@@ -2135,7 +2135,7 @@ function App() {
               <div className="flex flex-col gap-3 flex-1 min-w-0">
                 {/* Mobile Header Row: Pomodoro + Close */}
                 <div className="flex items-center justify-between sm:hidden w-full mb-1">
-                  {mode === 'project' ? (
+                  {mode === 'project' && currentUser?.activeFocus?.taskId === editingTask.id ? (
                     <div className="flex items-center gap-1.5 bg-white/50 dark:bg-white/5 p-1 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm animate-in fade-in slide-in-from-left-2 duration-300">
                       <div className="relative">
                         <button 
@@ -2253,7 +2253,7 @@ function App() {
 
               {/* Desktop-only Pomodoro controls and Close button */}
               <div className="hidden sm:flex items-center gap-4">
-                {mode === 'project' && (
+                {mode === 'project' && currentUser?.activeFocus?.taskId === editingTask.id && (
                   <div className="flex items-center gap-2 bg-white/50 dark:bg-white/5 p-2 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm animate-in fade-in zoom-in duration-300">
                     <div className="relative">
                 <button 

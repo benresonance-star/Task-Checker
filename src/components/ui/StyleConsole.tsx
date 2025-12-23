@@ -17,6 +17,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
     isDarkMode,
     toggleDarkMode,
     updateThemeSettings, 
+    previewThemeSettings,
     resetThemeSettings,
     saveThemePreset,
     updateThemePreset,
@@ -120,7 +121,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
   }, [isDragging, isResizing]);
 
   const handleChange = (key: keyof typeof themeSettings, value: string | number) => {
-    updateThemeSettings({ [key]: value });
+    previewThemeSettings({ [key]: value });
   };
 
   return (
@@ -593,13 +594,20 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
           </section>
 
           {/* Footer Actions */}
-          <div className="pt-4 flex items-center gap-2">
+          <div className="pt-4 flex flex-col gap-2">
+            <button
+              onClick={() => updateThemeSettings(themeSettings)}
+              className="w-full h-10 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest bg-google-blue text-white rounded-xl shadow-lg hover:shadow-blue-500/20 active:scale-95 transition-all"
+            >
+              <Save className="w-3.5 h-3.5" />
+              Save as Workspace Default
+            </button>
             <button
               onClick={() => resetThemeSettings()}
-              className="flex-1 h-10 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest bg-gray-100 dark:bg-black/40 text-gray-500 hover:bg-gray-200 dark:hover:bg-black/60 rounded-xl transition-all"
+              className="w-full h-10 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest bg-gray-100 dark:bg-black/40 text-gray-500 hover:bg-gray-200 dark:hover:bg-black/60 rounded-xl transition-all"
             >
               <RotateCcw className="w-3 h-3" />
-              Reset {isDarkMode ? 'Dark' : 'Light'} Defaults
+              Reset to System Defaults
             </button>
           </div>
         </div>

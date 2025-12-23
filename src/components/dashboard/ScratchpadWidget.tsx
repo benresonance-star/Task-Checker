@@ -226,7 +226,7 @@ export const ScratchpadWidget: React.FC = () => {
         {!isEditorOpen && (
           <button
             onClick={() => setIsEditorOpen(true)}
-            className="absolute top-3 right-3 w-10 h-10 bg-google-blue text-white rounded-xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition-all group z-10"
+            className="absolute top-4 right-4 w-10 h-10 bg-google-blue text-white rounded-xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition-all group z-10"
             title="Add New Note"
           >
             <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
@@ -235,8 +235,8 @@ export const ScratchpadWidget: React.FC = () => {
 
         {/* Category Filter Tabs */}
         <div className={clsx(
-          "flex items-center gap-2 px-4 py-3 overflow-x-auto no-scrollbar border-b border-gray-200/30 dark:border-gray-800/30 transition-all",
-          !isEditorOpen ? "pr-16" : "" // Make room for the floating plus button
+          "flex items-center gap-2 px-4 overflow-x-auto no-scrollbar border-b border-gray-200/30 dark:border-gray-800/30 transition-all",
+          isEditorOpen ? "py-3" : "pt-5 pb-4 pr-16"
         )}>
           <span className="text-[8px] font-black uppercase text-gray-400 tracking-tighter mr-1 shrink-0">Filter by:</span>
           {filterCategories.map(cat => (

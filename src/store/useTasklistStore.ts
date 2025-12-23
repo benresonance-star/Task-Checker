@@ -124,6 +124,7 @@ interface TasklistState {
   activePresetIdLight: string | null;
   activePresetIdDark: string | null;
   updateThemeSettings: (settings: Partial<ThemeSettings>, modeOverride?: 'light' | 'dark') => Promise<void>;
+  previewThemeSettings: (settings: Partial<ThemeSettings>, modeOverride?: 'light' | 'dark') => void;
   resetThemeSettings: (modeOverride?: 'light' | 'dark') => Promise<void>;
   saveThemePreset: (name: string, modeOverride?: 'light' | 'dark') => Promise<void>;
   updateThemePreset: (presetId: string) => Promise<void>;
@@ -1893,6 +1894,21 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       }
     },
 
+    previewThemeSettings: (settings, modeOverride) => {
+      const isDark = modeOverride ? (modeOverride === 'dark') : document.documentElement.classList.contains('dark');
+      const currentSettings = isDark ? get().themeSettingsDark : get().themeSettingsLight;
+      const newSettings = { ...currentSettings, ...settings };
+      
+      // Update local store only, NOT Firestore
+      if (isDark) {
+        set({ themeSettingsDark: newSettings });
+      } else {
+        set({ themeSettingsLight: newSettings });
+      }
+      
+      applyThemeToRoot(newSettings);
+    },
+
     resetThemeSettings: async (modeOverride) => {
       const isDark = modeOverride ? (modeOverride === 'dark') : get().isDarkMode;
       const defaults = getThemeDefaults(isDark);
@@ -1950,6 +1966,18 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
           settings: sanitize(currentSettings),
           updatedAt: Date.now() 
         });
+
+        // Also update global settings if this is the active preset
+        const { activePresetIdLight, activePresetIdDark, themeSettingsLight, themeSettingsDark } = get();
+        if (activePresetIdLight === presetId || activePresetIdDark === presetId) {
+          await setDoc(doc(db, 'settings', 'theme'), sanitize({
+            light: themeSettingsLight,
+            dark: themeSettingsDark,
+            activePresetIdLight,
+            activePresetIdDark
+          }));
+        }
+
         get().notify(`Updated "${preset.name}"!`, 'success');
       } catch (error) {
         console.error('Update preset failed:', error);

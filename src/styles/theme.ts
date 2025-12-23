@@ -90,11 +90,11 @@ export const theme = {
     hierarchy: {
       section: 'flex items-center gap-2 sm:gap-3 group mb-2 bg-white/60 dark:bg-black/40 p-1 sm:pl-1.5 sm:pr-5 rounded-card border border-blue-200 dark:border-gray-800 transition-all hover:shadow-md',
       sectionTitle: 'text-lg sm:text-xl font-heading tracking-heading text-text-heading',
-      verticalLine: 'absolute bg-[var(--hierarchy-line)] dark:bg-gray-400 pointer-events-none transition-[height,top] duration-150',
+      verticalLine: 'absolute bg-[var(--hierarchy-line)] pointer-events-none transition-[height,top] duration-150',
       innerContainer: 'ml-0.5 sm:ml-4 relative pl-2 sm:pl-6 py-2',
       subsection: 'my-1 sm:my-2 bg-white/60 dark:bg-black/40 rounded-card border border-blue-200 dark:border-gray-800 p-1 sm:pl-1.5 sm:pr-5 transition-all hover:shadow-md relative group/sub',
       subsectionTitle: 'font-heading tracking-heading text-text-primary text-sm sm:text-lg break-words whitespace-pre-wrap min-w-0 transition-all duration-300',
-      horizontalLine: 'absolute -left-[0.5rem] sm:-left-[1.5rem] top-5 sm:top-6 w-[0.5rem] sm:w-[1.5rem] h-[1px] bg-[var(--hierarchy-line)] dark:bg-gray-400',
+      horizontalLine: 'absolute -left-[0.5rem] sm:-left-[1.5rem] top-5 sm:top-6 w-[0.5rem] sm:w-[1.5rem] h-[1px] bg-[var(--hierarchy-line)]',
       addTaskButton: 'flex group/add-task text-[10px] sm:text-xs text-text-secondary font-heading ml-2 sm:ml-4 py-1.5 px-2 sm:px-3 transition-all items-center gap-2 rounded-button hover:bg-white dark:hover:bg-gray-800 shadow-xs border border-transparent hover:border-gray-200 dark:hover:border-gray-700',
       addSubsectionButton: 'text-xs sm:text-sm font-heading text-text-secondary hover:text-google-blue flex items-center gap-2 transition-all py-2.5 px-4 rounded-button bg-transparent border-dashed border-2 border-gray-300 dark:border-gray-700 hover:border-google-blue hover:bg-blue-50/50 dark:hover:bg-blue-900/20 relative z-20',
     },
