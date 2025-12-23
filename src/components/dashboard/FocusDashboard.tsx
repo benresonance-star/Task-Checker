@@ -67,64 +67,69 @@ export const FocusDashboard: React.FC = () => {
           
           {focusData ? (
             <div className={clsx(
-              "p-8 md:p-10 rounded-[2.5rem] border transition-all shadow-xl relative overflow-hidden group",
+              "p-8 md:p-12 rounded-[3rem] border transition-all shadow-2xl relative overflow-hidden group min-h-[450px] flex flex-col justify-between",
               "bg-white dark:bg-black/40 border-gray-200 dark:border-gray-800",
-              focusData.task.timerIsRunning && "ring-4 ring-google-blue/20"
+              focusData.task.timerIsRunning && "ring-4 ring-google-blue/20 shadow-blue-500/10"
             )}>
-              {/* Subtle Background Icon */}
-              <Target className="absolute -bottom-10 -right-10 w-64 h-64 text-google-blue/5 dark:text-google-blue/10 -rotate-12 pointer-events-none" />
+              {/* Subtle Background Icon - Moved and Faded */}
+              <Target className="absolute -top-10 -right-10 w-80 h-80 text-google-blue/5 dark:text-google-blue/10 rotate-12 pointer-events-none group-hover:scale-110 transition-transform duration-1000" />
 
-              <div className="relative z-10 space-y-8">
-                {/* Task Context */}
-                <div className="flex items-start justify-between gap-4">
-                  <div className="space-y-2 min-w-0">
-                    <div className="flex items-center gap-2 px-3 py-1 bg-google-blue/10 text-google-blue rounded-full w-fit border border-google-blue/20">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span className="text-[10px] font-black uppercase tracking-wider truncate max-w-[200px] md:max-w-md">{focusData.instance.title}</span>
-                    </div>
-                    <h2 className="text-2xl md:text-4xl font-black leading-tight text-[var(--text-heading)] break-words">
-                      {focusData.task.title}
-                    </h2>
+              <div className="relative z-10 flex flex-col h-full space-y-10">
+                {/* 1. TOP BAR: Context & Source Jump */}
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2.5 px-4 py-1.5 bg-google-blue/10 text-google-blue rounded-full border border-google-blue/20 shadow-sm">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span className="text-[11px] font-black uppercase tracking-[0.1em] truncate max-w-[250px] md:max-w-md">
+                      {focusData.instance.title}
+                    </span>
                   </div>
                   
                   <button 
                     onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance.id}?task=${focusData.task.id}`)}
-                    className="p-3 rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-google-blue hover:bg-google-blue/10 transition-all shadow-sm border border-transparent hover:border-google-blue/20 flex-shrink-0"
-                    title="Jump to Checklist"
+                    className="p-3 rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-google-blue hover:bg-google-blue/10 transition-all border border-transparent hover:border-google-blue/20 flex-shrink-0"
+                    title="Open in Full Checklist"
                   >
                     <RotateCcw className="w-6 h-6 rotate-180" />
                   </button>
                 </div>
 
-                {/* Pomodoro Engine */}
-                <div className="flex flex-col md:flex-row items-center gap-8 py-4">
-                  <div className="flex items-center gap-6">
+                {/* 2. CENTER: Task Title */}
+                <div className="flex-1 flex flex-col justify-center">
+                  <h2 className="text-3xl md:text-6xl font-black leading-[1.1] text-[var(--text-heading)] tracking-tight">
+                    {focusData.task.title}
+                  </h2>
+                </div>
+
+                {/* 3. BOTTOM: Timer & Primary Action */}
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-8 items-end">
+                  {/* Timer Side (3 columns) */}
+                  <div className="md:col-span-3 flex items-center gap-8">
                     <button 
                       onClick={() => toggleTaskTimer(focusData.task.id)}
                       className={clsx(
-                        "w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center transition-all shadow-2xl active:scale-95 border-4",
+                        "w-24 h-24 md:w-28 md:h-24 rounded-[2rem] flex items-center justify-center transition-all shadow-xl active:scale-95 border-4",
                         focusData.task.timerIsRunning 
-                          ? "bg-google-blue text-white border-white/20 shadow-blue-500/40" 
-                          : "bg-white dark:bg-white/10 text-google-blue border-google-blue shadow-lg hover:border-google-blue/60"
+                          ? "bg-google-blue text-white border-white/20 shadow-blue-500/30" 
+                          : "bg-white dark:bg-white/5 text-google-blue border-google-blue shadow-md hover:border-google-blue/60"
                       )}
                     >
-                      {focusData.task.timerIsRunning ? <Pause className="w-10 h-10 fill-current" /> : <Play className="w-10 h-10 fill-current ml-1" />}
+                      {focusData.task.timerIsRunning ? <Pause className="w-12 h-12 fill-current" /> : <Play className="w-12 h-12 fill-current ml-1.5" />}
                     </button>
 
-                    <div className="space-y-1">
-                      <div className="text-5xl md:text-7xl font-black tracking-tighter tabular-nums text-[var(--text-heading)]">
+                    <div className="space-y-2">
+                      <div className="text-6xl md:text-8xl font-black tracking-tighter tabular-nums text-[var(--text-heading)] leading-none">
                         {formatTime(focusData.task.timerRemaining ?? focusData.task.timerDuration ?? 20 * 60)}
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3 ml-1">
                         <button 
                           onClick={() => resetTaskTimer(focusData.task.id)}
-                          className="px-3 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-[10px] font-black uppercase text-gray-500 hover:text-google-blue transition-colors border border-transparent hover:border-google-blue/20"
+                          className="px-4 py-1.5 rounded-xl bg-gray-100 dark:bg-white/5 text-[11px] font-black uppercase text-gray-500 hover:text-google-blue transition-colors border border-transparent hover:border-google-blue/20"
                         >
                           Reset
                         </button>
                         <button 
                           onClick={() => updateTaskTimer(focusData.task.id, (focusData.task.timerRemaining ?? 20 * 60) + 300)}
-                          className="px-3 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-[10px] font-black uppercase text-gray-500 hover:text-google-blue transition-colors border border-transparent hover:border-google-blue/20"
+                          className="px-4 py-1.5 rounded-xl bg-gray-100 dark:bg-white/5 text-[11px] font-black uppercase text-gray-500 hover:text-google-blue transition-colors border border-transparent hover:border-google-blue/20"
                         >
                           +5 Mins
                         </button>
@@ -132,16 +137,17 @@ export const FocusDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex-1 w-full">
+                  {/* Done Side (2 columns) */}
+                  <div className="md:col-span-2 w-full">
                     <button 
                       onClick={() => toggleTask(focusData.task.id)}
                       className={clsx(
-                        "w-full h-20 md:h-24 rounded-3xl flex items-center justify-center gap-4 text-xl md:text-2xl font-black uppercase tracking-widest transition-all shadow-xl active:scale-[0.98]",
-                        "bg-[var(--active-task-done)] text-white shadow-green-500/20 hover:animate-pulse-gold border-2 border-white/20"
+                        "w-full h-24 md:h-32 rounded-[2.5rem] flex flex-col items-center justify-center gap-2 text-xl md:text-3xl font-black uppercase tracking-[0.15em] transition-all shadow-2xl active:scale-[0.98]",
+                        "bg-[var(--active-task-done)] text-white shadow-green-500/20 hover:animate-pulse-gold border-4 border-white/20"
                       )}
                     >
-                      <ThumbsUp className="w-8 h-8" />
-                      TASK DONE!
+                      <ThumbsUp className="w-8 h-8 md:w-10 md:h-10" />
+                      <span>Done</span>
                     </button>
                   </div>
                 </div>
