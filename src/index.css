@@ -18,6 +18,8 @@
   --project-info-border: #BFDBFE;
   --notes-bg: rgba(219, 234, 254, 0.7);
   --notes-border: #BFDBFE;
+  --note-personal-bg: #fff9db;
+  --note-project-bg: #fff4e6;
   --checklist-bg: rgba(239, 246, 255, 0.5);
   --checklist-border: #DBEAFE;
   --metadata-card-bg: rgba(255, 255, 255, 0.8);
@@ -57,6 +59,8 @@
 .dark {
   --background: #202124;
   --foreground: #d1d5db;
+  --note-personal-bg: #423b24;
+  --note-project-bg: #422f1c;
 }
 
 body {

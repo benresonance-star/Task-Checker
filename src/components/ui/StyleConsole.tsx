@@ -475,6 +475,16 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 onChange={(v) => handleChange('colorNotesBorder', v)} 
               />
               <ColorControl 
+                label="Note (Personal) Background" 
+                value={themeSettings.colorNotePersonalBg} 
+                onChange={(v) => handleChange('colorNotePersonalBg', v)} 
+              />
+              <ColorControl 
+                label="Note (Project) Background" 
+                value={themeSettings.colorNoteProjectBg} 
+                onChange={(v) => handleChange('colorNoteProjectBg', v)} 
+              />
+              <ColorControl 
                 label="Project Info Card Background" 
                 value={themeSettings.colorMetadataCardBg} 
                 onChange={(v) => handleChange('colorMetadataCardBg', v)} 

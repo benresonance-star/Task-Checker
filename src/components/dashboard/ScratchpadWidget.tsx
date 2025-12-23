@@ -307,13 +307,16 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
   return (
     <div 
       ref={setNodeRef}
-      style={style}
+      style={{
+        ...style,
+        backgroundColor: isEditing ? undefined : (task.completed ? undefined : (task.category === 'Personal' ? 'var(--note-personal-bg)' : 'var(--note-project-bg)'))
+      }}
       className={clsx(
         "group flex flex-col gap-2 p-3 rounded-2xl border transition-all animate-in fade-in slide-in-from-right-2 duration-200",
         isEditing ? "bg-blue-50/50 dark:bg-blue-900/10 border-google-blue ring-2 ring-google-blue/20" :
         task.completed 
           ? "bg-gray-50/50 dark:bg-white/5 border-transparent opacity-60" 
-          : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md"
+          : "border-transparent shadow-sm hover:shadow-md"
       )}
     >
       <div className="flex items-start gap-3">

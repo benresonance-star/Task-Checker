@@ -198,6 +198,8 @@ export interface ThemeSettings {
   colorProjectInfoBorder: string;
   colorNotesBg: string;
   colorNotesBorder: string;
+  colorNotePersonalBg: string;
+  colorNoteProjectBg: string;
   colorChecklistBg: string;
   colorChecklistBorder: string;
   colorMetadataCardBg: string;

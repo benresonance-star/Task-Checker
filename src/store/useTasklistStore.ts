@@ -171,6 +171,8 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--project-info-border', settings.colorProjectInfoBorder);
     root.style.setProperty('--notes-bg', settings.colorNotesBg);
     root.style.setProperty('--notes-border', settings.colorNotesBorder);
+    root.style.setProperty('--note-personal-bg', settings.colorNotePersonalBg);
+    root.style.setProperty('--note-project-bg', settings.colorNoteProjectBg);
     root.style.setProperty('--checklist-bg', settings.colorChecklistBg);
     root.style.setProperty('--checklist-border', settings.colorChecklistBorder);
     root.style.setProperty('--metadata-card-bg', settings.colorMetadataCardBg);
@@ -229,6 +231,8 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorProjectInfoBorder: oldSettings.colorProjectInfoBorder || oldSettings.colorDashboardBorder || '#BFDBFE',
       colorNotesBg: oldSettings.colorNotesBg || oldSettings.colorProjectInfoBg || 'rgba(219, 234, 254, 0.7)',
       colorNotesBorder: oldSettings.colorNotesBorder || oldSettings.colorProjectInfoBorder || '#BFDBFE',
+      colorNotePersonalBg: oldSettings.colorNotePersonalBg || (oldSettings.mode === 'dark' ? '#423b24' : '#fff9db'),
+      colorNoteProjectBg: oldSettings.colorNoteProjectBg || (oldSettings.mode === 'dark' ? '#422f1c' : '#fff4e6'),
       colorChecklistBg: oldSettings.colorChecklistBg || 'rgba(239, 246, 255, 0.5)',
       colorChecklistBorder: oldSettings.colorChecklistBorder || '#DBEAFE',
       colorMetadataCardBg: oldSettings.colorMetadataCardBg || 'rgba(255, 255, 255, 0.8)',
@@ -269,6 +273,8 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorProjectInfoBorder: isDark ? '#334155' : '#BFDBFE',
     colorNotesBg: isDark ? 'rgba(30, 41, 59, 0.8)' : 'rgba(219, 234, 254, 0.7)',
     colorNotesBorder: isDark ? '#334155' : '#BFDBFE',
+    colorNotePersonalBg: isDark ? '#423b24' : '#fff9db',
+    colorNoteProjectBg: isDark ? '#422f1c' : '#fff4e6',
     colorChecklistBg: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(239, 246, 255, 0.5)',
     colorChecklistBorder: isDark ? '#1e293b' : '#DBEAFE',
     colorMetadataCardBg: isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.8)',
