@@ -190,7 +190,7 @@ The system features a robust sync engine:
 - **`masters` Collection**: 
   - `title`, `version`, `sections` (Template structure)
 - **`settings` Collection**:
-  - `theme`: `{ brandBlue, brandGreen, brandGreenLight, brandRed, brandYellow, radiusCard, radiusButton, radiusContainer }`
+  - `theme`: `{ colorAppIdentity, colorActiveTaskDone, colorCompletedState, colorDestructive, colorPresenceNotice, radiusTaskCard, radiusInteractive, radiusMajorModal }`
 - **`themePresets` Collection**:
   - `id`, `name`, `settings` (ThemeSettings), `createdAt`, `createdBy`
 

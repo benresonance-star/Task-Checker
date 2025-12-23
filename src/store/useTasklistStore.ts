@@ -139,16 +139,32 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
   /**
    * Applies theme settings to CSS Variables on the document root.
    */
-  const applyThemeToRoot = (settings: TasklistState['themeSettings']) => {
+  const applyThemeToRoot = (settings: ThemeSettings) => {
     const root = document.documentElement;
-    root.style.setProperty('--brand-blue', settings.brandBlue);
-    root.style.setProperty('--brand-green', settings.brandGreen);
-    root.style.setProperty('--brand-green-light', settings.brandGreenLight);
-    root.style.setProperty('--brand-red', settings.brandRed);
-    root.style.setProperty('--brand-yellow', settings.brandYellow);
-    root.style.setProperty('--radius-card', `${settings.radiusCard}px`);
-    root.style.setProperty('--radius-button', `${settings.radiusButton}px`);
-    root.style.setProperty('--radius-container', `${settings.radiusContainer}px`);
+    root.style.setProperty('--brand-blue', settings.colorAppIdentity);
+    root.style.setProperty('--brand-green', settings.colorCompletedState);
+    root.style.setProperty('--brand-green-light', settings.colorActiveTaskDone);
+    root.style.setProperty('--brand-red', settings.colorDestructive);
+    root.style.setProperty('--brand-yellow', settings.colorPresenceNotice);
+    root.style.setProperty('--radius-card', `${settings.radiusTaskCard}px`);
+    root.style.setProperty('--radius-button', `${settings.radiusInteractive}px`);
+    root.style.setProperty('--radius-container', `${settings.radiusMajorModal}px`);
+  };
+
+  /**
+   * Migrates old theme settings to new semantic names.
+   */
+  const migrateThemeSettings = (oldSettings: any): ThemeSettings => {
+    return {
+      colorAppIdentity: oldSettings.colorAppIdentity || oldSettings.brandBlue || '#4285F4',
+      colorActiveTaskDone: oldSettings.colorActiveTaskDone || oldSettings.brandGreenLight || '#5DB975',
+      colorCompletedState: oldSettings.colorCompletedState || oldSettings.brandGreen || '#34A853',
+      colorDestructive: oldSettings.colorDestructive || oldSettings.brandRed || '#EA4335',
+      colorPresenceNotice: oldSettings.colorPresenceNotice || oldSettings.brandYellow || '#FBBC05',
+      radiusTaskCard: oldSettings.radiusTaskCard || oldSettings.radiusCard || 20,
+      radiusInteractive: oldSettings.radiusInteractive || oldSettings.radiusButton || 12,
+      radiusMajorModal: oldSettings.radiusMajorModal || oldSettings.radiusContainer || 32,
+    };
   };
 
   /**
@@ -244,14 +260,14 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     adminSimulationMode: (sessionStorage.getItem('adminSimulationMode') as 'admin' | 'viewer') || 'admin',
     notification: null,
     themeSettings: {
-      brandBlue: '#4285F4',
-      brandGreen: '#34A853',
-      brandGreenLight: '#5DB975',
-      brandRed: '#EA4335',
-      brandYellow: '#FBBC05',
-      radiusCard: 20,
-      radiusButton: 12,
-      radiusContainer: 32,
+      colorAppIdentity: '#4285F4',
+      colorActiveTaskDone: '#5DB975',
+      colorCompletedState: '#34A853',
+      colorDestructive: '#EA4335',
+      colorPresenceNotice: '#FBBC05',
+      radiusTaskCard: 20,
+      radiusInteractive: 12,
+      radiusMajorModal: 32,
     },
     themePresets: [],
 
@@ -368,9 +384,16 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
           // Theme Settings Listener
           onSnapshot(doc(db, 'settings', 'theme'), (snapshot) => {
             if (snapshot.exists()) {
-              const settings = snapshot.data() as ThemeSettings;
-              set({ themeSettings: settings });
-              applyThemeToRoot(settings);
+              const data = snapshot.data();
+              const migrated = migrateThemeSettings(data);
+              
+              // If we actually migrated something, save it back to clean up DB
+              if (JSON.stringify(data) !== JSON.stringify(migrated)) {
+                setDoc(doc(db, 'settings', 'theme'), sanitize(migrated));
+              }
+
+              set({ themeSettings: migrated });
+              applyThemeToRoot(migrated);
             } else {
               // If no theme settings in DB, apply defaults
               applyThemeToRoot(get().themeSettings);
@@ -379,7 +402,17 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
 
           // Theme Presets Listener
           onSnapshot(collection(db, 'themePresets'), (snapshot) => {
-            const presets = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as ThemePreset));
+            const presets = snapshot.docs.map(d => {
+              const data = d.data();
+              const migratedSettings = migrateThemeSettings(data.settings);
+              
+              // If settings were migrated, update the document in DB
+              if (JSON.stringify(data.settings) !== JSON.stringify(migratedSettings)) {
+                updateDoc(doc(db, 'themePresets', d.id), { settings: sanitize(migratedSettings) });
+              }
+
+              return { ...data, id: d.id, settings: migratedSettings } as ThemePreset;
+            });
             set({ themePresets: presets.sort((a, b) => b.createdAt - a.createdAt) });
           });
 
@@ -1485,15 +1518,15 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     },
 
     resetThemeSettings: async () => {
-      const defaults = {
-        brandBlue: '#4285F4',
-        brandGreen: '#34A853',
-        brandGreenLight: '#5DB975',
-        brandRed: '#EA4335',
-        brandYellow: '#FBBC05',
-        radiusCard: 20,
-        radiusButton: 12,
-        radiusContainer: 32,
+      const defaults: ThemeSettings = {
+        colorAppIdentity: '#4285F4',
+        colorCompletedState: '#34A853',
+        colorActiveTaskDone: '#5DB975',
+        colorDestructive: '#EA4335',
+        colorPresenceNotice: '#FBBC05',
+        radiusTaskCard: 20,
+        radiusInteractive: 12,
+        radiusMajorModal: 32,
       };
       await get().updateThemeSettings(defaults);
     },

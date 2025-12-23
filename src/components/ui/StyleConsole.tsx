@@ -123,57 +123,72 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-6">
           {/* Colors Section */}
           <section>
-            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">Core Branding</h3>
+            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">IDENTITY & NAVIGATION</h3>
             <div className="grid grid-cols-2 gap-4">
               <ColorControl 
-                label="Primary Blue" 
-                value={themeSettings.brandBlue} 
-                onChange={(v) => handleChange('brandBlue', v)} 
-              />
-              <ColorControl 
-                label="Action Green" 
-                value={themeSettings.brandGreenLight} 
-                onChange={(v) => handleChange('brandGreenLight', v)} 
-              />
-              <ColorControl 
-                label="Success Green" 
-                value={themeSettings.brandGreen} 
-                onChange={(v) => handleChange('brandGreen', v)} 
-              />
-              <ColorControl 
-                label="Danger Red" 
-                value={themeSettings.brandRed} 
-                onChange={(v) => handleChange('brandRed', v)} 
-              />
-              <ColorControl 
-                label="Warning Gold" 
-                value={themeSettings.brandYellow} 
-                onChange={(v) => handleChange('brandYellow', v)} 
+                label="Application Brand Identity" 
+                value={themeSettings.colorAppIdentity} 
+                onChange={(v) => handleChange('colorAppIdentity', v)} 
               />
             </div>
           </section>
 
-          {/* Radii Section */}
           <section>
-            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">Geometry (Corners)</h3>
+            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">TASK EXECUTION</h3>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <ColorControl 
+                label="Task Done Button Highlight" 
+                value={themeSettings.colorActiveTaskDone} 
+                onChange={(v) => handleChange('colorActiveTaskDone', v)} 
+              />
+              <ColorControl 
+                label="Completed Task Background" 
+                value={themeSettings.colorCompletedState} 
+                onChange={(v) => handleChange('colorCompletedState', v)} 
+              />
+            </div>
             <div className="space-y-4">
               <SliderControl 
-                label="Card Roundness" 
-                value={themeSettings.radiusCard} 
+                label="Checklist Task Container Radius" 
+                value={themeSettings.radiusTaskCard} 
                 min={0} max={40} 
-                onChange={(v) => handleChange('radiusCard', v)} 
+                onChange={(v) => handleChange('radiusTaskCard', v)} 
               />
+            </div>
+          </section>
+
+          <section>
+            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">TEAM & STATUS</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <ColorControl 
+                label="Team Presence & Indicators" 
+                value={themeSettings.colorPresenceNotice} 
+                onChange={(v) => handleChange('colorPresenceNotice', v)} 
+              />
+            </div>
+          </section>
+
+          <section>
+            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">SYSTEM CONTROLS</h3>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <ColorControl 
+                label="Destructive Action Alerts" 
+                value={themeSettings.colorDestructive} 
+                onChange={(v) => handleChange('colorDestructive', v)} 
+              />
+            </div>
+            <div className="space-y-4">
               <SliderControl 
-                label="Button Roundness" 
-                value={themeSettings.radiusButton} 
+                label="Interactive Button Corners" 
+                value={themeSettings.radiusInteractive} 
                 min={0} max={20} 
-                onChange={(v) => handleChange('radiusButton', v)} 
+                onChange={(v) => handleChange('radiusInteractive', v)} 
               />
               <SliderControl 
-                label="Modal Roundness" 
-                value={themeSettings.radiusContainer} 
+                label="Major Modal & UI Corners" 
+                value={themeSettings.radiusMajorModal} 
                 min={0} max={60} 
-                onChange={(v) => handleChange('radiusContainer', v)} 
+                onChange={(v) => handleChange('radiusMajorModal', v)} 
               />
             </div>
           </section>
@@ -213,9 +228,9 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                   <div className="flex flex-col min-w-0 flex-1 cursor-pointer" onClick={() => applyThemePreset(preset.id)}>
                     <span className="text-[10px] font-black truncate">{preset.name}</span>
                     <div className="flex gap-1 mt-1">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.brandBlue }} />
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.brandGreenLight }} />
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.brandYellow }} />
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorAppIdentity }} />
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorActiveTaskDone }} />
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorPresenceNotice }} />
                     </div>
                   </div>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

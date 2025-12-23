@@ -189,14 +189,14 @@ export interface ProjectDocItem {
 }
 
 export interface ThemeSettings {
-  brandBlue: string;
-  brandGreen: string;
-  brandGreenLight: string;
-  brandRed: string;
-  brandYellow: string;
-  radiusCard: number;
-  radiusButton: number;
-  radiusContainer: number;
+  colorAppIdentity: string;
+  colorActiveTaskDone: string;
+  colorCompletedState: string;
+  colorDestructive: string;
+  colorPresenceNotice: string;
+  radiusTaskCard: number;
+  radiusInteractive: number;
+  radiusMajorModal: number;
 }
 
 export interface ThemePreset {
