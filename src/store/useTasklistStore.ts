@@ -149,9 +149,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--brand-red', settings.colorDestructive);
     root.style.setProperty('--brand-yellow', settings.colorPresenceNotice);
     
-    // New variables
-    root.style.setProperty('--dashboard-bg', settings.colorDashboardBg);
-    root.style.setProperty('--dashboard-border', settings.colorDashboardBorder);
+    // Updated semantic variables
+    root.style.setProperty('--project-info-bg', settings.colorProjectInfoBg);
+    root.style.setProperty('--project-info-border', settings.colorProjectInfoBorder);
+    root.style.setProperty('--checklist-bg', settings.colorChecklistBg);
+    root.style.setProperty('--checklist-border', settings.colorChecklistBorder);
     root.style.setProperty('--metadata-card-bg', settings.colorMetadataCardBg);
     root.style.setProperty('--metadata-card-border', settings.colorMetadataCardBorder);
     root.style.setProperty('--section-ident', settings.colorSectionIdent);
@@ -178,11 +180,13 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorDestructive: oldSettings.colorDestructive || oldSettings.brandRed || '#EA4335',
       colorPresenceNotice: oldSettings.colorPresenceNotice || oldSettings.brandYellow || '#FBBC05',
       
-      // Defaults for new fields
-      colorDashboardBg: oldSettings.colorDashboardBg || 'rgba(219, 234, 254, 0.7)', // blue-100/70
-      colorDashboardBorder: oldSettings.colorDashboardBorder || '#BFDBFE', // blue-200
-      colorMetadataCardBg: oldSettings.colorMetadataCardBg || 'rgba(255, 255, 255, 0.8)', // white/80
-      colorMetadataCardBorder: oldSettings.colorMetadataCardBorder || '#BFDBFE', // blue-200
+      // Defaults for new fields / Renamed fields
+      colorProjectInfoBg: oldSettings.colorProjectInfoBg || oldSettings.colorDashboardBg || 'rgba(219, 234, 254, 0.7)',
+      colorProjectInfoBorder: oldSettings.colorProjectInfoBorder || oldSettings.colorDashboardBorder || '#BFDBFE',
+      colorChecklistBg: oldSettings.colorChecklistBg || 'rgba(239, 246, 255, 0.5)',
+      colorChecklistBorder: oldSettings.colorChecklistBorder || '#DBEAFE',
+      colorMetadataCardBg: oldSettings.colorMetadataCardBg || 'rgba(255, 255, 255, 0.8)',
+      colorMetadataCardBorder: oldSettings.colorMetadataCardBorder || '#BFDBFE',
       colorSectionIdent: oldSettings.colorSectionIdent || '#4285F4', // google-blue
       colorSectionIdentIcon: oldSettings.colorSectionIdentIcon || '#4285F4', // google-blue
       colorSectionPlan: oldSettings.colorSectionPlan || '#34A853', // google-green
@@ -295,8 +299,10 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorCompletedState: '#34A853',
       colorDestructive: '#EA4335',
       colorPresenceNotice: '#FBBC05',
-      colorDashboardBg: 'rgba(219, 234, 254, 0.7)',
-      colorDashboardBorder: '#BFDBFE',
+      colorProjectInfoBg: 'rgba(219, 234, 254, 0.7)',
+      colorProjectInfoBorder: '#BFDBFE',
+      colorChecklistBg: 'rgba(239, 246, 255, 0.5)',
+      colorChecklistBorder: '#DBEAFE',
       colorMetadataCardBg: 'rgba(255, 255, 255, 0.8)',
       colorMetadataCardBorder: '#BFDBFE',
       colorSectionIdent: '#4285F4',
@@ -1566,8 +1572,10 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
         colorCompletedState: '#34A853',
         colorDestructive: '#EA4335',
         colorPresenceNotice: '#FBBC05',
-        colorDashboardBg: 'rgba(219, 234, 254, 0.7)',
-        colorDashboardBorder: '#BFDBFE',
+        colorProjectInfoBg: 'rgba(219, 234, 254, 0.7)',
+        colorProjectInfoBorder: '#BFDBFE',
+        colorChecklistBg: 'rgba(239, 246, 255, 0.5)',
+        colorChecklistBorder: '#DBEAFE',
         colorMetadataCardBg: 'rgba(255, 255, 255, 0.8)',
         colorMetadataCardBorder: '#BFDBFE',
         colorSectionIdent: '#4285F4',

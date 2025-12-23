@@ -14,8 +14,10 @@
   --brand-yellow: #FBBC05;
   
   /* Dashboard & Panels */
-  --dashboard-bg: rgba(219, 234, 254, 0.7);
-  --dashboard-border: #BFDBFE;
+  --project-info-bg: rgba(219, 234, 254, 0.7);
+  --project-info-border: #BFDBFE;
+  --checklist-bg: rgba(239, 246, 255, 0.5);
+  --checklist-border: #DBEAFE;
   --metadata-card-bg: rgba(255, 255, 255, 0.8);
   --metadata-card-border: #BFDBFE;
   

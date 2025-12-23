@@ -1517,7 +1517,7 @@ function App() {
 
             {/* Active Checklist Section */}
             {activeInstance && (
-              <div className="bg-blue-100/70 dark:bg-blue-900/20 rounded-container border border-blue-200 dark:border-gray-800 shadow-sm overflow-hidden mb-8">
+              <div className={theme.components.dashboard.checklistContainer}>
                 <div 
                   className="flex items-center justify-between p-3 sm:pl-6 sm:pr-10 cursor-pointer hover:bg-blue-200/30 dark:hover:bg-white/5 transition-colors"
                   onClick={() => setIsChecklistCollapsed(!isChecklistCollapsed)}
@@ -1571,7 +1571,7 @@ function App() {
             )}
 
             {/* Persistent Checklist Shelf */}
-            <div className="bg-blue-100/70 dark:bg-blue-900/10 rounded-container border border-blue-200 dark:border-gray-800 p-6 shadow-sm">
+            <div className={theme.components.dashboard.checklistContainer.replace('p-4 md:p-12', 'p-6')}>
               <div className="flex items-center justify-between mb-6 px-2">
                 <div className="flex items-center gap-2">
                   <LayoutGrid className="w-5 h-5 text-google-blue" />
@@ -1638,7 +1638,7 @@ function App() {
         {/* Master Template View */}
         {mode === 'master' && activeMaster && (
           <div className="space-y-4 px-0 sm:px-4 md:px-12">
-            <div className="mb-8 p-4 sm:pl-6 sm:pr-7 bg-blue-100/70 dark:bg-blue-900/20 rounded-container border border-blue-200 dark:border-gray-800 shadow-sm">
+            <div className={theme.components.dashboard.checklistContainer.replace('p-4 md:p-12', 'p-4 sm:pl-6 sm:pr-7 mb-8')}>
               <div className="flex items-center justify-between gap-2 sm:pl-2.5 sm:pr-6">
                 <textarea
                   ref={titleTextareaRef}

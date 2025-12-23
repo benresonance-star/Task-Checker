@@ -198,22 +198,32 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
             <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">DASHBOARD & WORKSPACE</h3>
             <div className="grid grid-cols-2 gap-4 mb-4">
               <ColorControl 
-                label="Active Checklist Container Background" 
-                value={themeSettings.colorDashboardBg} 
-                onChange={(v) => handleChange('colorDashboardBg', v)} 
+                label="Project Info Container Background" 
+                value={themeSettings.colorProjectInfoBg} 
+                onChange={(v) => handleChange('colorProjectInfoBg', v)} 
               />
               <ColorControl 
-                label="Active Checklist Container Outline" 
-                value={themeSettings.colorDashboardBorder} 
-                onChange={(v) => handleChange('colorDashboardBorder', v)} 
+                label="Project Info Container Outline" 
+                value={themeSettings.colorProjectInfoBorder} 
+                onChange={(v) => handleChange('colorProjectInfoBorder', v)} 
               />
               <ColorControl 
-                label="Project Info Panel Background" 
+                label="Active Checklist Background" 
+                value={themeSettings.colorChecklistBg} 
+                onChange={(v) => handleChange('colorChecklistBg', v)} 
+              />
+              <ColorControl 
+                label="Active Checklist Outline" 
+                value={themeSettings.colorChecklistBorder} 
+                onChange={(v) => handleChange('colorChecklistBorder', v)} 
+              />
+              <ColorControl 
+                label="Project Info Card Background" 
                 value={themeSettings.colorMetadataCardBg} 
                 onChange={(v) => handleChange('colorMetadataCardBg', v)} 
               />
               <ColorControl 
-                label="Project Info Panel Outline" 
+                label="Project Info Card Outline" 
                 value={themeSettings.colorMetadataCardBorder} 
                 onChange={(v) => handleChange('colorMetadataCardBorder', v)} 
               />

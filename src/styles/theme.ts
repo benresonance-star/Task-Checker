@@ -68,7 +68,7 @@ export const theme = {
       title: 'text-xl font-black uppercase tracking-widest',
     },
     dashboard: {
-      container: 'bg-[var(--dashboard-bg)] dark:bg-blue-900/10 rounded-container border border-[var(--dashboard-border)] dark:border-gray-800 mb-8 shadow-sm overflow-hidden',
+      projectInfoContainer: 'bg-[var(--project-info-bg)] dark:bg-blue-900/10 rounded-container border border-[var(--project-info-border)] dark:border-gray-800 mb-8 shadow-sm overflow-hidden',
       header: 'flex flex-col sm:flex-row sm:items-center justify-between p-6 cursor-pointer hover:bg-blue-100/60 dark:hover:bg-blue-900/20 transition-colors gap-4',
       sectionCard: 'space-y-4 border border-[var(--metadata-card-border)] dark:border-gray-800 rounded-card p-6 shadow-sm bg-[var(--metadata-card-bg)] dark:bg-transparent',
       headerIdentification: 'text-[10px] font-black uppercase text-[var(--section-ident)] tracking-widest border-b border-gray-100 dark:border-gray-800 pb-2 mb-4',
@@ -79,6 +79,7 @@ export const theme = {
       iconBuild: 'text-[var(--section-build-icon)]',
       label: 'text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 tracking-wider mb-1',
       consultantCard: 'bg-[var(--metadata-card-bg)] dark:bg-black/40 rounded-container border border-[var(--metadata-card-border)] dark:border-gray-800 p-6 shadow-sm hover:border-google-blue transition-all group/card',
+      checklistContainer: 'bg-[var(--checklist-bg)] dark:bg-blue-900/10 rounded-[2.5rem] p-4 md:p-12 border border-[var(--checklist-border)] dark:border-gray-800 shadow-sm',
     },
     hierarchy: {
       section: 'flex items-center gap-2 sm:gap-3 group mb-2 bg-white/60 dark:bg-black/40 p-1 sm:pl-1.5 sm:pr-5 rounded-card border border-blue-200 dark:border-gray-800 transition-all hover:shadow-md',

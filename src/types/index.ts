@@ -194,8 +194,10 @@ export interface ThemeSettings {
   colorCompletedState: string;
   colorDestructive: string;
   colorPresenceNotice: string;
-  colorDashboardBg: string;
-  colorDashboardBorder: string;
+  colorProjectInfoBg: string;
+  colorProjectInfoBorder: string;
+  colorChecklistBg: string;
+  colorChecklistBorder: string;
   colorMetadataCardBg: string;
   colorMetadataCardBorder: string;
   colorSectionIdent: string;

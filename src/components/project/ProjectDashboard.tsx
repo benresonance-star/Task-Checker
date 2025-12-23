@@ -155,7 +155,7 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
 
   if (!isEditing) {
     return (
-      <div className={theme.components.dashboard.container}>
+      <div className={theme.components.dashboard.projectInfoContainer}>
         <div 
           className={theme.components.dashboard.header}
           onClick={() => setIsExpanded(!isExpanded)}
@@ -490,7 +490,7 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
 
   // EDIT MODE
   return (
-    <div className={clsx(theme.components.dashboard.container, "border-2 border-google-blue/30 p-8 shadow-xl animate-in fade-in duration-300")}>
+    <div className={clsx(theme.components.dashboard.projectInfoContainer, "border-2 border-google-blue/30 p-8 shadow-xl animate-in fade-in duration-300")}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-google-blue/10 rounded-xl">
