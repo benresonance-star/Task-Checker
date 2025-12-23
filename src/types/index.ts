@@ -207,6 +207,16 @@ export interface ThemeSettings {
   colorSectionBuild: string;
   colorSectionBuildIcon: string;
   colorHierarchyLine: string;
+  colorAppBg: string;
+  colorSidebarBg: string;
+  colorConsoleBg: string;
+  colorTextPrimary: string;
+  colorTextSecondary: string;
+  colorTextHeading: string;
+  fontSizeBase: number;
+  fontWeightHeading: string;
+  letterSpacingHeading: number;
+  lineHeightBase: number;
   radiusTaskCard: number;
   radiusInteractive: number;
   radiusMajorModal: number;

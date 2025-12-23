@@ -133,13 +133,12 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
         top: 0,
         width: isMinimized ? '256px' : `${size.width}px`,
         height: isMinimized ? '48px' : `${size.height}px`,
+        backgroundColor: 'var(--console-bg)',
       }}
       className={clsx(
         "z-[1000] border-2 border-google-blue rounded-container shadow-2xl flex flex-col overflow-hidden",
         (isDragging || isResizing) ? "" : "transition-all duration-200",
-        isMinimized 
-          ? "bg-google-blue" 
-          : "bg-white dark:bg-[#1e1e1e]"
+        isMinimized && "bg-google-blue"
       )}
     >
       {/* Header / Drag Handle */}
@@ -302,6 +301,89 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                   <p className="text-[9px] text-center text-gray-500 italic py-2">No {isDarkMode ? 'dark' : 'light'} snapshots saved yet.</p>
                 )}
               </div>
+            </div>
+          </section>
+
+          {/* Atmosphere Section */}
+          <section>
+            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">APP ATMOSPHERE</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <ColorControl 
+                label="Main App Background" 
+                value={themeSettings.colorAppBg} 
+                onChange={(v) => handleChange('colorAppBg', v)} 
+              />
+              <ColorControl 
+                label="Sidebar Background" 
+                value={themeSettings.colorSidebarBg} 
+                onChange={(v) => handleChange('colorSidebarBg', v)} 
+              />
+              <ColorControl 
+                label="Console Background" 
+                value={themeSettings.colorConsoleBg} 
+                onChange={(v) => handleChange('colorConsoleBg', v)} 
+              />
+            </div>
+          </section>
+
+          {/* Typography Section */}
+          <section>
+            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">TYPOGRAPHY & CONTENT</h3>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <ColorControl 
+                label="Primary Content Color" 
+                value={themeSettings.colorTextPrimary} 
+                onChange={(v) => handleChange('colorTextPrimary', v)} 
+              />
+              <ColorControl 
+                label="Secondary / Muted Color" 
+                value={themeSettings.colorTextSecondary} 
+                onChange={(v) => handleChange('colorTextSecondary', v)} 
+              />
+              <ColorControl 
+                label="Heading Accent Color" 
+                value={themeSettings.colorTextHeading} 
+                onChange={(v) => handleChange('colorTextHeading', v)} 
+              />
+            </div>
+            <div className="space-y-6">
+              <SliderControl 
+                label="Global Text Scale" 
+                value={themeSettings.fontSizeBase} 
+                min={10} max={24} 
+                onChange={(v) => handleChange('fontSizeBase', v)} 
+              />
+              <SliderControl 
+                label="Line Spacing (Leading)" 
+                value={themeSettings.lineHeightBase} 
+                min={1} max={2} step={0.1}
+                onChange={(v) => handleChange('lineHeightBase', v)} 
+              />
+              <div className="flex flex-col gap-2">
+                <label className="text-[9px] font-black uppercase text-gray-500 tracking-tight">Heading Weight</label>
+                <div className="flex bg-gray-50 dark:bg-black/20 p-1 rounded-lg">
+                  {['500', '700', '900'].map(w => (
+                    <button
+                      key={w}
+                      onClick={() => handleChange('fontWeightHeading', w)}
+                      className={clsx(
+                        "flex-1 py-1.5 text-[10px] font-black rounded-md transition-all",
+                        themeSettings.fontWeightHeading === w 
+                          ? "bg-white dark:bg-gray-800 text-google-blue shadow-sm" 
+                          : "text-gray-400 hover:text-gray-600"
+                      )}
+                    >
+                      {w === '500' ? 'Medium' : w === '700' ? 'Bold' : 'Heavy'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <SliderControl 
+                label="Header Letter Spacing" 
+                value={themeSettings.letterSpacingHeading} 
+                min={-0.05} max={0.5} step={0.01}
+                onChange={(v) => handleChange('letterSpacingHeading', v)} 
+              />
             </div>
           </section>
 
@@ -531,18 +613,19 @@ const ColorControl: React.FC<{ label: string; value: string; onChange: (v: strin
   );
 };
 
-const SliderControl: React.FC<{ label: string; value: number; min: number; max: number; onChange: (v: number) => void }> = ({ label, value, min, max, onChange }) => (
+const SliderControl: React.FC<{ label: string; value: number; min: number; max: number; step?: number; onChange: (v: number) => void }> = ({ label, value, min, max, step = 1, onChange }) => (
   <div className="flex flex-col gap-2">
     <div className="flex items-center justify-between">
       <label className="text-[9px] font-black uppercase text-gray-500 tracking-tight">{label}</label>
-      <span className="text-[10px] font-mono text-google-blue">{value}px</span>
+      <span className="text-[10px] font-mono text-google-blue">{value}{step < 1 ? '' : 'px'}</span>
     </div>
     <input 
       type="range" 
       min={min} 
       max={max} 
+      step={step}
       value={value} 
-      onChange={(e) => onChange(parseInt(e.target.value))}
+      onChange={(e) => onChange(parseFloat(e.target.value))}
       className="w-full h-1 bg-gray-200 dark:bg-gray-800 rounded-lg appearance-none cursor-pointer accent-google-blue"
     />
   </div>

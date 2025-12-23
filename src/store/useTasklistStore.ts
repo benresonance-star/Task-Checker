@@ -169,6 +169,20 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--section-build-icon', settings.colorSectionBuildIcon);
     root.style.setProperty('--hierarchy-line', settings.colorHierarchyLine);
 
+    // App Atmosphere
+    root.style.setProperty('--app-bg', settings.colorAppBg);
+    root.style.setProperty('--sidebar-bg', settings.colorSidebarBg);
+    root.style.setProperty('--console-bg', settings.colorConsoleBg);
+
+    // Typography
+    root.style.setProperty('--text-primary', settings.colorTextPrimary);
+    root.style.setProperty('--text-secondary', settings.colorTextSecondary);
+    root.style.setProperty('--text-heading', settings.colorTextHeading);
+    root.style.setProperty('--font-size-base', `${settings.fontSizeBase}px`);
+    root.style.setProperty('--font-weight-heading', settings.fontWeightHeading);
+    root.style.setProperty('--letter-spacing-heading', `${settings.letterSpacingHeading}em`);
+    root.style.setProperty('--line-height-base', settings.lineHeightBase.toString());
+
     root.style.setProperty('--radius-card', `${settings.radiusTaskCard}px`);
     root.style.setProperty('--radius-button', `${settings.radiusInteractive}px`);
     root.style.setProperty('--radius-container', `${settings.radiusMajorModal}px`);
@@ -208,6 +222,18 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorSectionBuildIcon: oldSettings.colorSectionBuildIcon || '#F97316', // orange-500
       colorHierarchyLine: oldSettings.colorHierarchyLine || '#D1D5DB', // gray-300
 
+      // Defaults for new fields
+      colorAppBg: oldSettings.colorAppBg || (oldSettings.mode === 'dark' ? '#121212' : '#FFFFFF'),
+      colorSidebarBg: oldSettings.colorSidebarBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.6)' : '#F9FAFB'),
+      colorConsoleBg: oldSettings.colorConsoleBg || (oldSettings.mode === 'dark' ? '#1E1E1E' : '#FFFFFF'),
+      colorTextPrimary: oldSettings.colorTextPrimary || (oldSettings.mode === 'dark' ? '#D1D5DB' : '#4B5563'),
+      colorTextSecondary: oldSettings.colorTextSecondary || (oldSettings.mode === 'dark' ? '#9CA3AF' : '#6B7280'),
+      colorTextHeading: oldSettings.colorTextHeading || (oldSettings.mode === 'dark' ? '#FFFFFF' : '#111827'),
+      fontSizeBase: oldSettings.fontSizeBase || 14,
+      fontWeightHeading: oldSettings.fontWeightHeading || '900',
+      letterSpacingHeading: oldSettings.letterSpacingHeading || 0,
+      lineHeightBase: oldSettings.lineHeightBase || 1.5,
+
       radiusTaskCard: oldSettings.radiusTaskCard || oldSettings.radiusCard || 20,
       radiusInteractive: oldSettings.radiusInteractive || oldSettings.radiusButton || 12,
       radiusMajorModal: oldSettings.radiusMajorModal || oldSettings.radiusContainer || 32,
@@ -233,6 +259,16 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorSectionBuild: '#F97316',
     colorSectionBuildIcon: '#F97316',
     colorHierarchyLine: isDark ? '#4b5563' : '#D1D5DB',
+    colorAppBg: isDark ? '#121212' : '#FFFFFF',
+    colorSidebarBg: isDark ? 'rgba(0, 0, 0, 0.6)' : '#F9FAFB',
+    colorConsoleBg: isDark ? '#1E1E1E' : '#FFFFFF',
+    colorTextPrimary: isDark ? '#D1D5DB' : '#4B5563',
+    colorTextSecondary: isDark ? '#9CA3AF' : '#6B7280',
+    colorTextHeading: isDark ? '#FFFFFF' : '#111827',
+    fontSizeBase: 14,
+    fontWeightHeading: '900',
+    letterSpacingHeading: 0,
+    lineHeightBase: 1.5,
     radiusTaskCard: 20,
     radiusInteractive: 12,
     radiusMajorModal: 32,

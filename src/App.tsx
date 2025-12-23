@@ -513,7 +513,7 @@ function NotificationToast() {
       notification.type === 'error' ? "bg-google-red text-white border-2 border-white/20" : "bg-google-green text-white border-2 border-white/20"
     )}>
       {notification.type === 'error' ? <AlertTriangle className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
-      <span className="font-black uppercase text-xs tracking-widest">{notification.message}</span>
+      <span className="font-heading uppercase text-xs tracking-widest">{notification.message}</span>
     </div>
   );
 }

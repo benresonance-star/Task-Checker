@@ -21,7 +21,19 @@ export default {
           yellow: 'var(--brand-yellow)',
           green: 'var(--brand-green)',
           'green-light': 'var(--brand-green-light)',
-        }
+        },
+        'app-bg': 'var(--app-bg)',
+        'sidebar-bg': 'var(--sidebar-bg)',
+        'console-bg': 'var(--console-bg)',
+        'text-primary': 'var(--text-primary)',
+        'text-secondary': 'var(--text-secondary)',
+        'text-heading': 'var(--text-heading)',
+      },
+      fontWeight: {
+        'heading': 'var(--font-weight-heading)',
+      },
+      letterSpacing: {
+        'heading': 'var(--letter-spacing-heading)',
       },
       keyframes: {
         'pulse-gold': {
