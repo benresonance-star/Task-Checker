@@ -161,7 +161,7 @@ The system features a robust sync engine:
 - **Performance "Red Lines"**:
   - **60fps Scrolling**: To maintain fluid performance with 100+ tasks, all complex derived data must be wrapped in `useMemo`. 
   - **Re-render Optimization**: Components like `TaskItem` must minimize internal state changes. High-frequency updates (like the 1s timer tick) are handled purely in local memory, syncing only on significant state changes (Pause, Complete, 10s Heartbeat).
-- **Mobile Optimization**: Portrait-first responsive layout with compressed headers, reduced padding, and intelligently repositioned primary action buttons. **Export Checklist features are hidden on mobile to optimize screen real estate.**
+- **Mobile Optimization**: Portrait-first responsive layout with compressed headers, reduced padding, and intelligently repositioned primary action buttons. **The "+ New Project/Template" button is positioned to the right of the section title on mobile for immediate access.** Export Checklist features are hidden on mobile to optimize screen real estate.
 - **Navigation Styling**: Active project buttons are styled in **Google Green** to visually synchronize the project context with active work items.
 
 ### Error Boundary & Fallback Policy

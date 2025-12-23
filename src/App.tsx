@@ -1358,7 +1358,22 @@ function App() {
                 )}
               </div>
             </div>
+
+            {/* Mobile-only New Project Button */}
+            {isAdmin && (
+              <div className="md:hidden">
+                <Button 
+                  size="sm"
+                  onClick={() => mode === 'master' ? addMaster('New Template') : addProject('New Project')}
+                  className="h-9 px-3 flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" /> 
+                  <span className="text-xs">New</span>
+                </Button>
+              </div>
+            )}
           </div>
+
           <div className="flex items-center gap-2">
             {mode === 'master' && (
                   <Button 
@@ -1371,10 +1386,13 @@ function App() {
                     {isTemplatesStacked ? <LayoutGrid className="w-5 h-5" /> : <ListOrdered className="w-5 h-5" />}
                   </Button>
             )}
+            {/* Desktop-only New Project Button */}
             {isAdmin && (
-              <Button onClick={() => mode === 'master' ? addMaster('New Template') : addProject('New Project')}>
-                <Plus className="w-5 h-5" /> New {mode === 'master' ? 'Template' : 'Project'}
-              </Button>
+              <div className="hidden md:block">
+                <Button onClick={() => mode === 'master' ? addMaster('New Template') : addProject('New Project')}>
+                  <Plus className="w-5 h-5" /> New {mode === 'master' ? 'Template' : 'Project'}
+                </Button>
+              </div>
             )}
             {/* Desktop-only My Playlist Button */}
             {mode === 'project' && (
