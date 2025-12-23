@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
-import { Plus, Trash2, CheckCircle2, Circle, Clock, X } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, Circle, Clock, X, Bold, List, ListOrdered } from 'lucide-react';
 import { clsx } from 'clsx';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
 
 export const ScratchpadWidget: React.FC = () => {
   const { 
@@ -25,6 +27,28 @@ export const ScratchpadWidget: React.FC = () => {
 
   const scratchpad = currentUser?.scratchpad || [];
 
+  // Tiptap Editor for New Note
+  const addEditor = useEditor({
+    extensions: [StarterKit],
+    content: '',
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm dark:prose-invert focus:outline-none min-h-[40px] text-sm font-bold placeholder:text-gray-400',
+      },
+    },
+  });
+
+  // Tiptap Editor for Editing Existing Note
+  const inlineEditor = useEditor({
+    extensions: [StarterKit],
+    content: '',
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm dark:prose-invert focus:outline-none min-h-[60px] text-xs font-bold',
+      },
+    },
+  });
+
   // Derived categories from projects + default "Personal"
   const availableCategories = useMemo(() => {
     const projectNames = projects.map(p => p.name);
@@ -46,24 +70,32 @@ export const ScratchpadWidget: React.FC = () => {
       .sort((a, b) => b.createdAt - a.createdAt);
   }, [scratchpad, activeCategory]);
 
-  const handleAddTask = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (!inputText.trim()) return;
+  const handleAddTask = () => {
+    if (!addEditor) return;
+    const content = addEditor.getHTML();
+    // Check if empty (tiptap returns <p></p> for empty)
+    if (content === '<p></p>' || !addEditor.getText().trim()) return;
     
-    addScratchpadTask(inputText.trim(), selectedCategory);
-    setInputText('');
+    addScratchpadTask(content, selectedCategory);
+    addEditor.commands.setContent('');
   };
 
   const startEditing = (task: any) => {
     setEditingId(task.id);
     setEditingText(task.text);
     setEditingCategory(task.category);
+    if (inlineEditor) {
+      inlineEditor.commands.setContent(task.text);
+      // Wait for next tick to focus
+      setTimeout(() => inlineEditor.commands.focus(), 10);
+    }
   };
 
   const saveEdit = () => {
-    if (!editingId) return;
+    if (!editingId || !inlineEditor) return;
+    const content = inlineEditor.getHTML();
     updateScratchpadTask(editingId, { 
-      text: editingText.trim(), 
+      text: content, 
       category: editingCategory 
     });
     setEditingId(null);
@@ -110,31 +142,34 @@ export const ScratchpadWidget: React.FC = () => {
 
         {/* Quick Input & Category Picker */}
         <div className="p-4 space-y-3">
-          <div className="flex gap-2">
-            <select 
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="bg-gray-100 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-[10px] font-black uppercase tracking-widest outline-none focus:border-google-blue transition-all max-w-[120px] truncate"
-            >
-              {availableCategories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-            <form onSubmit={handleAddTask} className="flex-1 flex gap-2">
-              <input
-                type="text"
-                className="flex-1 bg-white/50 dark:bg-black/20 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 text-sm font-bold outline-none focus:border-google-blue transition-all placeholder-gray-400"
-                placeholder={`Add note...`}
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-              />
+          <div className="flex flex-col gap-2 bg-white/50 dark:bg-black/20 border-2 border-gray-200 dark:border-gray-700 rounded-2xl p-2 transition-all focus-within:border-google-blue">
+            <div className="flex items-center justify-between px-2 py-1 border-b border-gray-200/50 dark:border-gray-800/50">
+              <select 
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="bg-transparent text-[9px] font-black uppercase tracking-widest outline-none text-google-blue max-w-[150px] truncate"
+              >
+                {availableCategories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+              <div className="flex items-center gap-1">
+                <button onClick={() => addEditor?.chain().focus().toggleBold().run()} className={clsx("p-1.5 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", addEditor?.isActive('bold') && "bg-gray-200 dark:bg-white/10")}><Bold className="w-3 h-3" /></button>
+                <button onClick={() => addEditor?.chain().focus().toggleBulletList().run()} className={clsx("p-1.5 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", addEditor?.isActive('bulletList') && "bg-gray-200 dark:bg-white/10")}><List className="w-3 h-3" /></button>
+                <button onClick={() => addEditor?.chain().focus().toggleOrderedList().run()} className={clsx("p-1.5 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", addEditor?.isActive('orderedList') && "bg-gray-200 dark:bg-white/10")}><ListOrdered className="w-3 h-3" /></button>
+              </div>
+            </div>
+            <div className="flex gap-2 p-2 pt-1 items-end">
+              <div className="flex-1 overflow-y-auto max-h-[150px] custom-scrollbar">
+                <EditorContent editor={addEditor} className="w-full" />
+              </div>
               <button
-                type="submit"
-                className="w-10 h-10 bg-google-blue text-white rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-all shrink-0"
+                onClick={handleAddTask}
+                className="w-10 h-10 bg-google-blue text-white rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-all shrink-0 mb-1"
               >
                 <Plus className="w-5 h-5" />
               </button>
-            </form>
+            </div>
           </div>
         </div>
 
@@ -171,20 +206,15 @@ export const ScratchpadWidget: React.FC = () => {
                   <div className="flex-1 min-w-0 flex flex-col">
                     {task.id === editingId ? (
                       <div className="space-y-2">
-                        <textarea
-                          autoFocus
-                          className="w-full bg-white dark:bg-gray-900 border-2 border-google-blue rounded-xl p-2 text-xs font-bold outline-none resize-none min-h-[60px]"
-                          value={editingText}
-                          onChange={(e) => setEditingText(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              e.preventDefault();
-                              saveEdit();
-                            }
-                            if (e.key === 'Escape') cancelEdit();
-                          }}
-                        />
-                        <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1 pb-1 border-b border-gray-200 dark:border-gray-700 mb-1">
+                          <button onClick={() => inlineEditor?.chain().focus().toggleBold().run()} className={clsx("p-1 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", inlineEditor?.isActive('bold') && "bg-gray-200 dark:bg-white/10")}><Bold className="w-3 h-3" /></button>
+                          <button onClick={() => inlineEditor?.chain().focus().toggleBulletList().run()} className={clsx("p-1 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", inlineEditor?.isActive('bulletList') && "bg-gray-200 dark:bg-white/10")}><List className="w-3 h-3" /></button>
+                          <button onClick={() => inlineEditor?.chain().focus().toggleOrderedList().run()} className={clsx("p-1 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", inlineEditor?.isActive('orderedList') && "bg-gray-200 dark:bg-white/10")}><ListOrdered className="w-3 h-3" /></button>
+                        </div>
+                        <div className="w-full bg-white dark:bg-gray-900 border-2 border-google-blue rounded-xl p-2 overflow-y-auto max-h-[200px] custom-scrollbar">
+                          <EditorContent editor={inlineEditor} />
+                        </div>
+                        <div className="flex items-center justify-between gap-2 pt-1">
                           <select 
                             value={editingCategory}
                             onChange={(e) => setEditingCategory(e.target.value)}
@@ -202,15 +232,14 @@ export const ScratchpadWidget: React.FC = () => {
                       </div>
                     ) : (
                       <>
-                        <span 
+                        <div 
                           onClick={() => startEditing(task)}
                           className={clsx(
-                            "text-xs font-bold break-words cursor-text hover:text-google-blue transition-colors",
-                            task.completed && "line-through"
+                            "text-xs font-bold break-words cursor-text hover:text-google-blue transition-colors prose prose-sm dark:prose-invert max-w-none prose-p:my-0 prose-ul:my-1 prose-li:my-0",
+                            task.completed && "line-through opacity-50"
                           )}
-                        >
-                          {task.text}
-                        </span>
+                          dangerouslySetInnerHTML={{ __html: task.text }}
+                        />
                         {(activeCategory === 'All' || task.category !== activeCategory) && (
                           <span className="text-[8px] font-black uppercase text-google-blue/60 tracking-wider mt-1">
                             {task.category}
@@ -223,7 +252,7 @@ export const ScratchpadWidget: React.FC = () => {
                   {task.id !== editingId && (
                     <button
                       onClick={() => deleteScratchpadTask(task.id)}
-                      className="p-1 text-gray-300 hover:text-google-red opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                      className="p-1 text-gray-300 hover:text-google-red opacity-0 group-hover:opacity-100 transition-all shrink-0 mt-0.5"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
