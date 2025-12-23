@@ -200,6 +200,9 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
    * Migrates old theme settings to new semantic names.
    */
   const migrateThemeSettings = (oldSettings: any): ThemeSettings => {
+    // If it's already the new nested structure being passed incorrectly, drill down
+    if (oldSettings?.light && !oldSettings.colorAppIdentity) return migrateThemeSettings(oldSettings.light);
+
     return {
       colorAppIdentity: oldSettings.colorAppIdentity || oldSettings.brandBlue || '#4285F4',
       colorActiveTaskDone: oldSettings.colorActiveTaskDone || oldSettings.brandGreenLight || '#5DB975',
@@ -614,6 +617,14 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
               const data = d.data();
               const migratedSettings = migrateThemeSettings(data.settings);
               
+              // If settings were migrated (old data missing new fields), update the document in DB
+              if (JSON.stringify(data.settings) !== JSON.stringify(migratedSettings)) {
+                updateDoc(doc(db, 'themePresets', d.id), { 
+                  settings: sanitize(migratedSettings),
+                  updatedAt: Date.now()
+                }).catch(err => console.error('Preset auto-update failed:', err));
+              }
+
               return { 
                 ...data, 
                 id: d.id, 
