@@ -16,7 +16,7 @@ export const theme = {
   components: {
     layout: {
       screen: 'min-h-screen flex flex-col md:flex-row bg-white dark:bg-[#121212] text-gray-600 dark:text-gray-300',
-      header: 'flex items-center justify-between p-4 border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-[#121212] sticky top-0 z-40',
+      header: 'md:hidden flex items-center justify-between p-4 border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-[#121212] sticky top-0 z-40',
       mobileMenu: 'md:hidden fixed inset-x-0 top-[65px] bg-white dark:bg-[#121212] border-b border-gray-300 dark:border-gray-700 shadow-xl z-30 animate-in slide-in-from-top duration-200 overflow-y-auto max-h-[calc(100vh-65px)]',
     },
     modal: {
