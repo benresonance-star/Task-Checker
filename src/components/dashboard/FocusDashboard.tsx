@@ -1,28 +1,12 @@
 import React from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
-import { theme } from '../../styles/theme';
-import { LayoutGrid, Target, Zap, Clock, ThumbsUp } from 'lucide-react';
+import { LayoutGrid, Target, Zap, Clock } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export const FocusDashboard: React.FC = () => {
   const { 
     currentUser, 
-    activeInstance, 
-    activeTaskId,
-    instances 
   } = useTasklistStore();
-
-  // Find the actual task object for the active focus
-  const activeTask = React.useMemo(() => {
-    if (!activeInstance || !activeTaskId) return null;
-    for (const section of activeInstance.sections) {
-      for (const subsection of section.subsections) {
-        const task = subsection.tasks.find(t => t.id === activeTaskId);
-        if (task) return { task, instanceTitle: activeInstance.title };
-      }
-    }
-    return null;
-  }, [activeInstance, activeTaskId]);
 
   return (
     <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
