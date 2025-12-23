@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f8f9fa;
+  --foreground: #374151;
+}
+
+.dark {
+  --background: #202124;
+  --foreground: #d1d5db;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+@layer components {
+  .google-card {
+    @apply border border-gray-200 dark:border-gray-700 rounded-card p-4 shadow-sm bg-white dark:bg-gray-800 transition-all;
+  }
+  
+  .btn-google {
+    @apply px-4 py-2 rounded-button font-medium transition-all active:scale-95 disabled:active:scale-100;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-200 dark:bg-gray-700 rounded-full;
+  }
+
+  .prose p {
+    @apply my-1;
+  }
+
+  /* Ensure TipTap lists are visible */
+  .ProseMirror ul, 
+  .prose ul {
+    list-style-type: disc !important;
+    padding-left: 1.5rem !important;
+    margin: 1rem 0 !important;
+    display: block !important;
+  }
+
+  .ProseMirror ol,
+  .prose ol {
+    list-style-type: decimal !important;
+    padding-left: 1.5rem !important;
+    margin: 1rem 0 !important;
+    display: block !important;
+  }
+
+  .ProseMirror li,
+  .prose li {
+    display: list-item !important;
+    margin: 0.25rem 0 !important;
+  }
+
+  /* Styling for links in the editor */
+  .ProseMirror a,
+  .prose a {
+    color: #4285F4 !important; /* Google Blue */
+    text-decoration: underline !important;
+    font-weight: 500 !important;
+    background-color: rgba(66, 133, 244, 0.1) !important;
+    padding: 0 2px !important;
+    border-radius: 2px !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+  }
+
+  .ProseMirror a:hover,
+  .prose a:hover {
+    background-color: rgba(66, 133, 244, 0.2) !important;
+    color: #1a73e8 !important;
+  }
+}
+

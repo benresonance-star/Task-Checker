@@ -1,0 +1,10 @@
+node_modules
+dist
+.cursor
+.firebase
+*.log
+.env
+.env.local
+.env.*.local
+
+
