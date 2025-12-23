@@ -1,5 +1,6 @@
 import React, { useState, useLayoutEffect } from 'react';
 import { ChevronDown, ChevronRight, Plus, Trash2, ChevronUp, ChevronDown as ChevronDownIcon, ArrowDownToLine, X } from 'lucide-react';
+import { theme } from '../../styles/theme';
 import { Section, Task } from '../../types';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { SubsectionItem } from './SubsectionItem';
@@ -119,7 +120,7 @@ export const SectionItem = ({ section, onOpenNotes }: SectionItemProps) => {
         </div>
       )}
 
-      <div className="flex items-center gap-2 sm:gap-3 group mb-2 bg-white/60 dark:bg-black/40 p-1 sm:pl-1.5 sm:pr-5 rounded-card border border-blue-200 dark:border-gray-800 transition-all hover:shadow-md">
+      <div className={theme.components.hierarchy.section}>
         <button 
           onClick={() => toggleLocalExpanded(section.id)}
           className="p-1 sm:p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0 border border-transparent hover:border-gray-300 dark:hover:border-gray-600"
@@ -146,7 +147,7 @@ export const SectionItem = ({ section, onOpenNotes }: SectionItemProps) => {
           <textarea
             ref={textareaRef}
             rows={1}
-            className="text-lg sm:text-xl font-black text-gray-600 dark:text-gray-300 bg-transparent border-none focus:ring-0 focus:outline-none pt-2 pb-2 px-1 sm:px-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 focus:bg-white dark:focus:bg-gray-800 flex-1 transition-colors resize-none overflow-visible min-h-[2.5rem] min-w-0 break-words leading-relaxed"
+            className={clsx(theme.components.hierarchy.sectionTitle, "bg-transparent border-none focus:ring-0 focus:outline-none pt-2 pb-2 px-1 sm:px-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 focus:bg-white dark:focus:bg-gray-800 flex-1 transition-colors resize-none overflow-visible min-h-[2.5rem] min-w-0 break-words leading-relaxed")}
             value={localTitle}
             onChange={(e) => {
               const newVal = e.target.value;
@@ -162,7 +163,7 @@ export const SectionItem = ({ section, onOpenNotes }: SectionItemProps) => {
             placeholder="Section Title..."
           />
         ) : (
-          <h3 className="text-lg sm:text-xl font-black text-gray-600 dark:text-gray-300 flex-1 py-1 px-2 break-words whitespace-pre-wrap min-w-0">
+          <h3 className={clsx(theme.components.hierarchy.sectionTitle, "flex-1 py-1 px-2 break-words whitespace-pre-wrap min-w-0")}>
             {section.title}
           </h3>
         )}
@@ -217,10 +218,10 @@ export const SectionItem = ({ section, onOpenNotes }: SectionItemProps) => {
       </div>
 
       {isExpanded && (
-        <div className="ml-0.5 sm:ml-4 relative pl-2 sm:pl-6 py-2">
+        <div className={theme.components.hierarchy.innerContainer}>
           {/* Calculated vertical line - moved outside observed container to prevent potential loop */}
           <div 
-            className="absolute bg-gray-300 dark:bg-gray-400 pointer-events-none transition-[height,top] duration-150" 
+            className={theme.components.hierarchy.verticalLine} 
             style={{ 
               left: 0, 
               top: `${lineStyle.top}px`, 
@@ -244,7 +245,7 @@ export const SectionItem = ({ section, onOpenNotes }: SectionItemProps) => {
             <div className="pt-6 relative">
               <button 
                 onClick={() => addSubsection(section.id, 'New Subsection')}
-                className="text-xs sm:text-sm font-black text-gray-500 hover:text-google-blue flex items-center gap-2 transition-all py-2.5 px-4 rounded-button bg-transparent border-dashed border-2 border-gray-300 dark:border-gray-700 hover:border-google-blue hover:bg-blue-50/50 dark:hover:bg-blue-900/20 relative z-20"
+                className={theme.components.hierarchy.addSubsectionButton}
               >
                 <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Add subsection
               </button>

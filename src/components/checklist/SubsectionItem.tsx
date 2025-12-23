@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { clsx } from 'clsx';
 import { ChevronDown, ChevronRight, Plus, Trash2, ChevronUp, ChevronDown as ChevronDownIcon, ArrowUpToLine } from 'lucide-react';
+import { theme } from '../../styles/theme';
 import { Subsection, Task } from '../../types';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { TaskItem } from './TaskItem';
@@ -60,13 +61,13 @@ export const SubsectionItem = ({ subsection, sectionId, onOpenNotes }: Subsectio
     <div 
       onClick={handleBackgroundClick}
       className={clsx(
-        "my-1 sm:my-2 bg-white/60 dark:bg-black/40 rounded-card border border-blue-200 dark:border-gray-800 p-1 sm:pl-1.5 sm:pr-5 transition-all hover:shadow-md relative group/sub",
+        theme.components.hierarchy.subsection,
         isInstance && activeTaskId && "cursor-pointer"
       )} 
       data-subsection-item
     >
       {/* Horizontal Connector Line */}
-      <div className="absolute -left-[0.5rem] sm:-left-[1.5rem] top-5 sm:top-6 w-[0.5rem] sm:w-[1.5rem] h-[1px] bg-gray-300 dark:bg-gray-400" data-horizontal-line />
+      <div className={theme.components.hierarchy.horizontalLine} data-horizontal-line />
       
       <div className="flex items-center gap-1 sm:gap-2 group mb-1 sm:mb-2">
         <button 
@@ -95,7 +96,7 @@ export const SubsectionItem = ({ subsection, sectionId, onOpenNotes }: Subsectio
           <textarea
             ref={textareaRef}
             rows={1}
-            className="font-black text-gray-600 dark:text-gray-300 text-sm sm:text-lg bg-transparent border-none focus:ring-0 focus:outline-none pt-2 pb-2 px-1 sm:px-2 rounded hover:bg-white dark:hover:bg-gray-800 focus:bg-white dark:focus:bg-gray-800 flex-1 transition-colors resize-none overflow-visible min-h-[2.2rem] sm:min-h-[2.5rem] min-w-0 break-words leading-relaxed"
+            className={clsx(theme.components.hierarchy.subsectionTitle, "bg-transparent border-none focus:ring-0 focus:outline-none pt-2 pb-2 px-1 sm:px-2 rounded hover:bg-white dark:hover:bg-gray-800 focus:bg-white dark:focus:bg-gray-800 flex-1 transition-colors resize-none overflow-visible min-h-[2.2rem] sm:min-h-[2.5rem] min-w-0 break-words leading-relaxed")}
             value={localTitle}
             onChange={(e) => {
               const newVal = e.target.value;
@@ -113,7 +114,7 @@ export const SubsectionItem = ({ subsection, sectionId, onOpenNotes }: Subsectio
         ) : (
           <div className="flex-1 flex items-center justify-between py-1 px-2 min-w-0">
             <h4 className={clsx(
-              "font-black text-gray-600 dark:text-gray-300 text-sm sm:text-lg break-words whitespace-pre-wrap min-w-0 transition-all duration-300",
+              theme.components.hierarchy.subsectionTitle,
               totalTasks > 0 && progress === 100 && "line-through opacity-60 decoration-2 decoration-google-green"
             )}>
               {subsection.title}
@@ -201,7 +202,7 @@ export const SubsectionItem = ({ subsection, sectionId, onOpenNotes }: Subsectio
           {isMaster && (
             <button 
               onClick={() => addTask(subsection.id, '')}
-              className="flex group/add-task text-[10px] sm:text-xs text-gray-500 dark:text-gray-300 font-black ml-2 sm:ml-4 py-1.5 px-2 sm:px-3 transition-all items-center gap-2 rounded-button hover:bg-white dark:hover:bg-gray-800 shadow-xs border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
+              className={theme.components.hierarchy.addTaskButton}
             >
               <div className="w-4 h-4 sm:w-5 sm:h-5 rounded bg-gray-200 dark:bg-gray-700 group-hover/add-task:bg-blue-100 dark:group-hover/add-task:bg-blue-900/40 flex items-center justify-center transition-colors">
                 <Plus className="w-3 h-3" />
