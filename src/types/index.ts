@@ -245,6 +245,14 @@ export interface ActionSetItem {
   addedAt: number;
 }
 
+export interface ScratchpadItem {
+  id: string;
+  text: string;
+  completed: boolean;
+  category: string;
+  createdAt: number;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -257,5 +265,6 @@ export interface User {
     timestamp: number;
   } | null;
   actionSet?: ActionSetItem[]; // The user's "Work Playlist"
+  scratchpad?: ScratchpadItem[]; // Private quick tasks
 }
 

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { MasterTasklist, TasklistInstance, Section, Subsection, Project, User, TaskFile, ProjectOverride, TaskGuide, ActionSetItem, ThemeSettings, ThemePreset } from '../types';
+import { MasterTasklist, TasklistInstance, Section, Subsection, Project, User, TaskFile, ProjectOverride, TaskGuide, ActionSetItem, ThemeSettings, ThemePreset, ScratchpadItem } from '../types';
 import { generateUUID } from '../utils/uuid';
 import { auth, db, storage } from '../lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -101,6 +101,12 @@ interface TasklistState {
   setActionSet: (newSet: ActionSetItem[]) => Promise<void>;
   clearActionSet: () => Promise<void>;
   
+  // Scratchpad
+  addScratchpadTask: (text: string, category: string) => Promise<void>;
+  toggleScratchpadTask: (id: string) => Promise<void>;
+  deleteScratchpadTask: (id: string) => Promise<void>;
+  clearCompletedScratchpad: (category: string) => Promise<void>;
+
   // Import
   importMaster: (data: Partial<MasterTasklist>) => Promise<void>;
 
@@ -849,6 +855,50 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       const { currentUser } = get();
       if (!currentUser) return;
       await updateDoc(doc(db, 'users', currentUser.id), { actionSet: [] });
+    },
+
+    addScratchpadTask: async (text, category) => {
+      const { currentUser } = get();
+      if (!currentUser) return;
+      
+      const newItem: ScratchpadItem = {
+        id: Math.random().toString(36).substr(2, 9),
+        text,
+        category,
+        completed: false,
+        createdAt: Date.now()
+      };
+
+      const scratchpad = [...(currentUser.scratchpad || []), newItem];
+      await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
+    },
+
+    toggleScratchpadTask: async (id) => {
+      const { currentUser } = get();
+      if (!currentUser || !currentUser.scratchpad) return;
+
+      const scratchpad = currentUser.scratchpad.map(item => 
+        item.id === id ? { ...item, completed: !item.completed } : item
+      );
+      await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
+    },
+
+    deleteScratchpadTask: async (id) => {
+      const { currentUser } = get();
+      if (!currentUser || !currentUser.scratchpad) return;
+
+      const scratchpad = currentUser.scratchpad.filter(item => item.id !== id);
+      await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
+    },
+
+    clearCompletedScratchpad: async (category) => {
+      const { currentUser } = get();
+      if (!currentUser || !currentUser.scratchpad) return;
+
+      const scratchpad = currentUser.scratchpad.filter(item => 
+        !(item.category === category && item.completed)
+      );
+      await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
     },
 
     updateUserRole: async (userId, role) => {

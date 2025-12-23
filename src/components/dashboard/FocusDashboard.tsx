@@ -5,6 +5,7 @@ import { LayoutGrid, Target, Zap, Clock, Play, Pause, RotateCcw, ThumbsUp, Check
 import { clsx } from 'clsx';
 import { useNavigate } from 'react-router-dom';
 import { Music } from 'lucide-react';
+import { ScratchpadWidget } from './ScratchpadWidget';
 
 const TomatoIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
@@ -339,13 +340,9 @@ export const FocusDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Scratchpad (Phase 4 Placeholder) */}
-          <div className="space-y-4 flex-1 flex flex-col">
-            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] ml-2">Personal Scratchpad</h3>
-            <div className="p-8 rounded-[2rem] border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center text-center space-y-3 bg-white/30 dark:bg-black/10 flex-1 min-h-[200px]">
-              <Clock className="w-10 h-10 text-gray-300 dark:text-gray-700" />
-              <h4 className="font-black text-sm uppercase tracking-widest text-gray-400">Phase 4: Private Tasks</h4>
-            </div>
+          {/* Scratchpad */}
+          <div className="space-y-4 flex-1 flex flex-col min-h-0">
+            <ScratchpadWidget />
           </div>
         </div>
       </div>
