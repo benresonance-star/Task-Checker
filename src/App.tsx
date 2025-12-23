@@ -187,7 +187,7 @@ const SidebarTaskItem = ({
       )}
       onClick={() => {
         if (project && instance) {
-          navigate(`/project/${project.id}/instance/${instance.id}?task=${task.id}`, { replace: true });
+          navigate(`/project/${project.id}/instance/${instance.id}`, { replace: true });
           toggleTaskFocus(project.id, instance.id, task.id);
         }
       }}
