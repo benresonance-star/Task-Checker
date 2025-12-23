@@ -114,18 +114,26 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
     }
   }, [task.title]);
 
-  // Scroll into view logic removed to prevent unwanted jumps
+  // Scroll into view if this task is active via URL parameter AND scroll flag is set
   React.useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
+    const urlTaskId = searchParams.get('task');
     const shouldScroll = searchParams.get('scroll') === 'true';
-    if (shouldScroll) {
-      // Clear the scroll parameter from URL immediately
-      const newParams = new URLSearchParams(window.location.search);
-      newParams.delete('scroll');
-      const newSearch = newParams.toString();
-      window.history.replaceState(null, '', newSearch ? `?${newSearch}` : window.location.pathname);
+    
+    if (urlTaskId === task.id && shouldScroll && containerRef.current) {
+      // Small delay to ensure the project/instance view is fully loaded and expanded
+      const timer = setTimeout(() => {
+        containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Clear the scroll parameter from URL after scrolling once to prevent re-jumps on refresh
+        const newParams = new URLSearchParams(window.location.search);
+        newParams.delete('scroll');
+        const newSearch = newParams.toString();
+        window.history.replaceState(null, '', newSearch ? `?${newSearch}` : window.location.pathname);
+      }, 1000);
+      return () => clearTimeout(timer);
     }
-  }, [location.search]);
+  }, [task.id, location.search]);
 
   // Removed individual timer logic to prevent race conditions
 
