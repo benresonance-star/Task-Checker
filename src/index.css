@@ -5,6 +5,18 @@
 :root {
   --background: #f8f9fa;
   --foreground: #374151;
+  
+  /* Brand Variables */
+  --brand-blue: #4285F4;
+  --brand-green: #34A853;
+  --brand-green-light: #5DB975;
+  --brand-red: #EA4335;
+  --brand-yellow: #FBBC05;
+  
+  /* Radii Variables */
+  --radius-card: 20px;
+  --radius-button: 12px;
+  --radius-container: 32px;
 }
 
 .dark {

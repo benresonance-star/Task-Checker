@@ -188,6 +188,25 @@ export interface ProjectDocItem {
   createdBy: string;
 }
 
+export interface ThemeSettings {
+  brandBlue: string;
+  brandGreen: string;
+  brandGreenLight: string;
+  brandRed: string;
+  brandYellow: string;
+  radiusCard: number;
+  radiusButton: number;
+  radiusContainer: number;
+}
+
+export interface ThemePreset {
+  id: string;
+  name: string;
+  settings: ThemeSettings;
+  createdAt: number;
+  createdBy: string;
+}
+
 /**
  * User definition for role-based access control.
  */

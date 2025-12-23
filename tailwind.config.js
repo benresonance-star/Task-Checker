@@ -8,25 +8,25 @@ export default {
   theme: {
     extend: {
       borderRadius: {
-        'google': '8px',
-        'button': '12px',
-        'card': '20px',
-        'container': '32px',
+        'google': 'var(--radius-button)',
+        'button': 'var(--radius-button)',
+        'card': 'var(--radius-card)',
+        'container': 'var(--radius-container)',
       },
       colors: {
         google: {
-          blue: '#4285F4',
+          blue: 'var(--brand-blue)',
           'blue-muted': '#7091C7',
-          red: '#EA4335',
-          yellow: '#FBBC05',
-          green: '#34A853',
-          'green-light': '#5DB975',
+          red: 'var(--brand-red)',
+          yellow: 'var(--brand-yellow)',
+          green: 'var(--brand-green)',
+          'green-light': 'var(--brand-green-light)',
         }
       },
       keyframes: {
         'pulse-gold': {
-          '0%, 100%': { backgroundColor: '#5DB975' }, // lighter green
-          '50%': { backgroundColor: '#FBBC05' }, // gold
+          '0%, 100%': { backgroundColor: 'var(--brand-green-light)' }, // lighter green
+          '50%': { backgroundColor: 'var(--brand-yellow)' }, // gold
         }
       },
       animation: {

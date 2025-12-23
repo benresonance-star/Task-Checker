@@ -17,8 +17,9 @@ import {
 } from 'firebase/auth';
 import { 
   CheckCircle2, StickyNote, Trash2, ListOrdered, Zap, Music, ListPlus, Play, Pause, X, Paperclip, Menu, LogOut, Mail, Lock, User as UserIcon, Loader2, GripVertical, ThumbsUp, AlertTriangle, Target,
-  Plus, LayoutGrid, ClipboardList, Moon, Sun, Download, Upload, UserCircle2, Users, FileText, FileSpreadsheet, File as FileIcon, ChevronUp, ChevronDown, ShieldCheck, Eye, ShieldOff, Eraser, ChevronRight
+  Plus, LayoutGrid, ClipboardList, Moon, Sun, Download, Upload, UserCircle2, Users, FileText, FileSpreadsheet, File as FileIcon, ChevronUp, ChevronDown, ShieldCheck, Eye, ShieldOff, Eraser, ChevronRight, Palette
 } from 'lucide-react';
+import { StyleConsole } from './components/ui/StyleConsole';
 import {
   DndContext,
   closestCenter,
@@ -657,6 +658,7 @@ function App() {
   const [importPreview, setImportPreview] = useState<Partial<MasterTasklist> | null>(null);
   const [importTemplateName, setImportTemplateName] = useState('');
   const [showPlainTextImport, setShowPlainTextImport] = useState(false);
+  const [showStyleConsole, setShowStyleConsole] = useState(false);
   const [plainTextContent, setPlainTextContent] = useState('');
   const [importLines, setImportLines] = useState<ImportLine[]>([]);
   const [plainTextPreview, setPlainTextPreview] = useState<MasterTasklist | null>(null);
@@ -1194,6 +1196,11 @@ function App() {
                 <Users className="w-5 h-5" /><span className="font-bold">User Management</span>
               </button>
             )}
+            {isAdmin && (
+              <button onClick={() => { setShowStyleConsole(true); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 px-4 py-3 rounded-button hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-google-blue">
+                <Palette className="w-5 h-5" /><span className="font-bold">Branding Console</span>
+              </button>
+            )}
             <div className="h-px bg-gray-200 dark:bg-gray-700 my-2" />
             
             {isAdmin && (
@@ -1311,6 +1318,13 @@ function App() {
                   >
                     <ClipboardList className="w-4 h-4 text-google-green" />
                     <span className="text-xs text-gray-700 dark:text-gray-300 font-bold">Import Plain Text</span>
+                  </button>
+                  <button 
+                    onClick={() => setShowStyleConsole(true)}
+                    className="flex items-center gap-2 px-3 h-9 rounded-google hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer group text-left w-full text-google-blue"
+                  >
+                    <Palette className="w-4 h-4" />
+                    <span className="text-xs font-bold">Branding Console</span>
                   </button>
                 </>
               )}
@@ -2179,6 +2193,10 @@ function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {isAdmin && showStyleConsole && (
+        <StyleConsole onClose={() => setShowStyleConsole(false)} />
       )}
 
       {isAdmin && showUserManagement && (

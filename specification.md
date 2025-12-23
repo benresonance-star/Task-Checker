@@ -62,6 +62,7 @@ The system features a robust sync engine:
 
 ### 6. Branding & Live Style System
 - **Branding Console**: A floating, draggable, and resizable HUD available to admins. It allows real-time adjustment of core brand colors (Blue, Green, Red, Yellow) and UI geometry (Corner radii for cards, buttons, and containers).
+- **Style Snapshots (Theme Library)**: Admins can capture the current brand styling and save it as a named snapshot (e.g., "Happy Mode"). These presets are stored globally and can be applied with a single click, allowing for instant "Hot-Swapping" of the entire application's visual identity.
 - **Smooth Interaction Engine**: Utilizes hardware-accelerated `translate3d` and `requestAnimationFrame` for buttery-smooth window movement. Transitions are dynamically disabled during active dragging to eliminate "input lag."
 - **Dynamic Theme Engine**: Uses CSS Variables (`--brand-blue`, `--radius-card`, etc.) to apply style changes instantly across the entire application without page reloads.
 - **Global Style Persistence**: Theme settings are stored in Firestore (`settings/theme`) and synchronized in real-time across all team members' sessions. Every teammate sees the new brand colors the moment the admin saves a change.
@@ -190,6 +191,8 @@ The system features a robust sync engine:
   - `title`, `version`, `sections` (Template structure)
 - **`settings` Collection**:
   - `theme`: `{ brandBlue, brandGreen, brandGreenLight, brandRed, brandYellow, radiusCard, radiusButton, radiusContainer }`
+- **`themePresets` Collection**:
+  - `id`, `name`, `settings` (ThemeSettings), `createdAt`, `createdBy`
 
 ### 2. State & Persistence Dependency Graph
 - **Global Store (Zustand)**: Collaborative data (Instances, Masters, Projects, Users), Auth state, Shared timer triggers.
@@ -252,7 +255,7 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > 
 > **Visual Identity**:
 > - Implement a high-contrast UI (Light and Dark) with theme persistence.
-> - **Branding & Style System**: Implement a dynamic theme engine using CSS Variables. Add a floating, draggable, and resizable **Branding Console** for admins to live-adjust colors and corner radii (Card, Button, Container) with real-time global sync via Firestore `settings/theme`. Use `translate3d` and `requestAnimationFrame` for smooth HUD movement.
+> - **Branding & Style System**: Implement a dynamic theme engine using CSS Variables. Add a floating, draggable, and resizable **Branding Console** for admins to live-adjust colors and corner radii (Card, Button, Container). Support **Style Snapshots** (Theme Library) for capturing and hot-swapping brand identities with real-time global sync via Firestore `settings/theme` and `themePresets`. Use `translate3d` and `requestAnimationFrame` for smooth HUD movement.
 > - **Standardized Radii Scales**: Define and use `rounded-button`, `rounded-card`, and `rounded-container` linked to dynamic CSS variables.
 > - **Project Context (Light Mode)**: Use `bg-blue-100/70` for main sections and `bg-white/80` for inner metadata cards (Identification, Planning, Building) with outlines matching text color.
 > - **Brand Identity**: Logo is a simple white tick inside an orange circle (`#E67E33`). Brand name stylized as `checkMATE`.
@@ -280,4 +283,4 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 23, 2025 (v1.1 - Branding Console Update)*
+*Updated: December 23, 2025 (v1.2 - Style Snapshots Update)*

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { MasterTasklist, TasklistInstance, Section, Subsection, Project, User, TaskFile, ProjectOverride, TaskGuide, ActionSetItem } from '../types';
+import { MasterTasklist, TasklistInstance, Section, Subsection, Project, User, TaskFile, ProjectOverride, TaskGuide, ActionSetItem, ThemeSettings, ThemePreset } from '../types';
 import { generateUUID } from '../utils/uuid';
 import { auth, db, storage } from '../lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -104,6 +104,15 @@ interface TasklistState {
   // Admin Simulation
   adminSimulationMode: 'admin' | 'viewer';
   toggleSimulationMode: () => void;
+
+  // Theme Settings
+  themeSettings: ThemeSettings;
+  themePresets: ThemePreset[];
+  updateThemeSettings: (settings: Partial<ThemeSettings>) => Promise<void>;
+  resetThemeSettings: () => Promise<void>;
+  saveThemePreset: (name: string) => Promise<void>;
+  deleteThemePreset: (presetId: string) => Promise<void>;
+  applyThemePreset: (presetId: string) => Promise<void>;
 }
 
 export const useTasklistStore = create<TasklistState>()((set, get) => {
@@ -125,6 +134,21 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       version: (master.version || 0) + 1,
       updatedAt: Date.now()
     };
+  };
+
+  /**
+   * Applies theme settings to CSS Variables on the document root.
+   */
+  const applyThemeToRoot = (settings: TasklistState['themeSettings']) => {
+    const root = document.documentElement;
+    root.style.setProperty('--brand-blue', settings.brandBlue);
+    root.style.setProperty('--brand-green', settings.brandGreen);
+    root.style.setProperty('--brand-green-light', settings.brandGreenLight);
+    root.style.setProperty('--brand-red', settings.brandRed);
+    root.style.setProperty('--brand-yellow', settings.brandYellow);
+    root.style.setProperty('--radius-card', `${settings.radiusCard}px`);
+    root.style.setProperty('--radius-button', `${settings.radiusButton}px`);
+    root.style.setProperty('--radius-container', `${settings.radiusContainer}px`);
   };
 
   /**
@@ -219,6 +243,17 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     expandedStates: JSON.parse(localStorage.getItem('expandedStates') || '{}'),
     adminSimulationMode: (sessionStorage.getItem('adminSimulationMode') as 'admin' | 'viewer') || 'admin',
     notification: null,
+    themeSettings: {
+      brandBlue: '#4285F4',
+      brandGreen: '#34A853',
+      brandGreenLight: '#5DB975',
+      brandRed: '#EA4335',
+      brandYellow: '#FBBC05',
+      radiusCard: 20,
+      radiusButton: 12,
+      radiusContainer: 32,
+    },
+    themePresets: [],
 
     notify: (message, type) => {
       set({ notification: { message, type } });
@@ -328,6 +363,24 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
               const updatedActive = projects.find(p => p.id === active.id);
               if (updatedActive) set({ activeProject: updatedActive });
             }
+          });
+
+          // Theme Settings Listener
+          onSnapshot(doc(db, 'settings', 'theme'), (snapshot) => {
+            if (snapshot.exists()) {
+              const settings = snapshot.data() as ThemeSettings;
+              set({ themeSettings: settings });
+              applyThemeToRoot(settings);
+            } else {
+              // If no theme settings in DB, apply defaults
+              applyThemeToRoot(get().themeSettings);
+            }
+          });
+
+          // Theme Presets Listener
+          onSnapshot(collection(db, 'themePresets'), (snapshot) => {
+            const presets = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as ThemePreset));
+            set({ themePresets: presets.sort((a, b) => b.createdAt - a.createdAt) });
           });
 
           // Instances Listener
@@ -1415,6 +1468,72 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
         updatedAt: Date.now()
       };
       await addDoc(collection(db, 'masters'), newMaster);
+    },
+
+    updateThemeSettings: async (settings) => {
+      const newSettings = { ...get().themeSettings, ...settings };
+      // Optimistic update
+      set({ themeSettings: newSettings });
+      applyThemeToRoot(newSettings);
+      
+      try {
+        await setDoc(doc(db, 'settings', 'theme'), sanitize(newSettings));
+      } catch (error) {
+        console.error('Update theme settings failed:', error);
+        get().notify('Failed to save theme settings to cloud.', 'error');
+      }
+    },
+
+    resetThemeSettings: async () => {
+      const defaults = {
+        brandBlue: '#4285F4',
+        brandGreen: '#34A853',
+        brandGreenLight: '#5DB975',
+        brandRed: '#EA4335',
+        brandYellow: '#FBBC05',
+        radiusCard: 20,
+        radiusButton: 12,
+        radiusContainer: 32,
+      };
+      await get().updateThemeSettings(defaults);
+    },
+
+    saveThemePreset: async (name) => {
+      const { themeSettings, currentUser } = get();
+      if (!currentUser) return;
+
+      const preset: Omit<ThemePreset, 'id'> = {
+        name,
+        settings: themeSettings,
+        createdAt: Date.now(),
+        createdBy: currentUser.name
+      };
+
+      try {
+        await addDoc(collection(db, 'themePresets'), sanitize(preset));
+        get().notify(`Preset "${name}" saved!`, 'success');
+      } catch (error) {
+        console.error('Save preset failed:', error);
+        get().notify('Failed to save theme preset.', 'error');
+      }
+    },
+
+    deleteThemePreset: async (presetId) => {
+      try {
+        await deleteDoc(doc(db, 'themePresets', presetId));
+        get().notify('Preset deleted.', 'success');
+      } catch (error) {
+        console.error('Delete preset failed:', error);
+        get().notify('Failed to delete preset.', 'error');
+      }
+    },
+
+    applyThemePreset: async (presetId) => {
+      const preset = get().themePresets.find(p => p.id === presetId);
+      if (preset) {
+        await get().updateThemeSettings(preset.settings);
+        get().notify(`Applied "${preset.name}"!`, 'success');
+      }
     }
   };
 });

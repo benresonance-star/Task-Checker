@@ -1,11 +1,11 @@
 export const theme = {
   colors: {
     google: {
-      blue: '#4285F4',
-      red: '#EA4335',
-      yellow: '#FBBC05',
-      green: '#34A853',
-      greenLight: '#5DB975',
+      blue: 'var(--brand-blue)',
+      red: 'var(--brand-red)',
+      yellow: 'var(--brand-yellow)',
+      green: 'var(--brand-green)',
+      greenLight: 'var(--brand-green-light)',
     },
     background: {
       light: 'bg-white',
