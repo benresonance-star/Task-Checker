@@ -387,6 +387,16 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorSectionBuild: '#F97316',
       colorSectionBuildIcon: '#F97316',
       colorHierarchyLine: '#D1D5DB',
+      colorAppBg: '#FFFFFF',
+      colorSidebarBg: '#F9FAFB',
+      colorConsoleBg: '#FFFFFF',
+      colorTextPrimary: '#4B5563',
+      colorTextSecondary: '#6B7280',
+      colorTextHeading: '#111827',
+      fontSizeBase: 14,
+      fontWeightHeading: '900',
+      letterSpacingHeading: 0,
+      lineHeightBase: 1.5,
       radiusTaskCard: 20,
       radiusInteractive: 12,
       radiusMajorModal: 32,
@@ -410,6 +420,16 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorSectionBuild: '#F97316',
       colorSectionBuildIcon: '#F97316',
       colorHierarchyLine: '#4b5563',
+      colorAppBg: '#121212',
+      colorSidebarBg: 'rgba(0, 0, 0, 0.6)',
+      colorConsoleBg: '#1E1E1E',
+      colorTextPrimary: '#D1D5DB',
+      colorTextSecondary: '#9CA3AF',
+      colorTextHeading: '#FFFFFF',
+      fontSizeBase: 14,
+      fontWeightHeading: '900',
+      letterSpacingHeading: 0,
+      lineHeightBase: 1.5,
       radiusTaskCard: 20,
       radiusInteractive: 12,
       radiusMajorModal: 32,
@@ -1719,7 +1739,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     },
 
     resetThemeSettings: async (modeOverride) => {
-      const isDark = modeOverride ? (modeOverride === 'dark') : document.documentElement.classList.contains('dark');
+      const isDark = modeOverride ? (modeOverride === 'dark') : get().isDarkMode;
       const defaults = getThemeDefaults(isDark);
       await get().updateThemeSettings(defaults, isDark ? 'dark' : 'light');
     },
