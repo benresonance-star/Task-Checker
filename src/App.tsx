@@ -95,8 +95,7 @@ const SidebarTaskItem = ({
   isActiveFocus: boolean, 
   onOpenNotes: (taskId: string) => void
 }) => {
-  const { projects, toggleTask, toggleTaskFocus, toggleTaskInActionSet, setTaskTimer, resetTaskTimer, toggleTaskTimer, updateTaskTimer, currentUser, users } = useTasklistStore();
-  const navigate = useNavigate();
+  const { projects, toggleTask, toggleTaskInActionSet, setTaskTimer, resetTaskTimer, toggleTaskTimer, updateTaskTimer, currentUser, users } = useTasklistStore();
   const [showTimerWidget, setShowTimerWidget] = useState(false);
   const [customMinutes, setCustomMinutes] = useState('20');
 
