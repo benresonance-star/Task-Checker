@@ -384,8 +384,4 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
     </div>
   );
 };
-      </div>
-    </div>
-  );
-};
 
