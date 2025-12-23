@@ -118,7 +118,7 @@ export const FocusDashboard: React.FC = () => {
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="hidden sm:flex items-center gap-3">
                       <button 
                         onClick={() => setShowPlaylistSidebar(!showPlaylistSidebar)}
                         className={clsx(
