@@ -14,19 +14,26 @@ export const ScratchpadWidget: React.FC = () => {
 
   const [inputText, setInputText] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState('Personal');
 
   const scratchpad = currentUser?.scratchpad || [];
 
-  // Derived categories from existing tasks + default "Personal"
-  const categories = useMemo(() => {
-    const cats = new Set(['Personal']);
+  // Derived categories from projects + default "Personal"
+  const availableCategories = useMemo(() => {
+    const projectNames = projects.map(p => p.name);
+    return ['Personal', ...projectNames];
+  }, [projects]);
+
+  // Combined categories for filtering (only categories that actually have tasks)
+  const filterCategories = useMemo(() => {
+    const cats = new Set(['All']);
     scratchpad.forEach(item => cats.add(item.category));
     return Array.from(cats);
   }, [scratchpad]);
 
   // Filter tasks based on active category
   const filteredTasks = useMemo(() => {
-    if (activeCategory === 'All') return scratchpad.sort((a, b) => b.createdAt - a.createdAt);
+    if (activeCategory === 'All') return [...scratchpad].sort((a, b) => b.createdAt - a.createdAt);
     return scratchpad
       .filter(t => t.category === activeCategory)
       .sort((a, b) => b.createdAt - a.createdAt);
@@ -36,10 +43,7 @@ export const ScratchpadWidget: React.FC = () => {
     e?.preventDefault();
     if (!inputText.trim()) return;
     
-    // Auto-categorize: If we are in a specific category (not All), use that. 
-    // Otherwise default to Personal.
-    const category = activeCategory === 'All' ? 'Personal' : activeCategory;
-    addScratchpadTask(inputText.trim(), category);
+    addScratchpadTask(inputText.trim(), selectedCategory);
     setInputText('');
   };
 
@@ -48,7 +52,7 @@ export const ScratchpadWidget: React.FC = () => {
   return (
     <div className="flex flex-col h-full space-y-4">
       <div className="flex items-center justify-between px-2">
-        <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Personal Scratchpad</h3>
+        <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">My Notes</h3>
         {completedCount > 0 && (
           <button 
             onClick={() => clearCompletedScratchpad(activeCategory)}
@@ -60,20 +64,9 @@ export const ScratchpadWidget: React.FC = () => {
       </div>
 
       <div className="flex-1 bg-white/30 dark:bg-black/10 rounded-[2rem] border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden transition-all">
-        {/* Category Tabs */}
+        {/* Category Filter Tabs */}
         <div className="flex items-center gap-2 p-4 border-b border-gray-200/50 dark:border-gray-800/50 overflow-x-auto no-scrollbar">
-          <button
-            onClick={() => setActiveCategory('All')}
-            className={clsx(
-              "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shrink-0",
-              activeCategory === 'All' 
-                ? "bg-google-blue text-white shadow-md" 
-                : "bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-google-blue"
-            )}
-          >
-            All
-          </button>
-          {categories.map(cat => (
+          {filterCategories.map(cat => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
@@ -89,22 +82,35 @@ export const ScratchpadWidget: React.FC = () => {
           ))}
         </div>
 
-        {/* Quick Input */}
-        <form onSubmit={handleAddTask} className="p-4 flex gap-2">
-          <input
-            type="text"
-            className="flex-1 bg-white/50 dark:bg-black/20 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 text-sm font-bold outline-none focus:border-google-blue transition-all placeholder-gray-400"
-            placeholder={`Add to ${activeCategory === 'All' ? 'Personal' : activeCategory}...`}
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-          />
-          <button
-            type="submit"
-            className="w-10 h-10 bg-google-blue text-white rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-all shrink-0"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
-        </form>
+        {/* Quick Input & Category Picker */}
+        <div className="p-4 space-y-3">
+          <div className="flex gap-2">
+            <select 
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="bg-gray-100 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-[10px] font-black uppercase tracking-widest outline-none focus:border-google-blue transition-all max-w-[120px] truncate"
+            >
+              {availableCategories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+            <form onSubmit={handleAddTask} className="flex-1 flex gap-2">
+              <input
+                type="text"
+                className="flex-1 bg-white/50 dark:bg-black/20 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 text-sm font-bold outline-none focus:border-google-blue transition-all placeholder-gray-400"
+                placeholder={`Add note...`}
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="w-10 h-10 bg-google-blue text-white rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-all shrink-0"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            </form>
+          </div>
+        </div>
 
         {/* Task List */}
         <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2 custom-scrollbar">
