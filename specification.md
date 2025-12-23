@@ -60,6 +60,13 @@ The system features a robust sync engine:
 - **Time Recording**: Automatically records exact time taken if a timer was used.
 - **Active Focus Tracking**: Selected tasks feature a **high-saturation focus ring (4px)** and a pulsing outline when multiple users are present.
 
+### 6. Branding & Live Style System
+- **Branding Console**: A floating, draggable, and resizable HUD available to admins. It allows real-time adjustment of core brand colors (Blue, Green, Red, Yellow) and UI geometry (Corner radii for cards, buttons, and containers).
+- **Smooth Interaction Engine**: Utilizes hardware-accelerated `translate3d` and `requestAnimationFrame` for buttery-smooth window movement. Transitions are dynamically disabled during active dragging to eliminate "input lag."
+- **Dynamic Theme Engine**: Uses CSS Variables (`--brand-blue`, `--radius-card`, etc.) to apply style changes instantly across the entire application without page reloads.
+- **Global Style Persistence**: Theme settings are stored in Firestore (`settings/theme`) and synchronized in real-time across all team members' sessions. Every teammate sees the new brand colors the moment the admin saves a change.
+- **Admin Management**: Dedicated "Branding Console" entry in the sidebar and mobile menu for authorized administrators.
+
 ## Technical Architecture
 
 ### State Management & Persistence
@@ -181,6 +188,8 @@ The system features a robust sync engine:
   - `activeUsers`: `Record<userId, { userName, taskId, timestamp }>` (Real-time presence)
 - **`masters` Collection**: 
   - `title`, `version`, `sections` (Template structure)
+- **`settings` Collection**:
+  - `theme`: `{ brandBlue, brandGreen, brandGreenLight, brandRed, brandYellow, radiusCard, radiusButton, radiusContainer }`
 
 ### 2. State & Persistence Dependency Graph
 - **Global Store (Zustand)**: Collaborative data (Instances, Masters, Projects, Users), Auth state, Shared timer triggers.
@@ -200,7 +209,8 @@ The system features a robust sync engine:
 - **`TaskItem.tsx`**: Complex task state manager. Handles multi-tier responsive layouts, Pomodoro widget, and collaborative pulsing logic.
 - **`ProjectDashboard.tsx`**: Project metadata management and the "Checklist Navigation Shelf".
 - **`NoteEditor.tsx`**: Tiptap-based rich text editor for "TEAM TASK FEEDBACK NOTES".
-- **`src/styles/theme.ts`**: Centralized style registry for colors, radii, and component-specific Tailwind class strings to ensure UI consistency.
+- **`src/styles/theme.ts`**: Centralized style registry for colors, radii, and component-specific Tailwind class strings. Now linked to dynamic CSS variables for real-time branding updates.
+- **`StyleConsole.tsx`**: Floating, resizable admin tool for live UI tweaking and global branding synchronization.
 - **`ErrorBoundary.tsx`**: Global catch-all for unexpected application errors with a user-friendly fallback UI.
 
 ### 5. Interaction Patterns (Standard Operating Procedures)
@@ -242,7 +252,8 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > 
 > **Visual Identity**:
 > - Implement a high-contrast UI (Light and Dark) with theme persistence.
-> - **Standardized Radii Scales**: Define and use `rounded-button` (12px), `rounded-card` (20px), and `rounded-container` (32px).
+> - **Branding & Style System**: Implement a dynamic theme engine using CSS Variables. Add a floating, draggable, and resizable **Branding Console** for admins to live-adjust colors and corner radii (Card, Button, Container) with real-time global sync via Firestore `settings/theme`. Use `translate3d` and `requestAnimationFrame` for smooth HUD movement.
+> - **Standardized Radii Scales**: Define and use `rounded-button`, `rounded-card`, and `rounded-container` linked to dynamic CSS variables.
 > - **Project Context (Light Mode)**: Use `bg-blue-100/70` for main sections and `bg-white/80` for inner metadata cards (Identification, Planning, Building) with outlines matching text color.
 > - **Brand Identity**: Logo is a simple white tick inside an orange circle (`#E67E33`). Brand name stylized as `checkMATE`.
 > - Use a modern System Font stack.
@@ -256,6 +267,7 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > - **Two-Stage Project Deletion**: Secure deletion workflow with a secondary 'Last Chance' warning and complete cloud storage cleanup.
 > - Multi-format Import/Export (JSON, ZIP, CSV). **Hide Export on mobile.**
 > - Intelligent Plain Text parser for hierarchical lists.
+> - **Branding Console**: Floating, resizable HUD for live-adjusting brand colors and corner radii with real-time sync.
 > - Personalized UI Folding: Store section expand/collapse states in localStore for individual workspace control.
 > - **Persistent Dashboard**: Implement a project-view layout with a collapsible metadata dashboard organized into Identification, Planning, and Building sections. **Optimize mobile layout with bordered Edit buttons and stacked controls.**
 > - **Add Logic Workflow**: Provide an "+ Add Checklist" modal to select and assign master templates to projects.
@@ -268,4 +280,4 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 23, 2025*
+*Updated: December 23, 2025 (v1.1 - Branding Console Update)*
