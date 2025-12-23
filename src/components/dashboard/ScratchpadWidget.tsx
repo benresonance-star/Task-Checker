@@ -8,7 +8,8 @@ import {
   DndContext, 
   closestCenter, 
   KeyboardSensor, 
-  PointerSensor, 
+  MouseSensor,
+  TouchSensor,
   useSensor, 
   useSensors, 
   DragEndEvent 
@@ -52,7 +53,17 @@ export const ScratchpadWidget: React.FC = () => {
   const hasDoneTasks = totalInView.some(t => t.completed);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -164,7 +175,7 @@ export const ScratchpadWidget: React.FC = () => {
         )}
       </div>
 
-      <div className="flex-1 bg-[var(--notes-bg)] rounded-[2rem] border-2 border-[var(--notes-border)] flex flex-col overflow-hidden transition-all">
+      <div className="flex-1 bg-[var(--notes-bg)] rounded-[2rem] border-2 border-[var(--notes-border)] flex flex-col overflow-hidden transition-all relative">
         {/* Quick Input & Category Picker */}
         <div className={clsx(
           "overflow-hidden transition-all duration-300 ease-in-out",
@@ -194,13 +205,15 @@ export const ScratchpadWidget: React.FC = () => {
               <div className="flex flex-col gap-1">
                 <button
                   onClick={() => setIsEditorOpen(false)}
-                  className="w-8 h-8 text-gray-400 hover:text-google-red transition-colors flex items-center justify-center rounded-lg"
+                  className="w-10 h-10 bg-google-red text-white rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-all shrink-0"
+                  title="Close Editor"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
                 <button
                   onClick={handleAddTask}
-                  className="w-10 h-10 bg-google-blue text-white rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-all shrink-0 mb-1"
+                  className="w-10 h-10 bg-google-blue text-white rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-all shrink-0"
+                  title="Add Note"
                 >
                   <Plus className="w-5 h-5" />
                 </button>
@@ -209,21 +222,22 @@ export const ScratchpadWidget: React.FC = () => {
           </div>
         </div>
 
-        {/* Header with Plus Button (when closed) */}
+        {/* Floating Plus Button when closed */}
         {!isEditorOpen && (
-          <div className="p-4 flex items-center justify-end">
-            <button
-              onClick={() => setIsEditorOpen(true)}
-              className="w-10 h-10 bg-google-blue text-white rounded-xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition-all group"
-              title="Add New Note"
-            >
-              <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
-            </button>
-          </div>
+          <button
+            onClick={() => setIsEditorOpen(true)}
+            className="absolute top-3 right-3 w-10 h-10 bg-google-blue text-white rounded-xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition-all group z-10"
+            title="Add New Note"
+          >
+            <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
+          </button>
         )}
 
-        {/* Category Filter Tabs (Relocated under text entry console) */}
-        <div className="flex items-center gap-2 px-4 py-3 overflow-x-auto no-scrollbar border-b border-gray-200/30 dark:border-gray-800/30">
+        {/* Category Filter Tabs */}
+        <div className={clsx(
+          "flex items-center gap-2 px-4 py-3 overflow-x-auto no-scrollbar border-b border-gray-200/30 dark:border-gray-800/30 transition-all",
+          !isEditorOpen ? "pr-16" : "" // Make room for the floating plus button
+        )}>
           <span className="text-[8px] font-black uppercase text-gray-400 tracking-tighter mr-1 shrink-0">Filter by:</span>
           {filterCategories.map(cat => (
             <button
@@ -328,9 +342,9 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: isDragging ? 'none' : transition,
     zIndex: isDragging ? 50 : undefined,
-    opacity: isDragging ? 0.5 : undefined,
+    opacity: isDragging ? 0.8 : undefined,
   };
 
   const isEditing = task.id === editingId;

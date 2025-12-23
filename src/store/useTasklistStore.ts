@@ -133,6 +133,8 @@ interface TasklistState {
   // Sidebar persistence
   showPlaylistSidebar: boolean;
   setShowPlaylistSidebar: (open: boolean) => void;
+  showMainSidebar: boolean;
+  setShowMainSidebar: (open: boolean) => void;
 }
 
 export const useTasklistStore = create<TasklistState>()((set, get) => {
@@ -495,6 +497,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     activePresetIdDark: null,
     activePresetId: null, // Legacy
     showPlaylistSidebar: localStorage.getItem('playlist_sidebar_open') === 'true',
+    showMainSidebar: localStorage.getItem('main_sidebar_open') !== 'false',
 
     toggleDarkMode: (val) => {
       const isDark = val !== undefined ? val : !get().isDarkMode;
@@ -511,6 +514,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     setShowPlaylistSidebar: (open: boolean) => {
       localStorage.setItem('playlist_sidebar_open', open.toString());
       set({ showPlaylistSidebar: open });
+    },
+
+    setShowMainSidebar: (open: boolean) => {
+      localStorage.setItem('main_sidebar_open', open.toString());
+      set({ showMainSidebar: open });
     },
 
     notify: (message, type) => {

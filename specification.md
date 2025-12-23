@@ -110,7 +110,8 @@ The system features a robust sync engine:
 - **Conflict Prevention**: Visual **pulsing effect** on task outlines if two or more users have the same task active simultaneously.
     - **Work Session Reordering**: The "My Session" sidebar supports fluid **Drag & Drop reordering** (powered by `dnd-kit`) for custom session planning.
     - **High-Impact Dashboard Typography**: The Active Focus card on the dashboard features **extra-bold (font-black)** and **large-scale (up to 6xl)** task titles to ensure clear visibility and mental focus during work sessions.
-    - **Personal Scratchpad (My Notes)**: A modular widget on the dashboard for personal and project-linked tasks. Supports rich text editing, category assignments, and **Priority flagging**. Priority items feature a **soft warm red background** and a **Flag icon** for high-visibility focus.
+- **Knowledge Hub (Smart Widgets)**: Integrated project intelligence center. Includes dynamic widgets like **Recent Project Documents** (direct-access file links) and **Project Progress** (real-time task completion analytics), positioned under the Personal Scratchpad.
+- **Personal Scratchpad (My Notes)**: A modular widget on the dashboard for personal and project-linked tasks. Supports rich text editing, category assignments, and **Priority flagging**. Features a **"Clean Entry" workflow** where the rich-text editor is hidden by default and collapses automatically after adding a note, triggered via a smooth fade-in/slide-down plus button.
 - **Completed Task Feedback**: 
   - **Active State**: Pulsing green card (`animate-pulse`) with a **thumbs up** icon on the completion button.
   - **Deactivated State**: Retains a **softer, lighter green background** to distinguish from pending tasks while maintaining visual hierarchy.
@@ -270,7 +271,7 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > - **Project Context (Light Mode)**: Use `bg-blue-100/70` for main sections and `bg-white/80` for inner metadata cards (Identification, Planning, Building) with outlines matching text color.
 > - **Brand Identity**: Logo is a simple white tick inside an orange circle (`#E67E33`). Brand name stylized as `checkMATE`.
 > - Use a modern System Font stack.
-> - Navigation: Sidebar-first layout on desktop; dedicated hamburger menu on mobile. **Implement Context-Aware Navigation for admins to remember last active template/project.** Sidebar task selection should switch project views without auto-scrolling; Dashboard selection should explicitly trigger auto-scroll.
+> - Navigation: Sidebar-first layout on desktop with a **collapsible left control panel**; dedicated hamburger menu on mobile. **Implement Context-Aware Navigation for admins to remember last active template/project.** Sidebar task selection should switch project views without auto-scrolling; Dashboard selection should explicitly trigger auto-scroll.
 > - Structural Graphics: Implement precise **1px** vertical and horizontal link lines. All action icons aligned on a single vertical axis.
 > - **Active Project Navigation**: Style active project buttons in **Google Green** for context synchronization.
 > 
@@ -282,6 +283,7 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > - Multi-format Import/Export (JSON, ZIP, CSV). **Hide Export on mobile.**
 > - Intelligent Plain Text parser for hierarchical lists.
 |> - **Branding Console**: Floating, resizable HUD for live-adjusting brand colors and corner radii with real-time sync and iterative snapshot updates.
+|> - **Main Sidebar Toggle**: A smooth, animated toggle to collapse the primary navigation sidebar in Desktop Mode, enabling an immersive, wide-screen view. State is persisted in `localStorage`.
 |> - **Dynamic Versioning**: Link the UI version display directly to the `version` field in `package.json`.
 |> - Personalized UI Folding: Store section expand/collapse states in localStore for individual workspace control.
 > - **Persistent Dashboard**: Implement a project-view layout with a collapsible metadata dashboard organized into Identification, Planning, and Building sections. **Optimize mobile layout with bordered Edit buttons and stacked controls.** The Active Focus card must use **font-black** and **large-scale typography (up to 6xl)** for the primary task title.
@@ -290,9 +292,11 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > - **Structured Task Guide**: Implement a collapsible guidance panel with 'What this Task Achieves', orange-themed 'Can I Proceed?' requirements, 'Helpful (Optional)' links/notes, and color-coded Complexity (located under title). **Ensure a responsive modal header with stacked controls for mobile and horizontal alignment for desktop.**
 > - **Progress Focus**: Dedicated 'TEAM TASK FEEDBACK NOTES' area for instance-specific logs, visually separated and prioritizable via guide-collapse.
 > - **Conditional Visibility**: Hide guide sections from users if they are empty.
+> - **Knowledge Hub & Widgets**: Implement a modular dashboard intelligence center. Include **Recent Project Documents** widget (latest 3 files with direct download links) and **Project Progress** widget (visual progress bars and task count analytics across all project checklists).
+- **My Notes Widget**: Modular dashboard widget with category filtering, priority flagging, and a **"Clean Entry" collapsible rich-text editor** with fade-in animations and automatic collapse upon entry.
 > - **Input Stability**: Implement local state synchronization for all hierarchical titles to prevent collaborative cursor jumping.
 > 
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 23, 2025 (v1.3.5 - High-Impact Dashboard Typography & My Notes Enhancements)*
+*Updated: December 24, 2025 (v1.3.8 - Knowledge Hub Smart Widgets & Vertical Dashboard Stack)*

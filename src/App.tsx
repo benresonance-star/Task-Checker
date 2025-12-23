@@ -19,7 +19,7 @@ import {
 } from 'firebase/auth';
 import { 
   CheckCircle2, StickyNote, Trash2, ListOrdered, Zap, Music, ListPlus, Play, Pause, X, Paperclip, Menu, LogOut, Mail, Lock, User as UserIcon, Loader2, GripVertical, ThumbsUp, AlertTriangle, Target,
-  Plus, LayoutGrid, ClipboardList, Moon, Sun, Download, Upload, UserCircle2, Users, FileText, FileSpreadsheet, File as FileIcon, ChevronUp, ChevronDown, ShieldCheck, Eye, ShieldOff, Eraser, ChevronRight, Palette
+  Plus, LayoutGrid, ClipboardList, Moon, Sun, Download, Upload, UserCircle2, Users, FileText, FileSpreadsheet, File as FileIcon, ChevronUp, ChevronDown, ShieldCheck, Eye, ShieldOff, Eraser, ChevronLeft, ChevronRight, Palette
 } from 'lucide-react';
 import { StyleConsole } from './components/ui/StyleConsole';
 import {
@@ -552,7 +552,8 @@ function App() {
     moveMaster, setLocalExpanded, clearActionSet,
     setTaskTimer, resetTaskTimer, toggleTaskTimer, updateTaskTimer,
     isDarkMode, toggleDarkMode,
-    showPlaylistSidebar, setShowPlaylistSidebar
+    showPlaylistSidebar, setShowPlaylistSidebar,
+    showMainSidebar, setShowMainSidebar
   } = useTasklistStore();
   
   const navigate = useNavigate();
@@ -1287,10 +1288,34 @@ function App() {
         </div>
       )}
 
-          {/* Sidebar (Desktop) */}
-          <aside className={theme.components.layout.desktopSidebar}>
-            <div className="flex flex-col gap-4 mb-4">
-              <Logo className="mb-2" />
+          {!showMainSidebar && (
+          <button 
+            onClick={() => setShowMainSidebar(true)}
+            className="hidden md:flex fixed left-0 top-1/2 -translate-y-1/2 z-[100] p-2 bg-google-blue text-white rounded-r-xl shadow-2xl hover:pl-4 transition-all group animate-in slide-in-from-left duration-300 border-y-2 border-r-2 border-white/20"
+            title="Open Control Panel"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        )}
+
+        {/* Sidebar (Desktop) */}
+          <aside className={clsx(
+            "hidden md:flex border-r border-gray-300 dark:border-gray-700 flex-col bg-sidebar-bg transition-all duration-300 ease-in-out relative shrink-0 overflow-hidden",
+            showMainSidebar 
+              ? "w-64 p-4 md:pt-8 md:px-4 md:pb-4 opacity-100" 
+              : "w-0 p-0 border-r-0 opacity-0 pointer-events-none"
+          )}>
+            <div className="flex flex-col gap-4 mb-4 min-w-[240px]">
+              <div className="flex items-center justify-between">
+                <Logo className="mb-2" />
+                <button 
+                  onClick={() => setShowMainSidebar(false)}
+                  className="p-2 rounded-xl bg-google-blue/10 text-google-blue hover:bg-google-blue hover:text-white transition-all shadow-sm"
+                  title="Collapse Sidebar"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+              </div>
 
               {/* Desktop Profile Card */}
               <div className={theme.components.profile.card}>
@@ -1408,7 +1433,7 @@ function App() {
       </aside>
 
       {/* Main Content */}
-      <main className={theme.components.layout.mainContent}>
+      <main className={clsx(theme.components.layout.mainContent, "transition-all duration-300 ease-in-out relative")}>
         {location.pathname !== '/dashboard' && (
           <header className={theme.components.layout.contentHeader}>
             <div className="flex items-center justify-between md:justify-start gap-3 w-full md:w-auto">
