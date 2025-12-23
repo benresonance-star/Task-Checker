@@ -244,17 +244,33 @@ export const FocusDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Smaller Done Button */}
-                  <button 
-                    onClick={() => toggleTask(focusData.task.id)}
-                    className={clsx(
-                      "h-16 md:h-20 px-8 md:px-12 rounded-[2rem] flex items-center justify-center gap-3 text-lg md:text-2xl font-black uppercase tracking-[0.15em] transition-all shadow-xl active:scale-[0.98] border-4",
-                      "bg-white text-google-green border-white/20 hover:scale-105 shadow-green-500/20"
-                    )}
-                  >
-                    <ThumbsUp className="w-6 h-6 md:w-8 md:h-8 text-google-green" />
-                    <span className="text-google-green">Done</span>
-                  </button>
+                              {/* Smaller Done Button */}
+                              <button 
+                                onClick={() => toggleTask(focusData.task.id)}
+                                className={clsx(
+                                  "h-16 md:h-20 px-8 md:px-12 rounded-[2rem] flex items-center justify-center gap-3 text-lg md:text-2xl font-black uppercase tracking-[0.15em] transition-all shadow-xl active:scale-[0.98] border-4",
+                                  focusData.isMultiUserActive 
+                                    ? (focusData.task.completed ? "bg-white text-google-red border-white" : "bg-google-red text-white border-white/30 hover:animate-pulse-gold")
+                                    : focusData.task.completed 
+                                      ? (isYellow ? "bg-white text-google-yellow border-white animate-pulse" : "bg-white text-google-green border-white animate-pulse")
+                                      : (isYellow 
+                                          ? "bg-google-yellow text-gray-900 border-white/30 hover:animate-pulse-gold" 
+                                          : "bg-google-green-light text-white border-white/20 hover:animate-pulse-gold"
+                                        )
+                                )}
+                              >
+                                {focusData.task.completed ? (
+                                  <>
+                                    <CheckCircle2 className={clsx("w-6 h-6 md:w-8 md:h-8", focusData.isMultiUserActive ? "text-google-red" : (isYellow ? "text-google-yellow" : "text-google-green"))} />
+                                    <span className={clsx(focusData.isMultiUserActive ? "text-google-red" : (isYellow ? "text-google-yellow" : "text-google-green"))}>Task Completed</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <ThumbsUp className="w-6 h-6 md:w-8 md:h-8" />
+                                    <span>TASK DONE!</span>
+                                  </>
+                                )}
+                              </button>
                 </div>
               </div>
             </div>
