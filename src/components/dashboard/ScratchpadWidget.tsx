@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { Plus, Trash2, CheckCircle2, Circle, Clock, X, Bold, List, ListOrdered } from 'lucide-react';
 import { clsx } from 'clsx';
@@ -16,13 +16,11 @@ export const ScratchpadWidget: React.FC = () => {
     clearCompletedScratchpad 
   } = useTasklistStore();
 
-  const [inputText, setInputText] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [selectedCategory, setSelectedCategory] = useState('Personal');
   
   // Inline Edit State
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingText, setEditingText] = useState('');
   const [editingCategory, setEditingCategory] = useState('');
 
   const scratchpad = currentUser?.scratchpad || [];
