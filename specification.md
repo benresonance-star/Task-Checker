@@ -62,9 +62,9 @@ The system features a robust sync engine:
 
 ### 6. Branding & Live Style System
 - **Branding Console**: A floating, draggable, and resizable HUD available to admins. It allows real-time adjustment of domain-specific brand elements (Primary Identity, Task Done Highlights, Completed States, etc.) and UI geometry (Corner radii for task cards, interactive buttons, and major containers).
-- **Style Snapshots (Theme Library)**: Admins can capture the current brand styling and save it as a named snapshot (e.g., "Happy Mode"). These presets are stored globally and can be applied with a single click, allowing for instant "Hot-Swapping" of the entire application's visual identity.
+- **Style Snapshots (Theme Library)**: Admins can capture the current brand styling and save it as a named snapshot (e.g., "Happy Mode"). Presets support **Active Style Tracking**, highlighting the currently applied theme and allowing for **Incremental Updates** (overwriting an existing snapshot with new tweaks) via a dedicated sync icon.
 - **Smooth Interaction Engine**: Utilizes hardware-accelerated `translate3d` and `requestAnimationFrame` for buttery-smooth window movement and resizing. Transitions are dynamically disabled during active interactions to eliminate "input lag."
-- **Dynamic Theme Engine**: Uses CSS Variables (`--brand-blue`, `--radius-card`, etc.) to apply style changes instantly across the entire application without page reloads.
+- **Semantic Theme Engine**: Uses CSS Variables linked to descriptive, role-based technical keys (e.g., `colorAppIdentity` instead of `brandBlue`). This ensures the codebase remains logical even when colors are dramatically altered.
 - **Global Style Persistence**: Theme settings are stored in Firestore (`settings/theme`) and synchronized in real-time across all team members' sessions. Every teammate sees the new brand colors the moment the admin saves a change.
 - **Admin Management**: Dedicated "Branding Console" entry in the sidebar and mobile menu for authorized administrators.
 
@@ -255,7 +255,7 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > 
 > **Visual Identity**:
 > - Implement a high-contrast UI (Light and Dark) with theme persistence.
-> - **Branding & Style System**: Implement a dynamic theme engine using CSS Variables. Add a floating, draggable, and resizable **Branding Console** for admins to live-adjust colors and corner radii (Card, Button, Container). Support **Style Snapshots** (Theme Library) for capturing and hot-swapping brand identities with real-time global sync via Firestore `settings/theme` and `themePresets`. Use `translate3d` and `requestAnimationFrame` for smooth HUD movement.
+> - **Branding & Style System**: Implement a dynamic theme engine using CSS Variables linked to **semantic technical keys** (e.g. `colorAppIdentity`, `radiusTaskCard`). Add a floating, draggable, and resizable **Branding Console** for admins to live-adjust colors and corner radii. Support **Style Snapshots** (Theme Library) with the ability to **highlight the active theme** and **overwrite/sync existing snapshots** with new iterative tweaks. Ensure real-time global sync via Firestore `settings/theme` and `themePresets`. Use `translate3d` and `requestAnimationFrame` for smooth HUD movement.
 > - **Standardized Radii Scales**: Define and use `rounded-button`, `rounded-card`, and `rounded-container` linked to dynamic CSS variables.
 > - **Project Context (Light Mode)**: Use `bg-blue-100/70` for main sections and `bg-white/80` for inner metadata cards (Identification, Planning, Building) with outlines matching text color.
 > - **Brand Identity**: Logo is a simple white tick inside an orange circle (`#E67E33`). Brand name stylized as `checkMATE`.
@@ -283,4 +283,4 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 23, 2025 (v1.2 - Style Snapshots Update)*
+*Updated: December 23, 2025 (v1.3 - Semantic Renaming & Iterative Updates)*
