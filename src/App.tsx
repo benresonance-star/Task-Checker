@@ -690,10 +690,18 @@ function App() {
     // Track last active IDs for smarter navigation
     if (projectId) localStorage.setItem('lastActiveProjectId', projectId);
     if (masterId) localStorage.setItem('lastActiveMasterId', masterId);
+    
+    // Store the last path to remember if user was on Dashboard
+    localStorage.setItem('lastActivePath', path);
 
     const path = location.pathname;
     if (path === '/' || path === '') {
-      navigate('/dashboard', { replace: true });
+      const lastPath = localStorage.getItem('lastActivePath');
+      if (lastPath && lastPath !== '/') {
+        navigate(lastPath, { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
       return;
     }
 
