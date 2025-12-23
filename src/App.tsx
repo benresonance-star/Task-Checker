@@ -772,8 +772,16 @@ function App() {
     const { projectId: focusProjectId, instanceId: focusInstanceId, taskId: focusTaskId } = currentUser.activeFocus;
     
     // 1. Initial Sync: Auto-navigate to the focused task on app load
+    // CRITICAL: We only auto-navigate if the user is NOT already on a specific page (like the Dashboard)
     if (!initialFocusSynced.current) {
       initialFocusSynced.current = true;
+      const currentPath = location.pathname;
+      
+      // If we are on the dashboard or master mode, don't force away
+      if (currentPath === '/dashboard' || currentPath.startsWith('/master')) {
+        return;
+      }
+
       if (projectId !== focusProjectId || instanceId !== focusInstanceId) {
         navigate(`/project/${focusProjectId}/instance/${focusInstanceId}?task=${focusTaskId}`, { replace: true });
         return;
