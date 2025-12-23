@@ -175,16 +175,17 @@ export const FocusDashboard: React.FC = () => {
                     </div>
                   </div>
                   
-                  <button 
-                    onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance.id}?task=${focusData.task.id}`)}
-                    className={clsx(
-                      "p-3 rounded-2xl transition-all border shadow-sm flex-shrink-0 active:scale-95",
-                      isYellow ? "bg-black/5 border-black/10 text-gray-600 hover:bg-black/10" : "bg-white/10 border-white/20 text-white/70 hover:bg-white/20"
-                    )}
-                    title="Open in Full Checklist"
-                  >
-                    <RotateCcw className="w-6 h-6 rotate-180" />
-                  </button>
+                              <button 
+                                onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance.id}?task=${focusData.task.id}`)}
+                                className={clsx(
+                                  "rounded-2xl transition-all border shadow-sm flex-shrink-0 active:scale-95",
+                                  showPlaylistSidebar ? "p-2" : "p-3",
+                                  isYellow ? "bg-black/5 border-black/10 text-gray-600 hover:bg-black/10" : "bg-white/10 border-white/20 text-white/70 hover:bg-white/20"
+                                )}
+                                title="Open in Full Checklist"
+                              >
+                                <RotateCcw className={clsx("rotate-180", showPlaylistSidebar ? "w-5 h-5" : "w-6 h-6")} />
+                              </button>
                 </div>
 
                 {/* 2. CENTER: Task Title */}
@@ -197,23 +198,27 @@ export const FocusDashboard: React.FC = () => {
                   </h2>
                 </div>
 
-                {/* 3. BOTTOM: Compact Pomodoro & Task Done */}
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-4 border-t border-white/10">
-                  
-                  {/* Reduced Pomodoro Widget */}
-                  <div className="flex items-center gap-4 bg-white/10 dark:bg-black/20 p-2 pl-3 rounded-2xl border border-white/10 shadow-inner relative">
-                    {/* Tomato Icon / Play Pause */}
-                    <div className="relative group/timer">
-                      <button 
-                        onClick={() => toggleTaskTimer(focusData.task.id)}
-                        className={clsx(
-                          "w-12 h-12 rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-90 border-2",
-                          focusData.task.timerIsRunning 
-                            ? "bg-google-red border-white/40 text-white animate-pulse" 
-                            : "bg-white text-google-red border-google-red/20 hover:bg-red-50"
-                        )}
-                      >
-                                    {focusData.task.timerIsRunning ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-0.5" />}
+                            {/* 3. BOTTOM: Compact Pomodoro & Task Done */}
+                            <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10">
+
+                              {/* Reduced Pomodoro Widget */}
+                              <div className={clsx(
+                                "flex items-center bg-white/10 dark:bg-black/20 p-2 rounded-2xl border border-white/10 shadow-inner relative",
+                                showPlaylistSidebar ? "gap-2 pl-2" : "gap-4 pl-3"
+                              )}>
+                                {/* Tomato Icon / Play Pause */}
+                                <div className="relative group/timer">
+                                  <button 
+                                    onClick={() => toggleTaskTimer(focusData.task.id)}
+                                    className={clsx(
+                                      "rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-90 border-2",
+                                      showPlaylistSidebar ? "w-10 h-10" : "w-12 h-12",
+                                      focusData.task.timerIsRunning 
+                                        ? "bg-google-red border-white/40 text-white animate-pulse" 
+                                        : "bg-white text-google-red border-google-red/20 hover:bg-red-50"
+                                    )}
+                                  >
+                                    {focusData.task.timerIsRunning ? <Pause className={showPlaylistSidebar ? "w-5 h-5 fill-current" : "w-6 h-6 fill-current"} /> : <Play className={clsx(showPlaylistSidebar ? "w-5 h-5 ml-0.5 fill-current" : "w-6 h-6 ml-0.5 fill-current")} />}
                                   </button>
 
                                   {/* Optional Set Duration Hover */}
@@ -226,74 +231,75 @@ export const FocusDashboard: React.FC = () => {
                                     </button>
                                   )}
 
-                      {showSetTimer && (
-                        <div className="absolute bottom-full left-0 mb-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-2 animate-in slide-in-from-bottom-2 duration-200 z-50 text-[var(--text-primary)]">
-                          <input 
-                            type="number" 
-                            className="w-16 h-10 bg-gray-100 dark:bg-gray-900 border-none rounded-xl text-center font-black text-google-blue focus:ring-2 focus:ring-google-blue transition-all"
-                            value={customMinutes}
-                            onChange={(e) => setCustomMinutes(e.target.value)}
-                            autoFocus
-                          />
-                          <button onClick={handleSetTimerSubmit} className="h-10 px-4 bg-google-blue text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all">Set</button>
-                          <button onClick={() => setShowSetTimer(false)} className="p-2 text-gray-400 hover:text-google-red transition-colors"><X className="w-4 h-4" /></button>
-                        </div>
-                      )}
-                    </div>
+                                  {showSetTimer && (
+                                    <div className="absolute bottom-full left-0 mb-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-2 animate-in slide-in-from-bottom-2 duration-200 z-50 text-[var(--text-primary)]">
+                                      <input 
+                                        type="number" 
+                                        className="w-16 h-10 bg-gray-100 dark:bg-gray-900 border-none rounded-xl text-center font-black text-google-blue focus:ring-2 focus:ring-google-blue transition-all"
+                                        value={customMinutes}
+                                        onChange={(e) => setCustomMinutes(e.target.value)}
+                                        autoFocus
+                                      />
+                                      <button onClick={handleSetTimerSubmit} className="h-10 px-4 bg-google-blue text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all">Set</button>
+                                      <button onClick={() => setShowSetTimer(false)} className="p-2 text-gray-400 hover:text-google-red transition-colors"><X className="w-4 h-4" /></button>
+                                    </div>
+                                  )}
+                                </div>
 
-                    <div className="flex flex-col">
-                      <div className={clsx(
-                        "text-3xl font-black tracking-tighter tabular-nums leading-none",
-                        isYellow ? "text-gray-900" : "text-white"
-                      )}>
-                        {formatTime(focusData.task.timerRemaining ?? focusData.task.timerDuration ?? 20 * 60)}
-                      </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <button 
-                          onClick={() => resetTaskTimer(focusData.task.id)}
-                          className={clsx(
-                            "text-[9px] font-black uppercase transition-colors px-1.5 py-0.5 rounded-md",
-                            isYellow ? "bg-black/5 text-gray-600 hover:bg-black/10" : "bg-white/10 text-white/60 hover:bg-white/20"
-                          )}
-                        >
-                          Reset
-                        </button>
-                        <button 
-                          onClick={() => updateTaskTimer(focusData.task.id, (focusData.task.timerRemaining ?? 20 * 60) + 300)}
-                          className={clsx(
-                            "text-[9px] font-black uppercase transition-colors px-1.5 py-0.5 rounded-md",
-                            isYellow ? "bg-black/5 text-gray-600 hover:bg-black/10" : "bg-white/10 text-white/60 hover:bg-white/20"
-                          )}
-                        >
-                          +5m
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                                <div className="flex flex-col">
+                                  <div className={clsx(
+                                    "font-black tracking-tighter tabular-nums leading-none",
+                                    showPlaylistSidebar ? "text-2xl" : "text-3xl",
+                                    isYellow ? "text-gray-900" : "text-white"
+                                  )}>
+                                    {formatTime(focusData.task.timerRemaining ?? focusData.task.timerDuration ?? 20 * 60)}
+                                  </div>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <button 
+                                      onClick={() => resetTaskTimer(focusData.task.id)}
+                                      className={clsx(
+                                        "text-[9px] font-black uppercase transition-colors px-1.5 py-0.5 rounded-md",
+                                        isYellow ? "bg-black/5 text-gray-600 hover:bg-black/10" : "bg-white/10 text-white/60 hover:bg-white/20"
+                                      )}
+                                    >
+                                      Reset
+                                    </button>
+                                    <button 
+                                      onClick={() => updateTaskTimer(focusData.task.id, (focusData.task.timerRemaining ?? 20 * 60) + 300)}
+                                      className={clsx(
+                                        "text-[9px] font-black uppercase transition-colors px-1.5 py-0.5 rounded-md",
+                                        isYellow ? "bg-black/5 text-gray-600 hover:bg-black/10" : "bg-white/10 text-white/60 hover:bg-white/20"
+                                      )}
+                                    >
+                                      +5m
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
 
                               {/* Smaller Done Button */}
                               <button 
                                 onClick={() => toggleTask(focusData.task.id, focusData.instance.id)}
                                 className={clsx(
-                                  "h-16 md:h-20 px-8 md:px-12 rounded-[2rem] flex items-center justify-center gap-3 text-lg md:text-2xl font-black uppercase tracking-[0.15em] transition-all shadow-xl active:scale-[0.98] border-4",
-                                  focusData.isMultiUserActive 
-                                    ? (focusData.task.completed ? "bg-white text-google-red border-white" : "bg-google-red text-white border-white/30 hover:animate-pulse-gold")
-                                    : focusData.task.completed 
-                                      ? (isYellow ? "bg-white text-google-yellow border-white animate-pulse" : "bg-white text-google-green border-white animate-pulse")
-                                      : (isYellow 
-                                          ? "bg-google-yellow text-gray-900 border-white/30 hover:animate-pulse-gold" 
-                                          : "bg-google-green-light text-white border-white/20 hover:animate-pulse-gold"
-                                        )
+                                  "rounded-[2rem] flex items-center justify-center gap-2 transition-all shadow-xl active:scale-[0.98] border-4 flex-1 md:flex-none",
+                                  showPlaylistSidebar ? "h-14 md:h-16 px-4 md:px-6 text-sm md:text-lg" : "h-16 md:h-20 px-8 md:px-12 text-lg md:text-2xl",
+                                  "font-black uppercase tracking-[0.1em]",
+                                  focusData.task.completed 
+                                    ? (focusData.isMultiUserActive ? "bg-white text-google-red border-white" : (isYellow ? "bg-white text-google-yellow border-white animate-pulse" : "bg-white text-google-green border-white animate-pulse"))
+                                    : (isYellow 
+                                        ? "bg-google-yellow text-gray-900 border-white/30 hover:animate-pulse-gold" 
+                                        : (focusData.isMultiUserActive ? "bg-google-red text-white border-white/30 hover:animate-pulse-gold" : "bg-google-green-light text-white border-white/20 hover:animate-pulse-gold")
+                                      )
                                 )}
                               >
                                 {focusData.task.completed ? (
                                   <>
-                                    <CheckCircle2 className={clsx("w-6 h-6 md:w-8 md:h-8", focusData.isMultiUserActive ? "text-google-red" : (isYellow ? "text-google-yellow" : "text-google-green"))} />
+                                    <CheckCircle2 className={clsx(showPlaylistSidebar ? "w-5 h-5" : "w-6 h-6 md:w-8 md:h-8", focusData.isMultiUserActive ? "text-google-red" : (isYellow ? "text-google-yellow" : "text-google-green"))} />
                                     <span className={clsx(focusData.isMultiUserActive ? "text-google-red" : (isYellow ? "text-google-yellow" : "text-google-green"))}>Task Completed</span>
                                   </>
                                 ) : (
                                   <>
-                                    <ThumbsUp className="w-6 h-6 md:w-8 md:h-8" />
+                                    <ThumbsUp className={showPlaylistSidebar ? "w-5 h-5" : "w-6 h-6 md:w-8 md:h-8"} />
                                     <span>TASK DONE?</span>
                                   </>
                                 )}
