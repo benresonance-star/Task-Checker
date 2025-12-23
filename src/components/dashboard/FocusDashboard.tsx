@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
-import { LayoutGrid, Target, Zap, Clock, Play, Pause, RotateCcw, ThumbsUp, CheckCircle2 } from 'lucide-react';
+import { theme } from '../../styles/theme';
+import { LayoutGrid, Target, Zap, Clock, Play, Pause, RotateCcw, ThumbsUp, CheckCircle2, ChevronRight, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,11 +10,17 @@ export const FocusDashboard: React.FC = () => {
   const { 
     currentUser, 
     instances,
+    projects,
+    users,
     updateTaskTimer,
     resetTaskTimer,
     toggleTaskTimer,
+    setTaskTimer,
     toggleTask,
   } = useTasklistStore();
+
+  const [showSetTimer, setShowSetTimer] = React.useState(false);
+  const [customMinutes, setCustomMinutes] = React.useState('20');
 
   // Find the actual task object for the active focus
   const focusData = React.useMemo(() => {
@@ -22,6 +29,8 @@ export const FocusDashboard: React.FC = () => {
 
     const instance = instances.find(i => i.id === focus.instanceId);
     if (!instance) return null;
+
+    const project = projects.find(p => p.id === focus.projectId);
 
     let foundTask = null;
     for (const section of instance.sections) {
@@ -36,14 +45,52 @@ export const FocusDashboard: React.FC = () => {
     }
 
     if (!foundTask) return null;
-    return { task: foundTask, instance, projectId: focus.projectId };
-  }, [currentUser?.activeFocus, instances]);
+
+    // Presence & Session logic for matching sidebar colors
+    const otherActiveUsers = Object.entries(instance?.activeUsers || {})
+      .filter(([uid, info]: [string, any]) => info.taskId === foundTask.id && uid !== currentUser?.id && Date.now() - info.lastSeen < 45000)
+      .map(([_, info]: [string, any]) => info);
+
+    const otherClaimants = users
+      .filter(u => u.id !== currentUser?.id && u.actionSet?.some(i => i.taskId === foundTask.id))
+      .map(u => ({ id: u.id, name: u.name }));
+
+    const isMultiUserActive = otherActiveUsers.length >= 1; // At least one other person is looking
+    const isYellowState = otherClaimants.length > 0; // At least one other person has it in their session
+
+    return { 
+      task: foundTask, 
+      instance, 
+      project,
+      projectId: focus.projectId,
+      isMultiUserActive,
+      isYellowState
+    };
+  }, [currentUser?.activeFocus, instances, projects, users]);
 
   const formatTime = (val: number) => {
     const mins = Math.floor(val / 60);
     const secs = val % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
+
+  const handleSetTimerSubmit = () => {
+    const mins = parseInt(customMinutes);
+    if (!isNaN(mins) && focusData) {
+      setTaskTimer(focusData.task.id, mins * 60);
+      setShowSetTimer(false);
+    }
+  };
+
+  // Determine card theme based on focus state
+  const cardTheme = React.useMemo(() => {
+    if (!focusData) return null;
+    if (focusData.isMultiUserActive) return theme.components.sidebar.activeTaskMulti;
+    if (focusData.isYellowState) return theme.components.sidebar.activeTaskYellow;
+    return theme.components.sidebar.activeTaskFocus;
+  }, [focusData]);
+
+  const isYellow = focusData?.isYellowState && !focusData?.isMultiUserActive;
 
   return (
     <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 custom-scrollbar">
@@ -53,7 +100,7 @@ export const FocusDashboard: React.FC = () => {
           <LayoutGrid className="w-8 h-8 md:w-10 md:h-10 text-google-blue" />
           <span>My Dashboard</span>
         </h1>
-        <p className="text-sm md:text-base font-bold text-[var(--text-secondary)] uppercase tracking-widest ml-11 md:ml-13 text-gray-500">
+        <p className="text-sm md:text-base font-bold text-[var(--text-secondary)] uppercase tracking-widest ml-11 md:ml-13 opacity-60">
           Welcome back, {currentUser?.name?.split(' ')[0] || 'User'}
         </p>
       </div>
@@ -61,32 +108,43 @@ export const FocusDashboard: React.FC = () => {
       {/* Main Bento Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Active Focus Card (Phase 2) */}
+        {/* Active Focus Card (Phase 2 Polished) */}
         <div className="lg:col-span-2 space-y-4">
           <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] ml-2">Current Focus</h3>
           
-          {focusData ? (
+          {focusData && cardTheme ? (
             <div className={clsx(
-              "p-8 md:p-12 rounded-[3rem] border transition-all shadow-2xl relative overflow-hidden group min-h-[450px] flex flex-col justify-between",
-              "bg-white dark:bg-black/40 border-gray-200 dark:border-gray-800",
-              focusData.task.timerIsRunning && "ring-4 ring-google-blue/20 shadow-blue-500/10"
+              "p-8 md:p-10 rounded-[3rem] border-4 transition-all shadow-2xl relative overflow-hidden group min-h-[400px] flex flex-col justify-between",
+              cardTheme,
+              focusData.task.timerIsRunning && !isYellow && "ring-8 ring-google-green/20 animate-pulse",
+              focusData.task.timerIsRunning && isYellow && "ring-8 ring-google-yellow/20 animate-pulse"
             )}>
-              {/* Subtle Background Icon - Moved and Faded */}
-              <Target className="absolute -top-10 -right-10 w-80 h-80 text-google-blue/5 dark:text-google-blue/10 rotate-12 pointer-events-none group-hover:scale-110 transition-transform duration-1000" />
-
-              <div className="relative z-10 flex flex-col h-full space-y-10">
-                {/* 1. TOP BAR: Context & Source Jump */}
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-2.5 px-4 py-1.5 bg-google-blue/10 text-google-blue rounded-full border border-google-blue/20 shadow-sm">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span className="text-[11px] font-black uppercase tracking-[0.1em] truncate max-w-[250px] md:max-w-md">
-                      {focusData.instance.title}
-                    </span>
+              <div className="relative z-10 flex flex-col h-full space-y-8">
+                {/* 1. TOP BAR: Project & Checklist Context */}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1.5 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h4 className={clsx("text-lg md:text-2xl font-black uppercase tracking-tight truncate", isYellow ? "text-gray-900" : "text-white")}>
+                        {focusData.project?.name || 'Unknown Project'}
+                      </h4>
+                    </div>
+                    <div className={clsx(
+                      "flex items-center gap-2 px-3 py-1 rounded-full w-fit border shadow-sm transition-colors",
+                      isYellow ? "bg-black/5 border-black/10 text-gray-700" : "bg-white/10 border-white/20 text-white/80"
+                    )}>
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span className="text-[10px] font-black uppercase tracking-wider truncate max-w-[200px] md:max-w-md">
+                        {focusData.instance.title}
+                      </span>
+                    </div>
                   </div>
                   
                   <button 
                     onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance.id}?task=${focusData.task.id}`)}
-                    className="p-3 rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-google-blue hover:bg-google-blue/10 transition-all border border-transparent hover:border-google-blue/20 flex-shrink-0"
+                    className={clsx(
+                      "p-3 rounded-2xl transition-all border shadow-sm flex-shrink-0 active:scale-95",
+                      isYellow ? "bg-black/5 border-black/10 text-gray-600 hover:bg-black/10" : "bg-white/10 border-white/20 text-white/70 hover:bg-white/20"
+                    )}
                     title="Open in Full Checklist"
                   >
                     <RotateCcw className="w-6 h-6 rotate-180" />
@@ -94,62 +152,100 @@ export const FocusDashboard: React.FC = () => {
                 </div>
 
                 {/* 2. CENTER: Task Title */}
-                <div className="flex-1 flex flex-col justify-center">
-                  <h2 className="text-3xl md:text-6xl font-black leading-[1.1] text-[var(--text-heading)] tracking-tight">
+                <div className="flex-1 flex flex-col justify-center py-4">
+                  <h2 className={clsx(
+                    "text-3xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight break-words",
+                    isYellow ? "text-gray-900" : "text-white"
+                  )}>
                     {focusData.task.title}
                   </h2>
                 </div>
 
-                {/* 3. BOTTOM: Timer & Primary Action */}
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-8 items-end">
-                  {/* Timer Side (3 columns) */}
-                  <div className="md:col-span-3 flex items-center gap-8">
-                    <button 
-                      onClick={() => toggleTaskTimer(focusData.task.id)}
-                      className={clsx(
-                        "w-24 h-24 md:w-28 md:h-24 rounded-[2rem] flex items-center justify-center transition-all shadow-xl active:scale-95 border-4",
-                        focusData.task.timerIsRunning 
-                          ? "bg-google-blue text-white border-white/20 shadow-blue-500/30" 
-                          : "bg-white dark:bg-white/5 text-google-blue border-google-blue shadow-md hover:border-google-blue/60"
+                {/* 3. BOTTOM: Compact Pomodoro & Task Done */}
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-4 border-t border-white/10">
+                  
+                  {/* Reduced Pomodoro Widget */}
+                  <div className="flex items-center gap-4 bg-white/10 dark:bg-black/20 p-2 pl-3 rounded-2xl border border-white/10 shadow-inner">
+                    {/* Tomato Icon / Play Pause */}
+                    <div className="relative group/timer">
+                      <button 
+                        onClick={() => toggleTaskTimer(focusData.task.id)}
+                        className={clsx(
+                          "w-12 h-12 rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-90 border-2",
+                          focusData.task.timerIsRunning 
+                            ? "bg-google-red border-white/40 text-white animate-pulse" 
+                            : "bg-white text-google-red border-google-red/20 hover:bg-red-50"
+                        )}
+                      >
+                        {focusData.task.timerIsRunning ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-1" />}
+                      </button>
+                      
+                      {/* Optional Set Duration Hover */}
+                      {!focusData.task.timerIsRunning && (
+                        <button 
+                          onClick={() => setShowSetTimer(!showSetTimer)}
+                          className="absolute -top-2 -right-2 w-5 h-5 bg-white dark:bg-gray-800 text-google-blue rounded-full flex items-center justify-center shadow-md border border-gray-200 dark:border-gray-700 hover:scale-110 transition-transform"
+                        >
+                          <Clock className="w-3 h-3" />
+                        </button>
                       )}
-                    >
-                      {focusData.task.timerIsRunning ? <Pause className="w-12 h-12 fill-current" /> : <Play className="w-12 h-12 fill-current ml-1.5" />}
-                    </button>
+                    </div>
 
-                    <div className="space-y-2">
-                      <div className="text-6xl md:text-8xl font-black tracking-tighter tabular-nums text-[var(--text-heading)] leading-none">
+                    <div className="flex flex-col">
+                      <div className={clsx(
+                        "text-3xl font-black tracking-tighter tabular-nums leading-none",
+                        isYellow ? "text-gray-900" : "text-white"
+                      )}>
                         {formatTime(focusData.task.timerRemaining ?? focusData.task.timerDuration ?? 20 * 60)}
                       </div>
-                      <div className="flex items-center gap-3 ml-1">
+                      <div className="flex items-center gap-2 mt-1">
                         <button 
                           onClick={() => resetTaskTimer(focusData.task.id)}
-                          className="px-4 py-1.5 rounded-xl bg-gray-100 dark:bg-white/5 text-[11px] font-black uppercase text-gray-500 hover:text-google-blue transition-colors border border-transparent hover:border-google-blue/20"
+                          className={clsx(
+                            "text-[9px] font-black uppercase transition-colors px-1.5 py-0.5 rounded-md",
+                            isYellow ? "bg-black/5 text-gray-600 hover:bg-black/10" : "bg-white/10 text-white/60 hover:bg-white/20"
+                          )}
                         >
                           Reset
                         </button>
                         <button 
                           onClick={() => updateTaskTimer(focusData.task.id, (focusData.task.timerRemaining ?? 20 * 60) + 300)}
-                          className="px-4 py-1.5 rounded-xl bg-gray-100 dark:bg-white/5 text-[11px] font-black uppercase text-gray-500 hover:text-google-blue transition-colors border border-transparent hover:border-google-blue/20"
+                          className={clsx(
+                            "text-[9px] font-black uppercase transition-colors px-1.5 py-0.5 rounded-md",
+                            isYellow ? "bg-black/5 text-gray-600 hover:bg-black/10" : "bg-white/10 text-white/60 hover:bg-white/20"
+                          )}
                         >
-                          +5 Mins
+                          +5m
                         </button>
                       </div>
                     </div>
+
+                    {showSetTimer && (
+                      <div className="absolute bottom-full left-0 mb-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-2 animate-in slide-in-from-bottom-2 duration-200 z-50">
+                        <input 
+                          type="number" 
+                          className="w-16 h-10 bg-gray-100 dark:bg-gray-900 border-none rounded-xl text-center font-black text-google-blue focus:ring-2 focus:ring-google-blue transition-all"
+                          value={customMinutes}
+                          onChange={(e) => setCustomMinutes(e.target.value)}
+                          autoFocus
+                        />
+                        <button onClick={handleSetTimerSubmit} className="h-10 px-4 bg-google-blue text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all">Set</button>
+                        <button onClick={() => setShowSetTimer(false)} className="p-2 text-gray-400 hover:text-google-red transition-colors"><X className="w-4 h-4" /></button>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Done Side (2 columns) */}
-                  <div className="md:col-span-2 w-full">
-                    <button 
-                      onClick={() => toggleTask(focusData.task.id)}
-                      className={clsx(
-                        "w-full h-24 md:h-32 rounded-[2.5rem] flex flex-col items-center justify-center gap-2 text-xl md:text-3xl font-black uppercase tracking-[0.15em] transition-all shadow-2xl active:scale-[0.98]",
-                        "bg-[var(--active-task-done)] text-white shadow-green-500/20 hover:animate-pulse-gold border-4 border-white/20"
-                      )}
-                    >
-                      <ThumbsUp className="w-8 h-8 md:w-10 md:h-10" />
-                      <span>Done</span>
-                    </button>
-                  </div>
+                  {/* Smaller Done Button */}
+                  <button 
+                    onClick={() => toggleTask(focusData.task.id)}
+                    className={clsx(
+                      "h-16 md:h-20 px-8 md:px-12 rounded-[2rem] flex items-center justify-center gap-3 text-lg md:text-2xl font-black uppercase tracking-[0.15em] transition-all shadow-xl active:scale-[0.98] border-4",
+                      "bg-white text-google-green border-white/20 hover:scale-105"
+                    )}
+                  >
+                    <ThumbsUp className="w-6 h-6 md:w-8 md:h-8" />
+                    <span>Done</span>
+                  </button>
                 </div>
               </div>
             </div>
