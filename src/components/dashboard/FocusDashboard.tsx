@@ -186,17 +186,17 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                       </div>
                     </div>
                     
-                  <button 
-                    onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance.id}?task=${focusData.task.id}&scroll=true`)}
-                    className={clsx(
-                        "rounded-2xl transition-all border shadow-sm flex-shrink-0 active:scale-95",
-                        showPlaylistSidebar ? "p-2" : "p-3",
-                        isYellow ? "bg-black/5 border-black/10 text-gray-600 hover:bg-black/10" : "bg-white/10 border-white/20 text-white/70 hover:bg-white/20"
-                      )}
-                      title="Open in Full Checklist"
-                    >
-                      <RotateCcw className={clsx("rotate-180", showPlaylistSidebar ? "w-5 h-5" : "w-6 h-6")} />
-                    </button>
+                              <button 
+                                onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance.id}?task=${focusData.task.id}&scroll=true`)}
+                                className={clsx(
+                                  "hidden md:flex rounded-2xl transition-all border shadow-sm flex-shrink-0 active:scale-95",
+                                  showPlaylistSidebar ? "p-2" : "p-3",
+                                  isYellow ? "bg-black/5 border-black/10 text-gray-600 hover:bg-black/10" : "bg-white/10 border-white/20 text-white/70 hover:bg-white/20"
+                                )}
+                                title="Open in Full Checklist"
+                              >
+                                <RotateCcw className={clsx("rotate-180", showPlaylistSidebar ? "w-5 h-5" : "w-6 h-6")} />
+                              </button>
                   </div>
 
                   {/* 2. CENTER: Task Title */}
@@ -299,6 +299,18 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                         title="Open Task Info"
                       >
                         <FileText className={clsx("w-10 h-10", (focusData.task.notes || focusData.task.userNotes || focusData.task.files?.length || focusData.task.userFiles?.length) && "fill-current")} />
+                      </button>
+
+                      {/* Open in Full Checklist Button - Mobile Only */}
+                      <button 
+                        onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance.id}?task=${focusData.task.id}&scroll=true`)}
+                        className={clsx(
+                          "md:hidden transition-all active:scale-90 flex items-center justify-center p-2",
+                          isYellow ? "text-gray-900/60 hover:text-gray-900" : "text-white/60 hover:text-white"
+                        )}
+                        title="Open in Full Checklist"
+                      >
+                        <RotateCcw className="w-10 h-10 rotate-180" />
                       </button>
                     </div>
 
