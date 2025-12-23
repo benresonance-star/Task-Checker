@@ -6,6 +6,7 @@ import { clsx } from 'clsx';
 export const ScratchpadWidget: React.FC = () => {
   const { 
     currentUser, 
+    projects,
     addScratchpadTask, 
     toggleScratchpadTask, 
     deleteScratchpadTask, 
