@@ -72,6 +72,16 @@ export const theme = {
       addTaskButton: 'flex group/add-task text-[10px] sm:text-xs text-gray-500 dark:text-gray-300 font-black ml-2 sm:ml-4 py-1.5 px-2 sm:px-3 transition-all items-center gap-2 rounded-button hover:bg-white dark:hover:bg-gray-800 shadow-xs border border-transparent hover:border-gray-200 dark:hover:border-gray-700',
       addSubsectionButton: 'text-xs sm:text-sm font-black text-gray-500 hover:text-google-blue flex items-center gap-2 transition-all py-2.5 px-4 rounded-button bg-transparent border-dashed border-2 border-gray-300 dark:border-gray-700 hover:border-google-blue hover:bg-blue-50/50 dark:hover:bg-blue-900/20 relative z-20',
     },
+    taskGuide: {
+      block: 'bg-white dark:bg-black/40 border border-gray-400 dark:border-gray-700 rounded-container p-6 shadow-sm',
+      blockPrereq: 'rounded-container border-2 p-6 transition-all shadow-sm',
+      blockPrereqActive: 'border-orange-200 bg-orange-100 dark:border-orange-500/50 dark:bg-orange-500/10',
+      header: 'text-[10px] font-black uppercase text-gray-600 dark:text-gray-300/70 tracking-[0.2em] mb-3 block px-2',
+      headerPrereq: 'flex items-center gap-2 text-orange-600 dark:text-orange-400 mb-4 px-2',
+      inputMaster: 'w-full bg-blue-50/30 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-card p-4 text-sm font-medium focus:border-google-blue outline-none transition-colors text-gray-800 dark:text-gray-100 resize-y min-h-[6rem] placeholder-gray-400',
+      itemPrereq: 'flex items-center justify-between bg-white dark:bg-black/40 px-4 py-3 rounded-card border border-orange-100 dark:border-orange-500/20 shadow-sm group',
+      itemPrep: 'flex flex-col bg-blue-50/20 dark:bg-black/40 p-4 rounded-card border border-blue-100 dark:border-gray-800 shadow-sm group',
+    },
     taskDoneButton: {
       base: 'flex-1 h-12 rounded-xl font-black uppercase tracking-[0.15em] text-xs flex items-center justify-center gap-2 transition-all duration-300 shadow-[0_10px_25px_rgba(0,0,0,0.3)] active:scale-95 active:shadow-inner border',
       active: 'bg-google-green-light text-white border-white/20 hover:animate-pulse-gold',

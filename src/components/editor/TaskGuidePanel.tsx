@@ -16,6 +16,7 @@ import {
   FileText
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { theme } from '../../styles/theme';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { generateUUID } from '../../utils/uuid';
 
@@ -232,12 +233,12 @@ export const TaskGuidePanel: React.FC<TaskGuidePanelProps> = ({ task, mode, show
       {!isGuideCollapsed && (
         <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-top-2 duration-200">
           {/* 1. Task Description */}
-          <div className="bg-white dark:bg-black/40 border border-gray-400 dark:border-gray-700 rounded-container p-6 shadow-sm">
-            <label className="text-[10px] font-black uppercase text-gray-600 dark:text-gray-300/70 tracking-[0.2em] mb-3 block px-2">What this Task Achieves</label>
+          <div className={theme.components.taskGuide.block}>
+            <label className={theme.components.taskGuide.header}>What this Task Achieves</label>
             {isMaster ? (
               <textarea
                 ref={descRef}
-                className="w-full bg-blue-50/30 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-card p-4 text-sm font-medium focus:border-google-blue outline-none transition-colors text-gray-800 dark:text-gray-100 resize-y min-h-[6rem] placeholder-gray-400"
+                className={theme.components.taskGuide.inputMaster}
                 placeholder="What is this task about?"
                 value={localDesc}
                 onChange={(e) => setLocalDesc(e.target.value)}
@@ -255,8 +256,8 @@ export const TaskGuidePanel: React.FC<TaskGuidePanelProps> = ({ task, mode, show
 
           {/* 2. Task Complexity (Conditional) */}
           {showComplexityHeader && (
-            <div className="bg-white dark:bg-black/40 border border-gray-400 dark:border-gray-700 rounded-container p-6 shadow-sm">
-              <label className="text-[10px] font-black uppercase text-gray-600 dark:text-gray-300/70 tracking-[0.2em] mb-3 block px-2">Task Complexity</label>
+            <div className={theme.components.taskGuide.block}>
+              <label className={theme.components.taskGuide.header}>Task Complexity</label>
               <div className="px-2">
                 {isMaster ? (
                   <select
@@ -293,18 +294,16 @@ export const TaskGuidePanel: React.FC<TaskGuidePanelProps> = ({ task, mode, show
       {/* 3. Prerequisites */}
       {(isMaster || (guide.requiredBefore?.length || 0) > 0) && (
         <div className={clsx(
-          "rounded-container border-2 p-6 transition-all shadow-sm",
-          (guide.requiredBefore?.length || 0) > 0 
-            ? "border-orange-200 bg-orange-100 dark:border-orange-500/50 dark:bg-orange-500/10" 
-            : "border-gray-400 bg-white dark:border-gray-700 dark:bg-black/40"
+          theme.components.taskGuide.blockPrereq,
+          (guide.requiredBefore?.length || 0) > 0 && theme.components.taskGuide.blockPrereqActive
         )}>
-          <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400 mb-4 px-2">
+          <div className={theme.components.taskGuide.headerPrereq}>
             <CheckCircle className="w-4 h-4" />
             <label className="text-[10px] font-black uppercase tracking-[0.2em]">Can I Proceed?</label>
           </div>
           <div className="space-y-2 px-2">
             {(guide.requiredBefore || []).map((req, i) => (
-              <div key={i} className="flex items-center justify-between bg-white dark:bg-black/40 px-4 py-3 rounded-card border border-orange-100 dark:border-orange-500/20 shadow-sm group">
+              <div key={i} className={theme.components.taskGuide.itemPrereq}>
                 {isMaster ? (
                   <InlineInput
                     value={req}
@@ -343,14 +342,14 @@ export const TaskGuidePanel: React.FC<TaskGuidePanelProps> = ({ task, mode, show
 
       {/* 4. Helpful to Prepare */}
       {(isMaster || (guide.helpfulPrep?.length || 0) > 0) && (
-        <div className="bg-white dark:bg-black/40 border border-gray-400 dark:border-gray-700 rounded-container p-6 shadow-sm">
+        <div className={theme.components.taskGuide.block}>
           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300/70 mb-4 px-2">
             <Lightbulb className="w-4 h-4" />
             <label className="text-[10px] font-black uppercase tracking-[0.2em]">Helpful (Optional)</label>
           </div>
           <div className="grid grid-cols-1 gap-3 px-2">
             {(guide.helpfulPrep || []).map((item) => (
-              <div key={item.id} className="flex flex-col bg-blue-50/20 dark:bg-black/40 p-4 rounded-card border border-blue-100 dark:border-gray-800 shadow-sm group">
+              <div key={item.id} className={theme.components.taskGuide.itemPrep}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     {item.type === 'text' ? (
@@ -444,7 +443,7 @@ export const TaskGuidePanel: React.FC<TaskGuidePanelProps> = ({ task, mode, show
 
       {/* 5. Keep an Eye On */}
       {(isMaster || (guide.watchOutFor?.length || 0) > 0) && (
-        <div className="bg-white dark:bg-black/40 border border-gray-400 dark:border-gray-700 rounded-container p-6 shadow-sm mb-6">
+        <div className={clsx(theme.components.taskGuide.block, "mb-6")}>
           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300/70 mb-4 px-2">
             <AlertTriangle className="w-4 h-4" />
             <label className="text-[10px] font-black uppercase tracking-[0.2em]">Watch For (Max 3)</label>
