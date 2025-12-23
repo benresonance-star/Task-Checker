@@ -202,7 +202,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                   {/* 2. CENTER: Task Title */}
                   <div className="flex-1 flex flex-col justify-center py-4">
                     <h2 className={clsx(
-                      "text-xl md:text-3xl lg:text-4xl font-semibold leading-[1.2] tracking-[0.1em] break-words",
+                      "text-2xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight break-words",
                       isYellow ? "text-gray-900" : "text-white"
                     )}>
                       {focusData.task.title}
