@@ -172,6 +172,9 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--project-info-border', settings.colorProjectInfoBorder);
     root.style.setProperty('--notes-bg', settings.colorNotesBg);
     root.style.setProperty('--notes-border', settings.colorNotesBorder);
+    root.style.setProperty('--notes-editor-bg', settings.colorNotesEditorBg);
+    root.style.setProperty('--notes-editor-border', settings.colorNotesEditorBorder);
+    root.style.setProperty('--notes-editor-separator', settings.colorNotesEditorSeparator);
     root.style.setProperty('--note-personal-bg', settings.colorNotePersonalBg);
     root.style.setProperty('--note-project-bg', settings.colorNoteProjectBg);
     root.style.setProperty('--note-priority-bg', settings.colorNotePriorityBg);
@@ -233,6 +236,9 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorProjectInfoBorder: oldSettings.colorProjectInfoBorder || oldSettings.colorDashboardBorder || '#BFDBFE',
       colorNotesBg: oldSettings.colorNotesBg || oldSettings.colorProjectInfoBg || 'rgba(219, 234, 254, 0.7)',
       colorNotesBorder: oldSettings.colorNotesBorder || oldSettings.colorProjectInfoBorder || '#BFDBFE',
+      colorNotesEditorBg: oldSettings.colorNotesEditorBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.5)'),
+      colorNotesEditorBorder: oldSettings.colorNotesEditorBorder || (oldSettings.mode === 'dark' ? '#334155' : '#E5E7EB'),
+      colorNotesEditorSeparator: oldSettings.colorNotesEditorSeparator || (oldSettings.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'),
       colorNotePersonalBg: oldSettings.colorNotePersonalBg || (oldSettings.mode === 'dark' ? '#423b24' : '#fff9db'),
       colorNoteProjectBg: oldSettings.colorNoteProjectBg || (oldSettings.mode === 'dark' ? '#422f1c' : '#fff4e6'),
       colorNotePriorityBg: oldSettings.colorNotePriorityBg || (oldSettings.mode === 'dark' ? '#421c1c' : '#fff0f0'),
@@ -276,6 +282,9 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorProjectInfoBorder: isDark ? '#334155' : '#BFDBFE',
     colorNotesBg: isDark ? 'rgba(30, 41, 59, 0.8)' : 'rgba(219, 234, 254, 0.7)',
     colorNotesBorder: isDark ? '#334155' : '#BFDBFE',
+    colorNotesEditorBg: isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.5)',
+    colorNotesEditorBorder: isDark ? '#334155' : '#E5E7EB',
+    colorNotesEditorSeparator: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
     colorNotePersonalBg: isDark ? '#423b24' : '#fff9db',
     colorNoteProjectBg: isDark ? '#422f1c' : '#fff4e6',
     colorNotePriorityBg: isDark ? '#421c1c' : '#fff0f0',

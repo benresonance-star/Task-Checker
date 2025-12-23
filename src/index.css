@@ -18,6 +18,9 @@
   --project-info-border: #BFDBFE;
   --notes-bg: rgba(219, 234, 254, 0.7);
   --notes-border: #BFDBFE;
+  --notes-editor-bg: rgba(255, 255, 255, 0.5);
+  --notes-editor-border: #E5E7EB;
+  --notes-editor-separator: rgba(0, 0, 0, 0.1);
   --note-personal-bg: #fff9db;
   --note-project-bg: #fff4e6;
   --note-priority-bg: #fff0f0;

@@ -465,31 +465,6 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 onChange={(v) => handleChange('colorChecklistBorder', v)} 
               />
               <ColorControl 
-                label="My Notes Container Background" 
-                value={themeSettings.colorNotesBg} 
-                onChange={(v) => handleChange('colorNotesBg', v)} 
-              />
-              <ColorControl 
-                label="My Notes Container Outline" 
-                value={themeSettings.colorNotesBorder} 
-                onChange={(v) => handleChange('colorNotesBorder', v)} 
-              />
-              <ColorControl 
-                label="Note (Personal) Background" 
-                value={themeSettings.colorNotePersonalBg} 
-                onChange={(v) => handleChange('colorNotePersonalBg', v)} 
-              />
-              <ColorControl 
-                label="Note (Project) Background" 
-                value={themeSettings.colorNoteProjectBg} 
-                onChange={(v) => handleChange('colorNoteProjectBg', v)} 
-              />
-              <ColorControl 
-                label="Note (Priority) Background" 
-                value={themeSettings.colorNotePriorityBg} 
-                onChange={(v) => handleChange('colorNotePriorityBg', v)} 
-              />
-              <ColorControl 
                 label="Project Info Card Background" 
                 value={themeSettings.colorMetadataCardBg} 
                 onChange={(v) => handleChange('colorMetadataCardBg', v)} 
@@ -499,6 +474,56 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 value={themeSettings.colorMetadataCardBorder} 
                 onChange={(v) => handleChange('colorMetadataCardBorder', v)} 
               />
+            </div>
+          </section>
+
+          <section>
+            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">MY NOTES WIDGET</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <ColorControl 
+                label="Widget Background" 
+                value={themeSettings.colorNotesBg} 
+                onChange={(v) => handleChange('colorNotesBg', v)} 
+              />
+              <ColorControl 
+                label="Widget Outline" 
+                value={themeSettings.colorNotesBorder} 
+                onChange={(v) => handleChange('colorNotesBorder', v)} 
+              />
+              <ColorControl 
+                label="Editor Background" 
+                value={themeSettings.colorNotesEditorBg} 
+                onChange={(v) => handleChange('colorNotesEditorBg', v)} 
+              />
+              <ColorControl 
+                label="Editor Outline" 
+                value={themeSettings.colorNotesEditorBorder} 
+                onChange={(v) => handleChange('colorNotesEditorBorder', v)} 
+              />
+              <ColorControl 
+                label="Editor Separator" 
+                value={themeSettings.colorNotesEditorSeparator} 
+                onChange={(v) => handleChange('colorNotesEditorSeparator', v)} 
+              />
+              <div className="col-span-2 mt-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                <div className="grid grid-cols-2 gap-4">
+                  <ColorControl 
+                    label="Personal Note Bg" 
+                    value={themeSettings.colorNotePersonalBg} 
+                    onChange={(v) => handleChange('colorNotePersonalBg', v)} 
+                  />
+                  <ColorControl 
+                    label="Project Note Bg" 
+                    value={themeSettings.colorNoteProjectBg} 
+                    onChange={(v) => handleChange('colorNoteProjectBg', v)} 
+                  />
+                  <ColorControl 
+                    label="Priority Note Bg" 
+                    value={themeSettings.colorNotePriorityBg} 
+                    onChange={(v) => handleChange('colorNotePriorityBg', v)} 
+                  />
+                </div>
+              </div>
             </div>
           </section>
 

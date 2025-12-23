@@ -165,8 +165,8 @@ export const ScratchpadWidget: React.FC = () => {
       <div className="flex-1 bg-[var(--notes-bg)] rounded-[2rem] border-2 border-[var(--notes-border)] flex flex-col overflow-hidden transition-all">
         {/* Quick Input & Category Picker */}
         <div className="p-4 space-y-3 pb-0">
-          <div className="flex flex-col gap-2 bg-white/50 dark:bg-black/20 border-2 border-gray-200 dark:border-gray-700 rounded-2xl p-2 transition-all focus-within:border-google-blue shadow-inner">
-            <div className="flex items-center justify-between px-2 py-1 border-b border-gray-200/50 dark:border-gray-800/50">
+          <div className="flex flex-col gap-2 bg-[var(--notes-editor-bg)] border-2 border-[var(--notes-editor-border)] rounded-2xl p-2 transition-all focus-within:border-google-blue shadow-inner">
+            <div className="flex items-center justify-between px-2 py-1 border-b border-[var(--notes-editor-separator)]">
               <select 
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
@@ -344,17 +344,17 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
         </button>
         
         <div className="flex-1 min-w-0 flex flex-col">
-          {isEditing ? (
-            <div className="space-y-2">
-              <div className="flex items-center gap-1 pb-1 border-b border-gray-200 dark:border-gray-700 mb-1">
-                <button onClick={() => inlineEditor?.chain().focus().toggleBold().run()} className={clsx("p-1 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", inlineEditor?.isActive('bold') && "bg-gray-200 dark:bg-white/10")}><Bold className="w-3 h-3" /></button>
-                <button onClick={() => inlineEditor?.chain().focus().toggleBulletList().run()} className={clsx("p-1 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", inlineEditor?.isActive('bulletList') && "bg-gray-200 dark:bg-white/10")}><List className="w-3 h-3" /></button>
-                <button onClick={() => inlineEditor?.chain().focus().toggleOrderedList().run()} className={clsx("p-1 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", inlineEditor?.isActive('orderedList') && "bg-gray-200 dark:bg-white/10")}><ListOrdered className="w-3 h-3" /></button>
-              </div>
-              <div className="w-full bg-white dark:bg-gray-900 border-2 border-google-blue rounded-xl p-2 overflow-y-auto max-h-[200px] custom-scrollbar">
-                <EditorContent editor={inlineEditor} />
-              </div>
-              <div className="flex items-center justify-between gap-2 pt-1">
+      {isEditing ? (
+        <div className="space-y-2">
+          <div className="flex items-center gap-1 pb-1 border-b border-[var(--notes-editor-separator)] mb-1">
+            <button onClick={() => inlineEditor?.chain().focus().toggleBold().run()} className={clsx("p-1 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", inlineEditor?.isActive('bold') && "bg-gray-200 dark:bg-white/10")}><Bold className="w-3 h-3" /></button>
+            <button onClick={() => inlineEditor?.chain().focus().toggleBulletList().run()} className={clsx("p-1 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", inlineEditor?.isActive('bulletList') && "bg-gray-200 dark:bg-white/10")}><List className="w-3 h-3" /></button>
+            <button onClick={() => inlineEditor?.chain().focus().toggleOrderedList().run()} className={clsx("p-1 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", inlineEditor?.isActive('orderedList') && "bg-gray-200 dark:bg-white/10")}><ListOrdered className="w-3 h-3" /></button>
+          </div>
+          <div className="w-full bg-[var(--notes-editor-bg)] border-2 border-google-blue rounded-xl p-2 overflow-y-auto max-h-[200px] custom-scrollbar">
+            <EditorContent editor={inlineEditor} />
+          </div>
+          <div className="flex items-center justify-between gap-2 pt-1">
                 <select 
                   value={editingCategory}
                   onChange={(e) => setEditingCategory(e.target.value)}

@@ -198,6 +198,9 @@ export interface ThemeSettings {
   colorProjectInfoBorder: string;
   colorNotesBg: string;
   colorNotesBorder: string;
+  colorNotesEditorBg: string;
+  colorNotesEditorBorder: string;
+  colorNotesEditorSeparator: string;
   colorNotePersonalBg: string;
   colorNoteProjectBg: string;
   colorNotePriorityBg: string;
