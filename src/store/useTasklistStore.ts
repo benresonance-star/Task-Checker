@@ -103,6 +103,7 @@ interface TasklistState {
   
   // Scratchpad
   addScratchpadTask: (text: string, category: string) => Promise<void>;
+  updateScratchpadTask: (id: string, updates: { text?: string; category?: string }) => Promise<void>;
   toggleScratchpadTask: (id: string) => Promise<void>;
   deleteScratchpadTask: (id: string) => Promise<void>;
   clearCompletedScratchpad: (category: string) => Promise<void>;
@@ -870,6 +871,16 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       };
 
       const scratchpad = [...(currentUser.scratchpad || []), newItem];
+      await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
+    },
+
+    updateScratchpadTask: async (id, updates) => {
+      const { currentUser } = get();
+      if (!currentUser || !currentUser.scratchpad) return;
+
+      const scratchpad = currentUser.scratchpad.map(item => 
+        item.id === id ? { ...item, ...updates } : item
+      );
       await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
     },
 
