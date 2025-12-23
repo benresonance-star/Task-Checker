@@ -61,7 +61,7 @@ The system features a robust sync engine:
 - **Active Focus Tracking**: Selected tasks feature a **high-saturation focus ring (4px)** and a pulsing outline when multiple users are present.
 
 ### 6. Branding & Live Style System
-- **Branding Console**: A floating, draggable, and resizable HUD available to admins. It allows real-time adjustment of domain-specific brand elements (Primary Identity, Task Done Highlights, Completed States, etc.) and UI geometry (Corner radii for task cards, interactive buttons, and major containers).
+- **Branding Console**: A floating, draggable, and resizable HUD available to admins. It allows real-time adjustment of domain-specific brand elements (Primary Identity, Task Done Highlights, Completed States, etc.), UI geometry (Radii), and **Dashboard Layouts** (splitting controls for Project Info panels vs Active Checklist backgrounds).
 - **Style Snapshots (Theme Library)**: Admins can capture the current brand styling and save it as a named snapshot (e.g., "Happy Mode"). Presets support **Active Style Tracking**, highlighting the currently applied theme and allowing for **Incremental Updates** (overwriting an existing snapshot with new tweaks) via a dedicated sync icon.
 - **Smooth Interaction Engine**: Utilizes hardware-accelerated `translate3d` and `requestAnimationFrame` for buttery-smooth window movement and resizing. Transitions are dynamically disabled during active interactions to eliminate "input lag."
 - **Semantic Theme Engine**: Uses CSS Variables linked to descriptive, role-based technical keys (e.g., `colorAppIdentity` instead of `brandBlue`). This ensures the codebase remains logical even when colors are dramatically altered.
@@ -191,7 +191,7 @@ The system features a robust sync engine:
 - **`masters` Collection**: 
   - `title`, `version`, `sections` (Template structure)
 - **`settings` Collection**:
-  - `theme`: `{ colorAppIdentity, colorActiveTaskDone, colorCompletedState, colorDestructive, colorPresenceNotice, radiusTaskCard, radiusInteractive, radiusMajorModal }`
+  - `theme`: `{ colorAppIdentity, colorActiveTaskDone, colorCompletedState, colorDestructive, colorPresenceNotice, colorProjectInfoBg, colorProjectInfoBorder, colorChecklistBg, colorChecklistBorder, colorMetadataCardBg, colorMetadataCardBorder, colorSectionIdent, colorSectionIdentIcon, colorSectionPlan, colorSectionPlanIcon, colorSectionBuild, colorSectionBuildIcon, colorHierarchyLine, radiusTaskCard, radiusInteractive, radiusMajorModal }`
 - **`themePresets` Collection**:
   - `id`, `name`, `settings` (ThemeSettings), `createdAt`, `createdBy`
 
