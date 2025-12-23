@@ -236,6 +236,14 @@ const SidebarTaskItem = ({
         )}
 
         <div className="flex-1 min-w-0">
+          {project?.name && (
+            <div className={clsx(
+              "text-[10px] font-black uppercase tracking-widest mb-0.5",
+              (isMultiUserActive || (isActiveFocus && !isYellowState) || (task.completed && !isDeactivatedCompleted)) ? "text-white/90" : (isActiveFocus && isYellowState) ? "text-gray-900/90" : isDeactivatedCompleted ? "text-google-green/90" : "text-gray-500 dark:text-gray-400"
+            )}>
+              {project.name}
+            </div>
+          )}
           <h4 className={clsx(
             (isActiveFocus || isMultiUserActive) ? "text-base font-bold mb-1" : "text-[13px] font-bold mt-0.5",
             "leading-tight whitespace-pre-wrap break-words", 
