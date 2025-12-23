@@ -18,6 +18,22 @@ export const theme = {
       screen: 'min-h-screen flex flex-col md:flex-row bg-white dark:bg-[#121212] text-gray-600 dark:text-gray-300',
       header: 'md:hidden flex items-center justify-between p-4 border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-[#121212] sticky top-0 z-40',
       mobileMenu: 'md:hidden fixed inset-x-0 top-[65px] bg-white dark:bg-[#121212] border-b border-gray-300 dark:border-gray-700 shadow-xl z-30 animate-in slide-in-from-top duration-200 overflow-y-auto max-h-[calc(100vh-65px)]',
+      desktopSidebar: 'hidden md:flex w-64 border-r border-gray-300 dark:border-gray-700 p-4 md:pt-8 md:px-4 md:pb-4 flex flex-col gap-6',
+      mainContent: 'flex-1 p-4 md:p-8 overflow-y-auto flex flex-col',
+      contentHeader: 'w-full px-0 sm:px-4 md:px-12 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8',
+    },
+    nav: {
+      item: 'flex items-center gap-3 px-3 py-2 rounded-lg transition-colors',
+      itemActive: 'bg-blue-50 text-google-blue dark:bg-blue-900/20',
+      itemInactive: 'hover:bg-gray-100 dark:hover:bg-gray-800',
+      pill: 'px-4 py-2 rounded-full border-2 transition-all font-bold text-left',
+      pillActiveBlue: 'bg-google-blue border-google-blue text-white shadow-md',
+      pillActiveGreen: 'bg-google-green border-google-green text-white shadow-md',
+      pillInactive: 'border-gray-300 dark:border-gray-700 hover:border-google-blue text-gray-800 dark:text-gray-300',
+    },
+    profile: {
+      card: 'flex items-center gap-3 px-3 py-2 bg-gray-100 dark:bg-black/40 rounded-card border border-gray-200 dark:border-gray-700 mb-2',
+      avatar: 'w-9 h-9 rounded-full bg-google-blue/10 flex items-center justify-center text-google-blue flex-shrink-0',
     },
     modal: {
       overlay: 'fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-in fade-in duration-300',

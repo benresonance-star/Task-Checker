@@ -1226,17 +1226,17 @@ function App() {
       )}
 
           {/* Sidebar (Desktop) */}
-          <aside className="hidden md:flex w-64 border-r border-gray-300 dark:border-gray-700 p-4 md:pt-8 md:px-4 md:pb-4 flex flex-col gap-6">
+          <aside className={theme.components.layout.desktopSidebar}>
             <div className="flex flex-col gap-4 mb-4">
               <Logo className="mb-2" />
 
               {/* Desktop Profile Card */}
-              <div className="flex items-center gap-3 px-3 py-2 bg-gray-100 dark:bg-black/40 rounded-card border border-gray-200 dark:border-gray-700 mb-2">
-                <div className="w-9 h-9 rounded-full bg-google-blue/10 flex items-center justify-center text-google-blue flex-shrink-0"><UserCircle2 className="w-6 h-6" /></div>
+              <div className={theme.components.profile.card}>
+                <div className={theme.components.profile.avatar}><UserCircle2 className="w-6 h-6" /></div>
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-bold truncate">{currentUser?.name}</span>
                   <div className="flex items-center gap-2">
-                    <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md ${isAdmin ? "bg-google-blue text-white shadow-sm" : "bg-google-green text-white shadow-sm"}`}>
+                    <span className={clsx("text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md", isAdmin ? "bg-google-blue text-white shadow-sm" : "bg-google-green text-white shadow-sm")}>
                       {currentUser?.role === 'admin' ? (adminSimulationMode === 'admin' ? 'Administrator' : 'Viewer (Simulated)') : 'Project Team'}
                     </span>
                     <button 
@@ -1264,7 +1264,10 @@ function App() {
                   const lastId = localStorage.getItem('lastActiveProjectId');
                   navigate(lastId ? `/project/${lastId}` : '/project');
                 }} 
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${mode === 'project' ? 'bg-blue-50 text-google-blue dark:bg-blue-900/20' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                className={clsx(
+                  theme.components.nav.item,
+                  mode === 'project' ? theme.components.nav.itemActive : theme.components.nav.itemInactive
+                )}
               >
                 <LayoutGrid className="w-5 h-5" /><span className="font-medium">Projects</span>
               </button>
@@ -1274,13 +1277,16 @@ function App() {
                     const lastId = localStorage.getItem('lastActiveMasterId');
                     navigate(lastId ? `/master/${lastId}` : '/master');
                   }} 
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${mode === 'master' ? 'bg-blue-50 text-google-blue dark:bg-blue-900/20' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                  className={clsx(
+                    theme.components.nav.item,
+                    mode === 'master' ? theme.components.nav.itemActive : theme.components.nav.itemInactive
+                  )}
                 >
                   <CheckCircle2 className="w-5 h-5" /><span className="font-medium">Checklist Templates</span>
                 </button>
               )}
               {isAdmin && (
-                <button onClick={() => setShowUserManagement(true)} className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">
+                <button onClick={() => setShowUserManagement(true)} className={clsx(theme.components.nav.item, theme.components.nav.itemInactive)}>
                   <Users className="w-5 h-5" /><span className="font-medium">User Management</span>
                 </button>
               )}
@@ -1321,8 +1327,8 @@ function App() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 md:p-8 overflow-y-auto flex flex-col">
-        <header className="w-full px-0 sm:px-4 md:px-12 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+      <main className={theme.components.layout.mainContent}>
+        <header className={theme.components.layout.contentHeader}>
           <div className="flex items-center justify-between md:justify-start gap-3 w-full md:w-auto">
             <div className="flex items-center gap-3">
               {mode === 'master' ? (
@@ -1391,9 +1397,9 @@ function App() {
                 <button 
                   onClick={() => navigate(`/master/${m.id}`)} 
                   className={clsx(
-                    "px-4 py-2 rounded-full border-2 transition-all font-bold text-left", 
+                    theme.components.nav.pill,
                     isTemplatesStacked ? "flex-1 rounded-2xl py-4 px-6" : "rounded-full",
-                    activeMaster?.id === m.id ? "bg-google-blue border-google-blue text-white shadow-md" : "border-gray-300 dark:border-gray-700 hover:border-google-blue text-gray-800 dark:text-gray-300"
+                    activeMaster?.id === m.id ? theme.components.nav.pillActiveBlue : theme.components.nav.pillInactive
                   )}
                 >
                   {m.title}
@@ -1420,7 +1426,14 @@ function App() {
             ))
           ) : (
             projects.map(p => (
-              <button key={p.id} onClick={() => navigate(`/project/${p.id}`)} className={`px-4 py-2 rounded-full border-2 transition-all font-bold ${activeProject?.id === p.id ? "bg-google-green border-google-green text-white shadow-md" : "border-gray-300 dark:border-gray-700 hover:border-google-blue text-gray-700 dark:text-gray-300"}`}>
+              <button 
+                key={p.id} 
+                onClick={() => navigate(`/project/${p.id}`)} 
+                className={clsx(
+                  theme.components.nav.pill,
+                  activeProject?.id === p.id ? theme.components.nav.pillActiveGreen : theme.components.nav.pillInactive
+                )}
+              >
                 {p.name}
               </button>
             ))
