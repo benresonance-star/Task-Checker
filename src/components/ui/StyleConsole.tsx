@@ -433,6 +433,11 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 value={themeSettings.colorPresenceNotice} 
                 onChange={(v) => handleChange('colorPresenceNotice', v)} 
               />
+              <ColorControl 
+                label="Destructive Action Alerts" 
+                value={themeSettings.colorDestructive} 
+                onChange={(v) => handleChange('colorDestructive', v)} 
+              />
             </div>
           </section>
 
@@ -512,7 +517,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
             <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">HIERARCHY & CONNECTORS</h3>
             <div className="grid grid-cols-2 gap-4 mb-4">
               <ColorControl 
-                label="Hierarchical Connector Lines" 
+                label="Hierarchical Connector Lines (CHECKLIST)" 
                 value={themeSettings.colorHierarchyLine} 
                 onChange={(v) => handleChange('colorHierarchyLine', v)} 
               />
@@ -521,13 +526,6 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
 
           <section>
             <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">SYSTEM CONTROLS</h3>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <ColorControl 
-                label="Destructive Action Alerts" 
-                value={themeSettings.colorDestructive} 
-                onChange={(v) => handleChange('colorDestructive', v)} 
-              />
-            </div>
             <div className="space-y-4">
               <SliderControl 
                 label="Interactive Button Corners" 
