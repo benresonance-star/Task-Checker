@@ -38,6 +38,7 @@ export const ScratchpadWidget: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [selectedCategory, setSelectedCategory] = useState('Personal');
   const [showDone, setShowDone] = useState(false);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
   
   // Inline Edit State
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -119,6 +120,7 @@ export const ScratchpadWidget: React.FC = () => {
     
     addScratchpadTask(content, selectedCategory);
     addEditor.commands.setContent('');
+    setIsEditorOpen(false);
   };
 
   const startEditing = (task: any) => {
@@ -164,7 +166,10 @@ export const ScratchpadWidget: React.FC = () => {
 
       <div className="flex-1 bg-[var(--notes-bg)] rounded-[2rem] border-2 border-[var(--notes-border)] flex flex-col overflow-hidden transition-all">
         {/* Quick Input & Category Picker */}
-        <div className="p-4 space-y-3 pb-0">
+        <div className={clsx(
+          "overflow-hidden transition-all duration-300 ease-in-out",
+          isEditorOpen ? "max-h-[300px] opacity-100 p-4 pb-0" : "max-h-0 opacity-0 p-0"
+        )}>
           <div className="flex flex-col gap-2 bg-[var(--notes-editor-bg)] border-2 border-[var(--notes-editor-border)] rounded-2xl p-2 transition-all focus-within:border-google-blue shadow-inner">
             <div className="flex items-center justify-between px-2 py-1 border-b border-[var(--notes-editor-separator)]">
               <select 
@@ -186,15 +191,36 @@ export const ScratchpadWidget: React.FC = () => {
               <div className="flex-1 overflow-y-auto max-h-[150px] custom-scrollbar">
                 <EditorContent editor={addEditor} className="w-full" />
               </div>
-              <button
-                onClick={handleAddTask}
-                className="w-10 h-10 bg-google-blue text-white rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-all shrink-0 mb-1"
-              >
-                <Plus className="w-5 h-5" />
-              </button>
+              <div className="flex flex-col gap-1">
+                <button
+                  onClick={() => setIsEditorOpen(false)}
+                  className="w-8 h-8 text-gray-400 hover:text-google-red transition-colors flex items-center justify-center rounded-lg"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleAddTask}
+                  className="w-10 h-10 bg-google-blue text-white rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-all shrink-0 mb-1"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Header with Plus Button (when closed) */}
+        {!isEditorOpen && (
+          <div className="p-4 flex items-center justify-end">
+            <button
+              onClick={() => setIsEditorOpen(true)}
+              className="w-10 h-10 bg-google-blue text-white rounded-xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition-all group"
+              title="Add New Note"
+            >
+              <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
+            </button>
+          </div>
+        )}
 
         {/* Category Filter Tabs (Relocated under text entry console) */}
         <div className="flex items-center gap-2 px-4 py-3 overflow-x-auto no-scrollbar border-b border-gray-200/30 dark:border-gray-800/30">
