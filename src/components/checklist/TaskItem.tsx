@@ -5,6 +5,7 @@ import { theme } from '../../styles/theme';
 import { Task } from '../../types';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { Button } from '../ui/Button';
+import { useLocation } from 'react-router-dom';
 
 interface TaskItemProps {
   task: Task;
@@ -87,6 +88,8 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
     toggleTaskFocus(activeProject.id, activeInstance.id, task.id);
   };
 
+  const location = useLocation();
+
   // Auto-resize textarea on mount to fit title content
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   React.useEffect(() => {
@@ -98,16 +101,16 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
 
   // Scroll into view if this task is active via URL parameter
   React.useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
+    const searchParams = new URLSearchParams(location.search);
     const urlTaskId = searchParams.get('task');
     if (urlTaskId === task.id && textareaRef.current) {
       // Small delay to ensure the project/instance view is fully loaded and expanded
       const timer = setTimeout(() => {
         textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 800);
+      }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [task.id]);
+  }, [task.id, location.search]);
 
   // Removed individual timer logic to prevent race conditions
 

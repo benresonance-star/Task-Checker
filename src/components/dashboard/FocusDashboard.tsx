@@ -93,7 +93,7 @@ export const FocusDashboard: React.FC = () => {
   const isYellow = focusData?.isYellowState && !focusData?.isMultiUserActive;
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 custom-scrollbar">
+    <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 custom-scrollbar text-[var(--text-primary)]">
       {/* Header Section */}
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl md:text-4xl font-black tracking-tight flex items-center gap-3 text-[var(--text-heading)]">
@@ -106,7 +106,7 @@ export const FocusDashboard: React.FC = () => {
       </div>
 
       {/* Main Bento Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-[var(--text-primary)]">
         
         {/* Active Focus Card */}
         <div className="lg:col-span-2 space-y-4">
@@ -114,7 +114,7 @@ export const FocusDashboard: React.FC = () => {
           
           {focusData && cardTheme ? (
             <div className={clsx(
-              "p-8 md:p-10 rounded-[3rem] border-4 transition-all shadow-2xl relative overflow-hidden group min-h-[400px] flex flex-col justify-between",
+              "p-8 md:p-10 rounded-[3rem] border-4 transition-all shadow-2xl relative overflow-hidden group min-h-[400px] flex flex-col justify-between text-[var(--text-primary)]",
               cardTheme,
               focusData.task.timerIsRunning && !isYellow && "ring-8 ring-google-green/20 animate-pulse",
               focusData.task.timerIsRunning && isYellow && "ring-8 ring-google-yellow/20 animate-pulse"
@@ -191,7 +191,7 @@ export const FocusDashboard: React.FC = () => {
                       )}
 
                       {showSetTimer && (
-                        <div className="absolute bottom-full left-0 mb-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-2 animate-in slide-in-from-bottom-2 duration-200 z-50">
+                        <div className="absolute bottom-full left-0 mb-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-2 animate-in slide-in-from-bottom-2 duration-200 z-50 text-[var(--text-primary)]">
                           <input 
                             type="number" 
                             className="w-16 h-10 bg-gray-100 dark:bg-gray-900 border-none rounded-xl text-center font-black text-google-blue focus:ring-2 focus:ring-google-blue transition-all"
@@ -251,7 +251,7 @@ export const FocusDashboard: React.FC = () => {
             </div>
           ) : (
             <div className="p-12 rounded-[2.5rem] border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center text-center space-y-6 bg-white/30 dark:bg-black/10 min-h-[400px]">
-              <div className="p-6 bg-gray-100 dark:bg-white/5 rounded-full">
+              <div className="p-6 bg-gray-100 dark:bg-white/5 rounded-full text-[var(--text-primary)]">
                 <Target className="w-16 h-16 text-gray-300 dark:text-gray-700" />
               </div>
               <div className="max-w-xs space-y-2">
@@ -271,7 +271,7 @@ export const FocusDashboard: React.FC = () => {
         </div>
 
         {/* Phase 3 & 4 Right Column */}
-        <div className="space-y-8 flex flex-col h-full">
+        <div className="space-y-8 flex flex-col h-full text-[var(--text-primary)]">
           {/* Knowledge Hub (Phase 3 Placeholder) */}
           <div className="space-y-4">
             <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] ml-2">Knowledge Hub</h3>
