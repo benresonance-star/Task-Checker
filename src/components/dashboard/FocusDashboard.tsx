@@ -182,9 +182,9 @@ export const FocusDashboard: React.FC = () => {
                       </div>
                     </div>
                     
-                    <button 
-                      onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance.id}?task=${focusData.task.id}`)}
-                      className={clsx(
+                  <button 
+                    onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance.id}?task=${focusData.task.id}&scroll=true`)}
+                    className={clsx(
                         "rounded-2xl transition-all border shadow-sm flex-shrink-0 active:scale-95",
                         showPlaylistSidebar ? "p-2" : "p-3",
                         isYellow ? "bg-black/5 border-black/10 text-gray-600 hover:bg-black/10" : "bg-white/10 border-white/20 text-white/70 hover:bg-white/20"

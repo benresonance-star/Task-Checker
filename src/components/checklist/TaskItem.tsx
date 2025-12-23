@@ -118,10 +118,17 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
   React.useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const urlTaskId = searchParams.get('task');
-    if (urlTaskId === task.id && containerRef.current) {
+    const shouldScroll = searchParams.get('scroll') === 'true';
+    if (urlTaskId === task.id && shouldScroll && containerRef.current) {
       // Small delay to ensure the project/instance view is fully loaded and expanded
       const timer = setTimeout(() => {
         containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Clear the scroll parameter from URL after scrolling once
+        const newParams = new URLSearchParams(window.location.search);
+        newParams.delete('scroll');
+        const newSearch = newParams.toString();
+        window.history.replaceState(null, '', newSearch ? `?${newSearch}` : window.location.pathname);
       }, 1000);
       return () => clearTimeout(timer);
     }
