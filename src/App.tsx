@@ -95,7 +95,8 @@ const SidebarTaskItem = ({
   isActiveFocus: boolean, 
   onOpenNotes: (taskId: string) => void
 }) => {
-  const { projects, toggleTask, toggleTaskInActionSet, setTaskTimer, resetTaskTimer, toggleTaskTimer, updateTaskTimer, currentUser, users } = useTasklistStore();
+  const { projects, toggleTask, toggleTaskFocus, toggleTaskInActionSet, setTaskTimer, resetTaskTimer, toggleTaskTimer, updateTaskTimer, currentUser, users } = useTasklistStore();
+  const navigate = useNavigate();
   const [showTimerWidget, setShowTimerWidget] = useState(false);
   const [customMinutes, setCustomMinutes] = useState('20');
 
@@ -184,6 +185,11 @@ const SidebarTaskItem = ({
               ? theme.components.sidebar.deactivatedCompleted
               : theme.components.sidebar.inactiveTask
       )}
+      onClick={() => {
+        if (instance && project) {
+          toggleTaskFocus(project.id, instance.id, task.id);
+        }
+      }}
     >
       {/* Top Zone: Identification & Drag Handle */}
       <div className={clsx("flex items-start gap-3 p-4", !isActiveFocus && !isMultiUserActive && "pb-3")}>
