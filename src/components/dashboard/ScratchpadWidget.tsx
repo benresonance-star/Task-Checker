@@ -32,7 +32,6 @@ export const ScratchpadWidget: React.FC = () => {
     updateScratchpadTask,
     deleteScratchpadTask, 
     reorderScratchpad,
-    clearCompletedScratchpad 
   } = useTasklistStore();
 
   const [activeCategory, setActiveCategory] = useState('All');
@@ -144,8 +143,6 @@ export const ScratchpadWidget: React.FC = () => {
   const cancelEdit = () => {
     setEditingId(null);
   };
-
-  const completedCount = filteredTasks.filter(t => t.completed).length;
 
   return (
     <div className="flex flex-col h-full space-y-4">
