@@ -96,6 +96,19 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
     }
   }, [task.title]);
 
+  // Scroll into view if this task is active via URL parameter
+  React.useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const urlTaskId = searchParams.get('task');
+    if (urlTaskId === task.id && textareaRef.current) {
+      // Small delay to ensure the project/instance view is fully loaded and expanded
+      const timer = setTimeout(() => {
+        textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [task.id]);
+
   // Removed individual timer logic to prevent race conditions
 
   const formatTime = (seconds: number | undefined | null, duration?: number) => {

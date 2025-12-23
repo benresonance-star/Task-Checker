@@ -165,7 +165,7 @@ export const FocusDashboard: React.FC = () => {
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-4 border-t border-white/10">
                   
                   {/* Reduced Pomodoro Widget */}
-                  <div className="flex items-center gap-4 bg-white/10 dark:bg-black/20 p-2 pl-3 rounded-2xl border border-white/10 shadow-inner">
+                  <div className="flex items-center gap-4 bg-white/10 dark:bg-black/20 p-2 pl-3 rounded-2xl border border-white/10 shadow-inner relative">
                     {/* Tomato Icon / Play Pause */}
                     <div className="relative group/timer">
                       <button 
@@ -189,51 +189,23 @@ export const FocusDashboard: React.FC = () => {
                           <Clock className="w-3 h-3" />
                         </button>
                       )}
+
+                      {showSetTimer && (
+                        <div className="absolute bottom-full left-0 mb-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-2 animate-in slide-in-from-bottom-2 duration-200 z-50">
+                          <input 
+                            type="number" 
+                            className="w-16 h-10 bg-gray-100 dark:bg-gray-900 border-none rounded-xl text-center font-black text-google-blue focus:ring-2 focus:ring-google-blue transition-all"
+                            value={customMinutes}
+                            onChange={(e) => setCustomMinutes(e.target.value)}
+                            autoFocus
+                          />
+                          <button onClick={handleSetTimerSubmit} className="h-10 px-4 bg-google-blue text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all">Set</button>
+                          <button onClick={() => setShowSetTimer(false)} className="p-2 text-gray-400 hover:text-google-red transition-colors"><X className="w-4 h-4" /></button>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex flex-col">
-                      <div className={clsx(
-                        "text-3xl font-black tracking-tighter tabular-nums leading-none",
-                        isYellow ? "text-gray-900" : "text-white"
-                      )}>
-                        {formatTime(focusData.task.timerRemaining ?? focusData.task.timerDuration ?? 20 * 60)}
-                      </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <button 
-                          onClick={() => resetTaskTimer(focusData.task.id)}
-                          className={clsx(
-                            "text-[9px] font-black uppercase transition-colors px-1.5 py-0.5 rounded-md",
-                            isYellow ? "bg-black/5 text-gray-600 hover:bg-black/10" : "bg-white/10 text-white/60 hover:bg-white/20"
-                          )}
-                        >
-                          Reset
-                        </button>
-                        <button 
-                          onClick={() => updateTaskTimer(focusData.task.id, (focusData.task.timerRemaining ?? 20 * 60) + 300)}
-                          className={clsx(
-                            "text-[9px] font-black uppercase transition-colors px-1.5 py-0.5 rounded-md",
-                            isYellow ? "bg-black/5 text-gray-600 hover:bg-black/10" : "bg-white/10 text-white/60 hover:bg-white/20"
-                          )}
-                        >
-                          +5m
-                        </button>
-                      </div>
-                    </div>
-
-                    {showSetTimer && (
-                      <div className="absolute bottom-full left-0 mb-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-2 animate-in slide-in-from-bottom-2 duration-200 z-50">
-                        <input 
-                          type="number" 
-                          className="w-16 h-10 bg-gray-100 dark:bg-gray-900 border-none rounded-xl text-center font-black text-google-blue focus:ring-2 focus:ring-google-blue transition-all"
-                          value={customMinutes}
-                          onChange={(e) => setCustomMinutes(e.target.value)}
-                          autoFocus
-                        />
-                        <button onClick={handleSetTimerSubmit} className="h-10 px-4 bg-google-blue text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all">Set</button>
-                        <button onClick={() => setShowSetTimer(false)} className="p-2 text-gray-400 hover:text-google-red transition-colors"><X className="w-4 h-4" /></button>
-                      </div>
-                    )}
-                  </div>
 
                   {/* Smaller Done Button */}
                   <button 
