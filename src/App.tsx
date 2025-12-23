@@ -146,7 +146,7 @@ const SidebarTaskItem = ({
     .map(([_, info]: [string, any]) => info);
 
   const otherClaimants = users
-    .filter(u => u.id !== currentUser?.id && u.actionSet?.some(i => i.taskId === task.id))
+    .filter(u => u.id !== currentUser?.id && u.actionSet?.some(i => i.projectId === item.projectId && i.instanceId === item.instanceId && i.taskId === task.id))
     .map(u => ({ id: u.id, name: u.name }));
 
     const isMultiUserActive = (otherActiveUsers.length + (isActiveFocus ? 1 : 0)) >= 2;
@@ -584,8 +584,8 @@ function App() {
     const { active, over } = event;
     if (over && active.id !== over.id) {
       const actionSet = currentUser?.actionSet || [];
-      const oldIndex = actionSet.findIndex((item) => item.taskId === active.id);
-      const newIndex = actionSet.findIndex((item) => item.taskId === over.id);
+      const oldIndex = actionSet.findIndex((item) => `${item.projectId}-${item.instanceId}-${item.taskId}` === active.id);
+      const newIndex = actionSet.findIndex((item) => `${item.projectId}-${item.instanceId}-${item.taskId}` === over.id);
       
       const newActionSet = arrayMove(actionSet, oldIndex, newIndex);
       const { setActionSet } = useTasklistStore.getState();
@@ -1815,20 +1815,23 @@ function App() {
                     modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
                   >
                     <SortableContext 
-                      items={currentUser.actionSet.map(i => i.taskId)}
+                      items={currentUser.actionSet.map(i => `${i.projectId}-${i.instanceId}-${i.taskId}`)}
                       strategy={verticalListSortingStrategy}
                     >
                       <div className="space-y-3">
                         {currentUser.actionSet.map((item) => {
+                          const compositeKey = `${item.projectId}-${item.instanceId}-${item.taskId}`;
                           const instance = instances.find(i => i.id === item.instanceId);
                           const task = instance?.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => t.id === item.taskId);
-                          const isActiveFocus = currentUser.activeFocus?.taskId === item.taskId;
+                          const isActiveFocus = currentUser.activeFocus?.projectId === item.projectId && 
+                                               currentUser.activeFocus?.instanceId === item.instanceId && 
+                                               currentUser.activeFocus?.taskId === item.taskId;
 
                           if (!task || !instance) return null;
 
                           return (
                             <SidebarTaskItem 
-                              key={item.taskId}
+                              key={compositeKey}
                               item={item}
                               task={task}
                               instance={instance}

@@ -52,8 +52,17 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
   const { mode, toggleTask, renameTask, deleteTask, moveTask, setTaskTimer, resetTaskTimer, toggleTaskTimer, activeInstance, currentUser, activeProject, toggleTaskFocus, toggleTaskInActionSet, users } = useTasklistStore();
 
   const isInstance = mode === 'project';
-  const isActive = isInstance && currentUser?.activeFocus?.taskId === task.id; // Highlight if this task is currently being focused/edited
-  const isInActionSet = currentUser?.actionSet?.some(i => i.taskId === task.id);
+  const isActive = isInstance && 
+    currentUser?.activeFocus?.projectId === activeProject?.id &&
+    currentUser?.activeFocus?.instanceId === activeInstance?.id &&
+    currentUser?.activeFocus?.taskId === task.id;
+
+  const isInActionSet = currentUser?.actionSet?.some(i => 
+    i.projectId === activeProject?.id && 
+    i.instanceId === activeInstance?.id && 
+    i.taskId === task.id
+  );
+
   const isAnyTaskActive = isInstance && !!currentUser?.activeFocus?.taskId;
   const shouldRecede = isInstance && isAnyTaskActive && !isActive;
 
@@ -67,7 +76,11 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
 
   // Claim Badges: Find other users who have this task in their Action Set
   const otherClaimants = users
-    .filter(u => u.id !== currentUser?.id && u.actionSet?.some(i => i.taskId === task.id))
+    .filter(u => u.id !== currentUser?.id && u.actionSet?.some(i => 
+      i.projectId === activeProject?.id && 
+      i.instanceId === activeInstance?.id && 
+      i.taskId === task.id
+    ))
     .map(u => ({ id: u.id, name: u.name }));
 
   const isMultiUser = (otherActiveUsers.length + (isActive ? 1 : 0)) >= 2;

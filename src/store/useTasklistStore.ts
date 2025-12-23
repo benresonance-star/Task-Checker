@@ -97,7 +97,7 @@ interface TasklistState {
   updatePresence: (taskId: string | null) => Promise<void>;
   toggleTaskFocus: (projectId: string, instanceId: string, taskId: string) => Promise<void>;
   toggleTaskInActionSet: (projectId: string, instanceId: string, taskId: string) => Promise<void>;
-  moveTaskInActionSet: (taskId: string, direction: 'up' | 'down') => Promise<void>;
+  moveTaskInActionSet: (projectId: string, instanceId: string, taskId: string, direction: 'up' | 'down') => Promise<void>;
   setActionSet: (newSet: ActionSetItem[]) => Promise<void>;
   clearActionSet: () => Promise<void>;
   
@@ -798,7 +798,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       const userRef = doc(db, 'users', currentUser.id);
       const currentFocus = currentUser.activeFocus;
 
-      if (currentFocus?.taskId === taskId) {
+      if (currentFocus?.projectId === projectId && currentFocus?.instanceId === instanceId && currentFocus?.taskId === taskId) {
         // Toggle off
         await updateDoc(userRef, { activeFocus: null });
         get().pauseOtherTimers(null);
@@ -821,11 +821,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
 
       const userRef = doc(db, 'users', currentUser.id);
       const currentSet = currentUser.actionSet || [];
-      const exists = currentSet.find(i => i.taskId === taskId);
+      const exists = currentSet.find(i => i.projectId === projectId && i.instanceId === instanceId && i.taskId === taskId);
 
       if (exists) {
         // Remove from playlist
-        const newSet = currentSet.filter(i => i.taskId !== taskId);
+        const newSet = currentSet.filter(i => !(i.projectId === projectId && i.instanceId === instanceId && i.taskId === taskId));
         await updateDoc(userRef, { actionSet: newSet });
       } else {
         // Add to playlist
@@ -839,13 +839,13 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       }
     },
 
-    moveTaskInActionSet: async (taskId, direction) => {
+    moveTaskInActionSet: async (projectId, instanceId, taskId, direction) => {
       const { currentUser } = get();
       if (!currentUser || !currentUser.actionSet) return;
 
       const userRef = doc(db, 'users', currentUser.id);
       const set = [...currentUser.actionSet];
-      const idx = set.findIndex(i => i.taskId === taskId);
+      const idx = set.findIndex(i => i.projectId === projectId && i.instanceId === instanceId && i.taskId === taskId);
       
       if (idx === -1) return;
       if (direction === 'up' && idx === 0) return;

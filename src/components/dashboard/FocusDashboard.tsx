@@ -65,7 +65,11 @@ export const FocusDashboard: React.FC = () => {
       .map(([_, info]: [string, any]) => info);
 
     const otherClaimants = users
-      .filter(u => u.id !== currentUser?.id && u.actionSet?.some(i => i.taskId === foundTask.id))
+      .filter(u => u.id !== currentUser?.id && u.actionSet?.some(i => 
+        i.projectId === focus.projectId && 
+        i.instanceId === focus.instanceId && 
+        i.taskId === foundTask.id
+      ))
       .map(u => ({ id: u.id, name: u.name }));
 
     const isMultiUserActive = otherActiveUsers.length >= 1; // At least one other person is looking
