@@ -643,6 +643,8 @@ function App() {
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [showDeleteProjectConfirm, setShowDeleteProjectConfirm] = useState(false);
   const [showDeleteProjectFinalConfirm, setShowDeleteProjectFinalConfirm] = useState(false);
+  const [showDeleteChecklistConfirm, setShowDeleteChecklistConfirm] = useState(false);
+  const [checklistToDelete, setChecklistToDelete] = useState<{ projectId: string, instanceId: string } | null>(null);
   const [showClearSessionConfirm, setShowClearSessionConfirm] = useState(false);
   const [adminUserToDeactivate, setAdminUserToDeactivate] = useState<{ id: string, name: string } | null>(null);
   const [adminUserToClearSession, setAdminUserToClearSession] = useState<{ id: string, name: string } | null>(null);
@@ -1598,7 +1600,11 @@ function App() {
                             "opacity-0 group-hover:opacity-100 transition-opacity",
                             isActive ? "text-white hover:bg-white/10" : "text-gray-400 hover:text-google-red"
                           )} 
-                          onClick={(e) => { e.stopPropagation(); if (confirm('Remove this checklist?')) removeInstanceFromProject(activeProject.id, id); }}
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            setChecklistToDelete({ projectId: activeProject.id, instanceId: id });
+                            setShowDeleteChecklistConfirm(true); 
+                          }}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -1952,6 +1958,47 @@ function App() {
                 disabled={isDeletingProject}
               >
                 NO KEEP
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteChecklistConfirm && checklistToDelete && (
+        <div className={theme.components.modal.overlay}>
+          <div className={clsx(theme.components.modal.container, theme.components.modal.containerRed)}>
+            <div className={clsx(theme.components.modal.iconContainer, "bg-red-100 dark:bg-red-900/30 ring-8 ring-red-50 dark:ring-red-900/10")}>
+              <Trash2 className="w-10 h-10 text-google-red" />
+            </div>
+            <h3 className={theme.components.modal.title}>Remove Checklist?</h3>
+            <div className={clsx(theme.components.modal.infoBox, theme.components.modal.infoBoxRed)}>
+              <p className={theme.components.modal.message}>
+                If you delete this checklist any work done on it will also be lost.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3">
+              <Button 
+                variant="danger" 
+                size="lg" 
+                className={clsx(theme.components.modal.buttonPrimary, "bg-google-red border-google-red")}
+                onClick={() => {
+                  removeInstanceFromProject(checklistToDelete.projectId, checklistToDelete.instanceId);
+                  setShowDeleteChecklistConfirm(false);
+                  setChecklistToDelete(null);
+                }}
+              >
+                YES, REMOVE CHECKLIST
+              </Button>
+              <Button 
+                size="lg" 
+                variant="secondary"
+                className={theme.components.modal.buttonSecondary}
+                onClick={() => {
+                  setShowDeleteChecklistConfirm(false);
+                  setChecklistToDelete(null);
+                }}
+              >
+                NO, KEEP IT
               </Button>
             </div>
           </div>
