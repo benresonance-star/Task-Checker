@@ -23,6 +23,8 @@ interface TasklistState {
   lastLocalThemeUpdate: number;
   
   // Actions
+  isDarkMode: boolean;
+  toggleDarkMode: (val?: boolean) => void;
   notify: (message: string, type: 'success' | 'error') => void;
   setMode: (mode: 'master' | 'project') => void;
   initializeAuth: () => void;
@@ -107,12 +109,14 @@ interface TasklistState {
   toggleSimulationMode: () => void;
 
   // Theme Settings
-  themeSettings: ThemeSettings;
+  themeSettingsLight: ThemeSettings;
+  themeSettingsDark: ThemeSettings;
   themePresets: ThemePreset[];
-  activePresetId: string | null;
-  updateThemeSettings: (settings: Partial<ThemeSettings>) => Promise<void>;
-  resetThemeSettings: () => Promise<void>;
-  saveThemePreset: (name: string) => Promise<void>;
+  activePresetIdLight: string | null;
+  activePresetIdDark: string | null;
+  updateThemeSettings: (settings: Partial<ThemeSettings>, modeOverride?: 'light' | 'dark') => Promise<void>;
+  resetThemeSettings: (modeOverride?: 'light' | 'dark') => Promise<void>;
+  saveThemePreset: (name: string, modeOverride?: 'light' | 'dark') => Promise<void>;
   updateThemePreset: (presetId: string) => Promise<void>;
   deleteThemePreset: (presetId: string) => Promise<void>;
   applyThemePreset: (presetId: string) => Promise<void>;
@@ -171,6 +175,14 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
   };
 
   /**
+   * Syncs the current live theme based on the app's dark/light mode.
+   */
+  const syncLiveTheme = () => {
+    const { isDarkMode, themeSettingsLight, themeSettingsDark } = get();
+    applyThemeToRoot(isDarkMode ? themeSettingsDark : themeSettingsLight);
+  };
+
+  /**
    * Migrates old theme settings to new semantic names.
    */
   const migrateThemeSettings = (oldSettings: any): ThemeSettings => {
@@ -201,6 +213,30 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       radiusMajorModal: oldSettings.radiusMajorModal || oldSettings.radiusContainer || 32,
     };
   };
+
+  const getThemeDefaults = (isDark: boolean): ThemeSettings => ({
+    colorAppIdentity: '#4285F4',
+    colorActiveTaskDone: '#5DB975',
+    colorCompletedState: '#34A853',
+    colorDestructive: '#EA4335',
+    colorPresenceNotice: '#FBBC05',
+    colorProjectInfoBg: isDark ? 'rgba(30, 41, 59, 0.8)' : 'rgba(219, 234, 254, 0.7)',
+    colorProjectInfoBorder: isDark ? '#334155' : '#BFDBFE',
+    colorChecklistBg: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(239, 246, 255, 0.5)',
+    colorChecklistBorder: isDark ? '#1e293b' : '#DBEAFE',
+    colorMetadataCardBg: isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.8)',
+    colorMetadataCardBorder: isDark ? '#1e293b' : '#BFDBFE',
+    colorSectionIdent: '#4285F4',
+    colorSectionIdentIcon: '#4285F4',
+    colorSectionPlan: '#34A853',
+    colorSectionPlanIcon: '#34A853',
+    colorSectionBuild: '#F97316',
+    colorSectionBuildIcon: '#F97316',
+    colorHierarchyLine: isDark ? '#4b5563' : '#D1D5DB',
+    radiusTaskCard: 20,
+    radiusInteractive: 12,
+    radiusMajorModal: 32,
+  });
 
   /**
    * Performs a structural merge between a Master template and a Project instance.
@@ -291,11 +327,12 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     currentUser: null,
     users: [],
     loading: true,
+    isDarkMode: localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches),
     expandedStates: JSON.parse(localStorage.getItem('expandedStates') || '{}'),
     adminSimulationMode: (sessionStorage.getItem('adminSimulationMode') as 'admin' | 'viewer') || 'admin',
     notification: null,
     lastLocalThemeUpdate: 0,
-    themeSettings: {
+    themeSettingsLight: {
       colorAppIdentity: '#4285F4',
       colorActiveTaskDone: '#5DB975',
       colorCompletedState: '#34A853',
@@ -318,8 +355,45 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       radiusInteractive: 12,
       radiusMajorModal: 32,
     },
+    themeSettingsDark: {
+      colorAppIdentity: '#4285F4',
+      colorActiveTaskDone: '#5DB975',
+      colorCompletedState: '#34A853',
+      colorDestructive: '#EA4335',
+      colorPresenceNotice: '#FBBC05',
+      colorProjectInfoBg: 'rgba(30, 41, 59, 0.8)',
+      colorProjectInfoBorder: '#334155',
+      colorChecklistBg: 'rgba(30, 41, 59, 0.5)',
+      colorChecklistBorder: '#1e293b',
+      colorMetadataCardBg: 'rgba(0, 0, 0, 0.4)',
+      colorMetadataCardBorder: '#1e293b',
+      colorSectionIdent: '#4285F4',
+      colorSectionIdentIcon: '#4285F4',
+      colorSectionPlan: '#34A853',
+      colorSectionPlanIcon: '#34A853',
+      colorSectionBuild: '#F97316',
+      colorSectionBuildIcon: '#F97316',
+      colorHierarchyLine: '#4b5563',
+      radiusTaskCard: 20,
+      radiusInteractive: 12,
+      radiusMajorModal: 32,
+    },
     themePresets: [],
-    activePresetId: null,
+    activePresetIdLight: null,
+    activePresetIdDark: null,
+    activePresetId: null, // Legacy
+
+    toggleDarkMode: (val) => {
+      const isDark = val !== undefined ? val : !get().isDarkMode;
+      set({ isDarkMode: isDark });
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      syncLiveTheme();
+    },
 
     notify: (message, type) => {
       set({ notification: { message, type } });
@@ -360,6 +434,14 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     },
     
     initializeAuth: () => {
+      // Initial theme application
+      const isDark = get().isDarkMode;
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+
       onAuthStateChanged(auth, async (firebaseUser) => {
         if (firebaseUser) {
           const userDocRef = doc(db, 'users', firebaseUser.uid);
@@ -433,27 +515,40 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
 
           // Theme Settings Listener
           onSnapshot(doc(db, 'settings', 'theme'), (snapshot) => {
-            // PROTECT LOCAL STATE: Use a grace period after local theme updates.
-            // This prevents the "jumpy" color picker behavior where Firestore 
-            // syncs back an older value before the latest setDoc is processed.
             const now = Date.now();
             const { lastLocalThemeUpdate } = get();
             if (now - lastLocalThemeUpdate < 2000) return;
 
             if (snapshot.exists()) {
               const data = snapshot.data();
-              const migrated = migrateThemeSettings(data);
               
-              // If we actually migrated something, save it back to clean up DB
-              if (JSON.stringify(data) !== JSON.stringify(migrated)) {
-                setDoc(doc(db, 'settings', 'theme'), sanitize(migrated));
+              // Handle new dual-mode structure
+              if (data.light && data.dark) {
+                const migratedLight = migrateThemeSettings(data.light);
+                const migratedDark = migrateThemeSettings(data.dark);
+                
+                set({ 
+                  themeSettingsLight: migratedLight,
+                  themeSettingsDark: migratedDark,
+                  activePresetIdLight: data.activePresetIdLight || null,
+                  activePresetIdDark: data.activePresetIdDark || null
+                });
+                
+                syncLiveTheme();
+              } else {
+                // Backward compatibility: Migrate old single-mode theme to both
+                const migrated = migrateThemeSettings(data);
+                const update = {
+                  light: migrated,
+                  dark: getThemeDefaults(true), // Use dark defaults for dark mode if missing
+                  activePresetIdLight: null,
+                  activePresetIdDark: null
+                };
+                setDoc(doc(db, 'settings', 'theme'), sanitize(update));
               }
-
-              set({ themeSettings: migrated });
-              applyThemeToRoot(migrated);
             } else {
-              // If no theme settings in DB, apply defaults
-              applyThemeToRoot(get().themeSettings);
+              // Apply defaults if no doc
+              syncLiveTheme();
             }
           });
 
@@ -463,12 +558,12 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
               const data = d.data();
               const migratedSettings = migrateThemeSettings(data.settings);
               
-              // If settings were migrated, update the document in DB
-              if (JSON.stringify(data.settings) !== JSON.stringify(migratedSettings)) {
-                updateDoc(doc(db, 'themePresets', d.id), { settings: sanitize(migratedSettings) });
-              }
-
-              return { ...data, id: d.id, settings: migratedSettings } as ThemePreset;
+              return { 
+                ...data, 
+                id: d.id, 
+                mode: data.mode || 'light', // Default to light if missing
+                settings: migratedSettings 
+              } as ThemePreset;
             });
             set({ themePresets: presets.sort((a, b) => b.createdAt - a.createdAt) });
           });
@@ -1560,65 +1655,73 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       await addDoc(collection(db, 'masters'), newMaster);
     },
 
-    updateThemeSettings: async (settings) => {
-      const newSettings = { ...get().themeSettings, ...settings };
-      // Optimistic update
-      set({ 
-        themeSettings: newSettings,
-        lastLocalThemeUpdate: Date.now()
-      });
+    updateThemeSettings: async (settings, modeOverride) => {
+      const isDark = modeOverride ? (modeOverride === 'dark') : document.documentElement.classList.contains('dark');
+      
+      const currentSettings = isDark ? get().themeSettingsDark : get().themeSettingsLight;
+      const newSettings = { ...currentSettings, ...settings };
+      
+      const update = isDark 
+        ? { themeSettingsDark: newSettings, lastLocalThemeUpdate: Date.now() }
+        : { themeSettingsLight: newSettings, lastLocalThemeUpdate: Date.now() };
+
+      set(update);
       applyThemeToRoot(newSettings);
       
       try {
-        await setDoc(doc(db, 'settings', 'theme'), sanitize(newSettings));
+        const { themeSettingsLight, themeSettingsDark, activePresetIdLight, activePresetIdDark } = get();
+        await setDoc(doc(db, 'settings', 'theme'), sanitize({
+          light: themeSettingsLight,
+          dark: themeSettingsDark,
+          activePresetIdLight,
+          activePresetIdDark
+        }));
       } catch (error) {
         console.error('Update theme settings failed:', error);
         get().notify('Failed to save theme settings to cloud.', 'error');
       }
     },
 
-    resetThemeSettings: async () => {
-      const defaults: ThemeSettings = {
-        colorAppIdentity: '#4285F4',
-        colorActiveTaskDone: '#5DB975',
-        colorCompletedState: '#34A853',
-        colorDestructive: '#EA4335',
-        colorPresenceNotice: '#FBBC05',
-        colorProjectInfoBg: 'rgba(219, 234, 254, 0.7)',
-        colorProjectInfoBorder: '#BFDBFE',
-        colorChecklistBg: 'rgba(239, 246, 255, 0.5)',
-        colorChecklistBorder: '#DBEAFE',
-        colorMetadataCardBg: 'rgba(255, 255, 255, 0.8)',
-        colorMetadataCardBorder: '#BFDBFE',
-        colorSectionIdent: '#4285F4',
-        colorSectionIdentIcon: '#4285F4',
-        colorSectionPlan: '#34A853',
-        colorSectionPlanIcon: '#34A853',
-        colorSectionBuild: '#F97316',
-        colorSectionBuildIcon: '#F97316',
-        colorHierarchyLine: '#D1D5DB',
-        radiusTaskCard: 20,
-        radiusInteractive: 12,
-        radiusMajorModal: 32,
-      };
-      await get().updateThemeSettings(defaults);
+    resetThemeSettings: async (modeOverride) => {
+      const isDark = modeOverride ? (modeOverride === 'dark') : document.documentElement.classList.contains('dark');
+      const defaults = getThemeDefaults(isDark);
+      await get().updateThemeSettings(defaults, isDark ? 'dark' : 'light');
     },
 
-    saveThemePreset: async (name) => {
-      const { themeSettings, currentUser } = get();
+    saveThemePreset: async (name, modeOverride) => {
+      const isDark = modeOverride ? (modeOverride === 'dark') : document.documentElement.classList.contains('dark');
+      const settings = isDark ? get().themeSettingsDark : get().themeSettingsLight;
+      const { currentUser } = get();
       if (!currentUser) return;
 
       const preset: Omit<ThemePreset, 'id'> = {
         name,
-        settings: themeSettings,
+        mode: isDark ? 'dark' : 'light',
+        settings,
         createdAt: Date.now(),
         createdBy: currentUser.name
       };
 
       try {
         const docRef = await addDoc(collection(db, 'themePresets'), sanitize(preset));
-        set({ activePresetId: docRef.id });
-        get().notify(`Preset "${name}" saved!`, 'success');
+        
+        // Mark as active preset for this mode
+        if (isDark) {
+          set({ activePresetIdDark: docRef.id });
+        } else {
+          set({ activePresetIdLight: docRef.id });
+        }
+        
+        // Sync settings doc with active preset ID
+        const { themeSettingsLight, themeSettingsDark, activePresetIdLight, activePresetIdDark } = get();
+        await setDoc(doc(db, 'settings', 'theme'), sanitize({
+          light: themeSettingsLight,
+          dark: themeSettingsDark,
+          activePresetIdLight,
+          activePresetIdDark
+        }));
+        
+        get().notify(`Saved "${name}"!`, 'success');
       } catch (error) {
         console.error('Save preset failed:', error);
         get().notify('Failed to save theme preset.', 'error');
@@ -1626,16 +1729,17 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     },
 
     updateThemePreset: async (presetId) => {
-      const { themeSettings, themePresets } = get();
-      const preset = themePresets.find(p => p.id === presetId);
+      const preset = get().themePresets.find(p => p.id === presetId);
       if (!preset) return;
-
+      
+      const currentSettings = preset.mode === 'dark' ? get().themeSettingsDark : get().themeSettingsLight;
+      
       try {
         await updateDoc(doc(db, 'themePresets', presetId), { 
-          settings: sanitize(themeSettings),
+          settings: sanitize(currentSettings),
           updatedAt: Date.now() 
         });
-        get().notify(`Preset "${preset.name}" updated!`, 'success');
+        get().notify(`Updated "${preset.name}"!`, 'success');
       } catch (error) {
         console.error('Update preset failed:', error);
         get().notify('Failed to update theme preset.', 'error');
@@ -1644,20 +1748,28 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
 
     deleteThemePreset: async (presetId) => {
       try {
+        const { activePresetIdLight, activePresetIdDark } = get();
         await deleteDoc(doc(db, 'themePresets', presetId));
-        if (get().activePresetId === presetId) set({ activePresetId: null });
-        get().notify('Preset deleted.', 'success');
+        
+        if (activePresetIdLight === presetId) set({ activePresetIdLight: null });
+        if (activePresetIdDark === presetId) set({ activePresetIdDark: null });
+        
+        get().notify('Snapshot deleted.', 'success');
       } catch (error) {
         console.error('Delete preset failed:', error);
-        get().notify('Failed to delete preset.', 'error');
+        get().notify('Failed to delete theme preset.', 'error');
       }
     },
 
     applyThemePreset: async (presetId) => {
       const preset = get().themePresets.find(p => p.id === presetId);
       if (preset) {
-        set({ activePresetId: presetId });
-        await get().updateThemeSettings(preset.settings);
+        if (preset.mode === 'dark') {
+          set({ activePresetIdDark: presetId });
+        } else {
+          set({ activePresetIdLight: presetId });
+        }
+        await get().updateThemeSettings(preset.settings, preset.mode);
         get().notify(`Applied "${preset.name}"!`, 'success');
       }
     }

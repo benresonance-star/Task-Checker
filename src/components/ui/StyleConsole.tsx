@@ -9,9 +9,13 @@ interface StyleConsoleProps {
 
 export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
   const { 
-    themeSettings, 
+    themeSettingsLight,
+    themeSettingsDark,
     themePresets,
-    activePresetId,
+    activePresetIdLight,
+    activePresetIdDark,
+    isDarkMode,
+    toggleDarkMode,
     updateThemeSettings, 
     resetThemeSettings,
     saveThemePreset,
@@ -19,12 +23,33 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
     deleteThemePreset,
     applyThemePreset
   } = useTasklistStore();
+  
+  const themeSettings = isDarkMode ? themeSettingsDark : themeSettingsLight;
+  const activePresetId = isDarkMode ? activePresetIdDark : activePresetIdLight;
+  
+  const activeLightPreset = themePresets.find(p => p.id === activePresetIdLight);
+  const activeDarkPreset = themePresets.find(p => p.id === activePresetIdDark);
+
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 100, y: 100 });
   const [size, setSize] = useState({ width: 320, height: 650 });
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [newPresetName, setNewPresetName] = useState('');
+  
+  const toggleTheme = (targetMode: 'light' | 'dark') => {
+    toggleDarkMode(targetMode === 'dark');
+  };
+
+  const isModified = (presetId: string | null, currentSettings: any) => {
+    if (!presetId) return false;
+    const preset = themePresets.find(p => p.id === presetId);
+    if (!preset) return false;
+    return JSON.stringify(preset.settings) !== JSON.stringify(currentSettings);
+  };
+
+  const lightModified = isModified(activePresetIdLight, themeSettingsLight);
+  const darkModified = isModified(activePresetIdDark, themeSettingsDark);
   const dragStartPos = useRef({ x: 0, y: 0 });
   const resizeStartSize = useRef({ width: 0, height: 0 });
   const resizeStartPos = useRef({ x: 0, y: 0 });
@@ -147,6 +172,141 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
 
       {!isMinimized && (
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-6">
+          {/* Dual-Status Mode Switcher */}
+          <section className="bg-gray-50 dark:bg-black/40 p-2 rounded-xl border border-gray-200 dark:border-gray-800">
+            <h3 className="text-[8px] font-black uppercase text-gray-400 tracking-widest mb-2 px-1">Global Workspace Context</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <button 
+                onClick={() => toggleTheme('light')}
+                className={clsx(
+                  "flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all",
+                  !isDarkMode 
+                    ? "bg-white border-google-blue text-google-blue shadow-sm" 
+                    : "bg-transparent border-transparent text-gray-400 hover:bg-white/5"
+                )}
+              >
+                <span className="text-[10px] font-black uppercase">Light Mode</span>
+                <span className="text-[8px] font-bold truncate max-w-full px-1">
+                  {activeLightPreset?.name || 'System Default'}
+                  {lightModified && <span className="ml-1 text-orange-500">*</span>}
+                </span>
+              </button>
+              <button 
+                onClick={() => toggleTheme('dark')}
+                className={clsx(
+                  "flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all",
+                  isDarkMode 
+                    ? "bg-gray-800 border-google-blue text-white shadow-sm" 
+                    : "bg-transparent border-transparent text-gray-400 hover:bg-black/5"
+                )}
+              >
+                <span className="text-[10px] font-black uppercase">Dark Mode</span>
+                <span className="text-[8px] font-bold truncate max-w-full px-1">
+                  {activeDarkPreset?.name || 'System Default'}
+                  {darkModified && <span className="ml-1 text-orange-500">*</span>}
+                </span>
+              </button>
+            </div>
+          </section>
+
+          <div className="h-px bg-gray-100 dark:bg-gray-800 mx-[-1.5rem]" />
+
+          <section>
+            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">
+              Currently Editing: {isDarkMode ? 'Dark Mode' : 'Light Mode'}
+            </h3>
+            {/* Snapshots Section */}
+            <div className="space-y-4">
+              {/* Save New Preset */}
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  placeholder={`Name ${isDarkMode ? 'Dark' : 'Light'} Style...`}
+                  value={newPresetName}
+                  onChange={(e) => setNewPresetName(e.target.value)}
+                  className="flex-1 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-[10px] font-bold"
+                />
+                <button
+                  disabled={!newPresetName.trim()}
+                  onClick={() => {
+                    saveThemePreset(newPresetName);
+                    setNewPresetName('');
+                  }}
+                  className="w-10 h-10 flex items-center justify-center bg-google-blue text-white rounded-lg disabled:opacity-50 transition-all hover:shadow-md active:scale-95"
+                  title="Capture Current State"
+                >
+                  <Camera className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Presets List (Filtered by Mode) */}
+              <div className="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                {themePresets.filter(p => p.mode === (isDarkMode ? 'dark' : 'light')).map(preset => {
+                  const isActive = activePresetId === preset.id;
+                  
+                  return (
+                    <div 
+                      key={preset.id}
+                      className={clsx(
+                        "flex items-center justify-between p-2 rounded-lg border transition-all group",
+                        isActive 
+                          ? "bg-google-blue/10 border-google-blue shadow-sm" 
+                          : "bg-gray-50 dark:bg-black/20 border-gray-100 dark:border-gray-800 hover:border-google-blue/30"
+                      )}
+                    >
+                      <div className="flex flex-col min-w-0 flex-1 cursor-pointer" onClick={() => applyThemePreset(preset.id)}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-black truncate">{preset.name}</span>
+                          {isActive && <div className="w-1 h-1 rounded-full bg-google-blue animate-pulse" />}
+                        </div>
+                        <div className="flex gap-1 mt-1">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorAppIdentity }} />
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorActiveTaskDone }} />
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorPresenceNotice }} />
+                        </div>
+                      </div>
+                      <div className={clsx(
+                        "flex items-center gap-1 transition-opacity",
+                        isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                      )}>
+                        {isActive && (
+                          <button 
+                            onClick={() => updateThemePreset(preset.id)}
+                            className="p-1.5 hover:bg-google-green/10 text-google-green rounded-md transition-colors"
+                            title="Overwrite Snapshot with Current Settings"
+                          >
+                            <Save className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        {!isActive && (
+                          <button 
+                            onClick={() => applyThemePreset(preset.id)}
+                            className="p-1.5 hover:bg-google-blue/10 text-google-blue rounded-md transition-colors"
+                            title="Apply Preset"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        <button 
+                          onClick={() => deleteThemePreset(preset.id)}
+                          className="p-1.5 hover:bg-google-red/10 text-google-red rounded-md transition-colors"
+                          title="Delete Preset"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+                {themePresets.filter(p => p.mode === (isDarkMode ? 'dark' : 'light')).length === 0 && (
+                  <p className="text-[9px] text-center text-gray-500 italic py-2">No {isDarkMode ? 'dark' : 'light'} snapshots saved yet.</p>
+                )}
+              </div>
+            </div>
+          </section>
+
+          <div className="h-px bg-gray-100 dark:bg-gray-800 mx-[-1.5rem]" />
+
           {/* Colors Section */}
           <section>
             <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">IDENTITY & NAVIGATION</h3>
@@ -302,104 +462,14 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
             </div>
           </section>
 
-          {/* Snapshots Section */}
-          <section>
-            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">Style Snapshots</h3>
-            
-            {/* Save New Preset */}
-            <div className="flex gap-2 mb-4">
-              <input 
-                type="text" 
-                placeholder="Name (e.g. Happy Mode)"
-                value={newPresetName}
-                onChange={(e) => setNewPresetName(e.target.value)}
-                className="flex-1 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-[10px] font-bold"
-              />
-              <button
-                disabled={!newPresetName.trim()}
-                onClick={() => {
-                  saveThemePreset(newPresetName);
-                  setNewPresetName('');
-                }}
-                className="w-10 h-10 flex items-center justify-center bg-google-blue text-white rounded-lg disabled:opacity-50 transition-all hover:shadow-md active:scale-95"
-              >
-                <Camera className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Presets List */}
-            <div className="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
-              {themePresets.map(preset => {
-                const isActive = activePresetId === preset.id;
-                
-                return (
-                  <div 
-                    key={preset.id}
-                    className={clsx(
-                      "flex items-center justify-between p-2 rounded-lg border transition-all group",
-                      isActive 
-                        ? "bg-google-blue/10 border-google-blue shadow-sm" 
-                        : "bg-gray-50 dark:bg-black/20 border-gray-100 dark:border-gray-800 hover:border-google-blue/30"
-                    )}
-                  >
-                    <div className="flex flex-col min-w-0 flex-1 cursor-pointer" onClick={() => applyThemePreset(preset.id)}>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-black truncate">{preset.name}</span>
-                        {isActive && <div className="w-1 h-1 rounded-full bg-google-blue animate-pulse" />}
-                      </div>
-                      <div className="flex gap-1 mt-1">
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorAppIdentity }} />
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorActiveTaskDone }} />
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorPresenceNotice }} />
-                      </div>
-                    </div>
-                    <div className={clsx(
-                      "flex items-center gap-1 transition-opacity",
-                      isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                    )}>
-                      {isActive && (
-                        <button 
-                          onClick={() => updateThemePreset(preset.id)}
-                          className="p-1.5 hover:bg-google-green/10 text-google-green rounded-md transition-colors"
-                          title="Update Snapshot with Current Settings"
-                        >
-                          <Save className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                      {!isActive && (
-                        <button 
-                          onClick={() => applyThemePreset(preset.id)}
-                          className="p-1.5 hover:bg-google-blue/10 text-google-blue rounded-md transition-colors"
-                          title="Apply Preset"
-                        >
-                          <Check className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                      <button 
-                        onClick={() => deleteThemePreset(preset.id)}
-                        className="p-1.5 hover:bg-google-red/10 text-google-red rounded-md transition-colors"
-                        title="Delete Preset"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-              {themePresets.length === 0 && (
-                <p className="text-[9px] text-center text-gray-500 italic py-2">No snapshots saved yet.</p>
-              )}
-            </div>
-          </section>
-
           {/* Footer Actions */}
           <div className="pt-4 flex items-center gap-2">
             <button
-              onClick={resetThemeSettings}
+              onClick={() => resetThemeSettings()}
               className="flex-1 h-10 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest bg-gray-100 dark:bg-black/40 text-gray-500 hover:bg-gray-200 dark:hover:bg-black/60 rounded-xl transition-all"
             >
               <RotateCcw className="w-3 h-3" />
-              Reset Defaults
+              Reset {isDarkMode ? 'Dark' : 'Light'} Defaults
             </button>
           </div>
         </div>

@@ -531,7 +531,8 @@ function App() {
     adminClearUserFocus, adminClearUserActionSet,
     activeTaskId, setActiveTaskId, updatePresence,
     moveMaster, setLocalExpanded, clearActionSet,
-    setTaskTimer, resetTaskTimer, toggleTaskTimer, updateTaskTimer
+    setTaskTimer, resetTaskTimer, toggleTaskTimer, updateTaskTimer,
+    isDarkMode, toggleDarkMode
   } = useTasklistStore();
   
   const navigate = useNavigate();
@@ -602,11 +603,6 @@ function App() {
     }
   }, [activeMaster?.title, activeInstance?.title]);
 
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved) return saved === 'dark';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isEditingProjectInfo, setIsEditingProjectInfo] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
@@ -804,17 +800,6 @@ function App() {
     return () => clearInterval(interval);
   }, [currentUser, activeInstance, mode, activeTaskId, updatePresence]);
 
-  // 3. Persist Dark Mode preference
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDarkMode]);
-
   // 4. Consolidated Pomodoro Timer Tick (Single Source of Truth)
   useEffect(() => {
     let tickCount = 0;
@@ -892,10 +877,6 @@ function App() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
   };
 
   const handleAddSection = () => {

@@ -215,6 +215,7 @@ export interface ThemeSettings {
 export interface ThemePreset {
   id: string;
   name: string;
+  mode: 'light' | 'dark';
   settings: ThemeSettings;
   createdAt: number;
   createdBy: string;
