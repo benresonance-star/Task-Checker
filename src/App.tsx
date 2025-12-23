@@ -112,7 +112,7 @@ const SidebarTaskItem = ({
     transform,
     transition,
     isDragging
-  } = useSortable({ id: item.taskId });
+  } = useSortable({ id: `${item.projectId}-${item.instanceId}-${item.taskId}` });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -187,6 +187,8 @@ const SidebarTaskItem = ({
       )}
       onClick={() => {
         if (instance && project) {
+          // Navigate to project without scroll flag
+          navigate(`/project/${project.id}/instance/${instance.id}`, { replace: true });
           toggleTaskFocus(project.id, instance.id, task.id);
         }
       }}
