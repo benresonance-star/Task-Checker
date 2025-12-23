@@ -118,7 +118,7 @@ export const ScratchpadWidget: React.FC = () => {
         )}
       </div>
 
-      <div className="flex-1 bg-white/30 dark:bg-black/10 rounded-[2rem] border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden transition-all">
+      <div className="flex-1 bg-[var(--notes-bg)] rounded-[2rem] border-2 border-[var(--notes-border)] flex flex-col overflow-hidden transition-all">
         {/* Category Filter Tabs */}
         <div className="flex items-center gap-2 p-4 border-b border-gray-200/50 dark:border-gray-800/50 overflow-x-auto no-scrollbar">
           {filterCategories.map(cat => (

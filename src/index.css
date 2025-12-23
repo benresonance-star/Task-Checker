@@ -16,6 +16,8 @@
   /* Dashboard & Panels */
   --project-info-bg: rgba(219, 234, 254, 0.7);
   --project-info-border: #BFDBFE;
+  --notes-bg: rgba(219, 234, 254, 0.7);
+  --notes-border: #BFDBFE;
   --checklist-bg: rgba(239, 246, 255, 0.5);
   --checklist-border: #DBEAFE;
   --metadata-card-bg: rgba(255, 255, 255, 0.8);

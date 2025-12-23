@@ -196,6 +196,8 @@ export interface ThemeSettings {
   colorPresenceNotice: string;
   colorProjectInfoBg: string;
   colorProjectInfoBorder: string;
+  colorNotesBg: string;
+  colorNotesBorder: string;
   colorChecklistBg: string;
   colorChecklistBorder: string;
   colorMetadataCardBg: string;
