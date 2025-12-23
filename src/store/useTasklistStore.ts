@@ -20,6 +20,7 @@ interface TasklistState {
   loading: boolean;
   expandedStates: Record<string, boolean>; // Local UI state for expanded/collapsed sections/subsections
   notification: { message: string; type: 'success' | 'error' } | null;
+  lastLocalThemeUpdate: number;
   
   // Actions
   notify: (message: string, type: 'success' | 'error') => void;
@@ -293,6 +294,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     expandedStates: JSON.parse(localStorage.getItem('expandedStates') || '{}'),
     adminSimulationMode: (sessionStorage.getItem('adminSimulationMode') as 'admin' | 'viewer') || 'admin',
     notification: null,
+    lastLocalThemeUpdate: 0,
     themeSettings: {
       colorAppIdentity: '#4285F4',
       colorActiveTaskDone: '#5DB975',
@@ -431,6 +433,13 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
 
           // Theme Settings Listener
           onSnapshot(doc(db, 'settings', 'theme'), (snapshot) => {
+            // PROTECT LOCAL STATE: Use a grace period after local theme updates.
+            // This prevents the "jumpy" color picker behavior where Firestore 
+            // syncs back an older value before the latest setDoc is processed.
+            const now = Date.now();
+            const { lastLocalThemeUpdate } = get();
+            if (now - lastLocalThemeUpdate < 2000) return;
+
             if (snapshot.exists()) {
               const data = snapshot.data();
               const migrated = migrateThemeSettings(data);
@@ -1554,7 +1563,10 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     updateThemeSettings: async (settings) => {
       const newSettings = { ...get().themeSettings, ...settings };
       // Optimistic update
-      set({ themeSettings: newSettings });
+      set({ 
+        themeSettings: newSettings,
+        lastLocalThemeUpdate: Date.now()
+      });
       applyThemeToRoot(newSettings);
       
       try {
