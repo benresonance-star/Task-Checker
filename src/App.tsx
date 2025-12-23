@@ -415,8 +415,17 @@ const SidebarTaskItem = ({
                       )
               )}
             >
-              {task.completed && <ThumbsUp className="w-4 h-4" />}
-              {task.completed ? "Task Completed" : "TASK DONE!"}
+              {task.completed ? (
+                <>
+                  <ThumbsUp className="w-4 h-4" />
+                  <span>Task Completed</span>
+                </>
+              ) : (
+                <>
+                  <ThumbsUp className="w-4 h-4" />
+                  <span>TASK DONE?</span>
+                </>
+              )}
             </button>
 
             <button 

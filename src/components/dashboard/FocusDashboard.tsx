@@ -267,7 +267,7 @@ export const FocusDashboard: React.FC = () => {
                                 ) : (
                                   <>
                                     <ThumbsUp className="w-6 h-6 md:w-8 md:h-8" />
-                                    <span>TASK DONE!</span>
+                                    <span>TASK DONE?</span>
                                   </>
                                 )}
                               </button>
