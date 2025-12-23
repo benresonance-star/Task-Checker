@@ -1096,9 +1096,9 @@ function App() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col md:flex-row bg-white dark:bg-[#121212] text-gray-600 dark:text-gray-300`}>
+    <div className={theme.components.layout.screen}>
       {/* Mobile Header */}
-      <header className="md:hidden flex items-center justify-between p-4 border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-[#121212] sticky top-0 z-40">
+      <header className={theme.components.layout.header}>
         <Logo className="scale-75 origin-left" />
         
         <div className="flex items-center gap-2">
@@ -1140,7 +1140,7 @@ function App() {
 
           {/* Mobile Dropdown Menu */}
           {isMobileMenuOpen && (
-            <div className="md:hidden fixed inset-x-0 top-[65px] bg-white dark:bg-[#121212] border-b border-gray-300 dark:border-gray-700 shadow-xl z-30 animate-in slide-in-from-top duration-200 overflow-y-auto max-h-[calc(100vh-65px)]">
+            <div className={theme.components.layout.mobileMenu}>
               <nav className="p-4 flex flex-col gap-2">
                 {/* Mobile Profile Card */}
                 <div className="flex items-center gap-3 px-4 py-3 bg-gray-100 dark:bg-black/40 rounded-card border border-gray-200 dark:border-gray-700 mb-2">
@@ -1655,12 +1655,12 @@ function App() {
       {/* Playlist Sidebar (The "Now Playing" Tray) */}
       {mode === 'project' && (
         <div className={clsx(
-          "border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-black/60 flex flex-col shadow-2xl z-40 fixed md:relative right-0 top-[65px] md:top-0 h-[calc(100vh-65px)] md:h-screen transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden",
-        showPlaylistSidebar ? "w-80 border-l opacity-100 translate-x-0" : "w-0 border-l-0 opacity-0 translate-x-full pointer-events-none"
-      )}>
+          theme.components.sidebar.shell,
+          showPlaylistSidebar ? "w-80 border-l opacity-100 translate-x-0" : "w-0 border-l-0 opacity-0 translate-x-full pointer-events-none"
+        )}>
         <div className="w-80 flex flex-col h-full flex-shrink-0">
           <div 
-            className="p-6 border-b border-google-blue/30 flex items-center justify-between bg-google-blue text-white shadow-lg cursor-pointer hover:bg-google-blue/90 transition-colors group/sidebar-header"
+            className={theme.components.sidebar.header}
             onClick={() => setShowPlaylistSidebar(false)}
             title="Collapse Sidebar"
           >
@@ -1687,11 +1687,11 @@ function App() {
 
               <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
                 {(!currentUser?.actionSet || currentUser.actionSet.length === 0) ? (
-                  <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-                    <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-300 dark:text-gray-700 mb-4">
+                  <div className={theme.components.sidebar.emptyState}>
+                    <div className={theme.components.sidebar.emptyIcon}>
                       <ListPlus className="w-8 h-8" />
                     </div>
-                    <p className="text-[10px] font-black uppercase text-gray-500 tracking-widest leading-relaxed">
+                    <p className={theme.components.sidebar.emptyText}>
                       Your Setlist is empty.<br/>Browse checklists and add tasks to your session.
                     </p>
                   </div>
@@ -1737,21 +1737,21 @@ function App() {
 
       {/* Modals */}
       {showClearSessionConfirm && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-[#121212] w-full max-w-md rounded-[2.5rem] border-4 border-google-blue p-8 shadow-[0_0_50px_rgba(66,133,244,0.3)] animate-in zoom-in-95 duration-200 text-center">
-            <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-6 ring-8 ring-blue-50 dark:ring-blue-900/10">
+        <div className={theme.components.modal.overlay}>
+          <div className={clsx(theme.components.modal.container, theme.components.modal.containerBlue)}>
+            <div className={clsx(theme.components.modal.iconContainer, theme.components.modal.iconContainerBlue)}>
               <Music className="w-10 h-10 text-google-blue" />
             </div>
-            <h3 className="text-2xl font-black text-gray-900 dark:text-gray-300 mb-4 uppercase tracking-tight">Clear Session?</h3>
-            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border-2 border-blue-100 dark:border-blue-900/30 mb-8">
-              <p className="text-sm font-black text-google-blue uppercase leading-relaxed">
+            <h3 className={theme.components.modal.title}>Clear Session?</h3>
+            <div className={clsx(theme.components.modal.infoBox, theme.components.modal.infoBoxBlue)}>
+              <p className={theme.components.modal.message}>
                 Are you sure you want to clear your entire session list? This will remove all tasks from your sidebar.
               </p>
             </div>
             <div className="flex flex-col gap-3">
               <Button 
                 size="lg" 
-                className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-google-blue border-google-blue text-white shadow-lg"
+                className={clsx(theme.components.modal.buttonPrimary, "bg-google-blue border-google-blue")}
                 onClick={() => {
                   clearActionSet();
                   setShowClearSessionConfirm(false);
@@ -1762,7 +1762,7 @@ function App() {
               <Button 
                 size="lg" 
                 variant="secondary"
-                className="w-full h-14 rounded-2xl font-black uppercase tracking-widest border-2 border-gray-200 dark:border-gray-700"
+                className={theme.components.modal.buttonSecondary}
                 onClick={() => setShowClearSessionConfirm(false)}
               >
                 NO, KEEP IT
@@ -1774,21 +1774,21 @@ function App() {
 
       {/* Admin: Deactivate Current Task Modal */}
       {adminUserToDeactivate && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-[110] animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-[#121212] w-full max-w-md rounded-[2.5rem] border-4 border-google-blue p-8 shadow-[0_0_50px_rgba(66,133,244,0.3)] animate-in zoom-in-95 duration-200 text-center">
-            <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-6 ring-8 ring-blue-50 dark:ring-blue-900/10">
+        <div className={clsx(theme.components.modal.overlay, "z-[110]")}>
+          <div className={clsx(theme.components.modal.container, theme.components.modal.containerBlue)}>
+            <div className={clsx(theme.components.modal.iconContainer, theme.components.modal.iconContainerBlue)}>
               <ShieldOff className="w-10 h-10 text-google-blue" />
             </div>
-            <h3 className="text-2xl font-black text-gray-900 dark:text-gray-300 mb-4 uppercase tracking-tight">Deactivate Task?</h3>
-            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border-2 border-blue-100 dark:border-blue-900/30 mb-8">
-              <p className="text-sm font-black text-google-blue uppercase leading-relaxed">
+            <h3 className={theme.components.modal.title}>Deactivate Task?</h3>
+            <div className={clsx(theme.components.modal.infoBox, theme.components.modal.infoBoxBlue)}>
+              <p className={theme.components.modal.message}>
                 Are you sure you want to deactivate the current active task for {adminUserToDeactivate.name}?
               </p>
             </div>
             <div className="flex flex-col gap-3">
               <Button 
                 size="lg" 
-                className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-google-blue border-google-blue text-white shadow-lg"
+                className={clsx(theme.components.modal.buttonPrimary, "bg-google-blue border-google-blue")}
                 onClick={() => {
                   adminClearUserFocus(adminUserToDeactivate.id);
                   setAdminUserToDeactivate(null);
@@ -1799,7 +1799,7 @@ function App() {
               <Button 
                 size="lg" 
                 variant="secondary"
-                className="w-full h-14 rounded-2xl font-black uppercase tracking-widest border-2 border-gray-200 dark:border-gray-700"
+                className={theme.components.modal.buttonSecondary}
                 onClick={() => setAdminUserToDeactivate(null)}
               >
                 NO, KEEP IT
@@ -1811,21 +1811,21 @@ function App() {
 
       {/* Admin: Clear Users Session List Modal */}
       {adminUserToClearSession && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-[110] animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-[#121212] w-full max-w-md rounded-[2.5rem] border-4 border-google-red p-8 shadow-[0_0_50px_rgba(234,67,53,0.3)] animate-in zoom-in-95 duration-200 text-center">
-            <div className="w-20 h-20 bg-red-50 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6 ring-8 ring-red-50 dark:ring-red-900/10">
+        <div className={clsx(theme.components.modal.overlay, "z-[110]")}>
+          <div className={clsx(theme.components.modal.container, theme.components.modal.containerRed)}>
+            <div className={clsx(theme.components.modal.iconContainer, theme.components.modal.iconContainerRed)}>
               <Eraser className="w-10 h-10 text-google-red" />
             </div>
-            <h3 className="text-2xl font-black text-gray-900 dark:text-gray-300 mb-4 uppercase tracking-tight">Clear Session?</h3>
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border-2 border-red-100 dark:border-red-900/30 mb-8">
-              <p className="text-sm font-black text-google-red uppercase leading-relaxed">
+            <h3 className={theme.components.modal.title}>Clear Session?</h3>
+            <div className={clsx(theme.components.modal.infoBox, theme.components.modal.infoBoxRed)}>
+              <p className={theme.components.modal.message}>
                 Are you sure you want to clear the entire session list for {adminUserToClearSession.name}?
               </p>
             </div>
             <div className="flex flex-col gap-3">
               <Button 
                 size="lg" 
-                className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-google-red border-google-red text-white shadow-lg"
+                className={clsx(theme.components.modal.buttonPrimary, "bg-google-red border-google-red")}
                 onClick={() => {
                   adminClearUserActionSet(adminUserToClearSession.id);
                   setAdminUserToClearSession(null);
@@ -1836,7 +1836,7 @@ function App() {
               <Button 
                 size="lg" 
                 variant="secondary"
-                className="w-full h-14 rounded-2xl font-black uppercase tracking-widest border-2 border-gray-200 dark:border-gray-700"
+                className={theme.components.modal.buttonSecondary}
                 onClick={() => setAdminUserToClearSession(null)}
               >
                 NO, KEEP IT
@@ -1847,14 +1847,14 @@ function App() {
       )}
 
       {showDeleteProjectConfirm && activeProject && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-[#121212] w-full max-w-md rounded-[2.5rem] border-4 border-google-red p-8 shadow-[0_0_50px_rgba(234,67,53,0.3)] animate-in zoom-in-95 duration-200 text-center">
-            <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse ring-8 ring-red-50 dark:ring-red-900/10">
+        <div className={theme.components.modal.overlay}>
+          <div className={clsx(theme.components.modal.container, theme.components.modal.containerRed)}>
+            <div className={clsx(theme.components.modal.iconContainer, "bg-red-100 dark:bg-red-900/30 ring-8 ring-red-50 dark:ring-red-900/10 animate-pulse")}>
               <Trash2 className="w-10 h-10 text-google-red" />
             </div>
-            <h3 className="text-2xl font-black text-gray-900 dark:text-gray-300 mb-4 uppercase tracking-tight">Delete Project?</h3>
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border-2 border-red-100 dark:border-red-900/30 mb-8">
-              <p className="text-sm font-black text-google-red uppercase leading-relaxed">
+            <h3 className={theme.components.modal.title}>Delete Project?</h3>
+            <div className={clsx(theme.components.modal.infoBox, theme.components.modal.infoBoxRed)}>
+              <p className={theme.components.modal.message}>
                 Warning: This action is permanent. All project metadata, checklists, progress, and the Online Documents root folder will be lost forever.
               </p>
             </div>
@@ -1885,14 +1885,14 @@ function App() {
       )}
 
       {showDeleteProjectFinalConfirm && activeProject && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 z-[110] animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-[#121212] w-full max-w-md rounded-[2.5rem] border-[6px] border-google-red p-8 shadow-[0_0_100px_rgba(234,67,53,0.5)] animate-in zoom-in-95 duration-200 text-center">
-            <div className="w-24 h-24 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce shadow-2xl">
+        <div className={theme.components.dangerModal.overlay}>
+          <div className={theme.components.dangerModal.container}>
+            <div className={theme.components.dangerModal.iconContainer}>
               <AlertTriangle className="w-12 h-12 text-white" />
             </div>
-            <h3 className="text-3xl font-black text-red-600 dark:text-red-500 mb-4 uppercase tracking-tighter">Last Chance...</h3>
-            <div className="p-6 bg-red-600/10 dark:bg-red-900/40 rounded-2xl border-2 border-red-600 mb-8">
-              <p className="text-lg font-black text-red-600 dark:text-red-400 uppercase leading-tight">
+            <h3 className={theme.components.dangerModal.title}>Last Chance...</h3>
+            <div className={theme.components.dangerModal.infoBox}>
+              <p className={theme.components.dangerModal.message}>
                 Are you really sure you want to delete this project?
               </p>
             </div>
@@ -1900,7 +1900,7 @@ function App() {
               <Button 
                 variant="danger" 
                 size="lg" 
-                className="w-full h-16 rounded-2xl font-black uppercase tracking-widest bg-red-600 hover:bg-red-700 text-white shadow-2xl"
+                className={theme.components.dangerModal.buttonPrimary}
                 disabled={isDeletingProject}
                 onClick={async () => {
                   setIsDeletingProject(true);
@@ -1920,7 +1920,7 @@ function App() {
               </Button>
               <Button 
                 size="lg" 
-                className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-google-green border-google-green text-white shadow-lg"
+                className={theme.components.dangerModal.buttonSecondary}
                 onClick={() => setShowDeleteProjectFinalConfirm(false)}
                 disabled={isDeletingProject}
               >
@@ -2329,10 +2329,10 @@ function App() {
       )}
 
       {showExportModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-[#121212] w-full max-w-md rounded-3xl p-8 border border-gray-300 dark:border-gray-700 animate-in zoom-in-95 duration-200 shadow-2xl">
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-xl font-black uppercase tracking-widest">Export {mode === 'master' ? 'Template' : 'Checklist'}</h3>
+        <div className={theme.components.generalModal.overlay}>
+          <div className={theme.components.generalModal.container}>
+            <div className={theme.components.generalModal.header}>
+              <h3 className={theme.components.generalModal.title}>Export {mode === 'master' ? 'Template' : 'Checklist'}</h3>
               <Button variant="ghost" onClick={() => setShowExportModal(false)} className="h-10 w-10 p-0 rounded-full border border-gray-200 dark:border-gray-800"><X className="w-5 h-5" /></Button>
             </div>
             <div className="space-y-3">
@@ -2354,10 +2354,10 @@ function App() {
       )}
 
       {showImportModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-[#121212] w-full max-w-md rounded-3xl p-8 border border-gray-300 dark:border-gray-700 animate-in zoom-in-95 duration-200 shadow-2xl">
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-xl font-black uppercase tracking-widest">Import Content</h3>
+        <div className={theme.components.generalModal.overlay}>
+          <div className={theme.components.generalModal.container}>
+            <div className={theme.components.generalModal.header}>
+              <h3 className={theme.components.generalModal.title}>Import Content</h3>
               <Button variant="ghost" onClick={() => setShowImportModal(false)} className="h-10 w-10 p-0 rounded-full border border-gray-200 dark:border-gray-800"><X className="w-5 h-5" /></Button>
             </div>
             <div className="space-y-4">
