@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Circle, CheckCircle2, StickyNote, Trash2, ChevronUp, ChevronDown, Play, Pause, AlertTriangle, ListPlus, ListMinus } from 'lucide-react';
 import { clsx } from 'clsx';
+import { theme } from '../../styles/theme';
 import { Task } from '../../types';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { Button } from '../ui/Button';
@@ -122,13 +123,13 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
     <div 
       onClick={handleTaskClick}
       className={clsx(
-        "flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 py-2 sm:py-2.5 px-3 sm:px-4 rounded-card group transition-all border shadow-sm hover:shadow-md cursor-pointer relative",
+        theme.components.checklist.container,
         isMultiUser 
-          ? "bg-google-red border-google-red text-white shadow-2xl scale-[1.02] z-20 animate-pulse"
+          ? theme.components.checklist.containerMulti
           : isActive 
-            ? "bg-gray-100 border-google-green dark:bg-black/60 dark:border-google-green ring-4 ring-google-green/30 shadow-lg" 
+            ? theme.components.checklist.containerActive
             : clsx(
-                "bg-white border-blue-200 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 dark:border-gray-800",
+                theme.components.checklist.containerInactive,
                 !isAnyTaskActive ? "dark:bg-black/60" : "dark:bg-[#121212]"
               ),
         shouldRecede && !isMultiUser && "opacity-40 grayscale-[0.5] scale-[0.98]"
@@ -208,10 +209,10 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
                       <span 
                         key={u.id}
                         className={clsx(
-                          "text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md border transition-all",
+                          theme.components.checklist.badge,
                           isActive 
-                            ? "bg-google-yellow border-google-yellow text-gray-900 shadow-sm" 
-                            : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-300 border-gray-200 dark:border-white/10"
+                            ? theme.components.checklist.badgeActive
+                            : theme.components.checklist.badgeInactive
                         )}
                       >
                         [{u.name.charAt(0).toUpperCase()}{u.name.charAt(1).toUpperCase()}] GATHERED

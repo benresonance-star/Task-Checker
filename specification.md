@@ -199,6 +199,8 @@ The system features a robust sync engine:
 - **`TaskItem.tsx`**: Complex task state manager. Handles multi-tier responsive layouts, Pomodoro widget, and collaborative pulsing logic.
 - **`ProjectDashboard.tsx`**: Project metadata management and the "Checklist Navigation Shelf".
 - **`NoteEditor.tsx`**: Tiptap-based rich text editor for "TEAM TASK FEEDBACK NOTES".
+- **`src/styles/theme.ts`**: Centralized style registry for colors, radii, and component-specific Tailwind class strings to ensure UI consistency.
+- **`ErrorBoundary.tsx`**: Global catch-all for unexpected application errors with a user-friendly fallback UI.
 
 ### 5. Interaction Patterns (Standard Operating Procedures)
 - **No System Dialogs**: All confirmations (Delete, Clear, Deactivate) MUST use the standard high-visibility in-app modals.

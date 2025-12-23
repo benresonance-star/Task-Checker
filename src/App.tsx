@@ -42,6 +42,7 @@ import {
 } from '@dnd-kit/modifiers';
 import { CSS } from '@dnd-kit/utilities';
 import { clsx } from 'clsx';
+import { theme } from './styles/theme';
 import { 
   useNavigate, 
   useLocation,
@@ -167,20 +168,19 @@ const SidebarTaskItem = ({
       ref={setNodeRef}
       style={style}
       className={clsx(
-        "group rounded-card border-2 cursor-pointer relative flex flex-col",
-        !isDragging && "transition-all",
+        theme.components.sidebar.activeTask,
         isMultiUserActive 
-          ? "bg-google-red border-google-red text-white shadow-2xl scale-[1.05] z-20 animate-pulse" 
+          ? theme.components.sidebar.activeTaskMulti
           : isActiveFocus 
             ? (isYellowState 
-                ? "bg-google-yellow border-google-yellow text-gray-900 shadow-lg scale-[1.02] z-10" 
+                ? theme.components.sidebar.activeTaskYellow
                 : clsx(
-                    "bg-google-green border-google-green text-white shadow-lg scale-[1.02] z-10",
+                    theme.components.sidebar.activeTaskFocus,
                     task.completed && "animate-pulse"
                   ))
             : isDeactivatedCompleted
-              ? "bg-google-green/10 border-google-green/20 text-google-green dark:text-google-green/80 shadow-sm min-h-[64px]"
-              : "bg-google-blue/5 dark:bg-google-blue/10 border-google-blue dark:border-google-blue hover:border-google-blue min-h-[64px]"
+              ? theme.components.sidebar.deactivatedCompleted
+              : theme.components.sidebar.inactiveTask
       )}
       onClick={() => {
         if (project && instance) {
@@ -305,8 +305,8 @@ const SidebarTaskItem = ({
           <div className="flex items-center gap-2">
             {/* Play/Pause Button - Aligned with left edge of card content */}
             <div className={clsx(
-              "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all shadow-sm",
-              isMultiUserActive ? "bg-white/20 border-white/30 text-white" : isYellowState ? "bg-black/10 border-black/20 text-gray-900" : "bg-white/20 border-white/30 text-white"
+              theme.components.pomodoro.button,
+              isYellowState && theme.components.pomodoro.buttonYellow
             )}>
               <button 
                 onClick={handlePlayPause} 
@@ -318,10 +318,7 @@ const SidebarTaskItem = ({
             </div>
 
             {/* Timer Controls Box */}
-            <div className={clsx(
-              "flex-1 h-10 flex items-center justify-center px-1.5 py-1 rounded-xl transition-all shadow-sm min-w-0",
-              isMultiUserActive ? "bg-white/10" : "bg-white/10"
-            )}>
+            <div className={theme.components.pomodoro.container}>
               <div className="relative flex items-center gap-1 min-w-0">
                 <button 
                   onClick={(e) => { e.stopPropagation(); setShowTimerWidget(!showTimerWidget); }}
@@ -404,14 +401,14 @@ const SidebarTaskItem = ({
                 toggleTask(task.id);
               }}
               className={clsx(
-                "flex-1 h-12 rounded-xl font-black uppercase tracking-[0.15em] text-xs flex items-center justify-center gap-2 transition-all duration-300 shadow-[0_10px_25px_rgba(0,0,0,0.3)] active:scale-95 active:shadow-inner border",
+                theme.components.taskDoneButton.base,
                 isMultiUserActive 
-                  ? (task.completed ? "bg-white text-google-red border-white" : "bg-google-red text-white border-white/30 hover:animate-pulse-gold")
+                  ? (task.completed ? theme.components.taskDoneButton.multiUserCompleted : theme.components.taskDoneButton.multiUser)
                   : task.completed 
-                    ? (isYellowState ? "bg-white text-google-yellow border-white animate-pulse" : "bg-white text-google-green border-white animate-pulse") 
+                    ? (isYellowState ? theme.components.taskDoneButton.yellowStateCompleted : theme.components.taskDoneButton.completed) 
                     : (isYellowState 
-                        ? "bg-google-yellow text-gray-900 border-white/30 hover:animate-pulse-gold" 
-                        : "bg-google-green-light text-white border-white/20 hover:animate-pulse-gold"
+                        ? theme.components.taskDoneButton.yellowState 
+                        : theme.components.taskDoneButton.active
                       )
               )}
             >
