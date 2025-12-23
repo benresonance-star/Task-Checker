@@ -108,7 +108,7 @@ export const FocusDashboard: React.FC = () => {
       {/* Main Bento Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Active Focus Card (Phase 2 Polished) */}
+        {/* Active Focus Card */}
         <div className="lg:col-span-2 space-y-4">
           <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] ml-2">Current Focus</h3>
           
@@ -206,17 +206,45 @@ export const FocusDashboard: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col">
+                      <div className={clsx(
+                        "text-3xl font-black tracking-tighter tabular-nums leading-none",
+                        isYellow ? "text-gray-900" : "text-white"
+                      )}>
+                        {formatTime(focusData.task.timerRemaining ?? focusData.task.timerDuration ?? 20 * 60)}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <button 
+                          onClick={() => resetTaskTimer(focusData.task.id)}
+                          className={clsx(
+                            "text-[9px] font-black uppercase transition-colors px-1.5 py-0.5 rounded-md",
+                            isYellow ? "bg-black/5 text-gray-600 hover:bg-black/10" : "bg-white/10 text-white/60 hover:bg-white/20"
+                          )}
+                        >
+                          Reset
+                        </button>
+                        <button 
+                          onClick={() => updateTaskTimer(focusData.task.id, (focusData.task.timerRemaining ?? 20 * 60) + 300)}
+                          className={clsx(
+                            "text-[9px] font-black uppercase transition-colors px-1.5 py-0.5 rounded-md",
+                            isYellow ? "bg-black/5 text-gray-600 hover:bg-black/10" : "bg-white/10 text-white/60 hover:bg-white/20"
+                          )}
+                        >
+                          +5m
+                        </button>
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Smaller Done Button */}
                   <button 
                     onClick={() => toggleTask(focusData.task.id)}
                     className={clsx(
                       "h-16 md:h-20 px-8 md:px-12 rounded-[2rem] flex items-center justify-center gap-3 text-lg md:text-2xl font-black uppercase tracking-[0.15em] transition-all shadow-xl active:scale-[0.98] border-4",
-                      "bg-white text-google-green border-white/20 hover:scale-105"
+                      "bg-white text-google-green border-white/20 hover:scale-105 shadow-green-500/20"
                     )}
                   >
-                    <ThumbsUp className="w-6 h-6 md:w-8 md:h-8" />
-                    <span>Done</span>
+                    <ThumbsUp className="w-6 h-6 md:w-8 md:h-8 text-google-green" />
+                    <span className="text-google-green">Done</span>
                   </button>
                 </div>
               </div>
@@ -244,7 +272,6 @@ export const FocusDashboard: React.FC = () => {
 
         {/* Phase 3 & 4 Right Column */}
         <div className="space-y-8 flex flex-col h-full">
-          
           {/* Knowledge Hub (Phase 3 Placeholder) */}
           <div className="space-y-4">
             <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] ml-2">Knowledge Hub</h3>
@@ -262,9 +289,7 @@ export const FocusDashboard: React.FC = () => {
               <h4 className="font-black text-sm uppercase tracking-widest text-gray-400">Phase 4: Private Tasks</h4>
             </div>
           </div>
-
         </div>
-
       </div>
     </div>
   );
