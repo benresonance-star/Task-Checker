@@ -9,9 +9,10 @@ export const FocusDashboard: React.FC = () => {
   const { 
     currentUser, 
     instances,
-    updateTimer,
-    toggleTimer,
-    completeTask,
+    updateTaskTimer,
+    resetTaskTimer,
+    toggleTaskTimer,
+    toggleTask,
   } = useTasklistStore();
 
   // Find the actual task object for the active focus
@@ -99,7 +100,7 @@ export const FocusDashboard: React.FC = () => {
                 <div className="flex flex-col md:flex-row items-center gap-8 py-4">
                   <div className="flex items-center gap-6">
                     <button 
-                      onClick={() => toggleTimer(focusData.instance.id, focusData.task.id)}
+                      onClick={() => toggleTaskTimer(focusData.task.id)}
                       className={clsx(
                         "w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center transition-all shadow-2xl active:scale-95 border-4",
                         focusData.task.timerIsRunning 
@@ -116,13 +117,13 @@ export const FocusDashboard: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         <button 
-                          onClick={() => updateTimer(focusData.instance.id, focusData.task.id, focusData.task.timerDuration ?? 20 * 60)}
+                          onClick={() => resetTaskTimer(focusData.task.id)}
                           className="px-3 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-[10px] font-black uppercase text-gray-500 hover:text-google-blue transition-colors border border-transparent hover:border-google-blue/20"
                         >
                           Reset
                         </button>
                         <button 
-                          onClick={() => updateTimer(focusData.instance.id, focusData.task.id, (focusData.task.timerRemaining ?? 20 * 60) + 300)}
+                          onClick={() => updateTaskTimer(focusData.task.id, (focusData.task.timerRemaining ?? 20 * 60) + 300)}
                           className="px-3 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-[10px] font-black uppercase text-gray-500 hover:text-google-blue transition-colors border border-transparent hover:border-google-blue/20"
                         >
                           +5 Mins
@@ -133,7 +134,7 @@ export const FocusDashboard: React.FC = () => {
 
                   <div className="flex-1 w-full">
                     <button 
-                      onClick={() => completeTask(focusData.instance.id, focusData.task.id, true)}
+                      onClick={() => toggleTask(focusData.task.id)}
                       className={clsx(
                         "w-full h-20 md:h-24 rounded-3xl flex items-center justify-center gap-4 text-xl md:text-2xl font-black uppercase tracking-widest transition-all shadow-xl active:scale-[0.98]",
                         "bg-[var(--active-task-done)] text-white shadow-green-500/20 hover:animate-pulse-gold border-2 border-white/20"
