@@ -185,12 +185,6 @@ const SidebarTaskItem = ({
               ? theme.components.sidebar.deactivatedCompleted
               : theme.components.sidebar.inactiveTask
       )}
-      onClick={() => {
-        if (project && instance) {
-          navigate(`/project/${project.id}/instance/${instance.id}`, { replace: true });
-          toggleTaskFocus(project.id, instance.id, task.id);
-        }
-      }}
     >
       {/* Top Zone: Identification & Drag Handle */}
       <div className={clsx("flex items-start gap-3 p-4", !isActiveFocus && !isMultiUserActive && "pb-3")}>
