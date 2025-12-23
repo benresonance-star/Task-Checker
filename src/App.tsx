@@ -687,13 +687,6 @@ function App() {
   useEffect(() => {
     if (loading || !currentUser) return;
 
-    // Track last active IDs for smarter navigation
-    if (projectId) localStorage.setItem('lastActiveProjectId', projectId);
-    if (masterId) localStorage.setItem('lastActiveMasterId', masterId);
-    
-    // Store the last path to remember if user was on Dashboard
-    localStorage.setItem('lastActivePath', path);
-
     const path = location.pathname;
     if (path === '/' || path === '') {
       const lastPath = localStorage.getItem('lastActivePath');
@@ -704,6 +697,13 @@ function App() {
       }
       return;
     }
+
+    // Track last active IDs for smarter navigation
+    if (projectId) localStorage.setItem('lastActiveProjectId', projectId);
+    if (masterId) localStorage.setItem('lastActiveMasterId', masterId);
+    
+    // Store the last path to remember if user was on Dashboard
+    localStorage.setItem('lastActivePath', path);
 
     // Mode sync
     if (path.startsWith('/dashboard')) {
