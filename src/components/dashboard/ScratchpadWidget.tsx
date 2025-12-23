@@ -80,7 +80,6 @@ export const ScratchpadWidget: React.FC = () => {
 
   const startEditing = (task: any) => {
     setEditingId(task.id);
-    setEditingText(task.text);
     setEditingCategory(task.category);
     if (inlineEditor) {
       inlineEditor.commands.setContent(task.text);
