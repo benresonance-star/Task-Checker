@@ -72,6 +72,7 @@ The system features a robust sync engine:
 
 ### State Management & Persistence
 - **Repository**: [GitHub - benresonance-star/Task-Checker](https://github.com/benresonance-star/Task-Checker)
+- **Security & Environment**: Sensitive configuration (Firebase keys, API endpoints) are stored in a `.env` file (excluded from Git via `.gitignore`). The application uses `import.meta.env` to access these variables securely.
 - **Library**: [Zustand](https://github.com/pmndrs/zustand)
 - **Navigation Persistence**: **URL Routing** via `react-router-dom`. The application tracks user position (Mode, Project, Instance, Task) in the browser address bar, enabling deep linking and functional browser "Back/Forward" buttons.
 - **Cloud Backend**: **Google Firebase** (Authentication, Firestore, Storage, Hosting).
