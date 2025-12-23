@@ -9,6 +9,7 @@ import {
   FolderOpen
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { theme } from '../../styles/theme';
 import { generateUUID } from '../../utils/uuid';
 import { DocumentExplorer } from './DocumentExplorer';
 
@@ -154,9 +155,9 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
 
   if (!isEditing) {
     return (
-      <div className="bg-blue-100/70 dark:bg-blue-900/10 rounded-container border border-blue-200 dark:border-gray-800 mb-8 shadow-sm overflow-hidden">
+      <div className={theme.components.dashboard.container}>
         <div 
-          className="flex flex-col sm:flex-row sm:items-center justify-between p-6 cursor-pointer hover:bg-blue-100/60 dark:hover:bg-blue-900/20 transition-colors gap-4"
+          className={theme.components.dashboard.header}
           onClick={() => setIsExpanded(!isExpanded)}
         >
           <div className="flex flex-col gap-2">
@@ -224,17 +225,17 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
           <div className="p-6 pt-0 animate-in slide-in-from-top-4 duration-300">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Primary Info */}
-              <div className="space-y-4 border border-blue-200 dark:border-gray-800 rounded-card p-6 shadow-sm bg-white/80 dark:bg-transparent">
-                <h4 className="text-[10px] font-black uppercase text-google-blue tracking-widest border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Identification</h4>
+              <div className={theme.components.dashboard.sectionCard}>
+                <h4 className={theme.components.dashboard.headerIdentification}>Identification</h4>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 tracking-wider mb-1">Project Number</span>
+                  <span className={theme.components.dashboard.label}>Project Number</span>
                   <div className="flex items-center gap-2 font-black text-gray-600 dark:text-gray-300">
                     <Hash className="w-4 h-4 text-google-blue" />
                     {project.projectNumber || 'Not Specified'}
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 tracking-wider mb-1">Client</span>
+                  <span className={theme.components.dashboard.label}>Client</span>
                   <div className="flex items-center justify-between font-bold text-gray-600 dark:text-gray-300 group/client">
                     <div className="flex items-center gap-2">
                       <User className="w-4 h-4 text-google-blue" />
@@ -259,7 +260,7 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 tracking-wider mb-1">Site Address</span>
+                  <span className={theme.components.dashboard.label}>Site Address</span>
                   <div className="flex items-start gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
                     <MapPin className="w-4 h-4 text-google-blue mt-0.5 flex-shrink-0" />
                     <div className="flex flex-col gap-2">
@@ -280,17 +281,17 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
               </div>
 
               {/* Planning Section */}
-              <div className="space-y-4 border border-blue-200 dark:border-gray-800 rounded-card p-6 shadow-sm bg-white/80 dark:bg-transparent">
-                <h4 className="text-[10px] font-black uppercase text-google-green tracking-widest border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Planning & Controls</h4>
+              <div className={theme.components.dashboard.sectionCard}>
+                <h4 className={theme.components.dashboard.headerPlanning}>Planning & Controls</h4>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 tracking-wider mb-1">Council / Municipality</span>
+                  <span className={theme.components.dashboard.label}>Council / Municipality</span>
                   <div className="flex items-center gap-2 font-bold text-gray-600 dark:text-gray-300">
                     <Building2 className="w-4 h-4 text-google-green" />
                     {project.council || 'Not Specified'}
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 tracking-wider mb-1">Planning Zone</span>
+                  <span className={theme.components.dashboard.label}>Planning Zone</span>
                   <div className="flex items-center gap-2 font-bold text-gray-600 dark:text-gray-300 text-sm">
                     <Globe className="w-4 h-4 text-google-green" />
                     {project.planningZone?.name ? (
@@ -306,7 +307,7 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 tracking-wider mb-1">Planning Overlays</span>
+                  <span className={theme.components.dashboard.label}>Planning Overlays</span>
                   <div className="flex flex-col gap-1.5">
                     {project.planningOverlays && project.planningOverlays.length > 0 ? (
                       project.planningOverlays.map(o => (
@@ -326,10 +327,10 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
               </div>
 
               {/* Building Section */}
-              <div className="space-y-4 border border-blue-200 dark:border-gray-800 rounded-card p-6 shadow-sm bg-white/80 dark:bg-transparent">
-                <h4 className="text-[10px] font-black uppercase text-orange-500 tracking-widest border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Building Standards</h4>
+              <div className={theme.components.dashboard.sectionCard}>
+                <h4 className={theme.components.dashboard.headerBuilding}>Building Standards</h4>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 tracking-wider mb-1">Building Classifications</span>
+                  <span className={theme.components.dashboard.label}>Building Classifications</span>
                   <div className="flex flex-wrap gap-1.5">
                     {project.buildingClassifications && project.buildingClassifications.length > 0 ? (
                       project.buildingClassifications.map(c => (
@@ -341,7 +342,7 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 tracking-wider mb-1">NCC Climate Zone</span>
+                  <span className={theme.components.dashboard.label}>NCC Climate Zone</span>
                   <div className="flex items-center gap-2 font-bold text-gray-600 dark:text-gray-300">
                     <Cloud className="w-4 h-4 text-orange-500" />
                     {project.nccClimateZone ? `Zone ${project.nccClimateZone}` : 'Not Specified'}
@@ -360,7 +361,7 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {(project.consultants || []).length > 0 ? (
                   project.consultants.map(c => (
-                    <div key={c.id} className="bg-white/80 dark:bg-black/40 rounded-container border border-blue-200 dark:border-gray-800 p-6 shadow-sm hover:border-google-blue transition-all group/card">
+                    <div key={c.id} className={theme.components.dashboard.consultantCard}>
                       <div className="flex flex-col gap-1 mb-4">
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] font-black uppercase text-google-blue tracking-widest flex items-center gap-1.5">
@@ -489,7 +490,7 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
 
   // EDIT MODE
   return (
-    <div className="bg-blue-100/70 dark:bg-blue-900/10 rounded-container border-2 border-google-blue/30 p-8 mb-8 shadow-xl animate-in fade-in duration-300">
+    <div className={clsx(theme.components.dashboard.container, "border-2 border-google-blue/30 p-8 shadow-xl animate-in fade-in duration-300")}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-google-blue/10 rounded-xl">

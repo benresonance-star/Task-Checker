@@ -51,6 +51,16 @@ export const theme = {
       header: 'flex items-center justify-between mb-8',
       title: 'text-xl font-black uppercase tracking-widest',
     },
+    dashboard: {
+      container: 'bg-blue-100/70 dark:bg-blue-900/10 rounded-container border border-blue-200 dark:border-gray-800 mb-8 shadow-sm overflow-hidden',
+      header: 'flex flex-col sm:flex-row sm:items-center justify-between p-6 cursor-pointer hover:bg-blue-100/60 dark:hover:bg-blue-900/20 transition-colors gap-4',
+      sectionCard: 'space-y-4 border border-blue-200 dark:border-gray-800 rounded-card p-6 shadow-sm bg-white/80 dark:bg-transparent',
+      headerIdentification: 'text-[10px] font-black uppercase text-google-blue tracking-widest border-b border-gray-100 dark:border-gray-800 pb-2 mb-4',
+      headerPlanning: 'text-[10px] font-black uppercase text-google-green tracking-widest border-b border-gray-100 dark:border-gray-800 pb-2 mb-4',
+      headerBuilding: 'text-[10px] font-black uppercase text-orange-500 tracking-widest border-b border-gray-100 dark:border-gray-800 pb-2 mb-4',
+      label: 'text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 tracking-wider mb-1',
+      consultantCard: 'bg-white/80 dark:bg-black/40 rounded-container border border-blue-200 dark:border-gray-800 p-6 shadow-sm hover:border-google-blue transition-all group/card',
+    },
     taskDoneButton: {
       base: 'flex-1 h-12 rounded-xl font-black uppercase tracking-[0.15em] text-xs flex items-center justify-center gap-2 transition-all duration-300 shadow-[0_10px_25px_rgba(0,0,0,0.3)] active:scale-95 active:shadow-inner border',
       active: 'bg-google-green-light text-white border-white/20 hover:animate-pulse-gold',
