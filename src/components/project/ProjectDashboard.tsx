@@ -352,15 +352,15 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
             </div>
 
             {/* Consultants Section */}
-            <div className="mt-12 pt-8">
-              <div className="flex items-center gap-2 mb-6">
-                <Users className="w-5 h-5 text-google-blue" />
-                <h3 className="text-sm font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">Project Consultants</h3>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {(project.consultants || []).length > 0 ? (
-                  project.consultants.map(c => (
+            {(project.consultants || []).length > 0 && (
+              <div className="mt-12 pt-8">
+                <div className="flex items-center gap-2 mb-6">
+                  <Users className="w-5 h-5 text-google-blue" />
+                  <h3 className="text-sm font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">Project Consultants</h3>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {project.consultants!.map(c => (
                     <div key={c.id} className={theme.components.dashboard.consultantCard}>
                       <div className="flex flex-col gap-1 mb-4">
                         <div className="flex items-center justify-between">
@@ -418,14 +418,10 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
                         </div>
                       )}
                     </div>
-                  ))
-                ) : (
-                  <div className="col-span-full py-10 text-center border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-container text-gray-400 font-bold uppercase text-xs tracking-widest">
-                    No consultants assigned to this project
-                  </div>
-                )}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 

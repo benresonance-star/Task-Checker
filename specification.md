@@ -91,9 +91,11 @@ The system features a robust sync engine:
   - **Intelligent Contacts**: Client and Consultant contact icons automatically switch between `Phone` and `Smartphone` based on number detection.
   - **OneDrive Integration**: Quick-links to project folders with support for personal user overrides. Relocated under the project name for immediate access.
   - **Logic Navigation**: Persistent "Project Checklists" shelf at the bottom for multi-checklist management. Active checklists feature individual collapse states persisted in `localStorage`. **Active checklist headers display the template title directly (removing "Active Checklist:" prefix) with font sizing matching checklist sections and support for multi-line wrapping.**
-  - **My Session Style**: The "My Session" sidebar features a **blue header** (`bg-google-blue`) with white text. 
+    - **My Session Style**: The "My Session" sidebar features a **blue header** (`bg-google-blue`) with white text. 
+    - **Contextual Hierarchy**: Each task in the sidebar displays the **Project Name** in bold uppercase letters directly above the task title, providing immediate context for users managing tasks across multiple projects.
     - **Intuitive Dismissal**: The entire sidebar header is clickable to collapse the panel, featuring a **right-pointing chevron** next to the title as a visual affordance for movement.
     - **Dynamic Entry Points**: To maintain focus, the "My Session" launch button **fades out and shifts** when the sidebar is active (horizontally on desktop, vertically on mobile) and returns when the sidebar is dismissed.
+    - **Navigation Logic**: Clicking a task in the sidebar switches the user to the associated project view but **does not trigger auto-scroll** to the task, allowing for a non-disruptive project overview. Conversely, the "Open in full checklist" button on the **Dashboard** explicitly triggers an auto-scroll to center the task in the checklist view.
     - **Visual States**: Inactive tasks in the list use a **light blue background** and **blue outline** to match the application's action-state language. Open/closed state is persisted in `localStorage`.
   - **Sidebar Prioritization**: Navigation elements (Projects, Templates) are positioned at the top of the sidebar for primary access, with Tools (Imports, Settings) below. **Admins benefit from Context-Aware Navigation, where the app remembers the last active project and template when switching between management modes.**
   - **UI Consistency**: The "Edit Details" interface background matches the general project information background for a seamless transition. **Mobile optimization includes a bordered Edit button and compressed, stacked Save/Cancel controls.**
@@ -183,7 +185,7 @@ The system features a robust sync engine:
 - **`users` Collection**: 
   - `id`, `name`, `email`, `role` ('admin' | 'viewer')
   - `activeFocus`: `{ projectId, instanceId, taskId, timestamp }` | `null`
-  - `actionSet`: `Array<{ projectId, instanceId, taskId, addedAt }>` (The "My Session" list)
+  - `actionSet`: `Array<{ projectId, instanceId, taskId, addedAt }>` (The "My Session" list). **Tasks are uniquely identified by their composite key of Project+Instance+Task ID to ensure no conflicts across different projects.**
 - **`projects` Collection**: 
   - `name`, `number`, `address`, `client`, `council`, `zone`, `buildingClass`, `climateZone`
   - `instanceIds`: `string[]` (References to `instances` collection)
@@ -243,6 +245,7 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > 
 > **Collaboration & Presence**:
 > - Implement a **Collaborative Presence** system using Firestore to show real-time user activity (Avatars on active tasks).
+> - **Unique Task Identification**: Ensure all tasks are managed using a composite key of `projectId + instanceId + taskId` to prevent conflicts when the same task ID exists across multiple projects.
 > - Add a visual **high-saturation focus ring (4px)** and pulsing effect for tasks with multiple active users.
 > - Implement a **Drag & Drop** reorganization system for the "My Session" sidebar using `dnd-kit`.
 > - Use atomic dot-notation updates for presence state to prevent race conditions.
@@ -265,7 +268,7 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > - **Project Context (Light Mode)**: Use `bg-blue-100/70` for main sections and `bg-white/80` for inner metadata cards (Identification, Planning, Building) with outlines matching text color.
 > - **Brand Identity**: Logo is a simple white tick inside an orange circle (`#E67E33`). Brand name stylized as `checkMATE`.
 > - Use a modern System Font stack.
-> - Navigation: Sidebar-first layout on desktop; dedicated hamburger menu on mobile. **Implement Context-Aware Navigation for admins to remember last active template/project.**
+> - Navigation: Sidebar-first layout on desktop; dedicated hamburger menu on mobile. **Implement Context-Aware Navigation for admins to remember last active template/project.** Sidebar task selection should switch project views without auto-scrolling; Dashboard selection should explicitly trigger auto-scroll.
 > - Structural Graphics: Implement precise **1px** vertical and horizontal link lines. All action icons aligned on a single vertical axis.
 > - **Active Project Navigation**: Style active project buttons in **Google Green** for context synchronization.
 > 
@@ -290,4 +293,4 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 23, 2025 (v1.3.2 - In-App Confirmation for Checklist Deletion)*
+*Updated: December 23, 2025 (v1.3.3 - Unique Task Context & Sidebar Navigation Logic)*
