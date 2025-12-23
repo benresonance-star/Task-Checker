@@ -82,6 +82,17 @@ export const theme = {
       itemPrereq: 'flex items-center justify-between bg-white dark:bg-black/40 px-4 py-3 rounded-card border border-orange-100 dark:border-orange-500/20 shadow-sm group',
       itemPrep: 'flex flex-col bg-blue-50/20 dark:bg-black/40 p-4 rounded-card border border-blue-100 dark:border-gray-800 shadow-sm group',
     },
+    docExplorer: {
+      overlay: 'fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4',
+      shell: 'bg-white dark:bg-[#121212] w-full max-w-5xl h-[80vh] rounded-container border border-gray-300 dark:border-gray-700 shadow-2xl flex flex-col overflow-hidden',
+      header: 'p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-black/20',
+      toolbar: 'p-4 border-b border-gray-100 dark:border-gray-800 flex flex-col gap-4',
+      grid: 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6',
+      card: 'group relative bg-white dark:bg-black/40 border-2 border-transparent hover:border-google-blue rounded-2xl p-4 shadow-sm transition-all cursor-pointer',
+      table: 'w-full text-left',
+      tableHeader: 'bg-gray-50/50 dark:bg-black/60 border-b border-gray-100 dark:border-gray-800',
+      tableRow: 'hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer transition-colors group',
+    },
     taskDoneButton: {
       base: 'flex-1 h-12 rounded-xl font-black uppercase tracking-[0.15em] text-xs flex items-center justify-center gap-2 transition-all duration-300 shadow-[0_10px_25px_rgba(0,0,0,0.3)] active:scale-95 active:shadow-inner border',
       active: 'bg-google-green-light text-white border-white/20 hover:animate-pulse-gold',

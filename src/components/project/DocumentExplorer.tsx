@@ -10,6 +10,7 @@ import { useTasklistStore } from '../../store/useTasklistStore';
 import { ProjectDocItem } from '../../types';
 import { Button } from '../ui/Button';
 import { clsx } from 'clsx';
+import { theme } from '../../styles/theme';
 
 interface DocumentExplorerProps {
   project: { id: string; name: string };
@@ -138,11 +139,11 @@ export const DocumentExplorer = ({ project, onClose }: DocumentExplorerProps) =>
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-[#121212] w-full max-w-5xl h-[80vh] rounded-container border border-gray-300 dark:border-gray-700 shadow-2xl flex flex-col overflow-hidden">
+    <div className={theme.components.docExplorer.overlay}>
+      <div className={theme.components.docExplorer.shell}>
         
         {/* Header */}
-        <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-black/20">
+        <div className={theme.components.docExplorer.header}>
           <div className="flex items-center gap-4">
             <div className="p-3 bg-google-blue/10 rounded-2xl text-google-blue">
               <FolderOpen className="w-6 h-6" />
@@ -158,7 +159,7 @@ export const DocumentExplorer = ({ project, onClose }: DocumentExplorerProps) =>
         </div>
 
         {/* Toolbar */}
-        <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex flex-col gap-4">
+        <div className={theme.components.docExplorer.toolbar}>
           {/* Top row: Breadcrumbs/Navigation */}
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
             {searchQuery.trim() ? (
@@ -270,7 +271,7 @@ export const DocumentExplorer = ({ project, onClose }: DocumentExplorerProps) =>
               </div>
             </div>
           ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            <div className={theme.components.docExplorer.grid}>
               {currentDocs.map((item) => (
                 <div 
                   key={item.id}
@@ -287,7 +288,7 @@ export const DocumentExplorer = ({ project, onClose }: DocumentExplorerProps) =>
                       handleOpenFile(item);
                     }
                   }}
-                  className="group relative bg-white dark:bg-black/40 border-2 border-transparent hover:border-google-blue rounded-2xl p-4 shadow-sm transition-all cursor-pointer"
+                  className={theme.components.docExplorer.card}
                 >
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button 
@@ -322,8 +323,8 @@ export const DocumentExplorer = ({ project, onClose }: DocumentExplorerProps) =>
             </div>
           ) : viewMode === 'list' ? (
             <div className="bg-white dark:bg-black/40 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm">
-              <table className="w-full text-left">
-                <thead className="bg-gray-50/50 dark:bg-black/60 border-b border-gray-100 dark:border-gray-800">
+              <table className={theme.components.docExplorer.table}>
+                <thead className={theme.components.docExplorer.tableHeader}>
                   <tr>
                     <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-500 tracking-widest">Name</th>
                     <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-500 tracking-widest">Type</th>
@@ -344,7 +345,7 @@ export const DocumentExplorer = ({ project, onClose }: DocumentExplorerProps) =>
                         }
                       }}
                       onDoubleClick={() => item.type === 'file' && handleOpenFile(item)}
-                      className="hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer transition-colors group"
+                      className={theme.components.docExplorer.tableRow}
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
@@ -380,8 +381,8 @@ export const DocumentExplorer = ({ project, onClose }: DocumentExplorerProps) =>
             </div>
           ) : (
             <div className="bg-white dark:bg-black/40 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm">
-              <table className="w-full text-left">
-                <thead className="bg-gray-50/50 dark:bg-black/60 border-b border-gray-100 dark:border-gray-800">
+              <table className={theme.components.docExplorer.table}>
+                <thead className={theme.components.docExplorer.tableHeader}>
                   <tr>
                     <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-500 tracking-widest">Hierarchy / Name</th>
                     <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-500 tracking-widest">Type</th>
@@ -403,7 +404,7 @@ export const DocumentExplorer = ({ project, onClose }: DocumentExplorerProps) =>
                       }}
                       onDoubleClick={() => item.type === 'file' && handleOpenFile(item)}
                       className={clsx(
-                        "hover:bg-gray-100/50 dark:hover:bg-white/5 cursor-pointer transition-colors group",
+                        theme.components.docExplorer.tableRow,
                         item.type === 'folder' ? "bg-amber-50/30 dark:bg-amber-900/10" : "bg-transparent"
                       )}
                     >
