@@ -1,4 +1,5 @@
 import React, { useState, useLayoutEffect } from 'react';
+import { clsx } from 'clsx';
 import { ChevronDown, ChevronRight, Plus, Trash2, ChevronUp, ChevronDown as ChevronDownIcon, ArrowDownToLine, X } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { Section, Task } from '../../types';
