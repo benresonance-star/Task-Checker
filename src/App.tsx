@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import JSZip from 'jszip';
+import pkg from '../package.json';
 import { useTasklistStore } from './store/useTasklistStore';
 import { SectionItem } from './components/checklist/SectionItem';
 import { Button } from './components/ui/Button';
@@ -1335,7 +1336,7 @@ function App() {
             </div>
             <div className="mt-auto pt-4 border-t border-gray-300 dark:border-gray-700 flex flex-col gap-1">
               <div className="px-3 py-2">
-                <p className="text-[10px] font-black uppercase text-gray-500 tracking-widest">v1.0.0</p>
+                <p className="text-[10px] font-black uppercase text-gray-500 tracking-widest">v{pkg.version}</p>
               </div>
             </div>
       </aside>
