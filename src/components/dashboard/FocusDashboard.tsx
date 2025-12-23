@@ -202,7 +202,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                   {/* 2. CENTER: Task Title */}
                   <div className="flex-1 flex flex-col justify-center py-4">
                     <h2 className={clsx(
-                      "text-2xl md:text-4xl lg:text-5xl font-black leading-[1.1] tracking-tight break-words",
+                      "text-xl md:text-3xl lg:text-4xl font-semibold leading-[1.2] tracking-[0.1em] break-words",
                       isYellow ? "text-gray-900" : "text-white"
                     )}>
                       {focusData.task.title}
@@ -212,7 +212,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                   {/* 3. BOTTOM: Compact Pomodoro & Task Done */}
                   <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10">
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-6">
                       {/* Reduced Pomodoro Widget */}
                       <div className={clsx(
                         "flex items-center bg-white/10 dark:bg-black/20 p-2 rounded-2xl border border-white/10 shadow-inner relative",
@@ -289,17 +289,16 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                         </div>
                       </div>
 
-                      {/* Task Notes Icon */}
+                      {/* Task Notes Icon - Simplified, larger, no bounding box */}
                       <button 
                         onClick={(e) => { e.stopPropagation(); onOpenNotes?.(focusData.task.id); }}
                         className={clsx(
-                          "rounded-2xl flex items-center justify-center transition-all shadow-lg active:scale-90 border-2",
-                          showPlaylistSidebar ? "w-10 h-10" : "w-12 h-12",
-                          isYellow ? "bg-black/10 border-black/20 text-gray-900 hover:bg-black/20" : "bg-white/20 border-white/20 text-white hover:bg-white/30"
+                          "transition-all active:scale-90 flex items-center justify-center p-2",
+                          isYellow ? "text-gray-900/60 hover:text-gray-900" : "text-white/60 hover:text-white"
                         )}
                         title="Open Task Info"
                       >
-                        <StickyNote className={clsx(showPlaylistSidebar ? "w-5 h-5" : "w-6 h-6", (focusData.task.notes || focusData.task.userNotes || focusData.task.files?.length || focusData.task.userFiles?.length) && "fill-current")} />
+                        <StickyNote className={clsx("w-10 h-10", (focusData.task.notes || focusData.task.userNotes || focusData.task.files?.length || focusData.task.userFiles?.length) && "fill-current")} />
                       </button>
                     </div>
 
