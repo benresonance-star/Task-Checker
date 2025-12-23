@@ -418,31 +418,48 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
   );
 };
 
-const ColorControl: React.FC<{ label: string; value: string; onChange: (v: string) => void }> = ({ label, value, onChange }) => (
-  <div className="flex flex-col gap-1.5">
-    <label className="text-[9px] font-black uppercase text-gray-500 tracking-tight">{label}</label>
-    <div className="flex items-center gap-2">
-      <div className="relative w-8 h-8 flex-shrink-0">
+const ColorControl: React.FC<{ label: string; value: string; onChange: (v: string) => void }> = ({ label, value, onChange }) => {
+  // Helper to ensure the native color picker gets a valid hex even if the value is rgba
+  const getHexValue = (val: string) => {
+    if (val.startsWith('#')) return val;
+    if (val.startsWith('rgba') || val.startsWith('rgb')) {
+      const match = val.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+      }
+    }
+    return '#000000';
+  };
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-[9px] font-black uppercase text-gray-500 tracking-tight">{label}</label>
+      <div className="flex items-center gap-2">
+        <div className="relative w-8 h-8 flex-shrink-0">
+          <input 
+            type="color" 
+            value={getHexValue(value)} 
+            onChange={(e) => onChange(e.target.value)}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+          />
+          <div 
+            style={{ backgroundColor: value }}
+            className="w-full h-full rounded-md border border-gray-600 shadow-sm"
+          />
+        </div>
         <input 
-          type="color" 
-          value={value} 
+          type="text" 
+          value={value.toUpperCase()} 
           onChange={(e) => onChange(e.target.value)}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-        />
-        <div 
-          style={{ backgroundColor: value }}
-          className="w-full h-full rounded-md border border-gray-600 shadow-sm"
+          className="flex-1 min-w-0 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 rounded-lg px-2 py-1 text-[10px] font-mono"
         />
       </div>
-      <input 
-        type="text" 
-        value={value.toUpperCase()} 
-        onChange={(e) => onChange(e.target.value)}
-        className="flex-1 min-w-0 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 rounded-lg px-2 py-1 text-[10px] font-mono"
-      />
     </div>
-  </div>
-);
+  );
+};
 
 const SliderControl: React.FC<{ label: string; value: number; min: number; max: number; onChange: (v: number) => void }> = ({ label, value, min, max, onChange }) => (
   <div className="flex flex-col gap-2">
