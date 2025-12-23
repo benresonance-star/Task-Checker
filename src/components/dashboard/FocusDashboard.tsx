@@ -5,6 +5,15 @@ import { LayoutGrid, Target, Zap, Clock, Play, Pause, RotateCcw, ThumbsUp, Check
 import { clsx } from 'clsx';
 import { useNavigate } from 'react-router-dom';
 
+const TomatoIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" opacity="0.2"/>
+    <path d="M12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20Z" fill="currentColor"/>
+    <path d="M12 4V2M10 3L14 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M15 6L17 4M16 5.5L16.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+
 export const FocusDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { 
@@ -177,18 +186,18 @@ export const FocusDashboard: React.FC = () => {
                             : "bg-white text-google-red border-google-red/20 hover:bg-red-50"
                         )}
                       >
-                        {focusData.task.timerIsRunning ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-1" />}
-                      </button>
-                      
-                      {/* Optional Set Duration Hover */}
-                      {!focusData.task.timerIsRunning && (
-                        <button 
-                          onClick={() => setShowSetTimer(!showSetTimer)}
-                          className="absolute -top-2 -right-2 w-5 h-5 bg-white dark:bg-gray-800 text-google-blue rounded-full flex items-center justify-center shadow-md border border-gray-200 dark:border-gray-700 hover:scale-110 transition-transform"
-                        >
-                          <Clock className="w-3 h-3" />
-                        </button>
-                      )}
+                                    {focusData.task.timerIsRunning ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-0.5" />}
+                                  </button>
+
+                                  {/* Optional Set Duration Hover */}
+                                  {!focusData.task.timerIsRunning && (
+                                    <button 
+                                      onClick={() => setShowSetTimer(!showSetTimer)}
+                                      className="absolute -top-2 -right-2 w-5 h-5 bg-white dark:bg-gray-800 text-google-blue rounded-full flex items-center justify-center shadow-md border border-gray-200 dark:border-gray-700 hover:scale-110 transition-transform"
+                                    >
+                                      <TomatoIcon className="w-3 h-3 text-google-red" />
+                                    </button>
+                                  )}
 
                       {showSetTimer && (
                         <div className="absolute bottom-full left-0 mb-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-2 animate-in slide-in-from-bottom-2 duration-200 z-50 text-[var(--text-primary)]">
