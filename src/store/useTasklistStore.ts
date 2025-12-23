@@ -108,9 +108,11 @@ interface TasklistState {
   // Theme Settings
   themeSettings: ThemeSettings;
   themePresets: ThemePreset[];
+  activePresetId: string | null;
   updateThemeSettings: (settings: Partial<ThemeSettings>) => Promise<void>;
   resetThemeSettings: () => Promise<void>;
   saveThemePreset: (name: string) => Promise<void>;
+  updateThemePreset: (presetId: string) => Promise<void>;
   deleteThemePreset: (presetId: string) => Promise<void>;
   applyThemePreset: (presetId: string) => Promise<void>;
 }
@@ -270,6 +272,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       radiusMajorModal: 32,
     },
     themePresets: [],
+    activePresetId: null,
 
     notify: (message, type) => {
       set({ notification: { message, type } });
@@ -1543,7 +1546,8 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       };
 
       try {
-        await addDoc(collection(db, 'themePresets'), sanitize(preset));
+        const docRef = await addDoc(collection(db, 'themePresets'), sanitize(preset));
+        set({ activePresetId: docRef.id });
         get().notify(`Preset "${name}" saved!`, 'success');
       } catch (error) {
         console.error('Save preset failed:', error);
@@ -1551,9 +1555,27 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       }
     },
 
+    updateThemePreset: async (presetId) => {
+      const { themeSettings, themePresets } = get();
+      const preset = themePresets.find(p => p.id === presetId);
+      if (!preset) return;
+
+      try {
+        await updateDoc(doc(db, 'themePresets', presetId), { 
+          settings: sanitize(themeSettings),
+          updatedAt: Date.now() 
+        });
+        get().notify(`Preset "${preset.name}" updated!`, 'success');
+      } catch (error) {
+        console.error('Update preset failed:', error);
+        get().notify('Failed to update theme preset.', 'error');
+      }
+    },
+
     deleteThemePreset: async (presetId) => {
       try {
         await deleteDoc(doc(db, 'themePresets', presetId));
+        if (get().activePresetId === presetId) set({ activePresetId: null });
         get().notify('Preset deleted.', 'success');
       } catch (error) {
         console.error('Delete preset failed:', error);
@@ -1564,6 +1586,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     applyThemePreset: async (presetId) => {
       const preset = get().themePresets.find(p => p.id === presetId);
       if (preset) {
+        set({ activePresetId: presetId });
         await get().updateThemeSettings(preset.settings);
         get().notify(`Applied "${preset.name}"!`, 'success');
       }

@@ -61,9 +61,9 @@ The system features a robust sync engine:
 - **Active Focus Tracking**: Selected tasks feature a **high-saturation focus ring (4px)** and a pulsing outline when multiple users are present.
 
 ### 6. Branding & Live Style System
-- **Branding Console**: A floating, draggable, and resizable HUD available to admins. It allows real-time adjustment of core brand colors (Blue, Green, Red, Yellow) and UI geometry (Corner radii for cards, buttons, and containers).
+- **Branding Console**: A floating, draggable, and resizable HUD available to admins. It allows real-time adjustment of domain-specific brand elements (Primary Identity, Task Done Highlights, Completed States, etc.) and UI geometry (Corner radii for task cards, interactive buttons, and major containers).
 - **Style Snapshots (Theme Library)**: Admins can capture the current brand styling and save it as a named snapshot (e.g., "Happy Mode"). These presets are stored globally and can be applied with a single click, allowing for instant "Hot-Swapping" of the entire application's visual identity.
-- **Smooth Interaction Engine**: Utilizes hardware-accelerated `translate3d` and `requestAnimationFrame` for buttery-smooth window movement. Transitions are dynamically disabled during active dragging to eliminate "input lag."
+- **Smooth Interaction Engine**: Utilizes hardware-accelerated `translate3d` and `requestAnimationFrame` for buttery-smooth window movement and resizing. Transitions are dynamically disabled during active interactions to eliminate "input lag."
 - **Dynamic Theme Engine**: Uses CSS Variables (`--brand-blue`, `--radius-card`, etc.) to apply style changes instantly across the entire application without page reloads.
 - **Global Style Persistence**: Theme settings are stored in Firestore (`settings/theme`) and synchronized in real-time across all team members' sessions. Every teammate sees the new brand colors the moment the admin saves a change.
 - **Admin Management**: Dedicated "Branding Console" entry in the sidebar and mobile menu for authorized administrators.

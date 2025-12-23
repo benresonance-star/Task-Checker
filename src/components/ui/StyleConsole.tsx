@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, GripHorizontal, RotateCcw, Palette, Maximize2, Minimize2, Camera, Trash2, Check } from 'lucide-react';
+import { X, GripHorizontal, RotateCcw, Palette, Maximize2, Minimize2, Camera, Trash2, Check, Save } from 'lucide-react';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { clsx } from 'clsx';
 
@@ -11,17 +11,23 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
   const { 
     themeSettings, 
     themePresets,
+    activePresetId,
     updateThemeSettings, 
     resetThemeSettings,
     saveThemePreset,
+    updateThemePreset,
     deleteThemePreset,
     applyThemePreset
   } = useTasklistStore();
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 100, y: 100 });
+  const [size, setSize] = useState({ width: 320, height: 650 });
   const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
   const [newPresetName, setNewPresetName] = useState('');
   const dragStartPos = useRef({ x: 0, y: 0 });
+  const resizeStartSize = useRef({ width: 0, height: 0 });
+  const resizeStartPos = useRef({ x: 0, y: 0 });
   const requestRef = useRef<number>();
   const consoleRef = useRef<HTMLDivElement>(null);
 
@@ -32,19 +38,36 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
         x: e.clientX - position.x,
         y: e.clientY - position.y
       };
-      e.preventDefault(); // Prevent text selection
+      e.preventDefault();
     }
+  };
+
+  const handleResizeMouseDown = (e: React.MouseEvent) => {
+    setIsResizing(true);
+    resizeStartSize.current = { width: size.width, height: size.height };
+    resizeStartPos.current = { x: e.clientX, y: e.clientY };
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
         if (requestRef.current) cancelAnimationFrame(requestRef.current);
-        
         requestRef.current = requestAnimationFrame(() => {
           setPosition({
             x: e.clientX - dragStartPos.current.x,
             y: e.clientY - dragStartPos.current.y
+          });
+        });
+      } else if (isResizing) {
+        if (requestRef.current) cancelAnimationFrame(requestRef.current);
+        requestRef.current = requestAnimationFrame(() => {
+          const deltaX = e.clientX - resizeStartPos.current.x;
+          const deltaY = e.clientY - resizeStartPos.current.y;
+          setSize({
+            width: Math.max(280, resizeStartSize.current.width + deltaX),
+            height: Math.max(200, resizeStartSize.current.height + deltaY)
           });
         });
       }
@@ -52,11 +75,12 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
 
     const handleMouseUp = () => {
       setIsDragging(false);
+      setIsResizing(false);
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
 
-    if (isDragging) {
-      document.body.style.cursor = 'grabbing';
+    if (isDragging || isResizing) {
+      document.body.style.cursor = isDragging ? 'grabbing' : 'nwse-resize';
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
     } else {
@@ -68,7 +92,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
       window.removeEventListener('mouseup', handleMouseUp);
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
-  }, [isDragging]);
+  }, [isDragging, isResizing]);
 
   const handleChange = (key: keyof typeof themeSettings, value: string | number) => {
     updateThemeSettings({ [key]: value });
@@ -82,13 +106,15 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
         position: 'fixed',
         left: 0,
         top: 0,
+        width: isMinimized ? '256px' : `${size.width}px`,
+        height: isMinimized ? '48px' : `${size.height}px`,
       }}
       className={clsx(
         "z-[1000] border-2 border-google-blue rounded-container shadow-2xl flex flex-col overflow-hidden",
-        isDragging ? "" : "transition-all duration-200",
+        (isDragging || isResizing) ? "" : "transition-all duration-200",
         isMinimized 
-          ? "w-64 h-12 bg-google-blue" 
-          : "w-80 h-[650px] bg-white dark:bg-[#1e1e1e]"
+          ? "bg-google-blue" 
+          : "bg-white dark:bg-[#1e1e1e]"
       )}
     >
       {/* Header / Drag Handle */}
@@ -220,37 +246,63 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
 
             {/* Presets List */}
             <div className="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
-              {themePresets.map(preset => (
-                <div 
-                  key={preset.id}
-                  className="flex items-center justify-between p-2 bg-gray-50 dark:bg-black/20 rounded-lg border border-gray-100 dark:border-gray-800 hover:border-google-blue/30 transition-all group"
-                >
-                  <div className="flex flex-col min-w-0 flex-1 cursor-pointer" onClick={() => applyThemePreset(preset.id)}>
-                    <span className="text-[10px] font-black truncate">{preset.name}</span>
-                    <div className="flex gap-1 mt-1">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorAppIdentity }} />
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorActiveTaskDone }} />
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorPresenceNotice }} />
+              {themePresets.map(preset => {
+                const isActive = activePresetId === preset.id;
+                
+                return (
+                  <div 
+                    key={preset.id}
+                    className={clsx(
+                      "flex items-center justify-between p-2 rounded-lg border transition-all group",
+                      isActive 
+                        ? "bg-google-blue/10 border-google-blue shadow-sm" 
+                        : "bg-gray-50 dark:bg-black/20 border-gray-100 dark:border-gray-800 hover:border-google-blue/30"
+                    )}
+                  >
+                    <div className="flex flex-col min-w-0 flex-1 cursor-pointer" onClick={() => applyThemePreset(preset.id)}>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black truncate">{preset.name}</span>
+                        {isActive && <div className="w-1 h-1 rounded-full bg-google-blue animate-pulse" />}
+                      </div>
+                      <div className="flex gap-1 mt-1">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorAppIdentity }} />
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorActiveTaskDone }} />
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorPresenceNotice }} />
+                      </div>
+                    </div>
+                    <div className={clsx(
+                      "flex items-center gap-1 transition-opacity",
+                      isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                    )}>
+                      {isActive && (
+                        <button 
+                          onClick={() => updateThemePreset(preset.id)}
+                          className="p-1.5 hover:bg-google-green/10 text-google-green rounded-md transition-colors"
+                          title="Update Snapshot with Current Settings"
+                        >
+                          <Save className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      {!isActive && (
+                        <button 
+                          onClick={() => applyThemePreset(preset.id)}
+                          className="p-1.5 hover:bg-google-blue/10 text-google-blue rounded-md transition-colors"
+                          title="Apply Preset"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => deleteThemePreset(preset.id)}
+                        className="p-1.5 hover:bg-google-red/10 text-google-red rounded-md transition-colors"
+                        title="Delete Preset"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button 
-                      onClick={() => applyThemePreset(preset.id)}
-                      className="p-1.5 hover:bg-google-blue/10 text-google-blue rounded-md transition-colors"
-                      title="Apply Preset"
-                    >
-                      <Check className="w-3.5 h-3.5" />
-                    </button>
-                    <button 
-                      onClick={() => deleteThemePreset(preset.id)}
-                      className="p-1.5 hover:bg-google-red/10 text-google-red rounded-md transition-colors"
-                      title="Delete Preset"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
               {themePresets.length === 0 && (
                 <p className="text-[9px] text-center text-gray-500 italic py-2">No snapshots saved yet.</p>
               )}
@@ -272,7 +324,10 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
 
       {/* Resize Handle */}
       {!isMinimized && (
-        <div className="absolute bottom-1 right-1 cursor-nwse-resize text-gray-300 dark:text-gray-700">
+        <div 
+          onMouseDown={handleResizeMouseDown}
+          className="absolute bottom-1 right-1 cursor-nwse-resize text-gray-300 dark:text-gray-700 hover:text-google-blue transition-colors"
+        >
           <GripHorizontal className="w-4 h-4 rotate-45" />
         </div>
       )}
