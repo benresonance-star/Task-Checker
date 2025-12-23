@@ -108,7 +108,8 @@ The system features a robust sync engine:
 ### Real-Time Collaboration
 - **Presence Tracking**: Integrated "Collaborative Presence" system. Users can see in real-time which tasks their teammates are focused on via avatar badges. **In the checklist, presence avatars are positioned to the left of the 'Add to Sidebar' icon and utilize the Google Yellow theme for consistent identification.**
 - **Conflict Prevention**: Visual **pulsing effect** on task outlines if two or more users have the same task active simultaneously.
-- **Work Session Reordering**: The "My Session" sidebar supports fluid **Drag & Drop reordering** (powered by `dnd-kit`) for custom session planning.
+    - **Work Session Reordering**: The "My Session" sidebar supports fluid **Drag & Drop reordering** (powered by `dnd-kit`) for custom session planning.
+    - **Personal Scratchpad (My Notes)**: A modular widget on the dashboard for personal and project-linked tasks. Supports rich text editing, category assignments, and **Priority flagging**. Priority items feature a **soft warm red background** and a **Flag icon** for high-visibility focus.
 - **Completed Task Feedback**: 
   - **Active State**: Pulsing green card (`animate-pulse`) with a **thumbs up** icon on the completion button.
   - **Deactivated State**: Retains a **softer, lighter green background** to distinguish from pending tasks while maintaining visual hierarchy.

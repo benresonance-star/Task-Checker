@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
-import { Plus, Trash2, CheckCircle2, Circle, Clock, X, Bold, List, ListOrdered, GripVertical } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, Circle, Clock, X, Bold, List, ListOrdered, GripVertical, Flag } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -29,6 +29,7 @@ export const ScratchpadWidget: React.FC = () => {
     projects,
     addScratchpadTask, 
     toggleScratchpadTask, 
+    toggleScratchpadPriority,
     updateScratchpadTask,
     deleteScratchpadTask, 
     reorderScratchpad,
@@ -241,6 +242,7 @@ export const ScratchpadWidget: React.FC = () => {
                     availableCategories={availableCategories}
                     onStartEditing={startEditing}
                     onToggle={toggleScratchpadTask}
+                    onTogglePriority={toggleScratchpadPriority}
                     onDelete={deleteScratchpadTask}
                     onSave={saveEdit}
                     onCancel={cancelEdit}
@@ -265,6 +267,7 @@ interface SortableItemProps {
   availableCategories: string[];
   onStartEditing: (task: any) => void;
   onToggle: (id: string) => void;
+  onTogglePriority: (id: string) => void;
   onDelete: (id: string) => void;
   onSave: () => void;
   onCancel: () => void;
@@ -280,6 +283,7 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
   availableCategories,
   onStartEditing,
   onToggle,
+  onTogglePriority,
   onDelete,
   onSave,
   onCancel,
@@ -310,14 +314,14 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
       ref={setNodeRef}
       style={{
         ...style,
-        backgroundColor: isEditing ? undefined : (task.completed ? undefined : (task.category === 'Personal' ? 'var(--note-personal-bg)' : 'var(--note-project-bg)'))
+        backgroundColor: isEditing ? undefined : (task.completed ? undefined : (task.priority ? 'var(--note-priority-bg)' : (task.category === 'Personal' ? 'var(--note-personal-bg)' : 'var(--note-project-bg)')))
       }}
       className={clsx(
         "group flex flex-col gap-2 p-3 rounded-2xl border transition-all animate-in fade-in slide-in-from-right-2 duration-200",
         isEditing ? "bg-blue-50/50 dark:bg-blue-900/10 border-google-blue ring-2 ring-google-blue/20" :
         task.completed 
           ? "bg-gray-50/50 dark:bg-white/5 border-transparent opacity-60" 
-          : "border-transparent shadow-sm hover:shadow-md"
+          : (task.priority ? "border-red-200 dark:border-red-900/30 shadow-md" : "border-transparent shadow-sm hover:shadow-md")
       )}
     >
       <div className="flex items-start gap-3">
@@ -386,12 +390,25 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
         </div>
 
         {!isEditing && (
-          <button
-            onClick={() => onDelete(task.id)}
-            className="p-1 text-gray-300 hover:text-google-red opacity-0 group-hover:opacity-100 transition-all shrink-0 mt-0.5"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex flex-col gap-1 shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-all">
+            <button
+              onClick={() => onTogglePriority(task.id)}
+              className={clsx(
+                "p-1 transition-colors",
+                task.priority ? "text-google-red" : "text-gray-300 hover:text-google-red"
+              )}
+              title="Toggle Priority"
+            >
+              <Flag className={clsx("w-3.5 h-3.5", task.priority && "fill-current")} />
+            </button>
+            <button
+              onClick={() => onDelete(task.id)}
+              className="p-1 text-gray-300 hover:text-google-red"
+              title="Delete Note"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
         )}
       </div>
     </div>

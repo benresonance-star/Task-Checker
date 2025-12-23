@@ -103,8 +103,9 @@ interface TasklistState {
   
   // Scratchpad
   addScratchpadTask: (text: string, category: string) => Promise<void>;
-  updateScratchpadTask: (id: string, updates: { text?: string; category?: string }) => Promise<void>;
+  updateScratchpadTask: (id: string, updates: { text?: string; category?: string; priority?: boolean }) => Promise<void>;
   toggleScratchpadTask: (id: string) => Promise<void>;
+  toggleScratchpadPriority: (id: string) => Promise<void>;
   deleteScratchpadTask: (id: string) => Promise<void>;
   reorderScratchpad: (newScratchpad: ScratchpadItem[]) => Promise<void>;
   clearCompletedScratchpad: (category: string) => Promise<void>;
@@ -173,6 +174,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--notes-border', settings.colorNotesBorder);
     root.style.setProperty('--note-personal-bg', settings.colorNotePersonalBg);
     root.style.setProperty('--note-project-bg', settings.colorNoteProjectBg);
+    root.style.setProperty('--note-priority-bg', settings.colorNotePriorityBg);
     root.style.setProperty('--checklist-bg', settings.colorChecklistBg);
     root.style.setProperty('--checklist-border', settings.colorChecklistBorder);
     root.style.setProperty('--metadata-card-bg', settings.colorMetadataCardBg);
@@ -233,6 +235,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorNotesBorder: oldSettings.colorNotesBorder || oldSettings.colorProjectInfoBorder || '#BFDBFE',
       colorNotePersonalBg: oldSettings.colorNotePersonalBg || (oldSettings.mode === 'dark' ? '#423b24' : '#fff9db'),
       colorNoteProjectBg: oldSettings.colorNoteProjectBg || (oldSettings.mode === 'dark' ? '#422f1c' : '#fff4e6'),
+      colorNotePriorityBg: oldSettings.colorNotePriorityBg || (oldSettings.mode === 'dark' ? '#421c1c' : '#fff0f0'),
       colorChecklistBg: oldSettings.colorChecklistBg || 'rgba(239, 246, 255, 0.5)',
       colorChecklistBorder: oldSettings.colorChecklistBorder || '#DBEAFE',
       colorMetadataCardBg: oldSettings.colorMetadataCardBg || 'rgba(255, 255, 255, 0.8)',
@@ -275,6 +278,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorNotesBorder: isDark ? '#334155' : '#BFDBFE',
     colorNotePersonalBg: isDark ? '#423b24' : '#fff9db',
     colorNoteProjectBg: isDark ? '#422f1c' : '#fff4e6',
+    colorNotePriorityBg: isDark ? '#421c1c' : '#fff0f0',
     colorChecklistBg: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(239, 246, 255, 0.5)',
     colorChecklistBorder: isDark ? '#1e293b' : '#DBEAFE',
     colorMetadataCardBg: isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.8)',
@@ -407,6 +411,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorNotesBorder: '#BFDBFE',
       colorNotePersonalBg: '#fff9db',
       colorNoteProjectBg: '#fff4e6',
+      colorNotePriorityBg: '#fff0f0',
       colorChecklistBg: 'rgba(239, 246, 255, 0.5)',
       colorChecklistBorder: '#DBEAFE',
       colorMetadataCardBg: 'rgba(255, 255, 255, 0.8)',
@@ -444,6 +449,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorNotesBorder: '#334155',
       colorNotePersonalBg: '#423b24',
       colorNoteProjectBg: '#422f1c',
+      colorNotePriorityBg: '#421c1c',
       colorChecklistBg: 'rgba(30, 41, 59, 0.5)',
       colorChecklistBorder: '#1e293b',
       colorMetadataCardBg: 'rgba(0, 0, 0, 0.4)',
@@ -888,6 +894,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
         text,
         category,
         completed: false,
+        priority: false,
         createdAt: Date.now()
       };
 
@@ -911,6 +918,16 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
 
       const scratchpad = currentUser.scratchpad.map(item => 
         item.id === id ? { ...item, completed: !item.completed } : item
+      );
+      await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
+    },
+
+    toggleScratchpadPriority: async (id) => {
+      const { currentUser } = get();
+      if (!currentUser || !currentUser.scratchpad) return;
+
+      const scratchpad = currentUser.scratchpad.map(item => 
+        item.id === id ? { ...item, priority: !item.priority } : item
       );
       await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
     },

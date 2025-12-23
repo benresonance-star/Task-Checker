@@ -200,6 +200,7 @@ export interface ThemeSettings {
   colorNotesBorder: string;
   colorNotePersonalBg: string;
   colorNoteProjectBg: string;
+  colorNotePriorityBg: string;
   colorChecklistBg: string;
   colorChecklistBorder: string;
   colorMetadataCardBg: string;
@@ -253,6 +254,7 @@ export interface ScratchpadItem {
   id: string;
   text: string;
   completed: boolean;
+  priority: boolean;
   category: string;
   createdAt: number;
 }
