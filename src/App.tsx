@@ -650,8 +650,19 @@ function App() {
       }
       return null;
     };
-    return searchTasks((mode === 'master' ? activeMaster : activeInstance)?.sections || []);
-  }, [editingTaskId, mode, activeMaster, activeInstance]);
+
+    // First search active master or instance
+    let task = searchTasks((mode === 'master' ? activeMaster : activeInstance)?.sections || []);
+    if (task) return task;
+
+    // If not found (e.g. on Dashboard), search through ALL instances
+    for (const inst of instances) {
+      task = searchTasks(inst.sections);
+      if (task) return task;
+    }
+
+    return null;
+  }, [editingTaskId, mode, activeMaster, activeInstance, instances]);
 
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [showDeleteProjectConfirm, setShowDeleteProjectConfirm] = useState(false);

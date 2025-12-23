@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { theme } from '../../styles/theme';
-import { LayoutGrid, Target, Zap, Play, Pause, RotateCcw, ThumbsUp, CheckCircle2, X, StickyNote } from 'lucide-react';
+import { LayoutGrid, Target, Zap, Play, Pause, RotateCcw, ThumbsUp, CheckCircle2, X, FileText } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useNavigate } from 'react-router-dom';
 import { Music } from 'lucide-react';
@@ -298,7 +298,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                         )}
                         title="Open Task Info"
                       >
-                        <StickyNote className={clsx("w-10 h-10", (focusData.task.notes || focusData.task.userNotes || focusData.task.files?.length || focusData.task.userFiles?.length) && "fill-current")} />
+                        <FileText className={clsx("w-10 h-10", (focusData.task.notes || focusData.task.userNotes || focusData.task.files?.length || focusData.task.userFiles?.length) && "fill-current")} />
                       </button>
                     </div>
 
