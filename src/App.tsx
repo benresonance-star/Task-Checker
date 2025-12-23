@@ -10,6 +10,7 @@ import { MasterTasklist, Section, Subsection, Complexity, Task } from './types';
 import { generateUUID } from './utils/uuid';
 import { auth } from './lib/firebase';
 import { ProjectDashboard } from './components/project/ProjectDashboard';
+import { FocusDashboard } from './components/dashboard/FocusDashboard';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
@@ -692,12 +693,14 @@ function App() {
 
     const path = location.pathname;
     if (path === '/' || path === '') {
-      navigate(isAdmin ? '/master' : '/project', { replace: true });
+      navigate('/dashboard', { replace: true });
       return;
     }
 
     // Mode sync
-    if (path.startsWith('/master')) {
+    if (path.startsWith('/dashboard')) {
+      if (mode !== 'project') setMode('project'); // Keep project mode state for sidebar logic
+    } else if (path.startsWith('/master')) {
       if (mode !== 'master') setMode('master');
     } else if (path.startsWith('/project')) {
       if (mode !== 'project') setMode('project');
@@ -1128,6 +1131,22 @@ function App() {
           {isMobileMenuOpen && (
             <div className={theme.components.layout.mobileMenu}>
               <nav className="p-4 flex flex-col gap-2">
+                <button
+                  onClick={() => {
+                    navigate('/dashboard');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={clsx(
+                    "flex items-center gap-3 p-3 rounded-lg font-bold text-sm transition-colors",
+                    location.pathname === '/dashboard' ? "bg-google-blue text-white" : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                  )}
+                >
+                  <LayoutGrid className="w-5 h-5" />
+                  <span>My Dashboard</span>
+                </button>
+
+                <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
+
                 {/* Mobile Profile Card */}
                 <div className="flex items-center gap-3 px-4 py-3 bg-gray-100 dark:bg-black/40 rounded-card border border-gray-200 dark:border-gray-700 mb-2">
                   <div className="w-10 h-10 rounded-full bg-google-blue/10 flex items-center justify-center text-google-blue"><UserCircle2 className="w-7 h-7" /></div>
@@ -1151,16 +1170,29 @@ function App() {
 
                 <div className="h-px bg-gray-200 dark:bg-gray-700 mb-2" />
 
+                <button
+                  onClick={() => {
+                    navigate('/dashboard');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center justify-between px-4 py-3 rounded-button transition-colors ${location.pathname === '/dashboard' ? "bg-blue-50 text-google-blue dark:bg-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+                >
+                  <div className="flex items-center gap-3"><LayoutGrid className="w-5 h-5" /><span className="font-bold">My Dashboard</span></div>
+                  {location.pathname === '/dashboard' && <div className="w-1.5 h-1.5 rounded-full bg-google-blue" />}
+                </button>
+
+                <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
+
             <button 
               onClick={() => { 
                 const lastId = localStorage.getItem('lastActiveProjectId');
                 navigate(lastId ? `/project/${lastId}` : '/project'); 
                 setIsMobileMenuOpen(false); 
               }} 
-              className={`flex items-center justify-between px-4 py-3 rounded-button transition-colors ${mode === 'project' ? "bg-blue-50 text-google-blue dark:bg-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+              className={`flex items-center justify-between px-4 py-3 rounded-button transition-colors ${mode === 'project' && location.pathname !== '/dashboard' ? "bg-blue-50 text-google-blue dark:bg-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
             >
-              <div className="flex items-center gap-3"><LayoutGrid className="w-5 h-5" /><span className="font-bold">Projects</span></div>
-              {mode === 'project' && <div className="w-1.5 h-1.5 rounded-full bg-google-blue" />}
+              <div className="flex items-center gap-3"><Target className="w-5 h-5" /><span className="font-bold">Projects</span></div>
+              {mode === 'project' && location.pathname !== '/dashboard' && <div className="w-1.5 h-1.5 rounded-full bg-google-blue" />}
             </button>
             {isAdmin && (
               <button 
@@ -1251,16 +1283,28 @@ function App() {
 
             <nav className="flex flex-col gap-1">
               <button 
+                onClick={() => navigate('/dashboard')} 
+                className={clsx(
+                  theme.components.nav.item,
+                  location.pathname === '/dashboard' ? theme.components.nav.itemActive : theme.components.nav.itemInactive
+                )}
+              >
+                <LayoutGrid className="w-5 h-5" /><span className="font-medium">My Dashboard</span>
+              </button>
+
+              <div className="h-px bg-gray-200 dark:bg-gray-700 my-2 mx-3" />
+
+              <button 
                 onClick={() => {
                   const lastId = localStorage.getItem('lastActiveProjectId');
                   navigate(lastId ? `/project/${lastId}` : '/project');
                 }} 
                 className={clsx(
                   theme.components.nav.item,
-                  mode === 'project' ? theme.components.nav.itemActive : theme.components.nav.itemInactive
+                  mode === 'project' && location.pathname !== '/dashboard' ? theme.components.nav.itemActive : theme.components.nav.itemInactive
                 )}
               >
-                <LayoutGrid className="w-5 h-5" /><span className="font-medium">Projects</span>
+                <Target className="w-5 h-5" /><span className="font-medium">Projects</span>
               </button>
               {isAdmin && (
                 <button 
@@ -1326,138 +1370,144 @@ function App() {
 
       {/* Main Content */}
       <main className={theme.components.layout.mainContent}>
-        <header className={theme.components.layout.contentHeader}>
-          <div className="flex items-center justify-between md:justify-start gap-3 w-full md:w-auto">
-            <div className="flex items-center gap-3">
-              {mode === 'master' ? (
-                <CheckCircle2 className="w-8 h-8 text-google-blue" />
-              ) : (
-                <LayoutGrid className="w-8 h-8 text-google-blue" />
-              )}
-              <div>
-                <h2 className="text-2xl font-black">{mode === 'master' ? 'Checklist Templates' : 'Projects'}</h2>
-                {mode === 'master' && (
-                  <p className="text-gray-700 dark:text-gray-300 text-sm font-medium">Manage checklist templates</p>
+        {location.pathname !== '/dashboard' && (
+          <header className={theme.components.layout.contentHeader}>
+            <div className="flex items-center justify-between md:justify-start gap-3 w-full md:w-auto">
+              <div className="flex items-center gap-3">
+                {mode === 'master' ? (
+                  <CheckCircle2 className="w-8 h-8 text-google-blue" />
+                ) : (
+                  <LayoutGrid className="w-8 h-8 text-google-blue" />
                 )}
+                <div>
+                  <h2 className="text-2xl font-black">{mode === 'master' ? 'Checklist Templates' : 'Projects'}</h2>
+                  {mode === 'master' && (
+                    <p className="text-gray-700 dark:text-gray-300 text-sm font-medium">Manage checklist templates</p>
+                  )}
+                </div>
               </div>
+
+              {/* Mobile-only New Project Button */}
+              {isAdmin && (
+                <div className="md:hidden">
+                  <Button 
+                    size="sm"
+                    onClick={() => mode === 'master' ? addMaster('New Template') : addProject('New Project')}
+                    className="h-9 px-3 flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" /> 
+                    <span className="text-xs">New</span>
+                  </Button>
+                </div>
+              )}
             </div>
 
-            {/* Mobile-only New Project Button */}
-            {isAdmin && (
-              <div className="md:hidden">
-                <Button 
-                  size="sm"
-                  onClick={() => mode === 'master' ? addMaster('New Template') : addProject('New Project')}
-                  className="h-9 px-3 flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" /> 
-                  <span className="text-xs">New</span>
-                </Button>
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            {mode === 'master' && (
+            <div className="flex items-center gap-2">
+              {mode === 'master' && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setIsTemplatesStacked(!isTemplatesStacked)}
+                      className="h-10 px-3 border border-gray-300 dark:border-gray-700"
+                      title={isTemplatesStacked ? "Switch to Side-by-Side" : "Switch to Stacked View"}
+                    >
+                      {isTemplatesStacked ? <LayoutGrid className="w-5 h-5" /> : <ListOrdered className="w-5 h-5" />}
+                    </Button>
+              )}
+              {/* Desktop-only New Project Button */}
+              {isAdmin && (
+                <div className="hidden md:block">
+                  <Button onClick={() => mode === 'master' ? addMaster('New Template') : addProject('New Project')}>
+                    <Plus className="w-5 h-5" /> New {mode === 'master' ? 'Template' : 'Project'}
+                  </Button>
+                </div>
+              )}
+              {/* Desktop-only My Playlist Button */}
+              {mode === 'project' && (
+                <div className="hidden md:block relative group/playlist">
                   <Button 
                     variant="ghost" 
-                    size="sm" 
-                    onClick={() => setIsTemplatesStacked(!isTemplatesStacked)}
-                    className="h-10 px-3 border border-gray-300 dark:border-gray-700"
-                    title={isTemplatesStacked ? "Switch to Side-by-Side" : "Switch to Stacked View"}
+                    onClick={() => setShowPlaylistSidebar(!showPlaylistSidebar)}
+                    className={clsx(
+                      "h-10 px-4 flex items-center gap-2 border-2 transition-all duration-500 font-bold rounded-button shadow-sm",
+                      showPlaylistSidebar 
+                        ? "opacity-0 pointer-events-none translate-x-4" 
+                        : (currentUser?.actionSet?.length || 0) > 0
+                          ? "bg-google-blue/10 text-google-blue border-google-blue/30 hover:bg-google-blue hover:text-white"
+                          : "bg-white dark:bg-black/40 text-gray-400 border-gray-300 dark:border-gray-700 hover:border-google-blue hover:text-google-blue"
+                    )}
                   >
-                    {isTemplatesStacked ? <LayoutGrid className="w-5 h-5" /> : <ListOrdered className="w-5 h-5" />}
+                    <Music className={clsx("w-4 h-4", (currentUser?.actionSet?.length || 0) > 0 && "animate-pulse")} />
+                    <span>My Session</span>
+                    {(currentUser?.actionSet?.length || 0) > 0 && (
+                      <span className="flex items-center justify-center bg-white dark:bg-google-blue text-google-blue dark:text-gray-300 w-5 h-5 rounded-full text-[10px] font-black ml-1 shadow-sm">
+                        {currentUser?.actionSet?.length}
+                      </span>
+                    )}
                   </Button>
-            )}
-            {/* Desktop-only New Project Button */}
-            {isAdmin && (
-              <div className="hidden md:block">
-                <Button onClick={() => mode === 'master' ? addMaster('New Template') : addProject('New Project')}>
-                  <Plus className="w-5 h-5" /> New {mode === 'master' ? 'Template' : 'Project'}
-                </Button>
-              </div>
-            )}
-            {/* Desktop-only My Playlist Button */}
-            {mode === 'project' && (
-              <div className="hidden md:block relative group/playlist">
-                <Button 
-                  variant="ghost" 
-                  onClick={() => setShowPlaylistSidebar(!showPlaylistSidebar)}
-                  className={clsx(
-                    "h-10 px-4 flex items-center gap-2 border-2 transition-all duration-500 font-bold rounded-button shadow-sm",
-                    showPlaylistSidebar 
-                      ? "opacity-0 pointer-events-none translate-x-4" 
-                      : (currentUser?.actionSet?.length || 0) > 0
-                        ? "bg-google-blue/10 text-google-blue border-google-blue/30 hover:bg-google-blue hover:text-white"
-                        : "bg-white dark:bg-black/40 text-gray-400 border-gray-300 dark:border-gray-700 hover:border-google-blue hover:text-google-blue"
-                  )}
-                >
-                  <Music className={clsx("w-4 h-4", (currentUser?.actionSet?.length || 0) > 0 && "animate-pulse")} />
-                  <span>My Session</span>
-                  {(currentUser?.actionSet?.length || 0) > 0 && (
-                    <span className="flex items-center justify-center bg-white dark:bg-google-blue text-google-blue dark:text-gray-300 w-5 h-5 rounded-full text-[10px] font-black ml-1 shadow-sm">
-                      {currentUser?.actionSet?.length}
-                    </span>
-                  )}
-                </Button>
-              </div>
-            )}
-          </div>
-        </header>
+                </div>
+              )}
+            </div>
+          </header>
+        )}
 
-        {/* Selection Area */}
-        <div className={clsx("flex mb-8", isTemplatesStacked && mode === 'master' ? "flex-col gap-3" : "flex-wrap gap-2")}>
-          {mode === 'master' ? (
-            masters.map((m, idx) => (
-              <div key={m.id} className={clsx("flex items-center gap-2", isTemplatesStacked ? "w-full max-w-2xl" : "contents")}>
-                <button 
-                  onClick={() => navigate(`/master/${m.id}`)} 
-                  className={clsx(
-                    theme.components.nav.pill,
-                    isTemplatesStacked ? "flex-1 rounded-2xl py-4 px-6" : "rounded-full",
-                    activeMaster?.id === m.id ? theme.components.nav.pillActiveBlue : theme.components.nav.pillInactive
-                  )}
-                >
-                  {m.title}
-                </button>
-                {isTemplatesStacked && (
-                  <div className="flex flex-col gap-1">
+        {location.pathname === '/dashboard' ? (
+          <FocusDashboard />
+        ) : (
+          <>
+            {/* Selection Area */}
+            <div className={clsx("flex mb-8", isTemplatesStacked && mode === 'master' ? "flex-col gap-3" : "flex-wrap gap-2")}>
+              {mode === 'master' ? (
+                masters.map((m, idx) => (
+                  <div key={m.id} className={clsx("flex items-center gap-2", isTemplatesStacked ? "w-full max-w-2xl" : "contents")}>
                     <button 
-                      onClick={(e) => { e.stopPropagation(); moveMaster(m.id, 'up'); }}
-                      disabled={idx === 0}
-                      className="p-1 text-gray-400 hover:text-google-blue disabled:opacity-30 disabled:hover:text-gray-400 transition-colors"
+                      onClick={() => navigate(`/master/${m.id}`)} 
+                      className={clsx(
+                        theme.components.nav.pill,
+                        isTemplatesStacked ? "flex-1 rounded-2xl py-4 px-6" : "rounded-full",
+                        activeMaster?.id === m.id ? theme.components.nav.pillActiveBlue : theme.components.nav.pillInactive
+                      )}
                     >
-                      <ChevronUp className="w-5 h-5" />
+                      {m.title}
                     </button>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); moveMaster(m.id, 'down'); }}
-                      disabled={idx === masters.length - 1}
-                      className="p-1 text-gray-400 hover:text-google-blue disabled:opacity-30 disabled:hover:text-gray-400 transition-colors"
-                    >
-                      <ChevronDown className="w-5 h-5" />
-                    </button>
+                    {isTemplatesStacked && (
+                      <div className="flex flex-col gap-1">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); moveMaster(m.id, 'up'); }}
+                          disabled={idx === 0}
+                          className="p-1 text-gray-400 hover:text-google-blue disabled:opacity-30 disabled:hover:text-gray-400 transition-colors"
+                        >
+                          <ChevronUp className="w-5 h-5" />
+                        </button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); moveMaster(m.id, 'down'); }}
+                          disabled={idx === masters.length - 1}
+                          className="p-1 text-gray-400 hover:text-google-blue disabled:opacity-30 disabled:hover:text-gray-400 transition-colors"
+                        >
+                          <ChevronDown className="w-5 h-5" />
+                        </button>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            ))
-          ) : (
-            projects.map(p => (
-              <button 
-                key={p.id} 
-                onClick={() => navigate(`/project/${p.id}`)} 
-                className={clsx(
-                  theme.components.nav.pill,
-                  activeProject?.id === p.id ? theme.components.nav.pillActiveGreen : theme.components.nav.pillInactive
-                )}
-              >
-                {p.name}
-              </button>
-            ))
-          )}
-        </div>
+                ))
+              ) : (
+                projects.map(p => (
+                  <button 
+                    key={p.id} 
+                    onClick={() => navigate(`/project/${p.id}`)} 
+                    className={clsx(
+                      theme.components.nav.pill,
+                      activeProject?.id === p.id ? theme.components.nav.pillActiveGreen : theme.components.nav.pillInactive
+                    )}
+                  >
+                    {p.name}
+                  </button>
+                ))
+              )}
+            </div>
 
-        {/* Dynamic View based on selection */}
-        {mode === 'project' && activeProject && (
+            {/* Dynamic View based on selection */}
+            {mode === 'project' && activeProject && (
           <div className="w-full px-0 sm:px-2 md:px-4 flex flex-col gap-8 mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex-1 min-w-0">
@@ -1683,7 +1733,9 @@ function App() {
             </div>
           </div>
         )}
-      </main>
+      </>
+    )}
+  </main>
 
       {/* Playlist Sidebar (The "Now Playing" Tray) */}
       {mode === 'project' && (

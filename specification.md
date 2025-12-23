@@ -60,7 +60,11 @@ The system features a robust sync engine:
 - **Time Recording**: Automatically records exact time taken if a timer was used.
 - **Active Focus Tracking**: Selected tasks feature a **high-saturation focus ring (4px)** and a pulsing outline when multiple users are present.
 
-### 6. Branding & Live Style System
+### 6. Checklist Deletion Safety
+- **In-App Confirmation**: Removing a checklist instance from a project utilizes a custom, high-visibility red modal instead of a system `confirm()` dialog.
+- **Data Loss Warning**: The modal explicitly warns: *"If you delete this checklist any work done on it will also be lost,"* preventing accidental removal of progress.
+
+### 7. Branding & Live Style System
 - **Branding Console**: A floating, draggable, and resizable HUD available to admins. It allows real-time adjustment of domain-specific brand elements (Primary Identity, Task Done Highlights, Completed States, etc.), UI geometry (Radii), and **Dashboard Layouts** (splitting controls for Project Info panels vs Active Checklist backgrounds).
 - **Style Snapshots (Theme Library)**: Admins can capture the current brand styling and save it as a named snapshot (e.g., "Happy Mode"). Presets support **Active Style Tracking**, highlighting the currently applied theme and allowing for **Incremental Updates** (overwriting an existing snapshot with new tweaks) via a dedicated sync icon.
 - **Smooth Interaction Engine**: Utilizes hardware-accelerated `translate3d` and `requestAnimationFrame` for buttery-smooth window movement and resizing. Transitions are dynamically disabled during active interactions to eliminate "input lag."
@@ -269,8 +273,9 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > - **Admin Simulation Mode**: Persistent toggle for admins to simulate the "Viewer" role with pulsing orange indicators and mobile header alerts.
 > - **Administrative Session Controls**: User management interface with 'Deactivate Current Task' (ShieldOff) and 'Clear Users Session List' (Eraser) buttons using custom in-app modals for all users.
 > - **Two-Stage Project Deletion**: Secure deletion workflow with a secondary 'Last Chance' warning and complete cloud storage cleanup.
+> - **Checklist Removal Safety**: In-app confirmation modal for removing checklists from projects, warning about potential work loss.
 > - Multi-format Import/Export (JSON, ZIP, CSV). **Hide Export on mobile.**
-|> - Intelligent Plain Text parser for hierarchical lists.
+> - Intelligent Plain Text parser for hierarchical lists.
 |> - **Branding Console**: Floating, resizable HUD for live-adjusting brand colors and corner radii with real-time sync and iterative snapshot updates.
 |> - **Dynamic Versioning**: Link the UI version display directly to the `version` field in `package.json`.
 |> - Personalized UI Folding: Store section expand/collapse states in localStore for individual workspace control.
@@ -285,4 +290,4 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 23, 2025 (v1.3.1 - Enhanced Branding & Dynamic Versioning)*
+*Updated: December 23, 2025 (v1.3.2 - In-App Confirmation for Checklist Deletion)*
