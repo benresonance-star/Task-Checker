@@ -37,12 +37,18 @@ export const ScratchpadWidget: React.FC = () => {
 
   const [activeCategory, setActiveCategory] = useState('All');
   const [selectedCategory, setSelectedCategory] = useState('Personal');
+  const [showDone, setShowDone] = useState(false);
   
   // Inline Edit State
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingCategory, setEditingCategory] = useState('');
 
   const scratchpad = currentUser?.scratchpad || [];
+  const totalInView = useMemo(() => {
+    return activeCategory === 'All' ? scratchpad : scratchpad.filter(t => t.category === activeCategory);
+  }, [scratchpad, activeCategory]);
+
+  const hasDoneTasks = totalInView.some(t => t.completed);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -96,11 +102,14 @@ export const ScratchpadWidget: React.FC = () => {
     return Array.from(cats);
   }, [scratchpad]);
 
-  // Filter tasks based on active category
+  // Filter tasks based on active category and visibility of done tasks
   const filteredTasks = useMemo(() => {
-    if (activeCategory === 'All') return scratchpad;
-    return scratchpad.filter(t => t.category === activeCategory);
-  }, [scratchpad, activeCategory]);
+    let tasks = activeCategory === 'All' ? scratchpad : scratchpad.filter(t => t.category === activeCategory);
+    if (!showDone) {
+      tasks = tasks.filter(t => !t.completed);
+    }
+    return tasks;
+  }, [scratchpad, activeCategory, showDone]);
 
   const handleAddTask = () => {
     if (!addEditor) return;
@@ -142,12 +151,15 @@ export const ScratchpadWidget: React.FC = () => {
     <div className="flex flex-col h-full space-y-4">
       <div className="flex items-center justify-between px-2">
         <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">My Notes</h3>
-        {completedCount > 0 && (
+        {hasDoneTasks && (
           <button 
-            onClick={() => clearCompletedScratchpad(activeCategory)}
-            className="text-[9px] font-black uppercase text-google-blue hover:underline tracking-widest"
+            onClick={() => setShowDone(!showDone)}
+            className={clsx(
+              "text-[9px] font-black uppercase tracking-widest transition-all",
+              showDone ? "text-google-green" : "text-google-blue hover:underline"
+            )}
           >
-            Clear Done
+            {showDone ? "Hide Done" : "Show Done"}
           </button>
         )}
       </div>
