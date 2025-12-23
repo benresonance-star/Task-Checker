@@ -1,13 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
-import { theme } from '../../styles/theme';
-import { Plus, Trash2, CheckCircle2, Circle, Clock, Filter, X } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, Circle, Clock } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export const ScratchpadWidget: React.FC = () => {
   const { 
     currentUser, 
-    projects,
     addScratchpadTask, 
     toggleScratchpadTask, 
     deleteScratchpadTask, 
@@ -16,7 +14,6 @@ export const ScratchpadWidget: React.FC = () => {
 
   const [inputText, setInputText] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
-  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
   const scratchpad = currentUser?.scratchpad || [];
 
