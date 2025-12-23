@@ -1310,7 +1310,7 @@ function App() {
                   </button>
                 </>
               )}
-              <Button variant="ghost" size="sm" className="justify-start h-9 px-3" onClick={toggleDarkMode}>
+              <Button variant="ghost" size="sm" className="justify-start h-9 px-3" onClick={() => toggleDarkMode()}>
                 {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}<span className="text-xs">Toggle Mode</span>
               </Button>
               <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
