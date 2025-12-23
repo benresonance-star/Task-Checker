@@ -162,24 +162,6 @@ export const ScratchpadWidget: React.FC = () => {
       </div>
 
       <div className="flex-1 bg-[var(--notes-bg)] rounded-[2rem] border-2 border-[var(--notes-border)] flex flex-col overflow-hidden transition-all">
-        {/* Category Filter Tabs */}
-        <div className="flex items-center gap-2 p-4 border-b border-gray-200/50 dark:border-gray-800/50 overflow-x-auto no-scrollbar">
-          {filterCategories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={clsx(
-                "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shrink-0",
-                activeCategory === cat 
-                  ? "bg-google-blue text-white shadow-md" 
-                  : "bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-google-blue"
-              )}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
         {/* Quick Input & Category Picker */}
         <div className="p-4 space-y-3">
           <div className="flex flex-col gap-2 bg-white/50 dark:bg-black/20 border-2 border-gray-200 dark:border-gray-700 rounded-2xl p-2 transition-all focus-within:border-google-blue">
@@ -211,6 +193,24 @@ export const ScratchpadWidget: React.FC = () => {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Category Filter Tabs (Relocated under text entry) */}
+        <div className="flex items-center gap-2 px-4 pb-4 overflow-x-auto no-scrollbar">
+          {filterCategories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={clsx(
+                "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shrink-0",
+                activeCategory === cat 
+                  ? "bg-google-blue text-white shadow-md" 
+                  : "bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-google-blue"
+              )}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
 
         {/* Task List */}

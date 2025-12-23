@@ -1479,9 +1479,9 @@ function App() {
           </header>
         )}
 
-        {location.pathname === '/dashboard' ? (
-          <FocusDashboard />
-        ) : (
+            {location.pathname === '/dashboard' ? (
+              <FocusDashboard onOpenNotes={(taskId) => setEditingTaskId(taskId)} />
+            ) : (
           <>
             {/* Selection Area */}
             <div className={clsx("flex mb-8", isTemplatesStacked && mode === 'master' ? "flex-col gap-3" : "flex-wrap gap-2")}>
