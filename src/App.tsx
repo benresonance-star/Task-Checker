@@ -401,7 +401,7 @@ const SidebarTaskItem = ({
             <button 
               onClick={(e) => {
                 e.stopPropagation();
-                toggleTask(task.id);
+                toggleTask(task.id, item.instanceId);
               }}
               className={clsx(
                 theme.components.taskDoneButton.base,

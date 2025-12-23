@@ -60,7 +60,7 @@ interface TasklistState {
   // Hierarchy Management
   toggleSection: (sectionId: string) => Promise<void>;
   toggleSubsection: (subsectionId: string) => Promise<void>;
-  toggleTask: (taskId: string) => Promise<void>;
+  toggleTask: (taskId: string, instanceId?: string) => Promise<void>;
   updateTaskNotes: (taskId: string, notes: string, isUserNotes?: boolean) => Promise<void>;
   updateTaskGuide: (taskId: string, guide: Partial<TaskGuide>) => Promise<void>;
   addTaskFile: (taskId: string, file: File, isUserFile?: boolean) => Promise<void>;
@@ -1313,10 +1313,15 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       }
     },
 
-    toggleTask: async (taskId) => {
-      const { activeInstance } = get();
-      if (!activeInstance) return;
-      const updated = activeInstance.sections.map(s => ({
+    toggleTask: async (taskId, instanceId) => {
+      const { activeInstance, instances } = get();
+      const targetInstance = instanceId 
+        ? instances.find(i => i.id === instanceId)
+        : activeInstance;
+
+      if (!targetInstance) return;
+      
+      const updated = targetInstance.sections.map(s => ({
         ...s,
         subsections: s.subsections.map(ss => ({
           ...ss,
@@ -1328,7 +1333,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
           })
         }))
       }));
-      await updateDoc(doc(db, 'instances', activeInstance.id), sanitize({ sections: updated }));
+      await updateDoc(doc(db, 'instances', targetInstance.id), sanitize({ sections: updated }));
     },
 
     updateTaskNotes: async (taskId, notes, isUserNotes) => {

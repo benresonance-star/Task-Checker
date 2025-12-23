@@ -246,7 +246,7 @@ export const FocusDashboard: React.FC = () => {
 
                               {/* Smaller Done Button */}
                               <button 
-                                onClick={() => toggleTask(focusData.task.id)}
+                                onClick={() => toggleTask(focusData.task.id, focusData.instance.id)}
                                 className={clsx(
                                   "h-16 md:h-20 px-8 md:px-12 rounded-[2rem] flex items-center justify-center gap-3 text-lg md:text-2xl font-black uppercase tracking-[0.15em] transition-all shadow-xl active:scale-[0.98] border-4",
                                   focusData.isMultiUserActive 
