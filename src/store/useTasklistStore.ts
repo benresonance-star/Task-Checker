@@ -500,6 +500,70 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       } else {
         document.documentElement.classList.remove('dark');
       }
+      syncLiveTheme();
+
+      // PUBLIC THEME LISTENERS (Load branding before login)
+      
+      // Theme Settings Listener
+      onSnapshot(doc(db, 'settings', 'theme'), (snapshot) => {
+        const now = Date.now();
+        const { lastLocalThemeUpdate } = get();
+        if (now - lastLocalThemeUpdate < 2000) return;
+
+        if (snapshot.exists()) {
+          const data = snapshot.data();
+          
+          // Handle new dual-mode structure
+          if (data.light && data.dark) {
+            const migratedLight = migrateThemeSettings(data.light);
+            const migratedDark = migrateThemeSettings(data.dark);
+            
+            set({ 
+              themeSettingsLight: migratedLight,
+              themeSettingsDark: migratedDark,
+              activePresetIdLight: data.activePresetIdLight || null,
+              activePresetIdDark: data.activePresetIdDark || null
+            });
+            
+            syncLiveTheme();
+          } else {
+            // Backward compatibility
+            const migrated = migrateThemeSettings(data);
+            const update = {
+              light: migrated,
+              dark: getThemeDefaults(true),
+              activePresetIdLight: null,
+              activePresetIdDark: null
+            };
+            setDoc(doc(db, 'settings', 'theme'), sanitize(update));
+          }
+        } else {
+          syncLiveTheme();
+        }
+      });
+
+      // Theme Presets Listener
+      onSnapshot(collection(db, 'themePresets'), (snapshot) => {
+        const presets = snapshot.docs.map(d => {
+          const data = d.data();
+          const migratedSettings = migrateThemeSettings(data.settings);
+          
+          if (JSON.stringify(data.settings) !== JSON.stringify(migratedSettings)) {
+            updateDoc(doc(db, 'themePresets', d.id), { 
+              settings: sanitize(migratedSettings),
+              updatedAt: Date.now()
+            }).catch(err => console.error('Preset auto-update failed:', err));
+          }
+
+          return { 
+            ...data, 
+            id: d.id, 
+            mode: data.mode || 'light',
+            settings: migratedSettings 
+          } as ThemePreset;
+        });
+        set({ themePresets: presets.sort((a, b) => b.createdAt - a.createdAt) });
+      });
 
       onAuthStateChanged(auth, async (firebaseUser) => {
         if (firebaseUser) {
@@ -570,69 +634,6 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
               const updatedActive = projects.find(p => p.id === active.id);
               if (updatedActive) set({ activeProject: updatedActive });
             }
-          });
-
-          // Theme Settings Listener
-          onSnapshot(doc(db, 'settings', 'theme'), (snapshot) => {
-            const now = Date.now();
-            const { lastLocalThemeUpdate } = get();
-            if (now - lastLocalThemeUpdate < 2000) return;
-
-            if (snapshot.exists()) {
-              const data = snapshot.data();
-              
-              // Handle new dual-mode structure
-              if (data.light && data.dark) {
-                const migratedLight = migrateThemeSettings(data.light);
-                const migratedDark = migrateThemeSettings(data.dark);
-                
-                set({ 
-                  themeSettingsLight: migratedLight,
-                  themeSettingsDark: migratedDark,
-                  activePresetIdLight: data.activePresetIdLight || null,
-                  activePresetIdDark: data.activePresetIdDark || null
-                });
-                
-                syncLiveTheme();
-              } else {
-                // Backward compatibility: Migrate old single-mode theme to both
-                const migrated = migrateThemeSettings(data);
-                const update = {
-                  light: migrated,
-                  dark: getThemeDefaults(true), // Use dark defaults for dark mode if missing
-                  activePresetIdLight: null,
-                  activePresetIdDark: null
-                };
-                setDoc(doc(db, 'settings', 'theme'), sanitize(update));
-              }
-            } else {
-              // Apply defaults if no doc
-              syncLiveTheme();
-            }
-          });
-
-          // Theme Presets Listener
-          onSnapshot(collection(db, 'themePresets'), (snapshot) => {
-            const presets = snapshot.docs.map(d => {
-              const data = d.data();
-              const migratedSettings = migrateThemeSettings(data.settings);
-              
-              // If settings were migrated (old data missing new fields), update the document in DB
-              if (JSON.stringify(data.settings) !== JSON.stringify(migratedSettings)) {
-                updateDoc(doc(db, 'themePresets', d.id), { 
-                  settings: sanitize(migratedSettings),
-                  updatedAt: Date.now()
-                }).catch(err => console.error('Preset auto-update failed:', err));
-              }
-
-              return { 
-                ...data, 
-                id: d.id, 
-                mode: data.mode || 'light', // Default to light if missing
-                settings: migratedSettings 
-              } as ThemePreset;
-            });
-            set({ themePresets: presets.sort((a, b) => b.createdAt - a.createdAt) });
           });
 
           // Instances Listener
