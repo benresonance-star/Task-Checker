@@ -229,14 +229,29 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 onChange={(v) => handleChange('colorSectionIdent', v)} 
               />
               <ColorControl 
+                label="Identification Icon Color" 
+                value={themeSettings.colorSectionIdentIcon} 
+                onChange={(v) => handleChange('colorSectionIdentIcon', v)} 
+              />
+              <ColorControl 
                 label="Planning Header Color" 
                 value={themeSettings.colorSectionPlan} 
                 onChange={(v) => handleChange('colorSectionPlan', v)} 
               />
               <ColorControl 
+                label="Planning Icon Color" 
+                value={themeSettings.colorSectionPlanIcon} 
+                onChange={(v) => handleChange('colorSectionPlanIcon', v)} 
+              />
+              <ColorControl 
                 label="Building Header Color" 
                 value={themeSettings.colorSectionBuild} 
                 onChange={(v) => handleChange('colorSectionBuild', v)} 
+              />
+              <ColorControl 
+                label="Building Icon Color" 
+                value={themeSettings.colorSectionBuildIcon} 
+                onChange={(v) => handleChange('colorSectionBuildIcon', v)} 
               />
             </div>
           </section>

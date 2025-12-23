@@ -155,8 +155,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--metadata-card-bg', settings.colorMetadataCardBg);
     root.style.setProperty('--metadata-card-border', settings.colorMetadataCardBorder);
     root.style.setProperty('--section-ident', settings.colorSectionIdent);
+    root.style.setProperty('--section-ident-icon', settings.colorSectionIdentIcon);
     root.style.setProperty('--section-plan', settings.colorSectionPlan);
+    root.style.setProperty('--section-plan-icon', settings.colorSectionPlanIcon);
     root.style.setProperty('--section-build', settings.colorSectionBuild);
+    root.style.setProperty('--section-build-icon', settings.colorSectionBuildIcon);
     root.style.setProperty('--hierarchy-line', settings.colorHierarchyLine);
 
     root.style.setProperty('--radius-card', `${settings.radiusTaskCard}px`);
@@ -181,8 +184,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorMetadataCardBg: oldSettings.colorMetadataCardBg || 'rgba(255, 255, 255, 0.8)', // white/80
       colorMetadataCardBorder: oldSettings.colorMetadataCardBorder || '#BFDBFE', // blue-200
       colorSectionIdent: oldSettings.colorSectionIdent || '#4285F4', // google-blue
+      colorSectionIdentIcon: oldSettings.colorSectionIdentIcon || '#4285F4', // google-blue
       colorSectionPlan: oldSettings.colorSectionPlan || '#34A853', // google-green
+      colorSectionPlanIcon: oldSettings.colorSectionPlanIcon || '#34A853', // google-green
       colorSectionBuild: oldSettings.colorSectionBuild || '#F97316', // orange-500
+      colorSectionBuildIcon: oldSettings.colorSectionBuildIcon || '#F97316', // orange-500
       colorHierarchyLine: oldSettings.colorHierarchyLine || '#D1D5DB', // gray-300
 
       radiusTaskCard: oldSettings.radiusTaskCard || oldSettings.radiusCard || 20,
@@ -1562,8 +1568,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
         colorMetadataCardBg: 'rgba(255, 255, 255, 0.8)',
         colorMetadataCardBorder: '#BFDBFE',
         colorSectionIdent: '#4285F4',
+        colorSectionIdentIcon: '#4285F4',
         colorSectionPlan: '#34A853',
+        colorSectionPlanIcon: '#34A853',
         colorSectionBuild: '#F97316',
+        colorSectionBuildIcon: '#F97316',
         colorHierarchyLine: '#D1D5DB',
         radiusTaskCard: 20,
         radiusInteractive: 12,

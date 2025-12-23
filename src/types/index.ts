@@ -199,8 +199,11 @@ export interface ThemeSettings {
   colorMetadataCardBg: string;
   colorMetadataCardBorder: string;
   colorSectionIdent: string;
+  colorSectionIdentIcon: string;
   colorSectionPlan: string;
+  colorSectionPlanIcon: string;
   colorSectionBuild: string;
+  colorSectionBuildIcon: string;
   colorHierarchyLine: string;
   radiusTaskCard: number;
   radiusInteractive: number;

@@ -21,8 +21,11 @@
   
   /* Section Category Colors */
   --section-ident: #4285F4;
+  --section-ident-icon: #4285F4;
   --section-plan: #34A853;
+  --section-plan-icon: #34A853;
   --section-build: #F97316;
+  --section-build-icon: #F97316;
   
   /* Hierarchy */
   --hierarchy-line: #D1D5DB;

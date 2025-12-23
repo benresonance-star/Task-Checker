@@ -230,7 +230,7 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
                 <div className="flex flex-col">
                   <span className={theme.components.dashboard.label}>Project Number</span>
                   <div className="flex items-center gap-2 font-black text-gray-600 dark:text-gray-300">
-                    <Hash className="w-4 h-4 text-google-blue" />
+                    <Hash className={clsx("w-4 h-4", theme.components.dashboard.iconIdent)} />
                     {project.projectNumber || 'Not Specified'}
                   </div>
                 </div>
@@ -238,7 +238,7 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
                   <span className={theme.components.dashboard.label}>Client</span>
                   <div className="flex items-center justify-between font-bold text-gray-600 dark:text-gray-300 group/client">
                     <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-google-blue" />
+                      <User className={clsx("w-4 h-4", theme.components.dashboard.iconIdent)} />
                       {project.client || 'Not Specified'}
                     </div>
                     <div className="flex items-center gap-2 opacity-0 group-hover/client:opacity-100 transition-opacity">
@@ -262,7 +262,7 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
                 <div className="flex flex-col">
                   <span className={theme.components.dashboard.label}>Site Address</span>
                   <div className="flex items-start gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
-                    <MapPin className="w-4 h-4 text-google-blue mt-0.5 flex-shrink-0" />
+                    <MapPin className={clsx("w-4 h-4 mt-0.5 flex-shrink-0", theme.components.dashboard.iconIdent)} />
                     <div className="flex flex-col gap-2">
                       <span>{project.address || 'Not Specified'}</span>
                       {project.address && (
@@ -286,14 +286,14 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
                 <div className="flex flex-col">
                   <span className={theme.components.dashboard.label}>Council / Municipality</span>
                   <div className="flex items-center gap-2 font-bold text-gray-600 dark:text-gray-300">
-                    <Building2 className="w-4 h-4 text-google-green" />
+                    <Building2 className={clsx("w-4 h-4", theme.components.dashboard.iconPlan)} />
                     {project.council || 'Not Specified'}
                   </div>
                 </div>
                 <div className="flex flex-col">
                   <span className={theme.components.dashboard.label}>Planning Zone</span>
                   <div className="flex items-center gap-2 font-bold text-gray-600 dark:text-gray-300 text-sm">
-                    <Globe className="w-4 h-4 text-google-green" />
+                    <Globe className={clsx("w-4 h-4", theme.components.dashboard.iconPlan)} />
                     {project.planningZone?.name ? (
                       <div className="flex items-center gap-2">
                         {project.planningZone.name}
@@ -312,7 +312,7 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
                     {project.planningOverlays && project.planningOverlays.length > 0 ? (
                       project.planningOverlays.map(o => (
                         <div key={o.id} className="flex items-center gap-2 text-xs font-bold text-gray-600 dark:text-gray-300">
-                          <Layers className="w-3.5 h-3.5 text-google-green" />
+                          <Layers className={clsx("w-3.5 h-3.5", theme.components.dashboard.iconPlan)} />
                           {o.name}
                           {o.link && (
                             <a href={o.link} target="_blank" rel="noopener noreferrer" className="text-google-blue">
@@ -344,7 +344,7 @@ export const ProjectDashboard = ({ project, currentUser, isAdmin, isEditing, set
                 <div className="flex flex-col">
                   <span className={theme.components.dashboard.label}>NCC Climate Zone</span>
                   <div className="flex items-center gap-2 font-bold text-gray-600 dark:text-gray-300">
-                    <Cloud className="w-4 h-4 text-orange-500" />
+                    <Cloud className={clsx("w-4 h-4", theme.components.dashboard.iconBuild)} />
                     {project.nccClimateZone ? `Zone ${project.nccClimateZone}` : 'Not Specified'}
                   </div>
                 </div>
