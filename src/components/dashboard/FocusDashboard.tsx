@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { theme } from '../../styles/theme';
-import { LayoutGrid, Target, Zap, Clock, Play, Pause, RotateCcw, ThumbsUp, CheckCircle2, ChevronRight, X } from 'lucide-react';
+import { LayoutGrid, Target, Zap, Clock, Play, Pause, RotateCcw, ThumbsUp, CheckCircle2, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useNavigate } from 'react-router-dom';
 
