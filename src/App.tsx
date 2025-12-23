@@ -542,7 +542,8 @@ function App() {
     activeTaskId, setActiveTaskId, updatePresence,
     moveMaster, setLocalExpanded, clearActionSet,
     setTaskTimer, resetTaskTimer, toggleTaskTimer, updateTaskTimer,
-    isDarkMode, toggleDarkMode
+    isDarkMode, toggleDarkMode,
+    showPlaylistSidebar, setShowPlaylistSidebar
   } = useTasklistStore();
   
   const navigate = useNavigate();
@@ -617,13 +618,6 @@ function App() {
   const [isEditingProjectInfo, setIsEditingProjectInfo] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [showAddChecklistModal, setShowAddChecklistModal] = useState(false);
-  const [showPlaylistSidebar, setShowPlaylistSidebar] = useState(() => {
-    return localStorage.getItem('playlist_sidebar_open') === 'true';
-  });
-
-  useEffect(() => {
-    localStorage.setItem('playlist_sidebar_open', showPlaylistSidebar.toString());
-  }, [showPlaylistSidebar]);
 
   const [isChecklistCollapsed, setIsChecklistCollapsed] = useState(() => {
     return localStorage.getItem(`checklist_collapsed_${activeInstance?.id}`) === 'true';

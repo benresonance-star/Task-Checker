@@ -4,6 +4,7 @@ import { theme } from '../../styles/theme';
 import { LayoutGrid, Target, Zap, Clock, Play, Pause, RotateCcw, ThumbsUp, CheckCircle2, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useNavigate } from 'react-router-dom';
+import { Music } from 'lucide-react';
 
 const TomatoIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
@@ -26,6 +27,8 @@ export const FocusDashboard: React.FC = () => {
     toggleTaskTimer,
     setTaskTimer,
     toggleTask,
+    showPlaylistSidebar,
+    setShowPlaylistSidebar
   } = useTasklistStore();
 
   const [showSetTimer, setShowSetTimer] = React.useState(false);
@@ -103,16 +106,40 @@ export const FocusDashboard: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 custom-scrollbar text-[var(--text-primary)]">
-      {/* Header Section */}
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl md:text-4xl font-black tracking-tight flex items-center gap-3 text-[var(--text-heading)]">
-          <LayoutGrid className="w-8 h-8 md:w-10 md:h-10 text-google-blue" />
-          <span>My Dashboard</span>
-        </h1>
-        <p className="text-sm md:text-base font-bold text-[var(--text-secondary)] uppercase tracking-widest ml-11 md:ml-13 opacity-60">
-          Welcome back, {currentUser?.name?.split(' ')[0] || 'User'}
-        </p>
-      </div>
+                  {/* Header Section */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                    <div className="flex flex-col gap-1">
+                      <h1 className="text-2xl md:text-4xl font-black tracking-tight flex items-center gap-3 text-[var(--text-heading)]">
+                        <LayoutGrid className="w-8 h-8 md:w-10 md:h-10 text-google-blue" />
+                        <span>My Dashboard</span>
+                      </h1>
+                      <p className="text-sm md:text-base font-bold text-[var(--text-secondary)] uppercase tracking-widest ml-11 md:ml-13 opacity-60">
+                        Welcome back, {currentUser?.name?.split(' ')[0] || 'User'}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={() => setShowPlaylistSidebar(!showPlaylistSidebar)}
+                        className={clsx(
+                          "h-12 px-6 flex items-center gap-3 border-2 transition-all duration-500 font-black rounded-2xl shadow-lg uppercase tracking-widest text-xs",
+                          showPlaylistSidebar 
+                            ? "opacity-0 pointer-events-none translate-x-4" 
+                            : (currentUser?.actionSet?.length || 0) > 0
+                              ? "bg-google-blue/10 text-google-blue border-google-blue/30 hover:bg-google-blue hover:text-white"
+                              : "bg-white dark:bg-black/40 text-gray-400 border-gray-300 dark:border-gray-700 hover:border-google-blue hover:text-google-blue"
+                        )}
+                      >
+                        <Music className={clsx("w-5 h-5", (currentUser?.actionSet?.length || 0) > 0 && "animate-pulse")} />
+                        <span>My Session</span>
+                        {(currentUser?.actionSet?.length || 0) > 0 && (
+                          <span className="flex items-center justify-center bg-white dark:bg-google-blue text-google-blue dark:text-gray-300 w-5 h-5 rounded-full text-[10px] font-black shadow-sm">
+                            {currentUser?.actionSet?.length}
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                  </div>
 
       {/* Main Bento Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-[var(--text-primary)]">

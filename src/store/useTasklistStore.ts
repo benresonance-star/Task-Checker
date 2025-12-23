@@ -120,6 +120,10 @@ interface TasklistState {
   updateThemePreset: (presetId: string) => Promise<void>;
   deleteThemePreset: (presetId: string) => Promise<void>;
   applyThemePreset: (presetId: string) => Promise<void>;
+
+  // Sidebar persistence
+  showPlaylistSidebar: boolean;
+  setShowPlaylistSidebar: (open: boolean) => void;
 }
 
 export const useTasklistStore = create<TasklistState>()((set, get) => {
@@ -441,6 +445,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     activePresetIdLight: null,
     activePresetIdDark: null,
     activePresetId: null, // Legacy
+    showPlaylistSidebar: localStorage.getItem('playlist_sidebar_open') === 'true',
 
     toggleDarkMode: (val) => {
       const isDark = val !== undefined ? val : !get().isDarkMode;
@@ -452,6 +457,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
         document.documentElement.classList.remove('dark');
       }
       syncLiveTheme();
+    },
+
+    setShowPlaylistSidebar: (open: boolean) => {
+      localStorage.setItem('playlist_sidebar_open', open.toString());
+      set({ showPlaylistSidebar: open });
     },
 
     notify: (message, type) => {
