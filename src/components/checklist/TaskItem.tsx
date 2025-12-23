@@ -92,6 +92,8 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
 
   // Auto-resize textarea on mount to fit title content
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
   React.useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -103,10 +105,10 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
   React.useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const urlTaskId = searchParams.get('task');
-    if (urlTaskId === task.id && textareaRef.current) {
+    if (urlTaskId === task.id && containerRef.current) {
       // Small delay to ensure the project/instance view is fully loaded and expanded
       const timer = setTimeout(() => {
-        textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 1000);
       return () => clearTimeout(timer);
     }
@@ -137,6 +139,7 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
 
   return (
     <div 
+      ref={containerRef}
       onClick={handleTaskClick}
       className={clsx(
         theme.components.checklist.container,
