@@ -133,10 +133,10 @@ The system features a robust sync engine:
 
 ### UI & UX Design Language
 - **Brand Identity**: Logo is a simple white tick inside an orange circle (`#E67E33`). Brand name is stylized as `checkMATE`.
-- **Standardized Radii Scales**: Consistent border-radius tiers defined in `tailwind.config.js`:
-  - **`rounded-button` (12px)**: Interactive elements (buttons, inputs, badges).
-  - **`rounded-card` (20px)**: Content cards (task items, user cards, consultant cards).
-  - **`rounded-container` (32px)**: Major structural blocks (Sections, Task Guide panels, Modals).
+- **Standardized Radii Scales**: Consistent border-radius tiers defined in `tailwind.config.js`, linked to dynamic CSS variables for real-time branding control:
+  - **`rounded-button`**: Interactive elements (buttons, inputs, badges).
+  - **`rounded-card`**: Content cards (task items, user cards, consultant cards).
+  - **`rounded-container`**: Major structural blocks (Sections, Task Guide panels, Modals).
 - **Asset & Icon Governance**:
   - **Icon Size Standard**: Primary action icons (Delete, Export, Reallocate) are standardized to **h-9** (container height) or **w-5 h-5** (standard icon). Mobile focus icons are **w-6 h-6**.
   - **Color Semantic Logic**: 
@@ -269,9 +269,10 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > - **Administrative Session Controls**: User management interface with 'Deactivate Current Task' (ShieldOff) and 'Clear Users Session List' (Eraser) buttons using custom in-app modals for all users.
 > - **Two-Stage Project Deletion**: Secure deletion workflow with a secondary 'Last Chance' warning and complete cloud storage cleanup.
 > - Multi-format Import/Export (JSON, ZIP, CSV). **Hide Export on mobile.**
-> - Intelligent Plain Text parser for hierarchical lists.
-> - **Branding Console**: Floating, resizable HUD for live-adjusting brand colors and corner radii with real-time sync.
-> - Personalized UI Folding: Store section expand/collapse states in localStore for individual workspace control.
+|> - Intelligent Plain Text parser for hierarchical lists.
+|> - **Branding Console**: Floating, resizable HUD for live-adjusting brand colors and corner radii with real-time sync and iterative snapshot updates.
+|> - **Dynamic Versioning**: Link the UI version display directly to the `version` field in `package.json`.
+|> - Personalized UI Folding: Store section expand/collapse states in localStore for individual workspace control.
 > - **Persistent Dashboard**: Implement a project-view layout with a collapsible metadata dashboard organized into Identification, Planning, and Building sections. **Optimize mobile layout with bordered Edit buttons and stacked controls.**
 > - **Add Logic Workflow**: Provide an "+ Add Checklist" modal to select and assign master templates to projects.
 > - **Online Documents**: Implement a project-specific file explorer with Firebase Storage integration, global search, and a recursive "Deep List" view mode. Grid view features "shapes only" icons (amber folders, blue files) for a modern feel.
@@ -283,4 +284,4 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 23, 2025 (v1.3 - Semantic Renaming & Iterative Updates)*
+*Updated: December 23, 2025 (v1.3.1 - Enhanced Branding & Dynamic Versioning)*

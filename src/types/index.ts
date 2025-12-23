@@ -194,6 +194,14 @@ export interface ThemeSettings {
   colorCompletedState: string;
   colorDestructive: string;
   colorPresenceNotice: string;
+  colorDashboardBg: string;
+  colorDashboardBorder: string;
+  colorMetadataCardBg: string;
+  colorMetadataCardBorder: string;
+  colorSectionIdent: string;
+  colorSectionPlan: string;
+  colorSectionBuild: string;
+  colorHierarchyLine: string;
   radiusTaskCard: number;
   radiusInteractive: number;
   radiusMajorModal: number;

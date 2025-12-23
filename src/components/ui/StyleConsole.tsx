@@ -195,6 +195,64 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
           </section>
 
           <section>
+            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">DASHBOARD & WORKSPACE</h3>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <ColorControl 
+                label="Active Checklist Container Background" 
+                value={themeSettings.colorDashboardBg} 
+                onChange={(v) => handleChange('colorDashboardBg', v)} 
+              />
+              <ColorControl 
+                label="Active Checklist Container Outline" 
+                value={themeSettings.colorDashboardBorder} 
+                onChange={(v) => handleChange('colorDashboardBorder', v)} 
+              />
+              <ColorControl 
+                label="Project Info Panel Background" 
+                value={themeSettings.colorMetadataCardBg} 
+                onChange={(v) => handleChange('colorMetadataCardBg', v)} 
+              />
+              <ColorControl 
+                label="Project Info Panel Outline" 
+                value={themeSettings.colorMetadataCardBorder} 
+                onChange={(v) => handleChange('colorMetadataCardBorder', v)} 
+              />
+            </div>
+          </section>
+
+          <section>
+            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">DASHBOARD SECTIONS</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <ColorControl 
+                label="Identification Header Color" 
+                value={themeSettings.colorSectionIdent} 
+                onChange={(v) => handleChange('colorSectionIdent', v)} 
+              />
+              <ColorControl 
+                label="Planning Header Color" 
+                value={themeSettings.colorSectionPlan} 
+                onChange={(v) => handleChange('colorSectionPlan', v)} 
+              />
+              <ColorControl 
+                label="Building Header Color" 
+                value={themeSettings.colorSectionBuild} 
+                onChange={(v) => handleChange('colorSectionBuild', v)} 
+              />
+            </div>
+          </section>
+
+          <section>
+            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">HIERARCHY & CONNECTORS</h3>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <ColorControl 
+                label="Hierarchical Connector Lines" 
+                value={themeSettings.colorHierarchyLine} 
+                onChange={(v) => handleChange('colorHierarchyLine', v)} 
+              />
+            </div>
+          </section>
+
+          <section>
             <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">SYSTEM CONTROLS</h3>
             <div className="grid grid-cols-2 gap-4 mb-4">
               <ColorControl 

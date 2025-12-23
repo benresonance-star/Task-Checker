@@ -148,6 +148,17 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--brand-green-light', settings.colorActiveTaskDone);
     root.style.setProperty('--brand-red', settings.colorDestructive);
     root.style.setProperty('--brand-yellow', settings.colorPresenceNotice);
+    
+    // New variables
+    root.style.setProperty('--dashboard-bg', settings.colorDashboardBg);
+    root.style.setProperty('--dashboard-border', settings.colorDashboardBorder);
+    root.style.setProperty('--metadata-card-bg', settings.colorMetadataCardBg);
+    root.style.setProperty('--metadata-card-border', settings.colorMetadataCardBorder);
+    root.style.setProperty('--section-ident', settings.colorSectionIdent);
+    root.style.setProperty('--section-plan', settings.colorSectionPlan);
+    root.style.setProperty('--section-build', settings.colorSectionBuild);
+    root.style.setProperty('--hierarchy-line', settings.colorHierarchyLine);
+
     root.style.setProperty('--radius-card', `${settings.radiusTaskCard}px`);
     root.style.setProperty('--radius-button', `${settings.radiusInteractive}px`);
     root.style.setProperty('--radius-container', `${settings.radiusMajorModal}px`);
@@ -163,6 +174,17 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorCompletedState: oldSettings.colorCompletedState || oldSettings.brandGreen || '#34A853',
       colorDestructive: oldSettings.colorDestructive || oldSettings.brandRed || '#EA4335',
       colorPresenceNotice: oldSettings.colorPresenceNotice || oldSettings.brandYellow || '#FBBC05',
+      
+      // Defaults for new fields
+      colorDashboardBg: oldSettings.colorDashboardBg || 'rgba(219, 234, 254, 0.7)', // blue-100/70
+      colorDashboardBorder: oldSettings.colorDashboardBorder || '#BFDBFE', // blue-200
+      colorMetadataCardBg: oldSettings.colorMetadataCardBg || 'rgba(255, 255, 255, 0.8)', // white/80
+      colorMetadataCardBorder: oldSettings.colorMetadataCardBorder || '#BFDBFE', // blue-200
+      colorSectionIdent: oldSettings.colorSectionIdent || '#4285F4', // google-blue
+      colorSectionPlan: oldSettings.colorSectionPlan || '#34A853', // google-green
+      colorSectionBuild: oldSettings.colorSectionBuild || '#F97316', // orange-500
+      colorHierarchyLine: oldSettings.colorHierarchyLine || '#D1D5DB', // gray-300
+
       radiusTaskCard: oldSettings.radiusTaskCard || oldSettings.radiusCard || 20,
       radiusInteractive: oldSettings.radiusInteractive || oldSettings.radiusButton || 12,
       radiusMajorModal: oldSettings.radiusMajorModal || oldSettings.radiusContainer || 32,
@@ -267,6 +289,14 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorCompletedState: '#34A853',
       colorDestructive: '#EA4335',
       colorPresenceNotice: '#FBBC05',
+      colorDashboardBg: 'rgba(219, 234, 254, 0.7)',
+      colorDashboardBorder: '#BFDBFE',
+      colorMetadataCardBg: 'rgba(255, 255, 255, 0.8)',
+      colorMetadataCardBorder: '#BFDBFE',
+      colorSectionIdent: '#4285F4',
+      colorSectionPlan: '#34A853',
+      colorSectionBuild: '#F97316',
+      colorHierarchyLine: '#D1D5DB',
       radiusTaskCard: 20,
       radiusInteractive: 12,
       radiusMajorModal: 32,

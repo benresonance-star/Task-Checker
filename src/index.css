@@ -13,6 +13,20 @@
   --brand-red: #EA4335;
   --brand-yellow: #FBBC05;
   
+  /* Dashboard & Panels */
+  --dashboard-bg: rgba(219, 234, 254, 0.7);
+  --dashboard-border: #BFDBFE;
+  --metadata-card-bg: rgba(255, 255, 255, 0.8);
+  --metadata-card-border: #BFDBFE;
+  
+  /* Section Category Colors */
+  --section-ident: #4285F4;
+  --section-plan: #34A853;
+  --section-build: #F97316;
+  
+  /* Hierarchy */
+  --hierarchy-line: #D1D5DB;
+  
   /* Radii Variables */
   --radius-card: 20px;
   --radius-button: 12px;
