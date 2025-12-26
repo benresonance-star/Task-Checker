@@ -119,10 +119,8 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
     />
   );
 
-  const CompletionPulse = () => (
-    <div className="absolute inset-0 z-0 pointer-events-none bg-[var(--brand-green-light)] animate-in fade-in duration-1000">
-      <div className="absolute inset-0 animate-completion-pulse" />
-    </div>
+  const CompletionTransition = () => (
+    <div className="absolute inset-0 z-0 pointer-events-none animate-completion-transition animate-in fade-in duration-1000" />
   );
 
   const handleSetTimerSubmit = () => {
@@ -294,7 +292,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                   isRunning={!!focusData.task.timerIsRunning} 
                 />
               )}
-              {focusData.task.completed && <CompletionPulse />}
+              {focusData.task.completed && <CompletionTransition />}
               <div className="relative z-10 flex flex-col h-full space-y-8">
                 <WorkflowTracker />
                 

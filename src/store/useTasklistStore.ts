@@ -360,7 +360,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorAppIdentity: '#4285F4',
     colorActiveTaskDone: '#5DB975',
     colorActiveTaskPulse: '#34A853',
-    pulseFrequencyDone: 3.0,
+    pulseFrequencyDone: 4.0,
     colorCompletedState: '#34A853',
     colorDestructive: '#EA4335',
     colorPresenceNotice: '#FBBC05',
