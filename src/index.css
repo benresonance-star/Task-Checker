@@ -97,8 +97,8 @@
 }
 
 @keyframes completion-pulse {
-  0%, 100% { opacity: 0.05; }
-  50% { opacity: 0.85; }
+  0%, 100% { background-color: var(--brand-green-light); }
+  50% { background-color: var(--brand-green-pulse); }
 }
 
 .animate-completion-pulse {

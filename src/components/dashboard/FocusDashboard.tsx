@@ -120,7 +120,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
   );
 
   const CompletionPulse = () => (
-    <div className="absolute inset-0 z-0 pointer-events-none bg-[var(--brand-green-pulse)] animate-completion-pulse" />
+    <div className="absolute inset-0 z-0 pointer-events-none animate-completion-pulse" />
   );
 
   const handleSetTimerSubmit = () => {
