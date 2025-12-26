@@ -120,12 +120,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
   );
 
   const CompletionPulse = () => (
-    <div 
-      className="absolute inset-0 z-0 pointer-events-none bg-[var(--brand-green-pulse)]" 
-      style={{ 
-        animation: `pulse-quick var(--pulse-frequency-done, 0.8s) ease-in-out infinite` 
-      }} 
-    />
+    <div className="absolute inset-0 z-0 pointer-events-none bg-[var(--brand-green-pulse)] animate-completion-pulse" />
   );
 
   const handleSetTimerSubmit = () => {

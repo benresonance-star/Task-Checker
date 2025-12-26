@@ -50,10 +50,6 @@ export default {
           '0%, 100%': { opacity: 1 },
           '50%': { opacity: 0.7 },
         },
-        'pulse-quick': {
-          '0%, 100%': { opacity: 0 },
-          '50%': { opacity: 0.4 },
-        },
         'wave': {
           '0%': { transform: 'translateX(0)' },
           '100%': { transform: 'translateX(33.33%)' }
@@ -62,7 +58,6 @@ export default {
       animation: {
         'pulse-gold': 'pulse-gold 2s ease-in-out infinite',
         'pulse-slow': 'pulse-slow 4s ease-in-out infinite',
-        'pulse-quick': 'pulse-quick 0.8s ease-in-out infinite',
         'wave': 'wave 8s linear infinite',
       }
     },

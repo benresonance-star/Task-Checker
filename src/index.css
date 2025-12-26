@@ -96,6 +96,15 @@
   --focus-water: rgba(59, 130, 246, 0.2);
 }
 
+@keyframes completion-pulse {
+  0%, 100% { opacity: 0.05; }
+  50% { opacity: 0.85; }
+}
+
+.animate-completion-pulse {
+  animation: completion-pulse var(--pulse-frequency-done, 0.8s) ease-in-out infinite;
+}
+
 body {
   background-color: var(--app-bg);
   color: var(--text-primary);
