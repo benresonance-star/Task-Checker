@@ -166,13 +166,13 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                 )}
               >
                 <div className={clsx(
-                  "w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black border transition-all",
+                  "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black border transition-all",
                   isActive ? "border-current scale-110" : "border-gray-500",
                   isActive && stage.id === 'preparing' && "animate-pulse"
                 )}>
                   {stepNum}
                 </div>
-                <span className="text-[9px] font-black uppercase tracking-[0.2em] whitespace-nowrap">{stage.label}</span>
+                <span className="text-[11px] font-black uppercase tracking-[0.2em] whitespace-nowrap">{stage.label}</span>
               </button>
               {idx < stages.length - 1 && (
                 <div className={clsx(
@@ -252,21 +252,20 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                 <WorkflowTracker />
                 
                 <div className="flex items-start justify-between gap-4">
-                  <div className="space-y-1.5 min-w-0">
+                  <div className="space-y-1 min-w-0">
                     {!isExecuting && (
                       <>
                         <div className="flex items-center gap-2">
-                          <h4 className={clsx("text-lg md:text-2xl font-black uppercase tracking-tight truncate", isYellow ? "text-gray-900" : "text-white")}>
-                            {focusData.project?.name || 'Unknown Project'}
+                          <h4 className={clsx("text-sm md:text-lg font-black uppercase tracking-[0.15em] truncate", isYellow ? "text-gray-900" : "text-white/90")}>
+                            PROJECT: {focusData.project?.name || 'Unknown Project'}
                           </h4>
                         </div>
                         <div className={clsx(
-                          "flex items-center gap-2 px-3 py-1 rounded-full w-fit border shadow-sm transition-colors",
-                          isYellow ? "bg-black/5 border-black/10 text-gray-700" : "bg-white/10 border-white/20 text-white/80"
+                          "flex items-center gap-2 transition-colors",
+                          isYellow ? "text-gray-700" : "text-white/70"
                         )}>
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span className="text-[10px] font-black uppercase tracking-wider truncate max-w-[200px] md:max-w-md">
-                            {focusData.instance.title}
+                          <span className="text-[11px] font-black uppercase tracking-[0.15em] truncate max-w-[250px] md:max-w-md">
+                            CHECKLIST: {focusData.instance.title}
                           </span>
                         </div>
                       </>
@@ -298,6 +297,19 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                   )}>
                     {focusData.task.title}
                   </h2>
+                  
+                  {focusData.task.guide?.complexity && (
+                    <div className={clsx(
+                      "mt-4 flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit transition-all duration-700",
+                      isExecuting && "mx-auto scale-125 mb-4",
+                      focusData.task.guide.complexity === 'Easy' && "bg-green-50/20 text-green-400 border-green-500/30",
+                      focusData.task.guide.complexity === 'Moderate' && "bg-amber-50/20 text-amber-400 border-amber-500/30",
+                      focusData.task.guide.complexity === 'Complex' && "bg-red-50/20 text-red-400 border-red-500/30"
+                    )}>
+                      <Zap className="w-3.5 h-3.5 fill-current" />
+                      <span>{focusData.task.guide.complexity}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className={clsx(
