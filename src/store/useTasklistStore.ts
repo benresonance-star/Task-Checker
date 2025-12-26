@@ -19,6 +19,7 @@ interface TasklistState {
   users: User[];
   loading: boolean;
   expandedStates: Record<string, boolean>; // Local UI state for expanded/collapsed sections/subsections
+  knowledgeHubStep: number;
   notification: { message: string; type: 'success' | 'error' } | null;
   lastLocalThemeUpdate: number;
   
@@ -37,6 +38,7 @@ interface TasklistState {
   setActiveInstance: (instance: TasklistInstance | null) => void;
   setActiveProject: (project: Project | null) => void;
   setActiveTaskId: (taskId: string | null) => void;
+  setKnowledgeHubStep: (step: number) => void;
   toggleLocalExpanded: (id: string) => void; // Toggle expanded state locally
   setLocalExpanded: (id: string, expanded: boolean) => void; // Set expanded state locally
   isLocalExpanded: (id: string, defaultValue?: boolean) => boolean; // Check expanded state locally
@@ -507,6 +509,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     loading: true,
     isDarkMode: localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches),
     expandedStates: JSON.parse(localStorage.getItem('expandedStates') || '{}'),
+    knowledgeHubStep: 0,
     adminSimulationMode: (sessionStorage.getItem('adminSimulationMode') as 'admin' | 'viewer') || 'admin',
     notification: null,
     lastLocalThemeUpdate: 0,
@@ -677,6 +680,10 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
           // Load user-specific expansion states
           const userExpandedStates = JSON.parse(localStorage.getItem(`expandedStates_${userData.id}`) || '{}');
           set({ expandedStates: userExpandedStates });
+
+          // Load user-specific Knowledge Hub step
+          const userKnowledgeHubStep = parseInt(localStorage.getItem(`knowledgeHubStep_${userData.id}`) || '0');
+          set({ knowledgeHubStep: userKnowledgeHubStep });
 
           // Users Listener (for everyone, but UI will restrict visibility)
           onSnapshot(collection(db, 'users'), (snapshot) => {
@@ -897,6 +904,16 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       get().updatePresence(taskId);
       // Automatically pause any running timers when switching focus
       get().pauseOtherTimers(taskId);
+    },
+
+    setKnowledgeHubStep: (step) => {
+      const { currentUser } = get();
+      set({ knowledgeHubStep: step });
+      if (currentUser) {
+        localStorage.setItem(`knowledgeHubStep_${currentUser.id}`, step.toString());
+      } else {
+        localStorage.setItem('knowledgeHubStep', step.toString());
+      }
     },
 
     updatePresence: async (taskId) => {

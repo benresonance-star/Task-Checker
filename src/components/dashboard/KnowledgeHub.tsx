@@ -58,17 +58,15 @@ const TaskScratchpadEditor: React.FC<{
 };
 
 export const KnowledgeHub: React.FC<KnowledgeHubProps> = ({ task, stage }) => {
-  const { currentUser, toggleTaskPrerequisite, updateTaskWorkbench } = useTasklistStore();
+  const { currentUser, toggleTaskPrerequisite, updateTaskWorkbench, knowledgeHubStep, setKnowledgeHubStep } = useTasklistStore();
   const containerId = currentUser?.activeFocus?.instanceId || '';
-
-  const [activeStep, setActiveStep] = React.useState<number>(0);
 
   // Sync activeStep with stage
   useEffect(() => {
     if (stage === 'staged') {
-      setActiveStep(0); // None highlighted in Established mode
-    } else if (stage === 'preparing' && activeStep === 0) {
-      setActiveStep(1); // Default to Step 1 when entering preparation
+      setKnowledgeHubStep(0); // None highlighted in Established mode
+    } else if (stage === 'preparing' && knowledgeHubStep === 0) {
+      setKnowledgeHubStep(1); // Default to Step 1 when entering preparation
     }
   }, [stage]);
 
@@ -79,10 +77,10 @@ export const KnowledgeHub: React.FC<KnowledgeHubProps> = ({ task, stage }) => {
   }, [task]);
 
   useEffect(() => {
-    if (allPrereqsDone && activeStep === 2) {
-      setActiveStep(3);
+    if (allPrereqsDone && knowledgeHubStep === 2) {
+      setKnowledgeHubStep(3);
     }
-  }, [allPrereqsDone, activeStep]);
+  }, [allPrereqsDone, knowledgeHubStep]);
 
   if (!task) {
     return (
@@ -101,7 +99,7 @@ export const KnowledgeHub: React.FC<KnowledgeHubProps> = ({ task, stage }) => {
 
   const stepClasses = (step: number) => clsx(
     "flex-1 border-4 rounded-widget p-6 shadow-xl flex flex-col gap-4 transition-all duration-500 cursor-pointer relative",
-    activeStep === step 
+    knowledgeHubStep === step 
       ? "opacity-100 scale-100 border-google-blue ring-8 ring-google-blue/10" 
       : "opacity-40 scale-95 border-[var(--hub-inactive-border)]"
   );
@@ -115,11 +113,11 @@ export const KnowledgeHub: React.FC<KnowledgeHubProps> = ({ task, stage }) => {
       <div className="flex flex-col lg:flex-row items-stretch gap-4 lg:gap-2">
         {/* Widget 1: Intent (Understand) */}
         <div 
-          onClick={() => setActiveStep(1)}
+          onClick={() => setKnowledgeHubStep(1)}
           className={stepClasses(1)}
         >
           <div className="flex items-center gap-2">
-            <div className={clsx("w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition-all", activeStep === 1 ? "bg-google-blue text-white scale-110" : "bg-gray-200 text-gray-500")}>1</div>
+            <div className={clsx("w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition-all", knowledgeHubStep === 1 ? "bg-google-blue text-white scale-110" : "bg-gray-200 text-gray-500")}>1</div>
             <Info className="w-4 h-4 text-google-blue" />
             <h4 className="text-[10px] font-black uppercase tracking-widest">Understand Intent</h4>
           </div>
@@ -155,11 +153,11 @@ export const KnowledgeHub: React.FC<KnowledgeHubProps> = ({ task, stage }) => {
 
         {/* Widget 2: Readiness (Confirm Doable) */}
         <div 
-          onClick={() => setActiveStep(2)}
-          className={clsx(stepClasses(2), activeStep === 2 ? "bg-[var(--prereq-bg)]" : "bg-[var(--hub-step2-inactive-bg)]")}
+          onClick={() => setKnowledgeHubStep(2)}
+          className={clsx(stepClasses(2), knowledgeHubStep === 2 ? "bg-[var(--prereq-bg)]" : "bg-[var(--hub-step2-inactive-bg)]")}
         >
           <div className="flex items-center gap-2">
-            <div className={clsx("w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition-all", activeStep === 2 ? "bg-orange-500 text-white scale-110" : "bg-gray-200 text-gray-500")}>2</div>
+            <div className={clsx("w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition-all", knowledgeHubStep === 2 ? "bg-orange-500 text-white scale-110" : "bg-gray-200 text-gray-500")}>2</div>
             <CheckCircle2 className="w-4 h-4 text-[var(--prereq-icon)]" />
             <h4 className="text-[10px] font-black uppercase tracking-widest text-[var(--prereq-text)]">Confirm Doable</h4>
           </div>
@@ -215,11 +213,11 @@ export const KnowledgeHub: React.FC<KnowledgeHubProps> = ({ task, stage }) => {
 
         {/* Widget 3: Technical Briefing (Task Notes) */}
         <div 
-          onClick={() => setActiveStep(3)}
+          onClick={() => setKnowledgeHubStep(3)}
           className={stepClasses(3)}
         >
           <div className="flex items-center gap-2">
-            <div className={clsx("w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition-all", activeStep === 3 ? "bg-google-blue text-white scale-110" : "bg-gray-200 text-gray-500")}>3</div>
+            <div className={clsx("w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition-all", knowledgeHubStep === 3 ? "bg-google-blue text-white scale-110" : "bg-gray-200 text-gray-500")}>3</div>
             <ClipboardList className="w-4 h-4 text-google-blue" />
             <h4 className="text-[10px] font-black uppercase tracking-widest">Technical Briefing</h4>
           </div>
@@ -242,15 +240,15 @@ export const KnowledgeHub: React.FC<KnowledgeHubProps> = ({ task, stage }) => {
 
       {/* Full Width Workbench (Gather & Log) */}
       <div 
-        onClick={() => setActiveStep(4)}
+        onClick={() => setKnowledgeHubStep(4)}
         className={clsx(
           "bg-[var(--metadata-card-bg)] border-4 rounded-widget p-8 shadow-2xl transition-all duration-700",
-          activeStep === 4 ? "border-google-blue ring-12 ring-google-blue/5 scale-[1.01]" : "opacity-30 scale-95 grayscale border-transparent"
+          knowledgeHubStep === 4 ? "border-google-blue ring-12 ring-google-blue/5 scale-[1.01]" : "opacity-30 scale-95 grayscale border-transparent"
         )}
       >
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className={clsx("w-8 h-8 rounded-full flex items-center justify-center text-sm font-black transition-all", activeStep === 4 ? "bg-google-green text-white scale-110" : "bg-gray-200 text-gray-500")}>4</div>
+            <div className={clsx("w-8 h-8 rounded-full flex items-center justify-center text-sm font-black transition-all", knowledgeHubStep === 4 ? "bg-google-green text-white scale-110" : "bg-gray-200 text-gray-500")}>4</div>
             <div className="flex flex-col">
               <h4 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--text-heading)]">Gather & Log (Workbench)</h4>
               <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Your personal scratchpad for this specific task</p>
