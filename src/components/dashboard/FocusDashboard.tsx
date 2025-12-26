@@ -108,7 +108,9 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
     <div 
       className={clsx(
         "absolute bottom-0 left-0 right-0 z-0 pointer-events-none transition-all duration-1000 ease-linear",
-        isRunning ? "opacity-100" : "opacity-60"
+        isRunning ? "opacity-100" : "opacity-60",
+        // Snap back to bottom instantly if progress is 0 (reset state)
+        progress === 0 && "duration-0"
       )}
       style={{ 
         height: `${Math.min(100, Math.max(0, progress * 100))}%`,
@@ -276,6 +278,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
             )}>
               {isExecuting && (
                 <ProgressFill 
+                  key={`${focusData.task.id}-${focusData.task.timerDuration}`}
                   progress={1 - ((focusData.task.timerRemaining ?? focusData.task.timerDuration ?? 1) / (focusData.task.timerDuration || 1))} 
                   isRunning={!!focusData.task.timerIsRunning} 
                 />

@@ -1388,9 +1388,13 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
                 changed = true;
                 targetInstanceId = inst.id;
                 (globalThis as any)[`lastToggle_${inst.id}-${t.id}`] = Date.now();
+                // If remaining time is increased beyond current duration (e.g. +5m extension),
+                // we update duration as well to keep the water level proportional.
+                const newDuration = Math.max(t.timerDuration || 0, remaining);
                 return { 
                   ...t, 
                   timerRemaining: remaining, 
+                  timerDuration: newDuration,
                   timerIsRunning: remaining > 0 ? (t.timerIsRunning ?? false) : false,
                   timerLastUpdated: Date.now()
                 };
