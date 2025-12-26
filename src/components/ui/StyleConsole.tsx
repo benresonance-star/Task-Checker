@@ -144,7 +144,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
     >
       <div className="flex items-center gap-2">
         <Icon className="w-3.5 h-3.5 text-google-blue" />
-        <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest group-hover:text-google-blue transition-colors">{label}</span>
+        <span className="text-sm font-black uppercase text-gray-500 tracking-widest group-hover:text-google-blue transition-colors">{label}</span>
       </div>
       {expandedSections[id] ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" /> : <ChevronRight className="w-3.5 h-3.5 text-gray-400" />}
     </button>
@@ -178,7 +178,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
       >
         <div className="flex items-center gap-2">
           <Palette className="w-4 h-4" />
-          <span className="text-[10px] font-black uppercase tracking-widest">Branding Console</span>
+          <span className="text-sm font-black uppercase tracking-widest">Branding Console</span>
         </div>
         <div className="flex items-center gap-1">
           <button 
@@ -200,7 +200,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-6">
           {/* Dual-Status Mode Switcher */}
           <section className="bg-gray-50 dark:bg-black/40 p-2 rounded-xl border border-gray-200 dark:border-gray-800">
-            <h3 className="text-[8px] font-black uppercase text-gray-400 tracking-widest mb-2 px-1">Global Workspace Context</h3>
+            <h3 className="text-xs font-black uppercase text-gray-400 tracking-widest mb-2 px-1">Global Workspace Context</h3>
             <div className="grid grid-cols-2 gap-2">
               <button 
                 onClick={() => toggleTheme('light')}
@@ -211,8 +211,8 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                     : "bg-transparent border-transparent text-gray-400 hover:bg-white/5"
                 )}
               >
-                <span className="text-[10px] font-black uppercase">Light Mode</span>
-                <span className="text-[8px] font-bold truncate max-w-full px-1">
+                <span className="text-sm font-black uppercase">Light Mode</span>
+                <span className="text-xs font-bold truncate max-w-full px-1">
                   {activeLightPreset?.name || 'System Default'}
                   {lightModified && <span className="ml-1 text-orange-500">*</span>}
                 </span>
@@ -226,8 +226,8 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                     : "bg-transparent border-transparent text-gray-400 hover:bg-black/5"
                 )}
               >
-                <span className="text-[10px] font-black uppercase">Dark Mode</span>
-                <span className="text-[8px] font-bold truncate max-w-full px-1">
+                <span className="text-sm font-black uppercase">Dark Mode</span>
+                <span className="text-xs font-bold truncate max-w-full px-1">
                   {activeDarkPreset?.name || 'System Default'}
                   {darkModified && <span className="ml-1 text-orange-500">*</span>}
                 </span>
@@ -248,7 +248,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                     placeholder={`Name ${isDarkMode ? 'Dark' : 'Light'} Style...`}
                     value={newPresetName}
                     onChange={(e) => setNewPresetName(e.target.value)}
-                    className="flex-1 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-[10px] font-bold"
+                    className="flex-1 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm font-bold"
                   />
                   <button
                     disabled={!newPresetName.trim()}
@@ -272,7 +272,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                       )}>
                         <div className="flex flex-col min-w-0 flex-1 cursor-pointer" onClick={() => applyThemePreset(preset.id)}>
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black truncate">{preset.name}</span>
+                            <span className="text-sm font-black truncate">{preset.name}</span>
                             {isActive && <div className="w-1 h-1 rounded-full bg-google-blue animate-pulse" />}
                           </div>
                         </div>
@@ -330,7 +330,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 </div>
                 
                 <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
-                  <h4 className="text-[8px] font-black uppercase text-gray-400 tracking-widest\">"Can I Proceed?" Styling</h4>
+                  <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest\">"Can I Proceed?" Styling</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <ColorControl label="Container Bg" value={themeSettings.colorPrereqBg} onChange={(v) => handleChange('colorPrereqBg', v)} />
                     <ColorControl label="Container Border" value={themeSettings.colorPrereqBorder} onChange={(v) => handleChange('colorPrereqBorder', v)} />
@@ -340,7 +340,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 </div>
 
                 <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
-                  <h4 className="text-[8px] font-black uppercase text-gray-400 tracking-widest\">My Notes & Workbench</h4>
+                  <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest\">My Notes & Workbench</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <ColorControl label="Widget Bg" value={themeSettings.colorNotesBg} onChange={(v) => handleChange('colorNotesBg', v)} />
                     <ColorControl label="Widget Outline" value={themeSettings.colorNotesBorder} onChange={(v) => handleChange('colorNotesBorder', v)} />
@@ -406,14 +406,14 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
           <div className="pt-4 flex flex-col gap-2">
             <button
               onClick={() => updateThemeSettings(themeSettings)}
-              className="w-full h-10 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest bg-google-blue text-white rounded-xl shadow-lg hover:shadow-blue-500/20 active:scale-95 transition-all"
+              className="w-full h-10 flex items-center justify-center gap-2 text-sm font-black uppercase tracking-widest bg-google-blue text-white rounded-xl shadow-lg hover:shadow-blue-500/20 active:scale-95 transition-all"
             >
               <Save className="w-3.5 h-3.5" />
               Save as Workspace Default
             </button>
             <button
               onClick={() => resetThemeSettings()}
-              className="w-full h-10 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest bg-gray-100 dark:bg-black/40 text-gray-500 hover:bg-gray-200 dark:hover:bg-black/60 rounded-xl transition-all"
+              className="w-full h-10 flex items-center justify-center gap-2 text-sm font-black uppercase tracking-widest bg-gray-100 dark:bg-black/40 text-gray-500 hover:bg-gray-200 dark:hover:bg-black/60 rounded-xl transition-all"
             >
               <RotateCcw className="w-3 h-3" />
               Reset to System Defaults
@@ -452,7 +452,7 @@ const ColorControl: React.FC<{ label: string; value: string; onChange: (v: strin
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-[7px] font-black uppercase text-gray-500 tracking-tight">{label}</label>
+      <label className="text-xs font-black uppercase text-gray-500 tracking-tight">{label}</label>
       <div className="flex items-center gap-1.5">
         <div className="relative w-6 h-6 flex-shrink-0">
           <input 
@@ -470,7 +470,7 @@ const ColorControl: React.FC<{ label: string; value: string; onChange: (v: strin
           type="text" 
           value={value.toUpperCase()} 
           onChange={(e) => onChange(e.target.value)}
-          className="flex-1 min-w-0 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 rounded px-1.5 py-1 text-[8px] font-mono"
+          className="flex-1 min-w-0 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 rounded px-1.5 py-1 text-xs font-mono"
         />
       </div>
     </div>
@@ -480,8 +480,8 @@ const ColorControl: React.FC<{ label: string; value: string; onChange: (v: strin
 const SliderControl: React.FC<{ label: string; value: number; min: number; max: number; step?: number; onChange: (v: number) => void }> = ({ label, value, min, max, step = 1, onChange }) => (
   <div className="flex flex-col gap-2">
     <div className="flex items-center justify-between">
-      <label className="text-[8px] font-black uppercase text-gray-500 tracking-tight">{label}</label>
-      <span className="text-[9px] font-mono text-google-blue">{value}{step < 1 ? '' : 'px'}</span>
+      <label className="text-xs font-black uppercase text-gray-500 tracking-tight">{label}</label>
+      <span className="text-xs font-mono text-google-blue">{value}{step < 1 ? '' : 'px'}</span>
     </div>
     <input 
       type="range" 
