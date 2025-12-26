@@ -23,7 +23,7 @@ const CompletionTransition = () => (
 
 const FocusTransition = () => (
   <div className="absolute inset-0 z-0 pointer-events-none">
-    <div className="absolute inset-0 bg-[var(--brand-focus-pulse)] opacity-20 animate-focus-breathing" />
+    <div className="absolute inset-0 bg-[var(--brand-focus-pulse)] animate-focus-breathing" />
   </div>
 );
 
