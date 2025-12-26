@@ -227,7 +227,7 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
               <span 
                 className={clsx(
                   'w-full py-0.5 px-1 cursor-pointer select-none break-words whitespace-pre-wrap text-sm font-medium transition-colors duration-300', 
-                  isMultiUser ? "text-white" : (task.completed ? 'line-through text-gray-400 dark:text-gray-500' : (shouldRecede ? 'text-gray-400 dark:text-gray-500' : 'text-[var(--task-title)]'))
+                  isMultiUser ? "text-white" : (task.completed ? 'line-through text-gray-400 dark:text-gray-500' : (shouldRecede ? 'text-[var(--task-inactive-text)]' : 'text-[var(--task-title)]'))
                 )}
               >
                   {task.title}

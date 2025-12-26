@@ -223,6 +223,7 @@ export interface ThemeSettings {
   colorSubsectionBorder: string;
   colorSubsectionTitle: string;
   colorTaskTitle: string;
+  colorTaskInactiveText: string;
   colorMetadataCardBg: string;
   colorMetadataCardBorder: string;
   colorSectionIdent: string;

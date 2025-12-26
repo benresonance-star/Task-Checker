@@ -414,6 +414,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                   <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest\">Task Styling</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <ColorControl label="Task Title" value={themeSettings.colorTaskTitle} onChange={(v) => handleChange('colorTaskTitle', v)} />
+                    <ColorControl label="Inactive Text" value={themeSettings.colorTaskInactiveText} onChange={(v) => handleChange('colorTaskInactiveText', v)} />
                     <ColorControl label="Completed State" value={themeSettings.colorCompletedState} onChange={(v) => handleChange('colorCompletedState', v)} />
                   </div>
                 </div>

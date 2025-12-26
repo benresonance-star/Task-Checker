@@ -223,6 +223,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--subsection-border', settings.colorSubsectionBorder);
     root.style.setProperty('--subsection-title', settings.colorSubsectionTitle);
     root.style.setProperty('--task-title', settings.colorTaskTitle);
+    root.style.setProperty('--task-inactive-text', settings.colorTaskInactiveText);
     root.style.setProperty('--metadata-card-bg', settings.colorMetadataCardBg);
     root.style.setProperty('--metadata-card-border', settings.colorMetadataCardBorder);
     root.style.setProperty('--metadata-card-border', settings.colorMetadataCardBorder);
@@ -316,6 +317,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorSubsectionBorder: oldSettings.colorSubsectionBorder || (oldSettings.mode === 'dark' ? '#1e293b' : '#DBEAFE'),
       colorSubsectionTitle: oldSettings.colorSubsectionTitle || (oldSettings.mode === 'dark' ? '#D1D5DB' : '#4B5563'),
       colorTaskTitle: oldSettings.colorTaskTitle || (oldSettings.mode === 'dark' ? '#D1D5DB' : '#4B5563'),
+      colorTaskInactiveText: oldSettings.colorTaskInactiveText || (oldSettings.mode === 'dark' ? '#9CA3AF' : '#6B7280'),
       colorMetadataCardBg: oldSettings.colorMetadataCardBg || 'rgba(255, 255, 255, 0.8)',
       colorMetadataCardBorder: oldSettings.colorMetadataCardBorder || '#BFDBFE',
       colorSectionIdent: oldSettings.colorSectionIdent || '#4285F4', // google-blue
@@ -390,6 +392,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorSubsectionBorder: isDark ? '#1e293b' : '#DBEAFE',
     colorSubsectionTitle: isDark ? '#D1D5DB' : '#4B5563',
     colorTaskTitle: isDark ? '#D1D5DB' : '#4B5563',
+    colorTaskInactiveText: isDark ? '#9CA3AF' : '#6B7280',
     colorMetadataCardBg: isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.8)',
     colorMetadataCardBorder: isDark ? '#1e293b' : '#BFDBFE',
     colorSectionIdent: '#4285F4',
