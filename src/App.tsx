@@ -552,7 +552,7 @@ function App() {
     importMaster, updateUserRole, deleteUser,
     adminClearUserFocus, adminClearUserActionSet,
     activeTaskId, setActiveTaskId, updatePresence,
-    moveMaster, setLocalExpanded, clearActionSet,
+    moveMaster, setLocalExpanded, isLocalExpanded, toggleLocalExpanded, clearActionSet,
     isDarkMode, toggleDarkMode,
     showPlaylistSidebar, setShowPlaylistSidebar,
     showMainSidebar, setShowMainSidebar
@@ -631,16 +631,6 @@ function App() {
   const [isEditingProjectInfo, setIsEditingProjectInfo] = useState(false);
   const [editingTaskInfo, setEditingTaskInfo] = useState<{ taskId: string, containerId: string, focusFeedback?: boolean } | null>(null);
   const [showAddChecklistModal, setShowAddChecklistModal] = useState(false);
-
-  const [isChecklistCollapsed, setIsChecklistCollapsed] = useState(() => {
-    return localStorage.getItem(`checklist_collapsed_${activeInstance?.id}`) === 'true';
-  });
-
-  useEffect(() => {
-    if (activeInstance) {
-      localStorage.setItem(`checklist_collapsed_${activeInstance.id}`, isChecklistCollapsed.toString());
-    }
-  }, [isChecklistCollapsed, activeInstance?.id]);
 
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [showDeleteProjectConfirm, setShowDeleteProjectConfirm] = useState(false);
@@ -1571,7 +1561,7 @@ function App() {
               <div className={theme.components.dashboard.checklistContainer}>
                 <div 
                   className="flex items-center justify-between p-3 sm:pl-6 sm:pr-10 cursor-pointer hover:bg-blue-200/30 dark:hover:bg-white/5 transition-colors"
-                  onClick={() => setIsChecklistCollapsed(!isChecklistCollapsed)}
+                  onClick={() => toggleLocalExpanded(activeInstance.id)}
                 >
                   <div className="flex items-center justify-between flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -1580,7 +1570,7 @@ function App() {
                         {activeInstance.title}
                       </h3>
                       <div className="ml-2 p-1 rounded-full bg-blue-200/50 dark:bg-white/20">
-                        {isChecklistCollapsed ? (
+                        {!isLocalExpanded(activeInstance.id, true) ? (
                           <ChevronDown className="w-3.5 h-3.5 text-google-blue dark:text-gray-300" />
                         ) : (
                           <ChevronUp className="w-3.5 h-3.5 text-google-blue dark:text-gray-300" />
@@ -1607,7 +1597,7 @@ function App() {
                   </div>
                 </div>
 
-                {!isChecklistCollapsed && (
+                {isLocalExpanded(activeInstance.id, true) && (
                   <div className="p-3 sm:p-4 pt-0 animate-in slide-in-from-top-4 duration-300">
                     <div className="space-y-6">
                       {activeInstance.sections.map(s => (
