@@ -96,13 +96,14 @@
   --focus-water: rgba(59, 130, 246, 0.2);
 }
 
-@keyframes completion-pulse {
-  0%, 100% { background-color: var(--brand-green-light); }
-  50% { background-color: var(--brand-green-pulse); }
+@keyframes completion-fade {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
 }
 
 .animate-completion-pulse {
-  animation: completion-pulse var(--pulse-frequency-done, 3s) ease-in-out infinite;
+  background-color: var(--brand-green-pulse);
+  animation: completion-fade var(--pulse-frequency-done, 3s) ease-in-out infinite;
 }
 
 body {
