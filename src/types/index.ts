@@ -197,6 +197,7 @@ export interface ThemeSettings {
   colorAppIdentity: string;
   colorActiveTaskDone: string;
   colorActiveTaskPulse: string;
+  pulseFrequencyDone: number;
   colorCompletedState: string;
   colorDestructive: string;
   colorPresenceNotice: string;

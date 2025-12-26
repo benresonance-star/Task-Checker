@@ -332,6 +332,10 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 </div>
                 
                 <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <SliderControl label="Pulse Frequency" value={themeSettings.pulseFrequencyDone} min={0.1} max={3} step={0.1} onChange={(v) => handleChange('pulseFrequencyDone', v)} />
+                </div>
+                
+                <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
                   <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest\">"Can I Proceed?" Styling</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <ColorControl label="Container Bg" value={themeSettings.colorPrereqBg} onChange={(v) => handleChange('colorPrereqBg', v)} />
