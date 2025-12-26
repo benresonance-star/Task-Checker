@@ -119,6 +119,10 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
     />
   );
 
+  const CompletionPulse = () => (
+    <div className="absolute inset-0 z-0 pointer-events-none animate-pulse-quick bg-[var(--brand-green-pulse)]" />
+  );
+
   const handleSetTimerSubmit = () => {
     const mins = parseInt(customMinutes);
     if (!isNaN(mins) && focusData) {
@@ -288,6 +292,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                   isRunning={!!focusData.task.timerIsRunning} 
                 />
               )}
+              {focusData.task.completed && <CompletionPulse />}
               <div className="relative z-10 flex flex-col h-full space-y-8">
                 <WorkflowTracker />
                 

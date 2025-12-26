@@ -196,6 +196,7 @@ export interface ProjectDocItem {
 export interface ThemeSettings {
   colorAppIdentity: string;
   colorActiveTaskDone: string;
+  colorActiveTaskPulse: string;
   colorCompletedState: string;
   colorDestructive: string;
   colorPresenceNotice: string;

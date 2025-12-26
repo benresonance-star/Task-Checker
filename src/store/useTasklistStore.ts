@@ -195,6 +195,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--brand-blue', settings.colorAppIdentity);
     root.style.setProperty('--brand-green', settings.colorCompletedState);
     root.style.setProperty('--brand-green-light', settings.colorActiveTaskDone);
+    root.style.setProperty('--brand-green-pulse', settings.colorActiveTaskPulse);
     root.style.setProperty('--brand-red', settings.colorDestructive);
     root.style.setProperty('--brand-yellow', settings.colorPresenceNotice);
     
@@ -283,6 +284,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     return {
       colorAppIdentity: oldSettings.colorAppIdentity || oldSettings.brandBlue || '#4285F4',
       colorActiveTaskDone: oldSettings.colorActiveTaskDone || oldSettings.brandGreenLight || '#5DB975',
+      colorActiveTaskPulse: oldSettings.colorActiveTaskPulse || '#34A853', // Default to brand green
       colorCompletedState: oldSettings.colorCompletedState || oldSettings.brandGreen || '#34A853',
       colorDestructive: oldSettings.colorDestructive || oldSettings.brandRed || '#EA4335',
       colorPresenceNotice: oldSettings.colorPresenceNotice || oldSettings.brandYellow || '#FBBC05',
@@ -355,6 +357,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
   const getThemeDefaults = (isDark: boolean): ThemeSettings => ({
     colorAppIdentity: '#4285F4',
     colorActiveTaskDone: '#5DB975',
+    colorActiveTaskPulse: '#34A853',
     colorCompletedState: '#34A853',
     colorDestructive: '#EA4335',
     colorPresenceNotice: '#FBBC05',
