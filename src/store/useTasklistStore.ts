@@ -209,7 +209,16 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--note-priority-bg', settings.colorNotePriorityBg);
     root.style.setProperty('--checklist-bg', settings.colorChecklistBg);
     root.style.setProperty('--checklist-border', settings.colorChecklistBorder);
+    root.style.setProperty('--checklist-title', settings.colorChecklistTitle);
+    root.style.setProperty('--section-bg', settings.colorSectionBg);
+    root.style.setProperty('--section-border', settings.colorSectionBorder);
+    root.style.setProperty('--section-title', settings.colorSectionTitle);
+    root.style.setProperty('--subsection-bg', settings.colorSubsectionBg);
+    root.style.setProperty('--subsection-border', settings.colorSubsectionBorder);
+    root.style.setProperty('--subsection-title', settings.colorSubsectionTitle);
+    root.style.setProperty('--task-title', settings.colorTaskTitle);
     root.style.setProperty('--metadata-card-bg', settings.colorMetadataCardBg);
+    root.style.setProperty('--metadata-card-border', settings.colorMetadataCardBorder);
     root.style.setProperty('--metadata-card-border', settings.colorMetadataCardBorder);
     root.style.setProperty('--section-ident', settings.colorSectionIdent);
     root.style.setProperty('--section-ident-icon', settings.colorSectionIdentIcon);
@@ -241,6 +250,8 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--line-height-base', settings.lineHeightBase.toString());
 
     root.style.setProperty('--radius-card', `${settings.radiusTaskCard}px`);
+    root.style.setProperty('--radius-section', `${settings.radiusSection}px`);
+    root.style.setProperty('--radius-subsection', `${settings.radiusSubsection}px`);
     root.style.setProperty('--radius-button', `${settings.radiusInteractive}px`);
     root.style.setProperty('--radius-container', `${settings.radiusMajorModal}px`);
     root.style.setProperty('--radius-widget', `${settings.radiusWidget || 24}px`);
@@ -286,6 +297,14 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorNotePriorityBg: oldSettings.colorNotePriorityBg || (oldSettings.mode === 'dark' ? '#421c1c' : '#fff0f0'),
       colorChecklistBg: oldSettings.colorChecklistBg || 'rgba(239, 246, 255, 0.5)',
       colorChecklistBorder: oldSettings.colorChecklistBorder || '#DBEAFE',
+      colorChecklistTitle: oldSettings.colorChecklistTitle || (oldSettings.mode === 'dark' ? '#FFFFFF' : '#111827'),
+      colorSectionBg: oldSettings.colorSectionBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.6)'),
+      colorSectionBorder: oldSettings.colorSectionBorder || (oldSettings.mode === 'dark' ? '#1e293b' : '#DBEAFE'),
+      colorSectionTitle: oldSettings.colorSectionTitle || (oldSettings.mode === 'dark' ? '#FFFFFF' : '#111827'),
+      colorSubsectionBg: oldSettings.colorSubsectionBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.6)'),
+      colorSubsectionBorder: oldSettings.colorSubsectionBorder || (oldSettings.mode === 'dark' ? '#1e293b' : '#DBEAFE'),
+      colorSubsectionTitle: oldSettings.colorSubsectionTitle || (oldSettings.mode === 'dark' ? '#D1D5DB' : '#4B5563'),
+      colorTaskTitle: oldSettings.colorTaskTitle || (oldSettings.mode === 'dark' ? '#D1D5DB' : '#4B5563'),
       colorMetadataCardBg: oldSettings.colorMetadataCardBg || 'rgba(255, 255, 255, 0.8)',
       colorMetadataCardBorder: oldSettings.colorMetadataCardBorder || '#BFDBFE',
       colorSectionIdent: oldSettings.colorSectionIdent || '#4285F4', // google-blue
@@ -316,6 +335,8 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       lineHeightBase: oldSettings.lineHeightBase || 1.5,
 
       radiusTaskCard: oldSettings.radiusTaskCard || oldSettings.radiusCard || 20,
+      radiusSection: oldSettings.radiusSection || 20,
+      radiusSubsection: oldSettings.radiusSubsection || 20,
       radiusInteractive: oldSettings.radiusInteractive || oldSettings.radiusButton || 12,
       radiusMajorModal: oldSettings.radiusMajorModal || oldSettings.radiusContainer || 32,
       radiusWidget: oldSettings.radiusWidget || 24,
@@ -345,6 +366,14 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorNotePriorityBg: isDark ? '#421c1c' : '#fff0f0',
     colorChecklistBg: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(239, 246, 255, 0.5)',
     colorChecklistBorder: isDark ? '#1e293b' : '#DBEAFE',
+    colorChecklistTitle: isDark ? '#FFFFFF' : '#111827',
+    colorSectionBg: isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.6)',
+    colorSectionBorder: isDark ? '#1e293b' : '#DBEAFE',
+    colorSectionTitle: isDark ? '#FFFFFF' : '#111827',
+    colorSubsectionBg: isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.6)',
+    colorSubsectionBorder: isDark ? '#1e293b' : '#DBEAFE',
+    colorSubsectionTitle: isDark ? '#D1D5DB' : '#4B5563',
+    colorTaskTitle: isDark ? '#D1D5DB' : '#4B5563',
     colorMetadataCardBg: isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.8)',
     colorMetadataCardBorder: isDark ? '#1e293b' : '#BFDBFE',
     colorSectionIdent: '#4285F4',
@@ -372,6 +401,8 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     letterSpacingHeading: 0,
     lineHeightBase: 1.5,
     radiusTaskCard: 20,
+    radiusSection: 20,
+    radiusSubsection: 20,
     radiusInteractive: 12,
     radiusMajorModal: 32,
     radiusWidget: 24,
@@ -479,65 +510,8 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     adminSimulationMode: (sessionStorage.getItem('adminSimulationMode') as 'admin' | 'viewer') || 'admin',
     notification: null,
     lastLocalThemeUpdate: 0,
-    themeSettingsLight: {
-      colorAppIdentity: '#4285F4',
-      colorActiveTaskDone: '#5DB975',
-      colorCompletedState: '#34A853',
-      colorDestructive: '#EA4335',
-      colorPresenceNotice: '#FBBC05',
-      colorProjectInfoBg: 'rgba(219, 234, 254, 0.7)',
-      colorProjectInfoBorder: '#BFDBFE',
-      colorNotesBg: 'rgba(219, 234, 254, 0.7)',
-      colorNotesBorder: '#BFDBFE',
-      colorNotesEditorBg: 'rgba(255, 255, 255, 0.5)',
-      colorNotesEditorBorder: '#E5E7EB',
-      colorNotesEditorSeparator: 'rgba(0, 0, 0, 0.1)',
-      colorNotePersonalBg: '#fff9db',
-      colorNoteProjectBg: '#fff4e6',
-      colorNotePriorityBg: '#fff0f0',
-      colorChecklistBg: 'rgba(239, 246, 255, 0.5)',
-      colorChecklistBorder: '#DBEAFE',
-      colorMetadataCardBg: 'rgba(255, 255, 255, 0.8)',
-      colorMetadataCardBorder: '#BFDBFE',
-      colorSectionIdent: '#4285F4',
-      colorSectionIdentIcon: '#4285F4',
-      colorSectionPlan: '#34A853',
-      colorSectionPlanIcon: '#34A853',
-      colorSectionBuild: '#F97316',
-      colorSectionBuildIcon: '#F97316',
-      colorHierarchyLine: '#D1D5DB',
-      colorPrereqBg: 'rgba(255, 247, 237, 0.5)',
-      colorPrereqBorder: '#FFEDD5',
-      colorPrereqItemBg: 'rgba(255, 255, 255, 0.6)',
-      colorPrereqText: '#EA580C',
-      colorPrereqIcon: '#EA580C',
-      colorAppBg: '#FFFFFF',
-      colorSidebarBg: '#F9FAFB',
-      colorConsoleBg: '#FFFFFF',
-      colorTextPrimary: '#4B5563',
-      colorTextSecondary: '#6B7280',
-      colorTextHeading: '#111827',
-      fontSizeBase: 14,
-      fontWeightHeading: '900',
-      letterSpacingHeading: 0,
-      lineHeightBase: 1.5,
-      radiusTaskCard: 20,
-      radiusInteractive: 12,
-      radiusMajorModal: 32,
-      radiusWidget: 24,
-      radiusSidebar: 0,
-      radiusProjectInfo: 32,
-      radiusMetadataCard: 20,
-      radiusFocusCard: 48,
-      radiusTaskButton: 12,
-      colorHubInactiveBorder: 'rgba(0, 0, 0, 0.15)',
-      colorHubStep2InactiveBg: 'rgba(254, 226, 226, 0.8)',
-    },
-    themeSettingsDark: {
-      ...getThemeDefaults(true),
-      colorHubInactiveBorder: 'rgba(255, 255, 255, 0.3)',
-      colorHubStep2InactiveBg: 'rgba(254, 226, 226, 0.1)',
-    },
+    themeSettingsLight: migrateThemeSettings(getThemeDefaults(false)),
+    themeSettingsDark: migrateThemeSettings(getThemeDefaults(true)),
     themePresets: [],
     activePresetIdLight: null,
     activePresetIdDark: null,

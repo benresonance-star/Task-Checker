@@ -1566,7 +1566,7 @@ function App() {
                   <div className="flex items-center justify-between flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <ClipboardList className="w-5 h-5 text-google-blue dark:text-gray-300" />
-                      <h3 className="text-lg sm:text-xl font-black text-gray-600 dark:text-gray-300 break-words">
+                      <h3 className="text-lg sm:text-xl font-black text-[var(--checklist-title)] break-words">
                         {activeInstance.title}
                       </h3>
                       <div className="ml-2 p-1 rounded-full bg-blue-200/50 dark:bg-white/20">

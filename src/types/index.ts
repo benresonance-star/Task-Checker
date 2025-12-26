@@ -211,6 +211,14 @@ export interface ThemeSettings {
   colorNotePriorityBg: string;
   colorChecklistBg: string;
   colorChecklistBorder: string;
+  colorChecklistTitle: string;
+  colorSectionBg: string;
+  colorSectionBorder: string;
+  colorSectionTitle: string;
+  colorSubsectionBg: string;
+  colorSubsectionBorder: string;
+  colorSubsectionTitle: string;
+  colorTaskTitle: string;
   colorMetadataCardBg: string;
   colorMetadataCardBorder: string;
   colorSectionIdent: string;
@@ -238,6 +246,8 @@ export interface ThemeSettings {
   letterSpacingHeading: number;
   lineHeightBase: number;
   radiusTaskCard: number;
+  radiusSection: number;
+  radiusSubsection: number;
   radiusInteractive: number;
   radiusMajorModal: number;
   radiusWidget: number;

@@ -372,7 +372,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
             )}
           </section>
 
-          {/* 4. Checklist & Templates */}
+            {/* 4. Checklist & Templates */}
           <section className="space-y-3">
             <SectionHeader id="checklist" label="Checklist & Templates" icon={ClipboardList} />
             {expandedSections.checklist && (
@@ -380,10 +380,35 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 <div className="grid grid-cols-2 gap-3">
                   <ColorControl label="Checklist Bg" value={themeSettings.colorChecklistBg} onChange={(v) => handleChange('colorChecklistBg', v)} />
                   <ColorControl label="Checklist Border" value={themeSettings.colorChecklistBorder} onChange={(v) => handleChange('colorChecklistBorder', v)} />
+                  <ColorControl label="Checklist Title" value={themeSettings.colorChecklistTitle} onChange={(v) => handleChange('colorChecklistTitle', v)} />
                   <ColorControl label="Connector Line" value={themeSettings.colorHierarchyLine} onChange={(v) => handleChange('colorHierarchyLine', v)} />
-                  <ColorControl label="Completed State" value={themeSettings.colorCompletedState} onChange={(v) => handleChange('colorCompletedState', v)} />
                 </div>
-                <SliderControl label="Task Container Radius" value={themeSettings.radiusTaskCard} min={0} max={40} onChange={(v) => handleChange('radiusTaskCard', v)} />
+                
+                <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest\">Section Styling</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Section Bg" value={themeSettings.colorSectionBg} onChange={(v) => handleChange('colorSectionBg', v)} />
+                    <ColorControl label="Section Border" value={themeSettings.colorSectionBorder} onChange={(v) => handleChange('colorSectionBorder', v)} />
+                    <ColorControl label="Section Title" value={themeSettings.colorSectionTitle} onChange={(v) => handleChange('colorSectionTitle', v)} />
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest\">Sub-section Styling</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Sub-section Bg" value={themeSettings.colorSubsectionBg} onChange={(v) => handleChange('colorSubsectionBg', v)} />
+                    <ColorControl label="Sub-section Border" value={themeSettings.colorSubsectionBorder} onChange={(v) => handleChange('colorSubsectionBorder', v)} />
+                    <ColorControl label="Sub-section Title" value={themeSettings.colorSubsectionTitle} onChange={(v) => handleChange('colorSubsectionTitle', v)} />
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest\">Task Styling</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Task Title" value={themeSettings.colorTaskTitle} onChange={(v) => handleChange('colorTaskTitle', v)} />
+                    <ColorControl label="Completed State" value={themeSettings.colorCompletedState} onChange={(v) => handleChange('colorCompletedState', v)} />
+                  </div>
+                </div>
               </div>
             )}
           </section>
@@ -393,6 +418,9 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
             <SectionHeader id="radii" label="System Corner Radii" icon={Settings} />
             {expandedSections.radii && (
               <div className="space-y-4 animate-in fade-in slide-in-from-top-1 duration-200 px-1">
+                <SliderControl label="Checklist Section" value={themeSettings.radiusSection} min={0} max={60} onChange={(v) => handleChange('radiusSection', v)} />
+                <SliderControl label="Checklist Sub-section" value={themeSettings.radiusSubsection} min={0} max={60} onChange={(v) => handleChange('radiusSubsection', v)} />
+                <SliderControl label="Task Card" value={themeSettings.radiusTaskCard} min={0} max={40} onChange={(v) => handleChange('radiusTaskCard', v)} />
                 <SliderControl label="Focus Card" value={themeSettings.radiusFocusCard} min={0} max={100} onChange={(v) => handleChange('radiusFocusCard', v)} />
                 <SliderControl label="Widgets" value={themeSettings.radiusWidget} min={0} max={40} onChange={(v) => handleChange('radiusWidget', v)} />
                 <SliderControl label="Interactive Buttons" value={themeSettings.radiusInteractive} min={0} max={20} onChange={(v) => handleChange('radiusInteractive', v)} />

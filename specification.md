@@ -75,8 +75,8 @@ The system features a robust sync engine:
   - **Atmosphere & Identity**: Core brand colors, app backgrounds, and typography engine.
   - **My Dashboard (Focus)**: Specific styling for the Active Focus card, **Knowledge Hub** (including inactive step borders and backgrounds), prerequisites, and scratchpads.
   - **Project Interface**: Dashboard metadata sections and card styling.
-  - **Checklist & Templates**: Task list hierarchy, connector lines, and task container styles.
-  - **System Corner Radii**: Global management of all corner radii from buttons to major modals.
+  - **Checklist & Templates**: Task list hierarchy, connector lines, and highly granular controls for **Section/Subsection backgrounds, borders, radii, and font colors**, as well as **Task and Checklist title colors**.
+  - **System Corner Radii**: Global management of all corner radii from checklist components to major modals.
 - **Style Snapshots (Theme Library)**: Admins can capture the current brand styling and save it as a named snapshot (e.g., "Happy Mode"). Presets support **Active Style Tracking**, highlighting the currently applied theme and allowing for **Incremental Updates** (overwriting an existing snapshot with new tweaks) via a dedicated save icon.
 - **Smooth Interaction Engine**: Utilizes hardware-accelerated `translate3d` and `requestAnimationFrame` for buttery-smooth window movement and resizing. Transitions are dynamically disabled during active interactions to eliminate "input lag."
 - **Semantic Theme Engine**: Uses CSS Variables linked to descriptive, role-based technical keys (e.g., `colorAppIdentity` instead of `brandBlue`). This ensures the codebase remains logical even when colors are dramatically altered.
@@ -234,7 +234,7 @@ The system features a robust sync engine:
 - **`masters` Collection**: 
   - `title`, `version`, `sections` (Template structure)
 - **`settings` Collection**:
-  - `theme`: `{ colorAppIdentity, colorActiveTaskDone, colorCompletedState, colorDestructive, colorPresenceNotice, colorProjectInfoBg, colorProjectInfoBorder, colorChecklistBg, colorChecklistBorder, colorMetadataCardBg, colorMetadataCardBorder, colorSectionIdent, colorSectionIdentIcon, colorSectionPlan, colorSectionPlanIcon, colorSectionBuild, colorSectionBuildIcon, colorHierarchyLine, colorPrereqBg, colorPrereqBorder, colorPrereqItemBg, colorPrereqText, colorPrereqIcon, colorHubInactiveBorder, colorHubStep2InactiveBg, colorNotesBg, colorNotesBorder, colorNotesEditorBg, colorNotesEditorBorder, colorNotesEditorSeparator, colorNotePersonalBg, colorNoteProjectBg, colorNotePriorityBg, radiusTaskCard, radiusInteractive, radiusMajorModal, radiusWidget, radiusSidebar, radiusProjectInfo, radiusMetadataCard, radiusFocusCard, radiusTaskButton }`
+  - `theme`: `{ ..., colorChecklistBg, colorChecklistBorder, colorChecklistTitle, colorSectionBg, colorSectionBorder, colorSectionTitle, colorSubsectionBg, colorSubsectionBorder, colorSubsectionTitle, colorTaskTitle, radiusSection, radiusSubsection, ... }`
 - **`themePresets` Collection**:
   - `id`, `name`, `settings` (ThemeSettings), `createdAt`, `createdBy`
 
@@ -354,4 +354,4 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 26, 2025 (v1.6.2 - Branding Console Reorganization)*
+*Updated: December 26, 2025 (v1.6.3 - Granular Checklist Branding)*

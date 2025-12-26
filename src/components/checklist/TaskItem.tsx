@@ -207,7 +207,7 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
               <textarea
                 ref={textareaRef}
                 rows={1}
-                className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-600 dark:text-gray-300 text-sm font-medium py-0.5 px-1 rounded hover:bg-white dark:hover:bg-gray-800 focus:bg-white dark:focus:bg-gray-800 transition-colors resize-none overflow-hidden min-h-[1.5rem]"
+                className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-[var(--task-title)] text-sm font-medium py-0.5 px-1 rounded hover:bg-white dark:hover:bg-gray-800 focus:bg-white dark:focus:bg-gray-800 transition-colors resize-none overflow-hidden min-h-[1.5rem]"
                 value={localTitle}
                 onChange={(e) => {
                   const newVal = e.target.value;
@@ -227,7 +227,7 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
               <span 
                 className={clsx(
                   'w-full py-0.5 px-1 cursor-pointer select-none break-words whitespace-pre-wrap text-sm font-medium transition-colors duration-300', 
-                  isMultiUser ? "text-white" : (task.completed ? 'line-through text-gray-400 dark:text-gray-500' : (shouldRecede ? 'text-gray-400 dark:text-gray-500' : 'text-gray-600 dark:text-gray-300'))
+                  isMultiUser ? "text-white" : (task.completed ? 'line-through text-gray-400 dark:text-gray-500' : (shouldRecede ? 'text-gray-400 dark:text-gray-500' : 'text-[var(--task-title)]'))
                 )}
               >
                   {task.title}
