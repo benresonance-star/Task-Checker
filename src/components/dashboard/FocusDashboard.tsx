@@ -104,6 +104,20 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const ProgressFill = ({ progress, isRunning }: { progress: number; isRunning: boolean }) => (
+    <div 
+      className={clsx(
+        "absolute bottom-0 left-0 right-0 z-0 pointer-events-none transition-all duration-1000 ease-linear",
+        isRunning ? "opacity-100" : "opacity-60"
+      )}
+      style={{ 
+        height: `${Math.min(100, Math.max(0, progress * 100))}%`,
+        background: 'linear-gradient(to top, rgba(34, 197, 94, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)',
+        borderTop: '2px solid rgba(255, 255, 255, 0.3)',
+      }}
+    />
+  );
+
   const handleSetTimerSubmit = () => {
     const mins = parseInt(customMinutes);
     if (!isNaN(mins) && focusData) {
@@ -259,9 +273,15 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
               isExecuting ? "min-h-[calc(100vh-2rem)] md:min-h-[700px]" : "min-h-[400px]",
               cardTheme,
               focusData.task.timerIsRunning && !isYellow && "ring-8 ring-google-green/20",
-            focusData.task.timerIsRunning && isYellow && "ring-8 ring-google-yellow/20"
-          )}>
-            <div className="relative z-10 flex flex-col h-full space-y-8">
+              focusData.task.timerIsRunning && isYellow && "ring-8 ring-google-yellow/20"
+            )}>
+              {isExecuting && (
+                <ProgressFill 
+                  progress={1 - ((focusData.task.timerRemaining ?? focusData.task.timerDuration ?? 1) / (focusData.task.timerDuration || 1))} 
+                  isRunning={!!focusData.task.timerIsRunning} 
+                />
+              )}
+              <div className="relative z-10 flex flex-col h-full space-y-8">
                 <WorkflowTracker />
                 
                 <div className="flex items-start justify-between gap-4">
