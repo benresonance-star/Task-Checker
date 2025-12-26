@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Task, FocusStage } from '../../types';
-import { FileText, ClipboardList, Info, Target, CheckCircle2, ArrowRight, ArrowDown, Bold, List, ListOrdered } from 'lucide-react';
+import { FileText, ClipboardList, Info, Target, CheckCircle2, ArrowRight, ArrowDown, Bold, List, ListOrdered, ExternalLink, Lightbulb } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -94,7 +94,6 @@ export const KnowledgeHub: React.FC<KnowledgeHubProps> = ({ task, stage }) => {
     );
   }
 
-  const hasGuidance = (task.guide?.description && task.guide.description.trim() !== '') || (task.guide?.content && task.guide.content !== '<p></p>');
   const hasPrereqs = (task.guide?.requiredBefore?.length || 0) > 0;
 
   const stepClasses = (step: number) => clsx(
@@ -123,24 +122,16 @@ export const KnowledgeHub: React.FC<KnowledgeHubProps> = ({ task, stage }) => {
           </div>
 
           <div className="flex-1 space-y-4 overflow-y-auto max-h-[250px] custom-scrollbar pr-2">
-            {!hasGuidance ? (
+            {!task.guide?.description ? (
               <div className="h-full flex flex-col items-center justify-center text-center py-6 opacity-40">
                 <FileText className="w-8 h-8 mb-2" />
-                <p className="text-[10px] font-black uppercase tracking-widest">No guidance provided</p>
+                <p className="text-[10px] font-black uppercase tracking-widest">No intent described</p>
               </div>
             ) : (
               <div className="space-y-3">
-                {task.guide?.description && (
-                  <p className="text-xs font-bold leading-relaxed text-gray-700 dark:text-gray-300">
-                    {task.guide.description}
-                  </p>
-                )}
-                {task.guide?.content && task.guide.content !== '<p></p>' && (
-                  <div 
-                    className="prose prose-sm dark:prose-invert max-w-none text-xs font-medium leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: String(task.guide.content) }}
-                  />
-                )}
+                <p className="text-xs font-bold leading-relaxed text-gray-700 dark:text-gray-300">
+                  {task.guide.description}
+                </p>
               </div>
             )}
           </div>
@@ -211,7 +202,7 @@ export const KnowledgeHub: React.FC<KnowledgeHubProps> = ({ task, stage }) => {
           <ArrowDown className="lg:hidden w-6 h-6" />
         </div>
 
-        {/* Widget 3: Technical Briefing (Task Notes) */}
+        {/* Widget 3: Technical Briefing (Prep & Guidance) */}
         <div 
           onClick={() => setKnowledgeHubStep(3)}
           className={stepClasses(3)}
@@ -222,17 +213,60 @@ export const KnowledgeHub: React.FC<KnowledgeHubProps> = ({ task, stage }) => {
             <h4 className="text-[10px] font-black uppercase tracking-widest">Technical Briefing</h4>
           </div>
 
-          <div className="flex-1 space-y-4 overflow-y-auto max-h-[250px] custom-scrollbar pr-2">
-            {!task.notes ? (
+          <div className="flex-1 space-y-6 overflow-y-auto max-h-[250px] custom-scrollbar pr-2">
+            {!task.guide?.helpfulPrep?.length && (!task.guide?.content || task.guide.content === '<p></p>') ? (
               <div className="h-full flex flex-col items-center justify-center text-center py-6 opacity-40">
                 <FileText className="w-8 h-8 mb-2" />
-                <p className="text-[10px] font-black uppercase tracking-widest">No technical notes</p>
+                <p className="text-[10px] font-black uppercase tracking-widest">No briefing materials</p>
               </div>
             ) : (
-              <div 
-                className="prose prose-sm dark:prose-invert max-w-none text-xs font-medium leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: String(task.notes) }}
-              />
+              <div className="space-y-6">
+                {/* Helpful Prep */}
+                {task.guide?.helpfulPrep && task.guide.helpfulPrep.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                      <Lightbulb className="w-3.5 h-3.5" />
+                      <span className="text-[9px] font-black uppercase tracking-widest">Helpful Prep</span>
+                    </div>
+                    <div className="space-y-2">
+                      {task.guide.helpfulPrep.map((item) => (
+                        <div key={item.id} className="bg-blue-50/30 dark:bg-white/5 border border-blue-100/50 dark:border-white/10 rounded-xl p-3 text-xs font-bold transition-all hover:border-google-blue">
+                          {item.type === 'text' ? (
+                            <div className="flex items-start gap-2">
+                              <FileText className="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" />
+                              <span className="text-gray-700 dark:text-gray-300 break-words whitespace-pre-wrap">{item.label}</span>
+                            </div>
+                          ) : (
+                            <a 
+                              href={item.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="flex items-start gap-2 text-google-blue dark:text-blue-400 hover:underline"
+                            >
+                              {item.type === 'internal' ? <FileText className="w-3.5 h-3.5 mt-0.5 shrink-0" /> : <ExternalLink className="w-3.5 h-3.5 mt-0.5 shrink-0" />}
+                              <span className="break-words">{item.label}</span>
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Additional Guidance */}
+                {task.guide?.content && task.guide.content !== '<p></p>' && (
+                  <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-white/5">
+                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                      <Info className="w-3.5 h-3.5" />
+                      <span className="text-[9px] font-black uppercase tracking-widest">Additional Guidance</span>
+                    </div>
+                    <div 
+                      className="prose prose-sm dark:prose-invert max-w-none text-xs font-medium leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: String(task.guide.content) }}
+                    />
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
