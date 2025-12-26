@@ -205,16 +205,27 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
     <div className="absolute inset-x-0 bottom-0 h-48 pointer-events-none overflow-hidden opacity-25 z-0">
       <div className="relative h-full w-full">
         <FishIcon 
-          className="absolute bottom-4 w-28 h-28 text-white animate-swim-slow" 
-          style={{ animationPlayState: isRunning ? 'running' : 'paused' }} 
+          className="absolute bottom-4 w-28 h-28 text-white animate-swim-slow will-change-[left]" 
+          style={{ 
+            animationPlayState: isRunning ? 'running' : 'paused',
+            transform: 'translateZ(0)'
+          }} 
         />
         <FishIcon 
-          className="absolute bottom-24 w-16 h-16 text-white animate-swim-medium" 
-          style={{ animationDelay: '-20s', animationPlayState: isRunning ? 'running' : 'paused' }} 
+          className="absolute bottom-24 w-16 h-16 text-white animate-swim-medium will-change-[left]" 
+          style={{ 
+            animationDelay: '-20s', 
+            animationPlayState: isRunning ? 'running' : 'paused',
+            transform: 'translateZ(0)'
+          }} 
         />
         <FishIcon 
-          className="absolute bottom-12 w-22 h-22 text-white animate-swim-fast" 
-          style={{ animationDelay: '-40s', animationPlayState: isRunning ? 'running' : 'paused' }} 
+          className="absolute bottom-12 w-22 h-22 text-white animate-swim-fast will-change-[left]" 
+          style={{ 
+            animationDelay: '-40s', 
+            animationPlayState: isRunning ? 'running' : 'paused',
+            transform: 'translateZ(0)'
+          }} 
         />
       </div>
     </div>
