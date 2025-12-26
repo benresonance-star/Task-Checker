@@ -97,15 +97,12 @@
 }
 
 @keyframes completion-pulse {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0%, 100% { background-color: var(--brand-green-light); }
+  50% { background-color: var(--brand-green-pulse); }
 }
 
 .animate-completion-pulse {
-  background: linear-gradient(90deg, var(--brand-green-light), var(--brand-green-pulse), var(--brand-green-light));
-  background-size: 200% 100%;
-  animation: completion-pulse var(--pulse-frequency-done, 0.8s) ease-in-out infinite;
+  animation: completion-pulse var(--pulse-frequency-done, 3s) ease-in-out infinite;
 }
 
 body {
