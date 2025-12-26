@@ -10,38 +10,10 @@ import { useLocation } from 'react-router-dom';
 interface TaskItemProps {
   task: Task;
   subsectionId: string;
-  onOpenNotes: (task: Task) => void;
+  onOpenNotes: (taskId: string, containerId: string) => void;
 }
 
-const TomatoIcon = ({ className }: { className?: string }) => (
-  <svg 
-    viewBox="0 0 24 24" 
-    xmlns="http://www.w3.org/2000/svg" 
-    className={className}
-  >
-    {/* Tomato Body */}
-    <path 
-      d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" 
-      fill="#EA4335" 
-    />
-    {/* Green Stem */}
-    <path 
-      d="M12 3C12 3 11 1.5 12 1C13 0.5 14 2 13 3" 
-      stroke="#34A853" 
-      strokeWidth="1.5" 
-      strokeLinecap="round" 
-    />
-    <path 
-      d="M9 3.5L12 4.5L15 3.5" 
-      stroke="#34A853" 
-      strokeWidth="1.5" 
-      strokeLinecap="round" 
-    />
-    {/* Clock Face Overlay */}
-    <circle cx="12" cy="12" r="5.5" stroke="white" strokeWidth="1" fill="white" fillOpacity="0.2" />
-    <path d="M12 9.5V12L13.5 13" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
+import { TomatoIcon } from '../icons/TomatoIcon';
 
 /**
  * TaskItem component represents a single task in the checklist.
@@ -49,13 +21,14 @@ const TomatoIcon = ({ className }: { className?: string }) => (
  * and the Pomodoro timer logic.
  */
 export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => {
-  const { mode, toggleTask, renameTask, deleteTask, moveTask, setTaskTimer, resetTaskTimer, toggleTaskTimer, activeInstance, currentUser, activeProject, toggleTaskFocus, toggleTaskInActionSet, users } = useTasklistStore();
+  const { mode, toggleTask, renameTask, deleteTask, moveTask, setTaskTimer, resetTaskTimer, toggleTaskTimer, activeInstance, activeMaster, currentUser, activeProject, toggleTaskFocus, toggleTaskInActionSet, users } = useTasklistStore();
 
   const isInstance = mode === 'project';
-  const isActive = isInstance && 
-    currentUser?.activeFocus?.projectId === activeProject?.id &&
-    currentUser?.activeFocus?.instanceId === activeInstance?.id &&
-    currentUser?.activeFocus?.taskId === task.id;
+  const isActive = currentUser?.activeFocus?.taskId === task.id && (
+    isInstance 
+      ? (currentUser?.activeFocus?.projectId === activeProject?.id && currentUser?.activeFocus?.instanceId === activeInstance?.id)
+      : (currentUser?.activeFocus?.projectId === 'master' && currentUser?.activeFocus?.instanceId === activeMaster?.id)
+  );
 
   const isInActionSet = currentUser?.actionSet?.some(i => 
     i.projectId === activeProject?.id && 
@@ -75,7 +48,7 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
     .map(([_, info]) => info);
 
   // Claim Badges: Find other users who have this task in their Action Set
-  const otherClaimants = users
+    const otherClaimants = users
     .filter(u => u.id !== currentUser?.id && u.actionSet?.some(i => 
       i.projectId === activeProject?.id && 
       i.instanceId === activeInstance?.id && 
@@ -83,7 +56,15 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
     ))
     .map(u => ({ id: u.id, name: u.name }));
 
-  const isMultiUser = (otherActiveUsers.length + (isActive ? 1 : 0)) >= 2;
+    // NEW LOGIC: Trigger danger alert if multiple users have this EXACT task focused in their profiles,
+    // regardless of their current online heartbeat status.
+    const concurrentFocusCount = users.filter(u => 
+      u.activeFocus?.projectId === activeProject?.id &&
+      u.activeFocus?.instanceId === activeInstance?.id &&
+      u.activeFocus?.taskId === task.id
+    ).length;
+
+  const isMultiUser = concurrentFocusCount >= 2;
 
   const [localTitle, setLocalTitle] = useState(task.title);
 
@@ -95,10 +76,15 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
   }, [task.title, isInstance]);
 
   const handleTaskClick = (e: React.MouseEvent) => {
-    if (!isInstance || !activeProject || !activeInstance) return;
     e.stopPropagation(); // Prevent triggering the SubsectionItem's background click (which clears selection)
     
-    toggleTaskFocus(activeProject.id, activeInstance.id, task.id);
+    if (isInstance) {
+      if (!activeProject || !activeInstance) return;
+      toggleTaskFocus(activeProject.id, activeInstance.id, task.id);
+    } else {
+      if (!activeMaster) return;
+      toggleTaskFocus('master', activeMaster.id, task.id);
+    }
   };
 
   const location = useLocation();
@@ -138,7 +124,8 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
   // Removed individual timer logic to prevent race conditions
 
   const formatTime = (seconds: number | undefined | null, duration?: number) => {
-    const val = seconds ?? duration ?? (20 * 60);
+    let val = seconds ?? duration ?? (20 * 60);
+    if (isNaN(val) || val < 0) val = 20 * 60;
     const hrs = Math.floor(val / 3600);
     const mins = Math.floor((val % 3600) / 60);
     const secs = val % 60;
@@ -195,11 +182,15 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
             )}
           </button>
         ) : (
-          <div className="flex flex-col opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-            <button onClick={() => moveTask(subsectionId, task.id, 'up')} className="text-gray-500 hover:text-google-blue transition-colors">
+          <div className={clsx(
+            "flex flex-col flex-shrink-0 transition-opacity",
+            "md:opacity-0 md:group-hover:opacity-100", // Hidden on desktop until hover
+            "opacity-100" // Always visible on mobile
+          )}>
+            <button onClick={(e) => { e.stopPropagation(); moveTask(subsectionId, task.id, 'up'); }} className="text-gray-500 hover:text-google-blue transition-colors p-0.5">
               <ChevronUp className="w-3.5 h-3.5" />
             </button>
-            <button onClick={() => moveTask(subsectionId, task.id, 'down')} className="text-gray-500 hover:text-google-blue transition-colors">
+            <button onClick={(e) => { e.stopPropagation(); moveTask(subsectionId, task.id, 'down'); }} className="text-gray-500 hover:text-google-blue transition-colors p-0.5">
               <ChevronDown className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -221,7 +212,7 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
                 onChange={(e) => {
                   const newVal = e.target.value;
                   setLocalTitle(newVal);
-                  renameTask(task.id, newVal);
+                  renameTask(task.id, newVal, activeMaster?.id || activeInstance?.id);
                   e.target.style.height = 'auto';
                   e.target.style.height = `${e.target.scrollHeight}px`;
                 }}
@@ -369,7 +360,7 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
             size="sm" 
             onClick={(e) => {
               e.stopPropagation();
-              onOpenNotes(task);
+              onOpenNotes(task.id, activeInstance?.id || activeMaster?.id || '');
             }}
             className={clsx(
               'h-7 w-7 sm:h-8 sm:w-8 p-0 transition-all rounded-full border-2', 
@@ -401,57 +392,59 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
       </div>
 
       {/* Control Tier: Mobile Action Row (Visible only when Active on Mobile) */}
-      {isActive && isInstance && (
+      {isActive && (
         <div className="flex sm:hidden items-center justify-between mt-3 pt-3 border-t border-gray-200 dark:border-gray-800 animate-in slide-in-from-top-2 duration-300">
           <div className="flex items-center gap-3">
-            {/* Pomodoro Mobile */}
-            <div className="flex items-center gap-2">
-              <div 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowTimerWidget(!showTimerWidget);
-                }}
-                className="relative"
-              >
-                <div className={clsx(
-                  "flex items-center gap-1.5 p-1.5 rounded-xl border transition-all",
-                  isMultiUser ? "bg-white/20 border-white/30" : "bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-900/40"
-                )}>
-                  <TomatoIcon className="w-5 h-5" />
-                  <span className={clsx(
-                    "text-[11px] font-black tabular-nums",
-                    isMultiUser ? "text-white" : "text-red-600 dark:text-red-400"
+            {/* Pomodoro Mobile (Project Mode only) */}
+            {isInstance && (
+              <div className="flex items-center gap-2">
+                <div 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowTimerWidget(!showTimerWidget);
+                  }}
+                  className="relative"
+                >
+                  <div className={clsx(
+                    "flex items-center gap-1.5 p-1.5 rounded-xl border transition-all",
+                    isMultiUser ? "bg-white/20 border-white/30" : "bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-900/40"
                   )}>
-                    {formatTime(task.timerRemaining, task.timerDuration)}
-                  </span>
+                    <TomatoIcon className="w-5 h-5" />
+                    <span className={clsx(
+                      "text-[11px] font-black tabular-nums",
+                      isMultiUser ? "text-white" : "text-red-600 dark:text-red-400"
+                    )}>
+                      {formatTime(task.timerRemaining, task.timerDuration)}
+                    </span>
+                  </div>
+
+                  {showTimerWidget && (
+                    <>
+                      <div className="fixed inset-0 z-[45]" onClick={(e) => { e.stopPropagation(); setShowTimerWidget(false); }} />
+                      <div onClick={(e) => e.stopPropagation()} className="absolute bottom-full left-0 mb-2 p-3 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-2xl shadow-2xl z-50 min-w-[120px]">
+                        <div className="flex gap-2">
+                          <input type="number" className="w-16 h-8 bg-gray-50 dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-lg px-2 text-sm outline-none font-bold text-gray-800 dark:text-gray-300" value={customMinutes} onChange={(e) => setCustomMinutes(e.target.value)} />
+                          <Button size="sm" onClick={handleSetTimer} className="h-7 px-2 font-black text-[10px] py-0">Set</Button>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
-                {showTimerWidget && (
-                  <>
-                    <div className="fixed inset-0 z-[45]" onClick={(e) => { e.stopPropagation(); setShowTimerWidget(false); }} />
-                    <div onClick={(e) => e.stopPropagation()} className="absolute bottom-full left-0 mb-2 p-3 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-2xl shadow-2xl z-50 min-w-[120px]">
-                      <div className="flex gap-2">
-                        <input type="number" className="w-16 h-8 bg-gray-50 dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-lg px-2 text-sm outline-none font-bold text-gray-800 dark:text-gray-300" value={customMinutes} onChange={(e) => setCustomMinutes(e.target.value)} />
-                        <Button size="sm" onClick={handleSetTimer} className="h-7 px-2 font-black text-[10px] py-0">Set</Button>
-                      </div>
-                    </div>
-                  </>
-                )}
+                <button 
+                  onClick={(e) => { e.stopPropagation(); toggleTaskTimer(task.id); }}
+                  className={clsx(
+                    "w-8 h-8 rounded-full flex items-center justify-center shadow-sm transition-all",
+                    isMultiUser ? "bg-white text-google-red" : "bg-red-500 text-white"
+                  )}
+                >
+                  {task.timerIsRunning ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+                </button>
               </div>
+            )}
 
-              <button 
-                onClick={(e) => { e.stopPropagation(); toggleTaskTimer(task.id); }}
-                className={clsx(
-                  "w-8 h-8 rounded-full flex items-center justify-center shadow-sm transition-all",
-                  isMultiUser ? "bg-white text-google-red" : "bg-red-500 text-white"
-                )}
-              >
-                {task.timerIsRunning ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
-              </button>
-            </div>
-
-            {/* Presence Mobile */}
-            {otherActiveUsers.length > 0 && (
+            {/* Presence Mobile (Project Mode only) */}
+            {isInstance && otherActiveUsers.length > 0 && (
               <div className="flex -space-x-2">
                 {otherActiveUsers.map((user, i) => (
                   <div key={i} className="w-8 h-8 rounded-full bg-google-yellow border-2 border-white dark:border-gray-900 flex items-center justify-center text-xs font-black text-gray-900 shadow-sm">
@@ -463,21 +456,23 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Sidebar Toggle Mobile */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                if (activeProject && activeInstance) toggleTaskInActionSet(activeProject.id, activeInstance.id, task.id);
-              }}
-              className={clsx(
-                "w-12 h-12 rounded-2xl transition-all border-2 flex items-center justify-center shadow-sm",
-                isMultiUser 
-                  ? (isInActionSet ? "bg-white text-google-red border-white" : "bg-white/20 text-white border-white/30")
-                  : (isInActionSet ? "bg-google-blue text-white border-google-blue" : "bg-white dark:bg-black/20 text-gray-400 border-gray-200 dark:border-gray-800")
-              )}
-            >
-              {isInActionSet ? <ListMinus className="w-6 h-6" /> : <ListPlus className="w-6 h-6" />}
-            </button>
+            {/* Sidebar Toggle Mobile (Project Mode only) */}
+            {isInstance && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (activeProject && activeInstance) toggleTaskInActionSet(activeProject.id, activeInstance.id, task.id);
+                }}
+                className={clsx(
+                  "w-12 h-12 rounded-2xl transition-all border-2 flex items-center justify-center shadow-sm",
+                  isMultiUser 
+                    ? (isInActionSet ? "bg-white text-google-red border-white" : "bg-white/20 text-white border-white/30")
+                    : (isInActionSet ? "bg-google-blue text-white border-google-blue" : "bg-white dark:bg-black/20 text-gray-400 border-gray-200 dark:border-gray-800")
+                )}
+              >
+                {isInActionSet ? <ListMinus className="w-6 h-6" /> : <ListPlus className="w-6 h-6" />}
+              </button>
+            )}
 
             {/* Notes Icon Mobile - Larger as requested */}
             <Button 
@@ -485,7 +480,7 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
               size="sm" 
               onClick={(e) => {
                 e.stopPropagation();
-                onOpenNotes(task);
+                onOpenNotes(task.id, activeInstance?.id || activeMaster?.id || '');
               }}
               className={clsx(
                 'h-12 w-12 p-0 transition-all rounded-2xl border-2 shadow-sm', 

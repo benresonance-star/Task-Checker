@@ -45,6 +45,7 @@ export interface Task {
   timerDuration?: number;   // Configured countdown duration in seconds
   timerRemaining?: number;  // Current remaining time in seconds
   timerIsRunning?: boolean; // Active state of the task timer
+  timerLastUpdated?: number; // Timestamp of the last timer state update (for sync safety)
   timeTaken?: number | null; // Recorded time (duration - remaining) upon completion
 }
 
@@ -215,6 +216,11 @@ export interface ThemeSettings {
   colorSectionBuild: string;
   colorSectionBuildIcon: string;
   colorHierarchyLine: string;
+  colorPrereqBg: string;
+  colorPrereqBorder: string;
+  colorPrereqItemBg: string;
+  colorPrereqText: string;
+  colorPrereqIcon: string;
   colorAppBg: string;
   colorSidebarBg: string;
   colorConsoleBg: string;
@@ -228,6 +234,12 @@ export interface ThemeSettings {
   radiusTaskCard: number;
   radiusInteractive: number;
   radiusMajorModal: number;
+  radiusWidget: number;
+  radiusSidebar: number;
+  radiusProjectInfo: number;
+  radiusMetadataCard: number;
+  radiusFocusCard: number;
+  radiusTaskButton: number;
 }
 
 export interface ThemePreset {

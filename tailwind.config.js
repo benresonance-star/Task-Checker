@@ -12,6 +12,12 @@ export default {
         'button': 'var(--radius-button)',
         'card': 'var(--radius-card)',
         'container': 'var(--radius-container)',
+        'widget': 'var(--radius-widget)',
+        'sidebar': 'var(--radius-sidebar)',
+        'project-info': 'var(--radius-project-info)',
+        'metadata': 'var(--radius-metadata-card)',
+        'focus-card': 'var(--radius-focus-card)',
+        'task-button': 'var(--radius-task-button)',
       },
       colors: {
         google: {

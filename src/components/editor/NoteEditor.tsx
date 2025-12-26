@@ -16,7 +16,7 @@ import { clsx } from 'clsx';
 
 interface NoteEditorProps {
   content: string;
-  onChange: (content: string) => void;
+  onChange: (content: string, immediate?: boolean) => void;
   readOnly?: boolean;
 }
 
@@ -162,6 +162,9 @@ const ResizableImage = Image.extend({
 })
 
 export const NoteEditor = ({ content, onChange, readOnly = false }: NoteEditorProps) => {
+  const lastUpdateRef = useRef(content);
+  const [isFocused, setIsFocused] = useState(false);
+  
   const editor = useEditor({
     editable: !readOnly,
     extensions: [
@@ -187,7 +190,20 @@ export const NoteEditor = ({ content, onChange, readOnly = false }: NoteEditorPr
     ],
     content: content,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const html = editor.getHTML();
+      if (html !== lastUpdateRef.current) {
+        lastUpdateRef.current = html;
+        onChange(html, false);
+      }
+    },
+    onFocus: () => {
+      setIsFocused(true);
+    },
+    onBlur: ({ editor }) => {
+      setIsFocused(false);
+      const html = editor.getHTML();
+      lastUpdateRef.current = html;
+      onChange(html, true);
     },
     editorProps: {
       attributes: {
@@ -210,10 +226,36 @@ export const NoteEditor = ({ content, onChange, readOnly = false }: NoteEditorPr
   });
 
   useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content);
+    if (!editor || isFocused) return;
+    
+    const currentHtml = editor.getHTML();
+    // Normalize both for comparison to avoid infinite loops due to minor HTML differences
+    const normalize = (html: string | null | undefined) => {
+      if (typeof html !== 'string') return '';
+      return html.replace(/\s/g, '').replace(/<br\/?>/g, '<br>');
+    };
+    
+    const normalizedContent = normalize(content);
+    if (normalizedContent !== normalize(currentHtml) && normalizedContent !== normalize(lastUpdateRef.current)) {
+      if (content !== undefined && content !== null) {
+        lastUpdateRef.current = content;
+        editor.commands.setContent(content, false);
+      }
     }
-  }, [content, editor]);
+  }, [content, editor, isFocused]);
+
+  // Flush changes on unmount
+  useEffect(() => {
+    return () => {
+      if (editor && !editor.isDestroyed) {
+        const html = editor.getHTML();
+        // Only flush if it's different from what we last saved
+        if (html !== lastUpdateRef.current) {
+          onChange(html, true);
+        }
+      }
+    };
+  }, [editor, onChange]);
 
   if (!editor) return null;
 
@@ -267,7 +309,7 @@ export const NoteEditor = ({ content, onChange, readOnly = false }: NoteEditorPr
   };
 
   return (
-    <div className="flex flex-col h-full border border-gray-400 dark:border-white/20 rounded-container overflow-hidden bg-white dark:bg-gray-900 shadow-sm backdrop-blur-sm">
+    <div className="flex flex-col h-full border border-gray-400 dark:border-white/20 rounded-container overflow-hidden bg-white dark:bg-gray-900 shadow-sm">
       {!readOnly && (
         <div className="flex flex-wrap items-center gap-1 p-3 px-4 border-b border-gray-400 dark:border-white/20 bg-gray-50 dark:bg-white/5">
           <Button

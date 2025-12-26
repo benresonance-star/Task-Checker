@@ -576,6 +576,37 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
           </section>
 
           <section>
+            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">"CAN I PROCEED?" SECTION</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <ColorControl 
+                label="Container Background" 
+                value={themeSettings.colorPrereqBg} 
+                onChange={(v) => handleChange('colorPrereqBg', v)} 
+              />
+        <ColorControl 
+          label="Container Outline" 
+          value={themeSettings.colorPrereqBorder} 
+          onChange={(v) => handleChange('colorPrereqBorder', v)} 
+        />
+        <ColorControl 
+          label="Item Background" 
+          value={themeSettings.colorPrereqItemBg} 
+          onChange={(v) => handleChange('colorPrereqItemBg', v)} 
+        />
+        <ColorControl 
+          label="Header Font Color" 
+                value={themeSettings.colorPrereqText} 
+                onChange={(v) => handleChange('colorPrereqText', v)} 
+              />
+              <ColorControl 
+                label="Header Icon Color" 
+                value={themeSettings.colorPrereqIcon} 
+                onChange={(v) => handleChange('colorPrereqIcon', v)} 
+              />
+            </div>
+          </section>
+
+          <section>
             <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">SYSTEM CONTROLS</h3>
             <div className="space-y-4">
               <SliderControl 
@@ -589,6 +620,42 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 value={themeSettings.radiusMajorModal} 
                 min={0} max={60} 
                 onChange={(v) => handleChange('radiusMajorModal', v)} 
+              />
+              <SliderControl 
+                label="Active Task Focus Card" 
+                value={themeSettings.radiusFocusCard} 
+                min={0} max={100} 
+                onChange={(v) => handleChange('radiusFocusCard', v)} 
+              />
+              <SliderControl 
+                label="Task Completion Button" 
+                value={themeSettings.radiusTaskButton} 
+                min={0} max={40} 
+                onChange={(v) => handleChange('radiusTaskButton', v)} 
+              />
+              <SliderControl 
+                label="Dashboard Widget Corners" 
+                value={themeSettings.radiusWidget} 
+                min={0} max={40} 
+                onChange={(v) => handleChange('radiusWidget', v)} 
+              />
+              <SliderControl 
+                label="Sidebar & Control Panel Corners" 
+                value={themeSettings.radiusSidebar} 
+                min={0} max={40} 
+                onChange={(v) => handleChange('radiusSidebar', v)} 
+              />
+              <SliderControl 
+                label="Project Dashboard Container" 
+                value={themeSettings.radiusProjectInfo} 
+                min={0} max={60} 
+                onChange={(v) => handleChange('radiusProjectInfo', v)} 
+              />
+              <SliderControl 
+                label="Inner Information Card Corners" 
+                value={themeSettings.radiusMetadataCard} 
+                min={0} max={40} 
+                onChange={(v) => handleChange('radiusMetadataCard', v)} 
               />
             </div>
           </section>

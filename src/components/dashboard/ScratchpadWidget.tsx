@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
-import { Plus, Trash2, CheckCircle2, Circle, Clock, X, Bold, List, ListOrdered, GripVertical, Flag } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, Circle, Clock, X, Bold, List, ListOrdered, GripVertical, Flag, ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -24,6 +24,71 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { restrictToVerticalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers';
 
+const Dropdown: React.FC<{
+  value: string;
+  options: string[];
+  onChange: (val: string) => void;
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  label?: string;
+  className?: string;
+  width?: string;
+  align?: 'left' | 'right';
+}> = ({ value, options, onChange, isOpen, setIsOpen, label, className, width = '200px', align = 'left' }) => (
+  <div className={clsx("relative", className)}>
+    <button
+      onClick={() => setIsOpen(!isOpen)}
+      className={clsx(
+        "flex items-center gap-2 bg-white/50 dark:bg-black/20 border-2 rounded-xl px-2.5 py-1.5 transition-all group shadow-sm",
+        isOpen ? "border-google-blue ring-4 ring-google-blue/10" : "border-gray-200 dark:border-gray-700 hover:border-google-blue"
+      )}
+    >
+      {label && <span className="text-[8px] font-black uppercase text-gray-400 tracking-tighter shrink-0 group-hover:text-google-blue transition-colors">{label}</span>}
+      <span className="text-[9px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300 truncate max-w-[120px] text-left">
+        {value === 'All' ? 'ALL NOTES' : value}
+      </span>
+      <ChevronDown className={clsx("w-3 h-3 text-gray-400 group-hover:text-google-blue transition-all", isOpen && "rotate-180")} />
+    </button>
+
+    {isOpen && (
+      <>
+        <div 
+          className="fixed inset-0 z-[100]" 
+          onClick={() => setIsOpen(false)} 
+        />
+        <div 
+          className={clsx(
+            "absolute top-full mt-2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-2 border-blue-200 dark:border-gray-700 rounded-2xl shadow-2xl z-[101] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200",
+            align === 'left' ? "left-0" : "right-0"
+          )}
+          style={{ width }}
+        >
+          <div className="max-h-[250px] overflow-y-auto custom-scrollbar p-1">
+            {options.map(opt => (
+              <button
+                key={opt}
+                onClick={() => {
+                  onChange(opt);
+                  setIsOpen(false);
+                }}
+                className={clsx(
+                  "w-full flex items-center justify-between px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all text-left",
+                  value === opt 
+                    ? "bg-google-blue text-white shadow-md" 
+                    : "text-gray-600 dark:text-gray-300 hover:bg-google-blue/10 hover:text-google-blue"
+                )}
+              >
+                <span className="truncate mr-2">{opt === 'All' ? 'ALL NOTES' : opt}</span>
+                {value === opt && <CheckCircle2 className="w-3 h-3 shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+      </>
+    )}
+  </div>
+);
+
 export const ScratchpadWidget: React.FC = () => {
   const { 
     currentUser, 
@@ -36,10 +101,25 @@ export const ScratchpadWidget: React.FC = () => {
     reorderScratchpad,
   } = useTasklistStore();
 
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [selectedCategory, setSelectedCategory] = useState('Personal');
-  const [showDone, setShowDone] = useState(false);
+  const [activeCategory, setActiveCategory] = useState(() => localStorage.getItem('notes_active_category') || 'All');
+  const [selectedCategory, setSelectedCategory] = useState(() => localStorage.getItem('notes_selected_category') || 'Personal');
+  const [showDone, setShowDone] = useState(() => localStorage.getItem('notes_show_done') === 'true');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+  const [isAddCategoryMenuOpen, setIsAddCategoryMenuOpen] = useState(false);
+
+  // Sync state to localStorage
+  useEffect(() => {
+    localStorage.setItem('notes_active_category', activeCategory);
+  }, [activeCategory]);
+
+  useEffect(() => {
+    localStorage.setItem('notes_selected_category', selectedCategory);
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    localStorage.setItem('notes_show_done', showDone.toString());
+  }, [showDone]);
   
   // Inline Edit State
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -85,7 +165,7 @@ export const ScratchpadWidget: React.FC = () => {
     content: '',
     editorProps: {
       attributes: {
-        class: 'prose prose-sm dark:prose-invert focus:outline-none min-h-[40px] text-sm font-bold placeholder:text-gray-400',
+        class: 'prose prose-sm dark:prose-invert focus:outline-none min-h-[80px] h-full text-sm font-bold placeholder:text-gray-400',
       },
     },
   });
@@ -96,7 +176,7 @@ export const ScratchpadWidget: React.FC = () => {
     content: '',
     editorProps: {
       attributes: {
-        class: 'prose prose-sm dark:prose-invert focus:outline-none min-h-[60px] text-xs font-bold',
+        class: 'prose prose-sm dark:prose-invert focus:outline-none min-h-[60px] h-full text-xs font-bold',
       },
     },
   });
@@ -175,7 +255,7 @@ export const ScratchpadWidget: React.FC = () => {
         )}
       </div>
 
-      <div className="flex-1 bg-[var(--notes-bg)] rounded-[2rem] border-2 border-[var(--notes-border)] flex flex-col overflow-hidden transition-all relative">
+      <div className="flex-1 bg-[var(--notes-bg)] rounded-widget border-2 border-[var(--notes-border)] flex flex-col overflow-visible transition-all relative">
         {/* Quick Input & Category Picker */}
         <div className={clsx(
           "overflow-hidden transition-all duration-300 ease-in-out",
@@ -183,26 +263,25 @@ export const ScratchpadWidget: React.FC = () => {
         )}>
           <div className="flex flex-col gap-2 bg-[var(--notes-editor-bg)] border-2 border-[var(--notes-editor-border)] rounded-2xl p-2 transition-all focus-within:border-google-blue shadow-inner">
             <div className="flex items-center justify-between px-2 py-1 border-b border-[var(--notes-editor-separator)]">
-              <select 
+              <Dropdown 
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="bg-transparent text-[9px] font-black uppercase tracking-widest outline-none text-google-blue max-w-[150px] truncate"
-              >
-                {availableCategories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
+                options={availableCategories}
+                onChange={setSelectedCategory}
+                isOpen={isAddCategoryMenuOpen}
+                setIsOpen={setIsAddCategoryMenuOpen}
+                width="180px"
+              />
               <div className="flex items-center gap-1">
                 <button onClick={() => addEditor?.chain().focus().toggleBold().run()} className={clsx("p-1.5 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", addEditor?.isActive('bold') && "bg-gray-200 dark:bg-white/10")}><Bold className="w-3 h-3" /></button>
                 <button onClick={() => addEditor?.chain().focus().toggleBulletList().run()} className={clsx("p-1.5 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", addEditor?.isActive('bulletList') && "bg-gray-200 dark:bg-white/10")}><List className="w-3 h-3" /></button>
                 <button onClick={() => addEditor?.chain().focus().toggleOrderedList().run()} className={clsx("p-1.5 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", addEditor?.isActive('orderedList') && "bg-gray-200 dark:bg-white/10")}><ListOrdered className="w-3 h-3" /></button>
               </div>
             </div>
-            <div className="flex gap-2 p-2 pt-1 items-end">
+            <div className="flex gap-2 p-2 pt-1 items-stretch">
               <div className="flex-1 overflow-y-auto max-h-[150px] custom-scrollbar">
-                <EditorContent editor={addEditor} className="w-full" />
+                <EditorContent editor={addEditor} className="w-full h-full" />
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 justify-end">
                 <button
                   onClick={() => setIsEditorOpen(false)}
                   className="w-10 h-10 bg-google-red text-white rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-all shrink-0"
@@ -226,33 +305,27 @@ export const ScratchpadWidget: React.FC = () => {
         {!isEditorOpen && (
           <button
             onClick={() => setIsEditorOpen(true)}
-            className="absolute top-4 right-4 w-10 h-10 bg-google-blue text-white rounded-xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition-all group z-10"
+            className="absolute top-4 right-4 w-10 h-10 bg-google-blue text-white rounded-xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition-all group z-[30]"
             title="Add New Note"
           >
             <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
           </button>
         )}
 
-        {/* Category Filter Tabs */}
+        {/* Category Filter Custom Dropdown */}
         <div className={clsx(
-          "flex items-center gap-2 px-4 overflow-x-auto no-scrollbar border-b border-gray-200/30 dark:border-gray-800/30 transition-all",
+          "flex items-center gap-2 px-4 border-b border-gray-200/30 dark:border-gray-800/30 transition-all relative z-[20]",
           isEditorOpen ? "py-3" : "pt-5 pb-4 pr-16"
         )}>
-          <span className="text-[8px] font-black uppercase text-gray-400 tracking-tighter mr-1 shrink-0">Filter by:</span>
-          {filterCategories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={clsx(
-                "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shrink-0 border",
-                activeCategory === cat 
-                  ? "bg-google-blue border-google-blue text-white shadow-md" 
-                  : "bg-white/50 dark:bg-black/20 border-gray-200 dark:border-gray-700 text-gray-400 hover:text-google-blue hover:border-google-blue"
-              )}
-            >
-              {cat}
-            </button>
-          ))}
+          <Dropdown 
+            label="Filter by:"
+            value={activeCategory}
+            options={filterCategories}
+            onChange={setActiveCategory}
+            isOpen={isFilterMenuOpen}
+            setIsOpen={setIsFilterMenuOpen}
+            width="220px"
+          />
         </div>
 
         {/* Task List */}
@@ -331,6 +404,7 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
   setEditingCategory,
   inlineEditor
 }) => {
+  const [isEditCategoryMenuOpen, setIsEditCategoryMenuOpen] = useState(false);
   const {
     attributes,
     listeners,
@@ -392,18 +466,17 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
             <button onClick={() => inlineEditor?.chain().focus().toggleOrderedList().run()} className={clsx("p-1 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", inlineEditor?.isActive('orderedList') && "bg-gray-200 dark:bg-white/10")}><ListOrdered className="w-3 h-3" /></button>
           </div>
           <div className="w-full bg-[var(--notes-editor-bg)] border-2 border-google-blue rounded-xl p-2 overflow-y-auto max-h-[200px] custom-scrollbar">
-            <EditorContent editor={inlineEditor} />
+            <EditorContent editor={inlineEditor} className="w-full h-full" />
           </div>
           <div className="flex items-center justify-between gap-2 pt-1">
-                <select 
+                <Dropdown 
                   value={editingCategory}
-                  onChange={(e) => setEditingCategory(e.target.value)}
-                  className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 text-[9px] font-black uppercase tracking-widest outline-none focus:border-google-blue"
-                >
-                  {availableCategories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
+                  options={availableCategories}
+                  onChange={setEditingCategory}
+                  isOpen={isEditCategoryMenuOpen}
+                  setIsOpen={setIsEditCategoryMenuOpen}
+                  width="180px"
+                />
                 <div className="flex items-center gap-1">
                   <button onClick={onCancel} className="p-1 text-gray-400 hover:text-google-red transition-colors"><X className="w-4 h-4" /></button>
                   <button onClick={onSave} className="p-1 text-google-blue hover:text-google-blue/80 transition-colors"><CheckCircle2 className="w-4 h-4" /></button>

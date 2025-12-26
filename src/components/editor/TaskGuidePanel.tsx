@@ -23,6 +23,7 @@ import { generateUUID } from '../../utils/uuid';
 interface TaskGuidePanelProps {
   task: Task;
   mode: 'master' | 'project';
+  containerId: string;
   showComplexityHeader?: boolean;
 }
 
@@ -37,15 +38,27 @@ interface InlineInputProps {
 
 const InlineInput: React.FC<InlineInputProps> = ({ value, onSave, className, placeholder, multiline = false, type = "text" }) => {
   const [localValue, setLocalValue] = useState(value);
+  const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    setLocalValue(value);
-  }, [value]);
+    if (!isFocused) {
+      setLocalValue(value);
+    }
+  }, [value, isFocused]);
 
   const handleBlur = () => {
+    setIsFocused(false);
     if (localValue !== value) {
       onSave(localValue);
+    }
+  };
+
+  const handleFocus = () => {
+    setIsFocused(true);
+    if (multiline && textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   };
 
@@ -73,10 +86,7 @@ const InlineInput: React.FC<InlineInputProps> = ({ value, onSave, className, pla
         rows={1}
         onChange={(e) => setLocalValue(e.target.value)}
         onBlur={handleBlur}
-        onFocus={(e) => {
-          e.target.style.height = 'auto';
-          e.target.style.height = `${e.target.scrollHeight}px`;
-        }}
+        onFocus={handleFocus}
       />
     );
   }
@@ -89,12 +99,13 @@ const InlineInput: React.FC<InlineInputProps> = ({ value, onSave, className, pla
       placeholder={placeholder}
       onChange={(e) => setLocalValue(e.target.value)}
       onBlur={handleBlur}
+      onFocus={() => setIsFocused(true)}
       onKeyDown={handleKeyDown}
     />
   );
 };
 
-export const TaskGuidePanel: React.FC<TaskGuidePanelProps> = ({ task, mode, showComplexityHeader = true }) => {
+export const TaskGuidePanel: React.FC<TaskGuidePanelProps> = React.memo(({ task, mode, containerId, showComplexityHeader = true }) => {
   const { updateTaskGuide } = useTasklistStore();
   const [showFullInstructions, setShowFullInstructions] = useState(false);
   const [isGuideCollapsed, setIsGuideCollapsed] = useState(() => {
@@ -140,32 +151,32 @@ export const TaskGuidePanel: React.FC<TaskGuidePanelProps> = ({ task, mode, show
     }
   };
 
-  const handleUpdate = (updates: Partial<TaskGuide>) => {
-    updateTaskGuide(task.id, updates);
+  const handleUpdate = (updates: Partial<TaskGuide>, immediate = false) => {
+    updateTaskGuide(task.id, updates, containerId, immediate);
   };
 
   const handleDescBlur = () => {
     if (localDesc !== (guide.description || '')) {
-      handleUpdate({ description: localDesc });
+      handleUpdate({ description: localDesc }, true);
     }
   };
 
   const addPrerequisite = (text: string) => {
     if (!text.trim()) return;
-    handleUpdate({ requiredBefore: [...(guide.requiredBefore || []), text.trim()] });
+    handleUpdate({ requiredBefore: [...(guide.requiredBefore || []), text.trim()] }, true);
     setNewPrereq('');
   };
 
   const removePrerequisite = (index: number) => {
     const newList = [...(guide.requiredBefore || [])];
     newList.splice(index, 1);
-    handleUpdate({ requiredBefore: newList });
+    handleUpdate({ requiredBefore: newList }, true);
   };
 
   const updatePrerequisite = (index: number, text: string) => {
     const newList = [...(guide.requiredBefore || [])];
     newList[index] = text;
-    handleUpdate({ requiredBefore: newList });
+    handleUpdate({ requiredBefore: newList }, true);
   };
 
   const addPrepItem = (type: 'internal' | 'external' | 'text') => {
@@ -176,17 +187,17 @@ export const TaskGuidePanel: React.FC<TaskGuidePanelProps> = ({ task, mode, show
       type
     };
     
-    handleUpdate({ helpfulPrep: [...(guide.helpfulPrep || []), newItem] });
+    handleUpdate({ helpfulPrep: [...(guide.helpfulPrep || []), newItem] }, true);
   };
 
   const removePrepLink = (id: string) => {
-    handleUpdate({ helpfulPrep: (guide.helpfulPrep || []).filter(l => l.id !== id) });
+    handleUpdate({ helpfulPrep: (guide.helpfulPrep || []).filter(l => l.id !== id) }, true);
   };
 
   const updatePrepItem = (id: string, updates: Partial<PrepItem>) => {
     handleUpdate({
       helpfulPrep: (guide.helpfulPrep || []).map(item => item.id === id ? { ...item, ...updates } : item)
-    });
+    }, true);
   };
 
   const addPitfall = (text: string) => {
@@ -195,20 +206,20 @@ export const TaskGuidePanel: React.FC<TaskGuidePanelProps> = ({ task, mode, show
       alert('Maximum 3 items allowed for focus.');
       return;
     }
-    handleUpdate({ watchOutFor: [...(guide.watchOutFor || []), text.trim()] });
+    handleUpdate({ watchOutFor: [...(guide.watchOutFor || []), text.trim()] }, true);
     setNewPitfall('');
   };
 
   const removePitfall = (index: number) => {
     const newList = [...(guide.watchOutFor || [])];
     newList.splice(index, 1);
-    handleUpdate({ watchOutFor: newList });
+    handleUpdate({ watchOutFor: newList }, true);
   };
 
   const updatePitfall = (index: number, text: string) => {
     const newList = [...(guide.watchOutFor || [])];
     newList[index] = text;
-    handleUpdate({ watchOutFor: newList });
+    handleUpdate({ watchOutFor: newList }, true);
   };
 
   const complexityColors = {
@@ -298,7 +309,7 @@ export const TaskGuidePanel: React.FC<TaskGuidePanelProps> = ({ task, mode, show
           (guide.requiredBefore?.length || 0) > 0 && theme.components.taskGuide.blockPrereqActive
         )}>
           <div className={theme.components.taskGuide.headerPrereq}>
-            <CheckCircle className="w-4 h-4" />
+            <CheckCircle className={clsx("w-4 h-4", theme.components.taskGuide.headerPrereqIcon)} />
             <label className="text-[10px] font-black uppercase tracking-[0.2em]">Can I Proceed?</label>
           </div>
           <div className="space-y-2 px-2">
@@ -508,7 +519,7 @@ export const TaskGuidePanel: React.FC<TaskGuidePanelProps> = ({ task, mode, show
             <div className="animate-in fade-in slide-in-from-top-2 duration-300">
               <NoteEditor 
                 content={guide.content || ''} 
-                onChange={(content) => handleUpdate({ content })} 
+                onChange={(content, imm) => handleUpdate({ content }, imm)} 
                 readOnly={!isMaster}
               />
             </div>
@@ -517,7 +528,7 @@ export const TaskGuidePanel: React.FC<TaskGuidePanelProps> = ({ task, mode, show
       )}
     </div>
   )}
-</div>
-);
-};
+    </div>
+  );
+});
 

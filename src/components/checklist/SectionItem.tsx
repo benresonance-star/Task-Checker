@@ -2,14 +2,14 @@ import React, { useState, useLayoutEffect } from 'react';
 import { clsx } from 'clsx';
 import { ChevronDown, ChevronRight, Plus, Trash2, ChevronUp, ChevronDown as ChevronDownIcon, ArrowDownToLine, X } from 'lucide-react';
 import { theme } from '../../styles/theme';
-import { Section, Task } from '../../types';
+import { Section } from '../../types';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { SubsectionItem } from './SubsectionItem';
 import { Button } from '../ui/Button';
 
 interface SectionItemProps {
   section: Section;
-  onOpenNotes: (task: Task) => void;
+  onOpenNotes: (taskId: string, containerId: string) => void;
 }
 
 /**
@@ -17,7 +17,7 @@ interface SectionItemProps {
  * It contains multiple subsections and provides a visual container with a vertical connector line.
  */
 export const SectionItem = ({ section, onOpenNotes }: SectionItemProps) => {
-  const { mode, addSubsection, renameSection, deleteSection, moveSection, activeMaster, demoteSection, isLocalExpanded, toggleLocalExpanded } = useTasklistStore();
+  const { mode, addSubsection, renameSection, deleteSection, moveSection, activeMaster, activeInstance, demoteSection, isLocalExpanded, toggleLocalExpanded } = useTasklistStore();
   const isMaster = mode === 'master';
   const isExpanded = isLocalExpanded(section.id, section.isExpanded);
 
@@ -153,7 +153,7 @@ export const SectionItem = ({ section, onOpenNotes }: SectionItemProps) => {
             onChange={(e) => {
               const newVal = e.target.value;
               setLocalTitle(newVal);
-              renameSection(section.id, newVal);
+              renameSection(section.id, newVal, activeMaster?.id || activeInstance?.id);
               e.target.style.height = 'auto';
               e.target.style.height = `${e.target.scrollHeight}px`;
             }}

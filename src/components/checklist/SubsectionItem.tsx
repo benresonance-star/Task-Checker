@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { clsx } from 'clsx';
 import { ChevronDown, ChevronRight, Plus, Trash2, ChevronUp, ChevronDown as ChevronDownIcon, ArrowUpToLine } from 'lucide-react';
 import { theme } from '../../styles/theme';
-import { Subsection, Task } from '../../types';
+import { Subsection } from '../../types';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { TaskItem } from './TaskItem';
 import { Button } from '../ui/Button';
@@ -11,7 +11,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 interface SubsectionItemProps {
   subsection: Subsection;
   sectionId: string;
-  onOpenNotes: (task: Task) => void;
+  onOpenNotes: (taskId: string, containerId: string) => void;
 }
 
 /**
@@ -20,7 +20,7 @@ interface SubsectionItemProps {
  * In Project mode, it shows a progress bar and allows collapsing/expanding.
  */
 export const SubsectionItem = ({ subsection, sectionId, onOpenNotes }: SubsectionItemProps) => {
-  const { mode, addTask, renameSubsection, deleteSubsection, moveSubsection, promoteSubsection, isLocalExpanded, toggleLocalExpanded, activeTaskId } = useTasklistStore();
+  const { mode, addTask, renameSubsection, deleteSubsection, moveSubsection, promoteSubsection, isLocalExpanded, toggleLocalExpanded, activeTaskId, activeMaster, activeInstance } = useTasklistStore();
   const isMaster = mode === 'master';
   const isInstance = mode === 'project';
   const isExpanded = isLocalExpanded(subsection.id, subsection.isExpanded);
@@ -101,7 +101,7 @@ export const SubsectionItem = ({ subsection, sectionId, onOpenNotes }: Subsectio
             onChange={(e) => {
               const newVal = e.target.value;
               setLocalTitle(newVal);
-              renameSubsection(subsection.id, newVal);
+              renameSubsection(subsection.id, newVal, activeMaster?.id || activeInstance?.id);
               e.target.style.height = 'auto';
               e.target.style.height = `${e.target.scrollHeight}px`;
             }}
@@ -197,7 +197,12 @@ export const SubsectionItem = ({ subsection, sectionId, onOpenNotes }: Subsectio
       {isExpanded && (
         <div className="space-y-1 sm:space-y-2 ml-1 sm:ml-2 mt-4 sm:mt-6 relative">
           {subsection.tasks.map(task => (
-            <TaskItem key={task.id} task={task} subsectionId={subsection.id} onOpenNotes={onOpenNotes} />
+            <TaskItem 
+              key={task.id} 
+              task={task} 
+              subsectionId={subsection.id} 
+              onOpenNotes={onOpenNotes} 
+            />
           ))}
           {isMaster && (
             <button 

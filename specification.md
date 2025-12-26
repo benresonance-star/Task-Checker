@@ -36,12 +36,12 @@ The system features a robust sync engine:
   - **Unified Header System**: Consistent `text-sm`, `font-black`, `uppercase` headers for instruction blocks with standardized left-aligned collapse toggles.
   - **What this Task Achieves**: High-level context of the task intent (formerly Task Description). **Admin Mode shows a pulsing orange alert icon on tasks with empty descriptions.**
   - **Task Complexity**: Color-coded rating (**Easy**, **Moderate**, **Complex**) to assist in resource allocation. Located **directly under the task title** in the guide. Visible as a badge in Project Mode and an inline editable dropdown for Admins.
-  - **Can I Proceed?**: A "Go/No-Go" list of items required to initiate work (formerly Required Before Starting). Featured in a high-visibility **orange theme** (`orange-600`) for visual priority. **Hidden from users if empty.**
+  - **Can I Proceed?**: A "Go/No-Go" list of items required to initiate work (formerly Required Before Starting). Featuring a **fully dynamic styling engine** allowing for custom background, border, item background, font, and icon colors. This styling is synchronized between the Task Info modal and the Dashboard Knowledge Hub for absolute visual consistency. **Hidden from users if empty.**
   - **Helpful (Optional)**: A "Preparation Shelf" containing links (Internal/External) or text-based notes (formerly Helpful to Prepare). **Hidden from users if empty.**
   - **Watch For**: A focused list of pitfalls (max 3) to prevent common errors (formerly Keep an Eye On). **Hidden from users if empty.**
   - **Additional Guidance**: Progressive disclosure rich-text area for deep technical instructions. **Hidden from users if empty** to maintain a clean interface.
-- **TEAM TASK FEEDBACK NOTES**: A dedicated, visually distinct section for users to record instance-specific feedback or project logs. 
-  - **Collapsible Workspace**: Users can collapse the entire Task Guide via a toggle to focus purely on TEAM TASK FEEDBACK NOTES. This state is persisted per task in `localStorage`. **The Task Notes modal header is responsive: on mobile, the 'Close' button and Pomodoro controls are reduced in size and sit together in a single top row for better accessibility; on desktop, all controls are aligned horizontally in the main header row for efficient space usage.**
+- **MY TASK FEEDBACK**: A dedicated, visually distinct section for users to record instance-specific feedback or project logs. 
+  - **Collapsible Workspace**: Users can collapse the entire Task Guide via a toggle to focus purely on MY TASK FEEDBACK. This state is persisted per task in `localStorage`. **The Task Notes modal header is responsive: on mobile, the 'Close' button and Pomodoro controls are reduced in size and sit together in a single top row for better accessibility; on desktop, all controls are aligned horizontally in the main header row for efficient space usage.**
 - **Persistent Active Focus**: Whichever task a user last made active remains focused and highlighted across sessions. 
   - **Auto-Navigation**: Upon refresh or application launch, the user is automatically navigated back to their last active Project, Checklist, and Task.
   - **Auto-Expansion**: The system automatically expands the Section and Subsection hierarchy containing the focused task.
@@ -49,11 +49,13 @@ The system features a robust sync engine:
   - **Explicit Control**: Users can disable the focus state by clicking again on the active task card.
 - **File Attachments**: Support for cloud-hosted file uploads (PDFs, Images, etc.) via Firebase Storage. Distinguishes between Template-level files and Project-level files.
 - **Pomodoro Timer**: Dedicated countdown timer per task, represented by a **red tomato with a clock face icon**. 
+  - **Context-Aware Visibility**: In the task notes modal, Pomodoro controls are only visible if the selected task is the user's **currently active focus**, preventing timing errors on background tasks.
   - **Default Duration**: Initialized to **20 minutes** for all new tasks.
   - **Comprehensive Controls**: Includes Toggle (Play/Pause), Set (custom duration in minutes), and Reset (reverts to the set duration).
   - **Quick Extension**: An **Add 5mins** button is available in the "My Session" sidebar and mobile view for rapid session adjustments.
-  - **One Active Timer Rule**: The system enforces focus by automatically pausing any running timers across all checklists when a user switches their active task focus.
-  - **Precision Recording**: Upon task completion, the application calculates and records the exact time spent (Original Duration minus Remaining Time) into a persistent `timeTaken` field.
+- **One Active Timer Rule**: The system enforces focus by automatically pausing any running timers across all checklists when a user switches their active task focus.
+- **Stable Interaction Engine**: The Task Info modal utilizes component-level isolation for high-frequency updates. The Pomodoro timer is decoupled from the main modal structure, ensuring that 1-second ticks do not trigger expensive re-renders of rich-text editors or instruction panels, maintaining a fluid 60fps UI.
+- **Precision Recording**: Upon task completion, the application calculates and records the exact time spent (Original Duration minus Remaining Time) into a persistent `timeTaken` field.
   - **State Protection**: Optimized for multi-user sync with a **3-second local grace period** that prevents incoming cloud data from reverting local timer states immediately after a user interaction.
   - **Cloud Heartbeat**: Running timers perform a **10-second heartbeat sync** to Firestore, ensuring progress is preserved across page refreshes and multi-device sessions.
 - **Session Integration**: An "Add to Session" icon is positioned to the left of the task checkbox for rapid session building. In mobile view, secondary action icons (Add to Session, Notes) are reinstated for all inactive tasks to ensure full functionality.
@@ -65,8 +67,8 @@ The system features a robust sync engine:
 - **Data Loss Warning**: The modal explicitly warns: *"If you delete this checklist any work done on it will also be lost,"* preventing accidental removal of progress.
 
 ### 7. Branding & Live Style System
-- **Branding Console**: A floating, draggable, and resizable HUD available to admins. It allows real-time adjustment of domain-specific brand elements (Primary Identity, Task Done Highlights, Completed States, etc.), UI geometry (Radii), **Dashboard Layouts**, and a consolidated **My Notes Widget** styling suite (controlling widget shells, rich-text editor backgrounds/separators, and individual note type colors).
-- **Style Snapshots (Theme Library)**: Admins can capture the current brand styling and save it as a named snapshot (e.g., "Happy Mode"). Presets support **Active Style Tracking**, highlighting the currently applied theme and allowing for **Incremental Updates** (overwriting an existing snapshot with new tweaks) via a dedicated sync icon.
+- **Branding Console**: A floating, draggable, and resizable HUD available to admins. It features a **"Draft Mode" workflow** where stylistic changes (colors, radii) are applied locally for real-time exploration but are only persisted to Firestore when explicitly saved via "Save as Workspace Default" or by overwriting an existing snapshot.
+- **Style Snapshots (Theme Library)**: Admins can capture the current brand styling and save it as a named snapshot (e.g., "Happy Mode"). Presets support **Active Style Tracking**, highlighting the currently applied theme and allowing for **Incremental Updates** (overwriting an existing snapshot with new tweaks) via a dedicated save icon.
 - **Smooth Interaction Engine**: Utilizes hardware-accelerated `translate3d` and `requestAnimationFrame` for buttery-smooth window movement and resizing. Transitions are dynamically disabled during active interactions to eliminate "input lag."
 - **Semantic Theme Engine**: Uses CSS Variables linked to descriptive, role-based technical keys (e.g., `colorAppIdentity` instead of `brandBlue`). This ensures the codebase remains logical even when colors are dramatically altered.
 - **Global Style Persistence**: Theme settings are stored in Firestore (`settings/theme`) and synchronized in real-time across all team members' sessions. Every teammate sees the new brand colors the moment the admin saves a change.
@@ -95,9 +97,9 @@ The system features a robust sync engine:
     - **Contextual Hierarchy**: Each task in the sidebar displays the **Project Name** in bold uppercase letters directly above the task title, providing immediate context for users managing tasks across multiple projects.
     - **Intuitive Dismissal**: The entire sidebar header is clickable to collapse the panel, featuring a **right-pointing chevron** next to the title as a visual affordance for movement.
     - **Dynamic Entry Points**: To maintain focus, the "My Session" launch button **fades out and shifts** when the sidebar is active (horizontally on desktop, vertically on mobile) and returns when the sidebar is dismissed.
-    - **Navigation Logic**: Sidebar task selection is used primarily for **Drag & Drop reordering** and does not trigger project navigation, ensuring smooth session planning without accidental view switches. The "Open in full checklist" button on the **Dashboard** explicitly triggers navigation and auto-scroll to center the task in the checklist view.
+    - **Navigation Logic**: Sidebar task selection is used for focus switching and Drag & Drop reordering. To maintain workflow continuity, selecting a task from the sidebar while on the Dashboard updates the focus without navigating away. In Project Mode, the app only navigates if the selected task belongs to a different project context. The "Open in full checklist" button on the **Dashboard** explicitly triggers navigation and auto-scroll to center the task in the checklist view.
     - **Visual States**: Inactive tasks in the list use a **light blue background** and **blue outline** to match the application's action-state language. Open/closed state is persisted in `localStorage`.
-  - **Sidebar Prioritization**: Navigation elements (Projects, Templates) are positioned at the top of the sidebar for primary access, with Tools (Imports, Settings) below. **Admins benefit from Context-Aware Navigation, where the app remembers the last active project and template when switching between management modes.**
+  - **Sidebar Prioritization**: Navigation elements (Projects, Templates) are positioned at the top of the sidebar for primary access, with Tools (Imports, Settings) below. **Admins benefit from Context-Aware Navigation, where the app remembers the last active project and template when switching between management modes. Sidebar task selection is context-aware: if the user is on the Dashboard, selection only updates focus without navigating; if in Project view, it only navigates if the task belongs to a different project.**
   - **UI Consistency**: The "Edit Details" interface background matches the general project information background for a seamless transition. **Mobile optimization includes a bordered Edit button and compressed, stacked Save/Cancel controls.**
   - **Online Documents Management**: Integrated file explorer for project documentation.
     - **Mobile UX**: Adaptive toolbar with full-width search positioned above action buttons for easy reach.
@@ -107,11 +109,11 @@ The system features a robust sync engine:
 
 ### Real-Time Collaboration
 - **Presence Tracking**: Integrated "Collaborative Presence" system. Users can see in real-time which tasks their teammates are focused on via avatar badges. **In the checklist, presence avatars are positioned to the left of the 'Add to Sidebar' icon and utilize the Google Yellow theme for consistent identification.**
-- **Conflict Prevention**: Visual **pulsing effect** on task outlines if two or more users have the same task active simultaneously.
+- **Conflict Prevention**: Visual **pulsing red background** ("Danger Alert") triggers when two or more users have the exact same task active in their profiles. Unlike heartbeat-based presence, this alert is **persistent regardless of online status**, clearing only when a user officially changes their task focus.
     - **Work Session Reordering**: The "My Session" sidebar supports fluid **Drag & Drop reordering** (powered by `dnd-kit`) for custom session planning.
-    - **High-Impact Dashboard Typography**: The Active Focus card on the dashboard features **extra-bold (font-black)** and **large-scale (up to 6xl)** task titles to ensure clear visibility and mental focus during work sessions.
-- **Knowledge Hub (Smart Widgets)**: Integrated project intelligence center. Includes dynamic widgets like **Recent Project Documents** (direct-access file links) and **Project Progress** (real-time task completion analytics), positioned under the Personal Scratchpad.
-- **Personal Scratchpad (My Notes)**: A modular widget on the dashboard for personal and project-linked tasks. Supports rich text editing, category assignments, and **Priority flagging**. Features a **"Clean Entry" workflow** where the rich-text editor is hidden by default and collapses automatically after adding a note, triggered via a smooth fade-in/slide-down plus button.
+    - **High-Impact Dashboard Typography**: The Active Focus card on the dashboard features **extra-bold (font-black)** and **large-scale (up to 6xl)** task titles. The interactive controls—including the Play/Pause button, Pomodoro box, and Task Info icon (`StickyNote`, white outline)—are styled to match the sidebar's active task layout for cross-interface consistency.
+    - **Knowledge Hub (Smart Widgets)**: Integrated task intelligence center positioned directly below the Current Focus. Includes dynamic widgets like **Task Guidance**, **Can I Proceed?**, and **My Task Feedback**, providing immediate context for the currently focused task. To maintain a clean dashboard, the redundant Task Info button has been removed from the Focus Card in favor of this integrated view.
+- **Personal Scratchpad (My Notes)**: A modular widget on the dashboard for personal and project-linked tasks. Supports rich text editing, category assignments, and **Priority flagging**. Features a **"Clean Entry" workflow** with an absolute-positioned floating plus button and a taller header for better balance. When editing, the interface features a high-visibility **white X on a red background** for closing, matching the action button's geometry. **Category filtering is handled via a streamlined dropdown interface.**
 - **Completed Task Feedback**: 
   - **Active State**: Pulsing green card (`animate-pulse`) with a **thumbs up** icon on the completion button.
   - **Deactivated State**: Retains a **softer, lighter green background** to distinguish from pending tasks while maintaining visual hierarchy.
@@ -132,8 +134,13 @@ The system features a robust sync engine:
   - **Visual Safety**: Compact "VIEWER" label in the mobile header prevents role confusion without compressing the primary "My Session" navigation.
   - **Persistence**: Simulation state is stored in `sessionStorage` (resets on tab close) for security.
 - **Role-Based Access Control (RBAC)**: 
-  - **Administrator**: Full system control (Master mode, User Management, role promotion).
-    - **Administrative Session Controls**: Within the User Management console, admins can forcefully deactivate any user's active task focus (ShieldOff icon) or empty their entire session list (Eraser icon). This includes self-clearing and clearing other admins for maximum coordination. All administrative actions use high-visibility in-app confirmation modals.
+  - **Administrator**: Full system control (Master mode, User Management, role promotion). **User cards feature role-aware background colors (e.g., light blue for admins, soft orange for viewers) for rapid identification.**
+    - **Administrative Session Controls**: Within the User Management console, admins can forcefully deactivate any user's active task focus (ShieldOff icon) or empty their entire session list (Eraser icon). This includes self-clearing and clearing other admins for maximum coordination. All administrative actions use high-visibility in-app modals. **Administrative icons (Shield/Eraser) are styled in high-contrast white for clarity in dark mode.**
+    - **Admin Feedback Ledger**: A centralized, scrollable audit feed of all user task feedback notes across the workspace.
+      - **Contextual Intelligence**: Each entry uses a **Breadcrumb Context** (`PROJECT / Checklist / Task`) for instant orientation.
+      - **Ledger Row Design**: Entries are styled as elegant cards with a light blue background (`bg-blue-50/20`), relative timestamps (e.g., "2 hours ago"), and prose content blocks.
+      - **Administrative Cleanup**: Admins can directly delete feedback entries from the ledger, which erases the `userNotes` from the original project task.
+      - **Smart Tools**: Includes real-time multi-field search, date-based sorting, and a "View in Project" link for deep-task inspection.
   - **Project Team (Viewer)**: Focused on progress tracking in Project Mode. Restricted administrative views and sub-headers are hidden.
 - **Self-Service**: Automatic profile creation for new signups as `viewers`.
 - **Project Deletion Safety**: A robust **two-stage confirmation** process for deleting projects.
@@ -144,9 +151,15 @@ The system features a robust sync engine:
 ### UI & UX Design Language
 - **Brand Identity**: Logo is a simple white tick inside an orange circle (`#E67E33`). Brand name is stylized as `checkMATE`.
 - **Standardized Radii Scales**: Consistent border-radius tiers defined in `tailwind.config.js`, linked to dynamic CSS variables for real-time branding control:
-  - **`rounded-button`**: Interactive elements (buttons, inputs, badges).
-  - **`rounded-card`**: Content cards (task items, user cards, consultant cards).
-  - **`rounded-container`**: Major structural blocks (Sections, Task Guide panels, Modals).
+  - **`rounded-button`**: Interactive elements (inputs, badges, navigation items).
+  - **`rounded-card`**: Standard content cards (task items, user management cards).
+  - **`rounded-container`**: Major structural blocks (Checklist panels, Sections, Modals).
+  - **`rounded-widget`**: Dashboard intelligence blocks (Knowledge Hub, My Notes, Document Explorer).
+  - **`rounded-sidebar`**: Primary navigation and session sidebars.
+  - **`rounded-project-info`**: The main project metadata container and checklist shelf.
+  - **`rounded-metadata`**: Nested information cards within the dashboard (Identification, Planning, Consultants).
+  - **`rounded-focus-card`**: The high-impact Active Focus container on the dashboard.
+  - **`rounded-task-button`**: Specialized primary action buttons (e.g., "TASK DONE?").
 - **Asset & Icon Governance**:
   - **Icon Size Standard**: Primary action icons (Delete, Export, Reallocate) are standardized to **h-9** (container height) or **w-5 h-5** (standard icon). Mobile focus icons are **w-6 h-6**.
   - **Color Semantic Logic**: 
@@ -170,8 +183,11 @@ The system features a robust sync engine:
 - **Input Stability**: Hierarchical titles (Templates, Sections, Subsections, and Tasks) utilize **local state synchronization** to prevent cursor jumping during collaborative editing, ensuring a fluid typing experience while maintaining real-time cloud persistence.
 - **Performance "Red Lines"**:
   - **60fps Scrolling**: To maintain fluid performance with 100+ tasks, all complex derived data must be wrapped in `useMemo`. 
-  - **Re-render Optimization**: Components like `TaskItem` must minimize internal state changes. High-frequency updates (like the 1s timer tick) are handled purely in local memory, syncing only on significant state changes (Pause, Complete, 10s Heartbeat).
+  - **Re-render Optimization**: Components like `TaskItem` and `TaskInfoModal` must minimize internal state changes. High-frequency updates (like the 1s timer tick) are isolated into specialized leaf components to prevent global re-render cycles of heavy parent containers.
+- **Stable Interaction Policy**: All modal interactions are subject to a 20ms mount-stabilization delay before complex child components (like Tiptap) are permitted to mount, preventing thread-locking on low-powered mobile processors.
 - **Mobile Optimization**: Portrait-first responsive layout with compressed headers, reduced padding, and intelligently repositioned primary action buttons. **The "+ New Project/Template" button is positioned to the right of the section title on mobile for immediate access.** Export Checklist features are hidden on mobile to optimize screen real estate.
+  - **GPU Safety**: Resource-intensive CSS filters like `backdrop-blur` are automatically disabled on mobile modal surfaces to prevent GPU-induced browser tab crashes.
+  - **Hydration Orchestration**: Heavy rich-text editors utilize a platform-aware 400ms-500ms staggered hydration delay on mobile, ensuring animations remain smooth before the editor engine initializes.
 - **Navigation Styling**: Active project buttons are styled in **Google Green** to visually synchronize the project context with active work items.
 
 ### Error Boundary & Fallback Policy
@@ -200,7 +216,7 @@ The system features a robust sync engine:
 - **`masters` Collection**: 
   - `title`, `version`, `sections` (Template structure)
 - **`settings` Collection**:
-  - `theme`: `{ colorAppIdentity, colorActiveTaskDone, colorCompletedState, colorDestructive, colorPresenceNotice, colorProjectInfoBg, colorProjectInfoBorder, colorChecklistBg, colorChecklistBorder, colorMetadataCardBg, colorMetadataCardBorder, colorSectionIdent, colorSectionIdentIcon, colorSectionPlan, colorSectionPlanIcon, colorSectionBuild, colorSectionBuildIcon, colorHierarchyLine, colorNotesBg, colorNotesBorder, colorNotesEditorBg, colorNotesEditorBorder, colorNotesEditorSeparator, colorNotePersonalBg, colorNoteProjectBg, colorNotePriorityBg, radiusTaskCard, radiusInteractive, radiusMajorModal }`
+  - `theme`: `{ colorAppIdentity, colorActiveTaskDone, colorCompletedState, colorDestructive, colorPresenceNotice, colorProjectInfoBg, colorProjectInfoBorder, colorChecklistBg, colorChecklistBorder, colorMetadataCardBg, colorMetadataCardBorder, colorSectionIdent, colorSectionIdentIcon, colorSectionPlan, colorSectionPlanIcon, colorSectionBuild, colorSectionBuildIcon, colorHierarchyLine, colorPrereqBg, colorPrereqBorder, colorPrereqItemBg, colorPrereqText, colorPrereqIcon, colorNotesBg, colorNotesBorder, colorNotesEditorBg, colorNotesEditorBorder, colorNotesEditorSeparator, colorNotePersonalBg, colorNoteProjectBg, colorNotePriorityBg, radiusTaskCard, radiusInteractive, radiusMajorModal, radiusWidget, radiusSidebar, radiusProjectInfo, radiusMetadataCard, radiusFocusCard, radiusTaskButton }`
 - **`themePresets` Collection**:
   - `id`, `name`, `settings` (ThemeSettings), `createdAt`, `createdBy`
 
@@ -221,8 +237,9 @@ The system features a robust sync engine:
 - **`App.tsx`**: Application shell, Sidebar management, Navigation logic, and global Administrative modals.
 - **`TaskItem.tsx`**: Complex task state manager. Handles multi-tier responsive layouts, Pomodoro widget, and collaborative pulsing logic.
 - **`ProjectDashboard.tsx`**: Project metadata management and the "Checklist Navigation Shelf".
-- **`NoteEditor.tsx`**: Tiptap-based rich text editor for "TEAM TASK FEEDBACK NOTES".
+- **`NoteEditor.tsx`**: Tiptap-based rich text editor for "MY TASK FEEDBACK".
 - **`src/styles/theme.ts`**: Centralized style registry for colors, radii, and component-specific Tailwind class strings. Now linked to dynamic CSS variables for real-time branding updates.
+- **`FeedbackLedger.tsx`**: Administrative audit tool for managing cross-project user feedback notes.
 - **`StyleConsole.tsx`**: Floating, resizable admin tool for live UI tweaking and global branding synchronization.
 - **`ErrorBoundary.tsx`**: Global catch-all for unexpected application errors with a user-friendly fallback UI.
 
@@ -266,18 +283,18 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > 
 > **Visual Identity**:
 > - Implement a high-contrast UI (Light and Dark) with theme persistence.
-> - **Branding & Style System**: Implement a dynamic theme engine using CSS Variables linked to **semantic technical keys** (e.g. `colorAppIdentity`, `radiusTaskCard`). Add a floating, draggable, and resizable **Branding Console** for admins to live-adjust colors and corner radii. Support **Style Snapshots** (Theme Library) with the ability to **highlight the active theme** and **overwrite/sync existing snapshots** with new iterative tweaks. Include a consolidated **My Notes styling section** with controls for widget containers, rich-text editor surfaces (background/outline/separators), and specific note types (Personal, Project, Priority). Ensure real-time global sync via Firestore `settings/theme` and `themePresets`. Use `translate3d` and `requestAnimationFrame` for smooth HUD movement.
-> - **Standardized Radii Scales**: Define and use `rounded-button`, `rounded-card`, and `rounded-container` linked to dynamic CSS variables.
+> - **Branding & Style System**: Implement a dynamic theme engine using CSS Variables linked to **semantic technical keys** (e.g. `colorAppIdentity`, `radiusTaskCard`). Add a floating, draggable, and resizable **Branding Console** for admins to live-adjust colors and corner radii. Support **Style Snapshots** (Theme Library) with the ability to **highlight the active theme** and **overwrite/sync existing snapshots** with new iterative tweaks. Include consolidated styling sections for **My Notes** (widget containers, rich-text surfaces, note types) and **"Can I Proceed?"** (background, border, item background, font, and icon colors). Ensure real-time global sync via Firestore `settings/theme` and `themePresets`. Use `translate3d` and `requestAnimationFrame` for smooth HUD movement.
+> - **Standardized Radii Scales**: Define and use dynamic classes (`rounded-button`, `rounded-card`, `rounded-container`, `rounded-widget`, `rounded-sidebar`, `rounded-project-info`, `rounded-metadata`, `rounded-focus-card`, `rounded-task-button`) linked to a central semantic theme engine.
 > - **Project Context (Light Mode)**: Use `bg-blue-100/70` for main sections and `bg-white/80` for inner metadata cards (Identification, Planning, Building) with outlines matching text color.
 > - **Brand Identity**: Logo is a simple white tick inside an orange circle (`#E67E33`). Brand name stylized as `checkMATE`.
 > - Use a modern System Font stack.
-> - Navigation: Sidebar-first layout on desktop with a **collapsible left control panel**; dedicated hamburger menu on mobile. **Implement Context-Aware Navigation for admins to remember last active template/project.** Sidebar task selection should switch project views without auto-scrolling; Dashboard selection should explicitly trigger auto-scroll.
+> - Navigation: Sidebar-first layout on desktop with a **collapsible left control panel**; dedicated hamburger menu on mobile. The desktop sidebar features a high-contrast close button, while a floating **ChevronRight tab (z-index 100)** appears at the screen edge when collapsed for instant access. **Implement Context-Aware Navigation for admins to remember last active template/project.** Sidebar task selection should switch project views without auto-scrolling; Dashboard selection should explicitly trigger auto-scroll.
 > - Structural Graphics: Implement precise **1px** vertical and horizontal link lines. All action icons aligned on a single vertical axis.
 > - **Active Project Navigation**: Style active project buttons in **Google Green** for context synchronization.
 > 
 > **Features**:
 > - **Admin Simulation Mode**: Persistent toggle for admins to simulate the "Viewer" role with pulsing orange indicators and mobile header alerts.
-> - **Administrative Session Controls**: User management interface with 'Deactivate Current Task' (ShieldOff) and 'Clear Users Session List' (Eraser) buttons using custom in-app modals for all users.
+> - **Administrative Session Controls**: User management interface with 'Deactivate Current Task' (ShieldOff) and 'Clear Users Session List' (Eraser) buttons using custom in-app modals. Support an **Admin Feedback Ledger** with contextual breadcrumbs (`PROJECT / Checklist / Task`), relative timestamps, and the ability to directly delete entries to clear user task notes.
 > - **Two-Stage Project Deletion**: Secure deletion workflow with a secondary 'Last Chance' warning and complete cloud storage cleanup.
 > - **Checklist Removal Safety**: In-app confirmation modal for removing checklists from projects, warning about potential work loss.
 > - Multi-format Import/Export (JSON, ZIP, CSV). **Hide Export on mobile.**
@@ -290,13 +307,13 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > - **Add Logic Workflow**: Provide an "+ Add Checklist" modal to select and assign master templates to projects.
 > - **Online Documents**: Implement a project-specific file explorer with Firebase Storage integration, global search, and a recursive "Deep List" view mode. Grid view features "shapes only" icons (amber folders, blue files) for a modern feel.
 > - **Structured Task Guide**: Implement a collapsible guidance panel with 'What this Task Achieves', orange-themed 'Can I Proceed?' requirements, 'Helpful (Optional)' links/notes, and color-coded Complexity (located under title). **Ensure a responsive modal header with stacked controls for mobile and horizontal alignment for desktop.**
-> - **Progress Focus**: Dedicated 'TEAM TASK FEEDBACK NOTES' area for instance-specific logs, visually separated and prioritizable via guide-collapse.
+> - **Progress Focus**: Dedicated 'MY TASK FEEDBACK' area for instance-specific logs, visually separated and prioritizable via guide-collapse.
 > - **Conditional Visibility**: Hide guide sections from users if they are empty.
-> - **Knowledge Hub & Widgets**: Implement a modular dashboard intelligence center. Include **Recent Project Documents** widget (latest 3 files with direct download links) and **Project Progress** widget (visual progress bars and task count analytics across all project checklists).
-- **My Notes Widget**: Modular dashboard widget with category filtering, priority flagging, and a **"Clean Entry" collapsible rich-text editor** with fade-in animations and automatic collapse upon entry.
+> - **Knowledge Hub & Widgets**: Implement a modular dashboard intelligence center positioned directly below the focus card. Include **Task Guidance** widget (displaying structured description and additional content), **Can I Proceed?** widget (fully dynamic styling for requirements including item backgrounds), and **My Task Feedback** widget (showing real-time instance-specific logs).
+> - **My Notes Widget**: Modular dashboard widget with category filtering, priority flagging, and a **"Clean Entry" collapsible rich-text editor** with fade-in animations and automatic collapse upon entry.
 > - **Input Stability**: Implement local state synchronization for all hierarchical titles to prevent collaborative cursor jumping.
 > 
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 24, 2025 (v1.3.8 - Knowledge Hub Smart Widgets & Vertical Dashboard Stack)*
+*Updated: December 24, 2025 (v1.5.0 - Dynamic Branding & Structural Refinement)*

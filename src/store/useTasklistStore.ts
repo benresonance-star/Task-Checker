@@ -61,10 +61,13 @@ interface TasklistState {
   toggleSection: (sectionId: string) => Promise<void>;
   toggleSubsection: (subsectionId: string) => Promise<void>;
   toggleTask: (taskId: string, instanceId?: string) => Promise<void>;
-  updateTaskNotes: (taskId: string, notes: string, isUserNotes?: boolean) => Promise<void>;
-  updateTaskGuide: (taskId: string, guide: Partial<TaskGuide>) => Promise<void>;
+  updateTaskNotes: (taskId: string, notes: string, containerId: string, isUserNotes?: boolean, immediate?: boolean) => Promise<void>;
+  updateTaskGuide: (taskId: string, guide: Partial<TaskGuide>, containerId: string, immediate?: boolean) => Promise<void>;
   addTaskFile: (taskId: string, file: File, isUserFile?: boolean) => Promise<void>;
   removeTaskFile: (taskId: string, fileId: string, isUserFile?: boolean) => Promise<void>;
+  handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>, taskId: string, containerId: string, isUserFile: boolean) => Promise<void>;
+  handleFileDownload: (file: any) => void;
+  deleteTaskFeedback: (taskId: string, containerId: string) => Promise<void>;
   
   // Master CRUD
   addMaster: (title: string) => Promise<void>;
@@ -74,15 +77,15 @@ interface TasklistState {
   
   addSection: (masterId: string, title: string) => Promise<void>;
   deleteSection: (sectionId: string) => Promise<void>;
-  renameSection: (sectionId: string, title: string) => Promise<void>;
+  renameSection: (sectionId: string, title: string, containerId?: string) => Promise<void>;
   
   addSubsection: (sectionId: string, title: string) => Promise<void>;
   deleteSubsection: (subsectionId: string) => Promise<void>;
-  renameSubsection: (subsectionId: string, title: string) => Promise<void>;
+  renameSubsection: (subsectionId: string, title: string, containerId?: string) => Promise<void>;
   
   addTask: (subsectionId: string, title: string) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
-  renameTask: (taskId: string, title: string) => Promise<void>;
+  renameTask: (taskId: string, title: string, containerId?: string) => Promise<void>;
   
   // Reorganization
   moveSection: (masterId: string, sectionId: string, direction: 'up' | 'down') => Promise<void>;
@@ -159,6 +162,26 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     };
   };
 
+  // Debounce management for Firestore updates
+  const debounceMap = new Map<string, any>();
+  const debounceUpdate = (id: string, callback: () => Promise<void>, delay = 1000) => {
+    if (debounceMap.has(id)) {
+      clearTimeout(debounceMap.get(id));
+    }
+    const timeout = setTimeout(async () => {
+      debounceMap.delete(id);
+      await callback();
+    }, delay);
+    debounceMap.set(id, timeout);
+  };
+
+  const cancelDebounce = (id: string) => {
+    if (debounceMap.has(id)) {
+      clearTimeout(debounceMap.get(id));
+      debounceMap.delete(id);
+    }
+  };
+
   /**
    * Applies theme settings to CSS Variables on the document root.
    */
@@ -192,6 +215,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--section-build', settings.colorSectionBuild);
     root.style.setProperty('--section-build-icon', settings.colorSectionBuildIcon);
     root.style.setProperty('--hierarchy-line', settings.colorHierarchyLine);
+    root.style.setProperty('--prereq-bg', settings.colorPrereqBg);
+    root.style.setProperty('--prereq-border', settings.colorPrereqBorder);
+    root.style.setProperty('--prereq-item-bg', settings.colorPrereqItemBg);
+    root.style.setProperty('--prereq-text', settings.colorPrereqText);
+    root.style.setProperty('--prereq-icon', settings.colorPrereqIcon);
 
     // App Atmosphere
     root.style.setProperty('--app-bg', settings.colorAppBg);
@@ -210,6 +238,12 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--radius-card', `${settings.radiusTaskCard}px`);
     root.style.setProperty('--radius-button', `${settings.radiusInteractive}px`);
     root.style.setProperty('--radius-container', `${settings.radiusMajorModal}px`);
+    root.style.setProperty('--radius-widget', `${settings.radiusWidget || 24}px`);
+    root.style.setProperty('--radius-sidebar', `${settings.radiusSidebar || 0}px`);
+    root.style.setProperty('--radius-project-info', `${settings.radiusProjectInfo || 32}px`);
+    root.style.setProperty('--radius-metadata-card', `${settings.radiusMetadataCard || 20}px`);
+    root.style.setProperty('--radius-focus-card', `${settings.radiusFocusCard || 48}px`);
+    root.style.setProperty('--radius-task-button', `${settings.radiusTaskButton || 12}px`);
   };
 
   /**
@@ -256,6 +290,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorSectionBuild: oldSettings.colorSectionBuild || '#F97316', // orange-500
       colorSectionBuildIcon: oldSettings.colorSectionBuildIcon || '#F97316', // orange-500
       colorHierarchyLine: oldSettings.colorHierarchyLine || '#D1D5DB', // gray-300
+      colorPrereqBg: oldSettings.colorPrereqBg || (oldSettings.mode === 'dark' ? 'rgba(249, 115, 22, 0.1)' : 'rgba(255, 247, 237, 0.5)'),
+      colorPrereqBorder: oldSettings.colorPrereqBorder || (oldSettings.mode === 'dark' ? 'rgba(249, 115, 22, 0.3)' : '#FFEDD5'),
+      colorPrereqItemBg: oldSettings.colorPrereqItemBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.6)'),
+      colorPrereqText: oldSettings.colorPrereqText || '#EA580C', // orange-600
+      colorPrereqIcon: oldSettings.colorPrereqIcon || '#EA580C', // orange-600
 
       // Defaults for new fields
       colorAppBg: oldSettings.colorAppBg || (oldSettings.mode === 'dark' ? '#121212' : '#FFFFFF'),
@@ -272,6 +311,12 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       radiusTaskCard: oldSettings.radiusTaskCard || oldSettings.radiusCard || 20,
       radiusInteractive: oldSettings.radiusInteractive || oldSettings.radiusButton || 12,
       radiusMajorModal: oldSettings.radiusMajorModal || oldSettings.radiusContainer || 32,
+      radiusWidget: oldSettings.radiusWidget || 24,
+      radiusSidebar: oldSettings.radiusSidebar !== undefined ? oldSettings.radiusSidebar : 0,
+      radiusProjectInfo: oldSettings.radiusProjectInfo || 32,
+      radiusMetadataCard: oldSettings.radiusMetadataCard || 20,
+      radiusFocusCard: oldSettings.radiusFocusCard || 48,
+      radiusTaskButton: oldSettings.radiusTaskButton || 12,
     };
   };
 
@@ -302,6 +347,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorSectionBuild: '#F97316',
     colorSectionBuildIcon: '#F97316',
     colorHierarchyLine: isDark ? '#4b5563' : '#D1D5DB',
+    colorPrereqBg: isDark ? 'rgba(249, 115, 22, 0.1)' : 'rgba(255, 247, 237, 0.5)',
+    colorPrereqBorder: isDark ? 'rgba(249, 115, 22, 0.3)' : '#FFEDD5',
+    colorPrereqItemBg: isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.6)',
+    colorPrereqText: '#EA580C',
+    colorPrereqIcon: '#EA580C',
     colorAppBg: isDark ? '#121212' : '#FFFFFF',
     colorSidebarBg: isDark ? 'rgba(0, 0, 0, 0.6)' : '#F9FAFB',
     colorConsoleBg: isDark ? '#1E1E1E' : '#FFFFFF',
@@ -315,6 +365,12 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     radiusTaskCard: 20,
     radiusInteractive: 12,
     radiusMajorModal: 32,
+    radiusWidget: 24,
+    radiusSidebar: 0,
+    radiusProjectInfo: 32,
+    radiusMetadataCard: 20,
+    radiusFocusCard: 48,
+    radiusTaskButton: 12,
   });
 
   /**
@@ -330,6 +386,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       timerDuration?: number;
       timerRemaining?: number;
       timerIsRunning?: boolean;
+      timerLastUpdated?: number;
     }>();
     const sectionExpandedStates = new Map<string, boolean>();
     const subsectionExpandedStates = new Map<string, boolean>();
@@ -346,7 +403,8 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
             userFiles: t.userFiles,
             timerDuration: t.timerDuration,
             timerRemaining: t.timerRemaining,
-            timerIsRunning: t.timerIsRunning
+            timerIsRunning: t.timerIsRunning,
+            timerLastUpdated: t.timerLastUpdated
           });
         });
       });
@@ -369,7 +427,8 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
               userFiles: existing.userFiles ?? [],
               timerDuration: existing.timerDuration ?? 20 * 60,
               timerRemaining: existing.timerRemaining ?? existing.timerDuration ?? 20 * 60,
-              timerIsRunning: existing.timerIsRunning ?? false
+              timerIsRunning: existing.timerIsRunning ?? false,
+              timerLastUpdated: existing.timerLastUpdated
             };
           }
           return {
@@ -438,6 +497,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorSectionBuild: '#F97316',
       colorSectionBuildIcon: '#F97316',
       colorHierarchyLine: '#D1D5DB',
+      colorPrereqBg: 'rgba(255, 247, 237, 0.5)',
+      colorPrereqBorder: '#FFEDD5',
+      colorPrereqItemBg: 'rgba(255, 255, 255, 0.6)',
+      colorPrereqText: '#EA580C',
+      colorPrereqIcon: '#EA580C',
       colorAppBg: '#FFFFFF',
       colorSidebarBg: '#F9FAFB',
       colorConsoleBg: '#FFFFFF',
@@ -451,6 +515,12 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       radiusTaskCard: 20,
       radiusInteractive: 12,
       radiusMajorModal: 32,
+      radiusWidget: 24,
+      radiusSidebar: 0,
+      radiusProjectInfo: 32,
+      radiusMetadataCard: 20,
+      radiusFocusCard: 48,
+      radiusTaskButton: 12,
     },
     themeSettingsDark: {
       colorAppIdentity: '#4285F4',
@@ -479,6 +549,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorSectionBuild: '#F97316',
       colorSectionBuildIcon: '#F97316',
       colorHierarchyLine: '#4b5563',
+      colorPrereqBg: 'rgba(249, 115, 22, 0.1)',
+      colorPrereqBorder: 'rgba(249, 115, 22, 0.3)',
+      colorPrereqItemBg: 'rgba(0, 0, 0, 0.2)',
+      colorPrereqText: '#EA580C',
+      colorPrereqIcon: '#EA580C',
       colorAppBg: '#121212',
       colorSidebarBg: 'rgba(0, 0, 0, 0.6)',
       colorConsoleBg: '#1E1E1E',
@@ -492,6 +567,12 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       radiusTaskCard: 20,
       radiusInteractive: 12,
       radiusMajorModal: 32,
+      radiusWidget: 24,
+      radiusSidebar: 0,
+      radiusProjectInfo: 32,
+      radiusMetadataCard: 20,
+      radiusFocusCard: 48,
+      radiusTaskButton: 12,
     },
     themePresets: [],
     activePresetIdLight: null,
@@ -662,22 +743,68 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
           });
           // Masters Listener
           onSnapshot(collection(db, 'masters'), (snapshot) => {
-            const masters = snapshot.docs
+            const mastersFromFirestore = snapshot.docs
               .map(d => ({ ...d.data(), id: d.id } as MasterTasklist))
               .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-            set({ masters });
             
-            const activeM = get().activeMaster;
-            if (activeM) {
-              const updatedActive = masters.find(m => m.id === activeM.id);
-              if (updatedActive) set({ activeMaster: updatedActive });
-            }
+            // PROTECT LOCAL STATE: Use a grace period after local updates to prevent stale Firestore overwrites.
+            const localTaskState = new Map<string, { 
+              notes: string;
+              guide: TaskGuide;
+              lastLocalContent: number;
+            }>();
+            get().masters.forEach(master => {
+              master.sections.forEach(s => {
+                s.subsections.forEach(ss => {
+                  ss.tasks.forEach(t => {
+                    const lastLocalContent = (globalThis as any)[`lastUpdate_${master.id}-${t.id}`] || 0;
+                    localTaskState.set(`${master.id}-${t.id}`, { 
+                      notes: t.notes || '',
+                      guide: t.guide || {},
+                      lastLocalContent
+                    });
+                  });
+                });
+              });
+            });
+
+            const mergedMasters = mastersFromFirestore.map(master => {
+              return {
+                ...master,
+                sections: master.sections.map(s => ({
+                  ...s,
+                  subsections: s.subsections.map(ss => ({
+                    ...ss,
+                    tasks: ss.tasks.map(t => {
+                      const local = localTaskState.get(`${master.id}-${t.id}`);
+                      if (local) {
+                        const isRecentContent = Date.now() - local.lastLocalContent < 15000;
+                        return { 
+                          ...t, 
+                          notes: isRecentContent ? local.notes : t.notes,
+                          guide: isRecentContent ? local.guide : t.guide
+                        };
+                      }
+                      return t;
+                    })
+                  }))
+                }))
+              };
+            });
+
+            const currentActiveM = get().activeMaster;
+            const updatedActive = currentActiveM ? mergedMasters.find(m => m.id === currentActiveM.id) : null;
+
+            set({ 
+              masters: mergedMasters,
+              activeMaster: updatedActive || currentActiveM
+            });
 
             // --- AUTO-SYNC LOGIC ---
             // If any master version has increased, find its instances and sync them locally
             // The instances listener will then handle pushing those changes to Firestore
             const currentInstances = get().instances;
-            masters.forEach(master => {
+            mergedMasters.forEach(master => {
               currentInstances.forEach(instance => {
                 if (instance.masterId === master.id && instance.version < master.version) {
                   const synced = performSync(instance, master);
@@ -707,72 +834,88 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
           // Instances Listener
           onSnapshot(collection(db, 'instances'), (snapshot) => {
             const instancesFromFirestore = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as TasklistInstance));
-            const currentActiveInstance = get().activeInstance;
 
             // PROTECT LOCAL STATE: Use a grace period after local updates to prevent stale Firestore overwrites.
             // This is CRITICAL for the timer to prevent it "reverting" to old values on pause/toggle.
-            const localTaskState = new Map<string, { remaining: number; running: boolean; lastLocal: number }>();
+            const localTaskState = new Map<string, { 
+              remaining: number; 
+              running: boolean; 
+              notes: string;
+              userNotes: string;
+              guide: TaskGuide;
+              lastLocalTimer: number;
+              lastLocalContent: number;
+              timerLastUpdated: number;
+            }>();
             get().instances.forEach(inst => {
               inst.sections.forEach(s => {
                 s.subsections.forEach(ss => {
                   ss.tasks.forEach(t => {
-                    const lastLocal = (globalThis as any)[`lastToggle_${t.id}`] || 0;
-                    localTaskState.set(t.id, { 
+                    const lastLocalTimer = (globalThis as any)[`lastToggle_${inst.id}-${t.id}`] || 0;
+                    const lastLocalContent = (globalThis as any)[`lastUpdate_${inst.id}-${t.id}`] || 0;
+                    localTaskState.set(`${inst.id}-${t.id}`, { 
                       remaining: t.timerRemaining ?? 20 * 60, 
                       running: t.timerIsRunning ?? false,
-                      lastLocal
+                      notes: t.notes || '',
+                      userNotes: t.userNotes || '',
+                      guide: t.guide || {},
+                      lastLocalTimer,
+                      lastLocalContent,
+                      timerLastUpdated: t.timerLastUpdated || 0
                     });
                   });
                 });
               });
             });
 
-    const mergedInstances = instancesFromFirestore.map(inst => {
-      return {
-        ...inst,
-        sections: inst.sections.map(s => ({
-          ...s,
-          subsections: s.subsections.map(ss => ({
-            ...ss,
-            tasks: ss.tasks.map(t => {
-              const local = localTaskState.get(t.id);
-              
-              // Ensure t always has basic timer fields to prevent UI fallback to default 20:00 incorrectly
-              const tWithDefaults = {
-                ...t,
-                timerRemaining: t.timerRemaining ?? t.timerDuration ?? 20 * 60,
-                timerDuration: t.timerDuration ?? 20 * 60,
-                timerIsRunning: t.timerIsRunning ?? false
+            const mergedInstances = instancesFromFirestore.map(inst => {
+              return {
+                ...inst,
+                sections: inst.sections.map(s => ({
+                  ...s,
+                  subsections: s.subsections.map(ss => ({
+                    ...ss,
+                    tasks: ss.tasks.map(t => {
+                      const local = localTaskState.get(`${inst.id}-${t.id}`);
+                      
+                      const tWithDefaults = {
+                        ...t,
+                        timerRemaining: t.timerRemaining ?? t.timerDuration ?? 20 * 60,
+                        timerDuration: t.timerDuration ?? 20 * 60,
+                        timerIsRunning: t.timerIsRunning ?? false
+                      };
+
+                      if (local) {
+                        const isRecentTimer = Date.now() - local.lastLocalTimer < 10000;
+                        const isLocalTimerNewer = (local.timerLastUpdated || 0) > (t.timerLastUpdated || 0);
+                        const isRecentContent = Date.now() - local.lastLocalContent < 20000;
+
+                        const useLocalTimer = isRecentTimer || isLocalTimerNewer;
+
+                        return { 
+                          ...tWithDefaults, 
+                          timerRemaining: useLocalTimer ? local.remaining : tWithDefaults.timerRemaining,
+                          timerIsRunning: useLocalTimer ? local.running : tWithDefaults.timerIsRunning,
+                          timerLastUpdated: useLocalTimer ? local.timerLastUpdated : t.timerLastUpdated,
+                          notes: isRecentContent ? local.notes : t.notes,
+                          userNotes: isRecentContent ? local.userNotes : t.userNotes,
+                          guide: isRecentContent ? local.guide : t.guide
+                        };
+                      }
+                      return tWithDefaults;
+                    })
+                  }))
+                }))
               };
+            });
 
-              if (local) {
-                const isRecent = Date.now() - local.lastLocal < 3000; // 3 second grace period
-                // CRITICAL: Only use local state if there was a RECENT local interaction.
-                // Using "local.running" here was causing auto-start bugs because the local store
-                // might still think it's running when the snapshot arrives.
-                if (isRecent) {
-                  return { 
-                    ...tWithDefaults, 
-                    timerRemaining: local.remaining,
-                    timerIsRunning: local.running 
-                  };
-                }
-              }
-              return tWithDefaults;
-            })
-          }))
-        }))
-      };
-    });
+            const currentActiveInstance = get().activeInstance;
+            const updatedActive = currentActiveInstance ? mergedInstances.find(i => i.id === currentActiveInstance.id) : null;
 
-            set({ instances: mergedInstances });
-            
-            if (currentActiveInstance) {
-              const updatedActive = mergedInstances.find(i => i.id === currentActiveInstance.id);
-              if (updatedActive) {
-                set({ activeInstance: updatedActive });
-              }
-            }
+            set({ 
+              instances: mergedInstances,
+              activeInstance: updatedActive || currentActiveInstance
+            });
 
             // --- REVERSE CHECK ---
             // If instances updated but we haven't synced with master yet (e.g. just loaded)
@@ -933,6 +1076,10 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       const scratchpad = currentUser.scratchpad.map(item => 
         item.id === id ? { ...item, ...updates } : item
       );
+      
+      // Optimistic Update
+      set({ currentUser: { ...currentUser, scratchpad } });
+      
       await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
     },
 
@@ -943,6 +1090,10 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       const scratchpad = currentUser.scratchpad.map(item => 
         item.id === id ? { ...item, completed: !item.completed } : item
       );
+      
+      // Optimistic Update
+      set({ currentUser: { ...currentUser, scratchpad } });
+      
       await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
     },
 
@@ -953,6 +1104,10 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       const scratchpad = currentUser.scratchpad.map(item => 
         item.id === id ? { ...item, priority: !item.priority } : item
       );
+      
+      // Optimistic Update
+      set({ currentUser: { ...currentUser, scratchpad } });
+      
       await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
     },
 
@@ -961,12 +1116,20 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       if (!currentUser || !currentUser.scratchpad) return;
 
       const scratchpad = currentUser.scratchpad.filter(item => item.id !== id);
+      
+      // Optimistic Update
+      set({ currentUser: { ...currentUser, scratchpad } });
+      
       await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
     },
 
     reorderScratchpad: async (newScratchpad) => {
       const { currentUser } = get();
       if (!currentUser) return;
+      
+      // Optimistic Update
+      set({ currentUser: { ...currentUser, scratchpad: newScratchpad } });
+      
       await updateDoc(doc(db, 'users', currentUser.id), { scratchpad: newScratchpad });
     },
 
@@ -1030,8 +1193,15 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
               if (t.id === taskId) {
                 changed = true;
                 targetInstanceId = inst.id;
+                (globalThis as any)[`lastToggle_${inst.id}-${t.id}`] = Date.now();
                 // Setting timer always resets remaining to duration and pauses
-                return { ...t, timerDuration: duration, timerRemaining: duration, timerIsRunning: false };
+                return { 
+                  ...t, 
+                  timerDuration: duration, 
+                  timerRemaining: duration, 
+                  timerIsRunning: false,
+                  timerLastUpdated: Date.now() 
+                };
               }
               return t;
             })
@@ -1050,7 +1220,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       const targetInst = updatedInstances.find(i => i.id === targetInstanceId);
       if (targetInst) {
         try {
-          await updateDoc(doc(db, 'instances', targetInst.id), { sections: targetInst.sections });
+          await updateDoc(doc(db, 'instances', targetInst.id), sanitize({ sections: targetInst.sections }));
         } catch (error) {
           console.error('Timer sync failed:', error);
           get().notify('Failed to sync timer with cloud. Changes saved locally.', 'error');
@@ -1072,8 +1242,14 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
               if (t.id === taskId) {
                 changed = true;
                 targetInstanceId = inst.id;
+                (globalThis as any)[`lastToggle_${inst.id}-${t.id}`] = Date.now();
                 // Resetting timer sets remaining back to duration and pauses
-                return { ...t, timerRemaining: t.timerDuration || 20 * 60, timerIsRunning: false };
+                return { 
+                  ...t, 
+                  timerRemaining: t.timerDuration || 20 * 60, 
+                  timerIsRunning: false,
+                  timerLastUpdated: Date.now()
+                };
               }
               return t;
             })
@@ -1092,7 +1268,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       const targetInst = updatedInstances.find(i => i.id === targetInstanceId);
       if (targetInst) {
         try {
-          await updateDoc(doc(db, 'instances', targetInst.id), { sections: targetInst.sections });
+          await updateDoc(doc(db, 'instances', targetInst.id), sanitize({ sections: targetInst.sections }));
         } catch (error) {
           console.error('Reset timer failed:', error);
           get().notify('Failed to reset timer in cloud.', 'error');
@@ -1104,8 +1280,6 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       const { instances, activeInstance } = get();
       let targetInstanceId: string | null = null;
       let isStarting = false;
-
-      (globalThis as any)[`lastToggle_${taskId}`] = Date.now();
 
       // First pass: find if we are starting the timer
       instances.forEach(inst => {
@@ -1132,20 +1306,22 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
                 instanceChanged = true;
                 sectionChanged = true;
                 subsectionChanged = true;
-                (globalThis as any)[`lastToggle_${t.id}`] = Date.now();
-                return { ...t, timerIsRunning: false };
+                (globalThis as any)[`lastToggle_${inst.id}-${t.id}`] = Date.now();
+                return { ...t, timerIsRunning: false, timerLastUpdated: Date.now() };
               }
               if (t.id === taskId) {
                 instanceChanged = true;
                 sectionChanged = true;
                 subsectionChanged = true;
                 targetInstanceId = inst.id;
+                (globalThis as any)[`lastToggle_${inst.id}-${t.id}`] = Date.now();
                 
                 // Toggle running state. If it was finished (0), don't auto-reset here.
                 // The user must explicitly reset or set a new time.
                 return { 
                   ...t, 
-                  timerIsRunning: !t.timerIsRunning 
+                  timerIsRunning: !t.timerIsRunning,
+                  timerLastUpdated: Date.now()
                 };
               }
               return t;
@@ -1171,7 +1347,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
           const original = instances.find(o => o.id === inst.id);
           return JSON.stringify(original?.sections) !== JSON.stringify(inst.sections);
         })
-        .map(inst => updateDoc(doc(db, 'instances', inst.id), { sections: inst.sections }));
+        .map(inst => updateDoc(doc(db, 'instances', inst.id), sanitize({ sections: inst.sections })));
       
       try {
         await Promise.all(updatePromises);
@@ -1184,8 +1360,6 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     updateTaskTimer: async (taskId, remaining) => {
       const { instances, activeInstance } = get();
       let targetInstanceId: string | null = null;
-
-      (globalThis as any)[`lastToggle_${taskId}`] = Date.now();
       
       const updatedInstances = instances.map(inst => {
         let changed = false;
@@ -1197,7 +1371,13 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
               if (t.id === taskId) {
                 changed = true;
                 targetInstanceId = inst.id;
-                return { ...t, timerRemaining: remaining, timerIsRunning: remaining > 0 ? (t.timerIsRunning ?? false) : false };
+                (globalThis as any)[`lastToggle_${inst.id}-${t.id}`] = Date.now();
+                return { 
+                  ...t, 
+                  timerRemaining: remaining, 
+                  timerIsRunning: remaining > 0 ? (t.timerIsRunning ?? false) : false,
+                  timerLastUpdated: Date.now()
+                };
               }
               return t;
             })
@@ -1217,7 +1397,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       if (targetInst) {
         // Sync to Firestore immediately for deliberate timer updates (Pause, Add 5m, manual set)
         try {
-          await updateDoc(doc(db, 'instances', targetInst.id), { sections: targetInst.sections });
+          await updateDoc(doc(db, 'instances', targetInst.id), sanitize({ sections: targetInst.sections }));
         } catch (error) {
           console.error('Task timer update failed:', error);
           get().notify('Failed to sync timer update to cloud.', 'error');
@@ -1240,8 +1420,8 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
                 instanceChanged = true;
                 sChanged = true;
                 ssChanged = true;
-                (globalThis as any)[`lastToggle_${t.id}`] = Date.now();
-                return { ...t, timerIsRunning: false };
+                (globalThis as any)[`lastToggle_${inst.id}-${t.id}`] = Date.now();
+                return { ...t, timerIsRunning: false, timerLastUpdated: Date.now() };
               }
               return t;
             });
@@ -1261,7 +1441,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       if (instancesToUpdate.length > 0) {
         set({ instances: updatedInstances });
         const updatePromises = instancesToUpdate.map(inst => 
-          updateDoc(doc(db, 'instances', inst.id), { sections: inst.sections })
+          updateDoc(doc(db, 'instances', inst.id), sanitize({ sections: inst.sections }))
         );
         await Promise.all(updatePromises);
       }
@@ -1343,7 +1523,20 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     },
 
     updateProjectDetails: async (id, details) => {
-      await updateDoc(doc(db, 'projects', id), sanitize(details));
+      const { projects, activeProject } = get();
+      const updatedProjects = projects.map(p => p.id === id ? { ...p, ...details } : p);
+      
+      // Optimistic Update
+      set({ 
+        projects: updatedProjects,
+        activeProject: activeProject?.id === id ? { ...activeProject, ...details } : activeProject
+      });
+
+      try {
+        await updateDoc(doc(db, 'projects', id), sanitize(details));
+      } catch (err) {
+        console.error('Failed to update project details:', err);
+      }
     },
 
     deleteProject: async (id) => {
@@ -1391,7 +1584,20 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     },
 
     renameProject: async (id, name) => {
-      await updateDoc(doc(db, 'projects', id), { name });
+      const { projects, activeProject } = get();
+      const updatedProjects = projects.map(p => p.id === id ? { ...p, name } : p);
+      
+      // Optimistic Update
+      set({ 
+        projects: updatedProjects,
+        activeProject: activeProject?.id === id ? { ...activeProject, name } : activeProject
+      });
+
+      try {
+        await updateDoc(doc(db, 'projects', id), { name });
+      } catch (err) {
+        console.error('Failed to rename project:', err);
+      }
     },
 
     addInstanceToProject: async (projectId, masterId) => {
@@ -1475,47 +1681,149 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       await updateDoc(doc(db, 'instances', targetInstance.id), sanitize({ sections: updated }));
     },
 
-    updateTaskNotes: async (taskId, notes, isUserNotes) => {
-      const { mode, activeMaster, activeInstance } = get();
+    updateTaskNotes: async (taskId, notes, containerId, isUserNotes = false, immediate = false) => {
+      const { mode, masters, instances } = get();
       const field = isUserNotes ? 'userNotes' : 'notes';
-      const update = (sections: Section[]) => sections.map(s => ({
+      const timestamp = Date.now();
+      
+      // Track local update for protection against snapshot reverts
+      (globalThis as any)[`lastUpdate_${containerId}-${taskId}`] = timestamp;
+
+      const updateSections = (sections: Section[]) => sections.map(s => ({
         ...s,
         subsections: s.subsections.map(ss => ({
           ...ss,
-          tasks: ss.tasks.map(t => t.id === taskId ? { ...t, [field]: notes, lastUpdated: Date.now() } : t)
+          tasks: ss.tasks.map(t => t.id === taskId ? { ...t, [field]: notes, lastUpdated: timestamp } : t)
         }))
       }));
 
-      if (mode === 'master' && activeMaster) {
-        const updatedMaster = incrementMasterVersion({ ...activeMaster, sections: update(activeMaster.sections) });
-        await updateDoc(doc(db, 'masters', activeMaster.id), sanitize({ sections: updatedMaster.sections, version: updatedMaster.version, updatedAt: updatedMaster.updatedAt }));
-      } else if (mode === 'project' && activeInstance) {
-        await updateDoc(doc(db, 'instances', activeInstance.id), sanitize({ sections: update(activeInstance.sections) }));
+      if (mode === 'master') {
+        const targetMaster = masters.find(m => m.id === containerId);
+        if (!targetMaster) return;
+
+        const updatedMaster = { ...targetMaster, sections: updateSections(targetMaster.sections), updatedAt: timestamp };
+        
+        // Optimistic Update
+        set(state => ({ 
+          masters: state.masters.map(m => m.id === targetMaster.id ? updatedMaster : m),
+          activeMaster: state.activeMaster?.id === targetMaster.id ? updatedMaster : state.activeMaster
+        }));
+
+        const performDbUpdate = async () => {
+          // Read LATEST from store to avoid Lost Updates if multiple tasks were edited in same container
+          const latestMaster = get().masters.find(m => m.id === targetMaster.id);
+          if (!latestMaster) return;
+          
+          const finalMaster = incrementMasterVersion(latestMaster);
+          try {
+            await updateDoc(doc(db, 'masters', targetMaster.id), sanitize({ 
+              sections: finalMaster.sections, 
+              version: finalMaster.version, 
+              updatedAt: finalMaster.updatedAt 
+            }));
+          } catch (err) {
+            console.error('Failed to update master notes:', err);
+          }
+        };
+
+        if (immediate) {
+          cancelDebounce(`master-notes-${targetMaster.id}`);
+          await performDbUpdate();
+        } else {
+          debounceUpdate(`master-notes-${targetMaster.id}`, performDbUpdate);
+        }
+
+      } else if (mode === 'project') {
+        const targetInstance = instances.find(i => i.id === containerId);
+        if (!targetInstance) return;
+
+        const updatedSections = updateSections(targetInstance.sections);
+        const updatedInstance = { ...targetInstance, sections: updatedSections, updatedAt: timestamp };
+        
+        // Optimistic Update
+        set(state => ({
+          instances: state.instances.map(i => i.id === targetInstance.id ? updatedInstance : i),
+          activeInstance: state.activeInstance?.id === targetInstance.id ? updatedInstance : state.activeInstance
+        }));
+
+        const performDbUpdate = async () => {
+          // Read LATEST from store to avoid Lost Updates
+          const latestInstance = get().instances.find(i => i.id === targetInstance.id);
+          if (!latestInstance) return;
+
+          try {
+            await updateDoc(doc(db, 'instances', targetInstance.id), sanitize({ 
+              sections: latestInstance.sections,
+              updatedAt: Date.now()
+            }));
+          } catch (err) {
+            console.error('Failed to update instance notes:', err);
+          }
+        };
+
+        if (immediate) {
+          cancelDebounce(`instance-notes-${targetInstance.id}`);
+          await performDbUpdate();
+        } else {
+          debounceUpdate(`instance-notes-${targetInstance.id}`, performDbUpdate);
+        }
       }
     },
 
-    updateTaskGuide: async (taskId, guideUpdate) => {
-      const { mode, activeMaster } = get();
-      if (mode !== 'master' || !activeMaster) return;
+    updateTaskGuide: async (taskId, guideUpdate, containerId, immediate = false) => {
+      const { mode, masters } = get();
+      if (mode !== 'master') return;
 
-      const update = (sections: Section[]) => sections.map(s => ({
+      const timestamp = Date.now();
+      // Track local update for protection against snapshot reverts
+      (globalThis as any)[`lastUpdate_${containerId}-${taskId}`] = timestamp;
+
+      const updateSections = (sections: Section[]) => sections.map(s => ({
         ...s,
         subsections: s.subsections.map(ss => ({
           ...ss,
           tasks: ss.tasks.map(t => t.id === taskId ? { 
             ...t, 
             guide: { ...(t.guide || {}), ...guideUpdate },
-            lastUpdated: Date.now() 
+            lastUpdated: timestamp
           } : t)
         }))
       }));
 
-      const updatedMaster = incrementMasterVersion({ ...activeMaster, sections: update(activeMaster.sections) });
-      await updateDoc(doc(db, 'masters', activeMaster.id), sanitize({ 
-        sections: updatedMaster.sections, 
-        version: updatedMaster.version, 
-        updatedAt: updatedMaster.updatedAt 
+      const targetMaster = masters.find(m => m.id === containerId);
+      if (!targetMaster) return;
+
+      const updatedMasterLocal = { ...targetMaster, sections: updateSections(targetMaster.sections), updatedAt: timestamp };
+      
+      // Optimistic Update
+      set(state => ({
+        masters: state.masters.map(m => m.id === targetMaster.id ? updatedMasterLocal : m),
+        activeMaster: state.activeMaster?.id === targetMaster.id ? updatedMasterLocal : state.activeMaster
       }));
+
+      const performDbUpdate = async () => {
+        // Read LATEST from store to avoid Lost Updates
+        const latestMaster = get().masters.find(m => m.id === targetMaster.id);
+        if (!latestMaster) return;
+
+        const finalMaster = incrementMasterVersion(latestMaster);
+        try {
+          await updateDoc(doc(db, 'masters', targetMaster.id), sanitize({ 
+            sections: finalMaster.sections, 
+            version: finalMaster.version, 
+            updatedAt: finalMaster.updatedAt 
+          }));
+        } catch (err) {
+          console.error('Failed to update task guide:', err);
+        }
+      };
+
+      if (immediate) {
+        cancelDebounce(`master-guide-${targetMaster.id}`);
+        await performDbUpdate();
+      } else {
+        debounceUpdate(`master-guide-${targetMaster.id}`, performDbUpdate);
+      }
     },
 
     addTaskFile: async (taskId, file, isUserFile) => {
@@ -1597,6 +1905,27 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       }
     },
 
+    handleFileUpload: async (e, taskId, _containerId, isUserFile) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        await get().addTaskFile(taskId, file, isUserFile);
+      } catch (err) {
+        console.error('Upload failed:', err);
+        alert('Upload failed. Please try again.');
+      }
+      e.target.value = '';
+    },
+
+    handleFileDownload: (file) => {
+      const link = document.createElement('a');
+      link.href = file.data;
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
+
     addMaster: async (title) => {
       const { masters } = get();
       const maxOrder = masters.reduce((max, m) => Math.max(max, m.order ?? 0), 0);
@@ -1618,10 +1947,23 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     },
 
     renameMaster: async (id, title) => {
-      const master = get().masters.find(m => m.id === id);
-      if (!master) return;
-      const updated = incrementMasterVersion({ ...master, title });
-      await updateDoc(doc(db, 'masters', id), sanitize({ title: updated.title, version: updated.version, updatedAt: updated.updatedAt }));
+      const { masters, activeMaster } = get();
+      const targetMaster = masters.find(m => m.id === id);
+      if (!targetMaster) return;
+      
+      const updated = incrementMasterVersion({ ...targetMaster, title });
+      
+      // Optimistic Update
+      set({ 
+        masters: masters.map(m => m.id === id ? updated : m),
+        activeMaster: activeMaster?.id === id ? updated : activeMaster
+      });
+
+      try {
+        await updateDoc(doc(db, 'masters', id), sanitize({ title: updated.title, version: updated.version, updatedAt: updated.updatedAt }));
+      } catch (err) {
+        console.error('Failed to rename master:', err);
+      }
     },
 
     moveMaster: async (id, direction) => {
@@ -1661,11 +2003,40 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       await updateDoc(doc(db, 'masters', activeMaster.id), sanitize({ sections: updated.sections, version: updated.version, updatedAt: updated.updatedAt }));
     },
 
-    renameSection: async (sectionId, title) => {
-      const { activeMaster } = get();
-      if (!activeMaster) return;
-      const updated = incrementMasterVersion({ ...activeMaster, sections: activeMaster.sections.map(s => s.id === sectionId ? { ...s, title } : s) });
-      await updateDoc(doc(db, 'masters', activeMaster.id), sanitize({ sections: updated.sections, version: updated.version, updatedAt: updated.updatedAt }));
+    renameSection: async (sectionId, title, containerId) => {
+      const { mode, masters } = get();
+      const timestamp = Date.now();
+
+      const updateSections = (sections: Section[]) => sections.map(s => s.id === sectionId ? { ...s, title } : s);
+
+      if (mode === 'master' || containerId) {
+        const id = containerId || masters.find(m => m.sections.some(s => s.id === sectionId))?.id;
+        if (!id) return;
+
+        const targetMaster = get().masters.find(m => m.id === id);
+        if (!targetMaster) return;
+
+        const updated = incrementMasterVersion({ 
+          ...targetMaster, 
+          sections: updateSections(targetMaster.sections),
+          updatedAt: timestamp
+        });
+
+        set(state => ({ 
+          masters: state.masters.map(m => m.id === id ? updated : m),
+          activeMaster: state.activeMaster?.id === id ? updated : state.activeMaster
+        }));
+
+        try {
+          await updateDoc(doc(db, 'masters', id), sanitize({ 
+            sections: updated.sections, 
+            version: updated.version, 
+            updatedAt: updated.updatedAt 
+          }));
+        } catch (err) {
+          console.error('Failed to rename section:', err);
+        }
+      }
     },
 
     addSubsection: async (sectionId, title) => {
@@ -1682,11 +2053,43 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       await updateDoc(doc(db, 'masters', activeMaster.id), sanitize({ sections: updated.sections, version: updated.version, updatedAt: updated.updatedAt }));
     },
 
-    renameSubsection: async (subsectionId, title) => {
-      const { activeMaster } = get();
-      if (!activeMaster) return;
-      const updated = incrementMasterVersion({ ...activeMaster, sections: activeMaster.sections.map(s => ({ ...s, subsections: s.subsections.map(ss => ss.id === subsectionId ? { ...ss, title } : ss) })) });
-      await updateDoc(doc(db, 'masters', activeMaster.id), sanitize({ sections: updated.sections, version: updated.version, updatedAt: updated.updatedAt }));
+    renameSubsection: async (subsectionId, title, containerId) => {
+      const { mode, masters } = get();
+      const timestamp = Date.now();
+
+      const updateSections = (sections: Section[]) => sections.map(s => ({ 
+        ...s, 
+        subsections: s.subsections.map(ss => ss.id === subsectionId ? { ...ss, title } : ss) 
+      }));
+
+      if (mode === 'master' || containerId) {
+        const id = containerId || masters.find(m => m.sections.some(s => s.subsections.some(ss => ss.id === subsectionId)))?.id;
+        if (!id) return;
+
+        const targetMaster = get().masters.find(m => m.id === id);
+        if (!targetMaster) return;
+
+        const updated = incrementMasterVersion({ 
+          ...targetMaster, 
+          sections: updateSections(targetMaster.sections),
+          updatedAt: timestamp
+        });
+
+        set(state => ({ 
+          masters: state.masters.map(m => m.id === id ? updated : m),
+          activeMaster: state.activeMaster?.id === id ? updated : state.activeMaster
+        }));
+
+        try {
+          await updateDoc(doc(db, 'masters', id), sanitize({ 
+            sections: updated.sections, 
+            version: updated.version, 
+            updatedAt: updated.updatedAt 
+          }));
+        } catch (err) {
+          console.error('Failed to rename subsection:', err);
+        }
+      }
     },
 
     addTask: async (subsectionId, title) => {
@@ -1713,11 +2116,69 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       await updateDoc(doc(db, 'masters', activeMaster.id), sanitize({ sections: updated.sections, version: updated.version, updatedAt: updated.updatedAt }));
     },
 
-    renameTask: async (taskId, title) => {
-      const { activeMaster } = get();
-      if (!activeMaster) return;
-      const updated = incrementMasterVersion({ ...activeMaster, sections: activeMaster.sections.map(s => ({ ...s, subsections: s.subsections.map(ss => ({ ...ss, tasks: ss.tasks.map(t => t.id === taskId ? { ...t, title } : t) })) })) });
-      await updateDoc(doc(db, 'masters', activeMaster.id), sanitize({ sections: updated.sections, version: updated.version, updatedAt: updated.updatedAt }));
+    renameTask: async (taskId, title, containerId) => {
+      const { mode, masters, instances } = get();
+      const timestamp = Date.now();
+
+      const updateSections = (sections: Section[]) => sections.map(s => ({ 
+        ...s, 
+        subsections: s.subsections.map(ss => ({ 
+          ...ss, 
+          tasks: ss.tasks.map(t => t.id === taskId ? { ...t, title, lastUpdated: timestamp } : t) 
+        })) 
+      }));
+
+      if (mode === 'master') {
+        const id = containerId || masters.find(m => m.sections.some(s => s.subsections.some(ss => ss.tasks.some(t => t.id === taskId))))?.id;
+        if (!id) return;
+
+        const targetMaster = get().masters.find(m => m.id === id);
+        if (!targetMaster) return;
+
+        const updated = incrementMasterVersion({ 
+          ...targetMaster, 
+          sections: updateSections(targetMaster.sections),
+          updatedAt: timestamp
+        });
+
+        set(state => ({ 
+          masters: state.masters.map(m => m.id === id ? updated : m),
+          activeMaster: state.activeMaster?.id === id ? updated : state.activeMaster
+        }));
+
+        try {
+          await updateDoc(doc(db, 'masters', id), sanitize({ 
+            sections: updated.sections, 
+            version: updated.version, 
+            updatedAt: updated.updatedAt 
+          }));
+        } catch (err) {
+          console.error('Failed to rename master task:', err);
+        }
+      } else if (mode === 'project') {
+        const id = containerId || instances.find(inst => inst.sections.some(s => s.subsections.some(ss => ss.tasks.some(t => t.id === taskId))))?.id;
+        if (!id) return;
+
+        const targetInstance = get().instances.find(inst => inst.id === id);
+        if (!targetInstance) return;
+
+        const updatedSections = updateSections(targetInstance.sections);
+        const updatedInstance = { ...targetInstance, sections: updatedSections, updatedAt: timestamp };
+
+        set(state => ({
+          instances: state.instances.map(inst => inst.id === id ? updatedInstance : inst),
+          activeInstance: state.activeInstance?.id === id ? updatedInstance : state.activeInstance
+        }));
+
+        try {
+          await updateDoc(doc(db, 'instances', id), sanitize({ 
+            sections: updatedSections,
+            updatedAt: timestamp
+          }));
+        } catch (err) {
+          console.error('Failed to rename instance task:', err);
+        }
+      }
     },
 
     moveSection: async (masterId, sectionId, direction) => {
@@ -2011,6 +2472,39 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
         await get().updateThemeSettings(preset.settings, preset.mode);
         get().notify(`Applied "${preset.name}"!`, 'success');
       }
-    }
+    },
+    deleteTaskFeedback: async (taskId, containerId) => {
+      const { instances } = get();
+      const targetInstance = instances.find(i => i.id === containerId);
+      if (!targetInstance) return;
+
+      const updateSections = (sections: Section[]) => sections.map(s => ({
+        ...s,
+        subsections: s.subsections.map(ss => ({
+          ...ss,
+          tasks: ss.tasks.map(t => t.id === taskId ? { 
+            ...t, 
+            userNotes: '',
+            lastUpdated: Date.now()
+          } : t)
+        }))
+      }));
+
+      const updatedInstance = { ...targetInstance, sections: updateSections(targetInstance.sections) };
+      
+      // Optimistic Update
+      set(state => ({
+        instances: state.instances.map(i => i.id === targetInstance.id ? updatedInstance : i),
+        activeInstance: state.activeInstance?.id === targetInstance.id ? updatedInstance : state.activeInstance
+      }));
+
+      try {
+        await updateDoc(doc(db, 'instances', containerId), sanitize({ 
+          sections: updatedInstance.sections 
+        }));
+      } catch (err) {
+        console.error('Failed to delete task feedback:', err);
+      }
+    },
   };
 });

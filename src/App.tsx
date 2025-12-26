@@ -1,16 +1,16 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import JSZip from 'jszip';
 import pkg from '../package.json';
 import { useTasklistStore } from './store/useTasklistStore';
 import { SectionItem } from './components/checklist/SectionItem';
 import { Button } from './components/ui/Button';
-import { NoteEditor } from './components/editor/NoteEditor';
-import { TaskGuidePanel } from './components/editor/TaskGuidePanel';
-import { MasterTasklist, Section, Subsection, Complexity, Task } from './types';
+import { MasterTasklist, Section, Subsection, Task } from './types';
 import { generateUUID } from './utils/uuid';
 import { auth } from './lib/firebase';
 import { ProjectDashboard } from './components/project/ProjectDashboard';
 import { FocusDashboard } from './components/dashboard/FocusDashboard';
+import { TaskInfoModal } from './components/modals/TaskInfoModal';
+import { FeedbackLedger } from './components/admin/FeedbackLedger';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
@@ -18,7 +18,7 @@ import {
   updateProfile
 } from 'firebase/auth';
 import { 
-  CheckCircle2, StickyNote, Trash2, ListOrdered, Zap, Music, ListPlus, Play, Pause, X, Paperclip, Menu, LogOut, Mail, Lock, User as UserIcon, Loader2, GripVertical, ThumbsUp, AlertTriangle, Target,
+  CheckCircle2, StickyNote, Trash2, ListOrdered, Music, ListPlus, Play, Pause, X, Menu, LogOut, Mail, Lock, User as UserIcon, Loader2, GripVertical, ThumbsUp, AlertTriangle, Target,
   Plus, LayoutGrid, ClipboardList, Moon, Sun, Download, Upload, UserCircle2, Users, FileText, FileSpreadsheet, File as FileIcon, ChevronUp, ChevronDown, ShieldCheck, Eye, ShieldOff, Eraser, ChevronLeft, ChevronRight, Palette
 } from 'lucide-react';
 import { StyleConsole } from './components/ui/StyleConsole';
@@ -52,35 +52,7 @@ import {
   matchPath
 } from 'react-router-dom';
 
-const TomatoIcon = ({ className }: { className?: string }) => (
-  <svg 
-    viewBox="0 0 24 24" 
-    xmlns="http://www.w3.org/2000/svg" 
-    className={className}
-  >
-    {/* Tomato Body */}
-    <path 
-      d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" 
-      fill="#EA4335" 
-    />
-    {/* Green Stem */}
-    <path 
-      d="M12 3C12 3 11 1.5 12 1C13 0.5 14 2 13 3" 
-      stroke="#34A853" 
-      strokeWidth="1.5" 
-      strokeLinecap="round" 
-    />
-    <path 
-      d="M9 3.5L12 4.5L15 3.5" 
-      stroke="#34A853" 
-      strokeWidth="1.5" 
-      strokeLinecap="round" 
-    />
-    {/* Clock Face Overlay */}
-    <circle cx="12" cy="12" r="5.5" stroke="white" strokeWidth="1" fill="white" fillOpacity="0.2" />
-    <path d="M12 9.5V12L13.5 13" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
+import { TomatoIcon } from './components/icons/TomatoIcon';
 
 const SidebarTaskItem = ({ 
   item, 
@@ -93,10 +65,11 @@ const SidebarTaskItem = ({
   task: Task, 
   instance: any, 
   isActiveFocus: boolean, 
-  onOpenNotes: (taskId: string) => void
+  onOpenNotes: (taskId: string, containerId: string) => void
 }) => {
   const { projects, toggleTask, toggleTaskFocus, toggleTaskInActionSet, setTaskTimer, resetTaskTimer, toggleTaskTimer, updateTaskTimer, currentUser, users } = useTasklistStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showTimerWidget, setShowTimerWidget] = useState(false);
   const [customMinutes, setCustomMinutes] = useState('20');
 
@@ -122,7 +95,8 @@ const SidebarTaskItem = ({
   } as React.CSSProperties;
 
   const formatTime = (seconds: number | undefined | null, duration?: number) => {
-    const val = seconds ?? duration ?? (20 * 60);
+    let val = seconds ?? duration ?? (20 * 60);
+    if (isNaN(val) || val < 0) val = 20 * 60;
     const hrs = Math.floor(val / 3600);
     const mins = Math.floor((val % 3600) / 60);
     const secs = val % 60;
@@ -149,7 +123,15 @@ const SidebarTaskItem = ({
     .filter(u => u.id !== currentUser?.id && u.actionSet?.some(i => i.projectId === item.projectId && i.instanceId === item.instanceId && i.taskId === task.id))
     .map(u => ({ id: u.id, name: u.name }));
 
-    const isMultiUserActive = (otherActiveUsers.length + (isActiveFocus ? 1 : 0)) >= 2;
+    // NEW LOGIC: Trigger danger alert if multiple users have this EXACT task focused in their profiles,
+    // regardless of their current online heartbeat status.
+    const concurrentFocusCount = users.filter(u => 
+      u.activeFocus?.projectId === item.projectId &&
+      u.activeFocus?.instanceId === item.instanceId &&
+      u.activeFocus?.taskId === task.id
+    ).length;
+
+    const isMultiUserActive = concurrentFocusCount >= 2;
 
     const project = projects.find(p => p.id === item.projectId);
     const isYellowState = isActiveFocus && otherClaimants.length > 0;
@@ -187,9 +169,31 @@ const SidebarTaskItem = ({
       )}
       onClick={() => {
         if (instance && project) {
-          // Navigate to project without scroll flag
-          navigate(`/project/${project.id}/instance/${instance.id}`, { replace: true });
-          toggleTaskFocus(project.id, instance.id, task.id);
+          const isDashboard = location.pathname === '/' || location.pathname === '/dashboard';
+          const isProjectView = location.pathname.startsWith('/project/');
+          
+          if (isDashboard) {
+            // Stay on Dashboard, just update focus
+            toggleTaskFocus(project.id, instance.id, task.id);
+          } else if (isProjectView) {
+            // Check if we are already in THIS project context
+            const pathParts = location.pathname.split('/');
+            const currentProjectId = pathParts[2];
+            const currentInstanceId = pathParts[4];
+            
+            if (currentProjectId === project.id && currentInstanceId === instance.id) {
+              // Same project, just toggle focus
+              toggleTaskFocus(project.id, instance.id, task.id);
+            } else {
+              // Different project, jump to it
+              navigate(`/project/${project.id}/instance/${instance.id}`, { replace: true });
+              toggleTaskFocus(project.id, instance.id, task.id);
+            }
+          } else {
+            // Default (e.g. Master Mode): jump to project context
+            navigate(`/project/${project.id}/instance/${instance.id}`, { replace: true });
+            toggleTaskFocus(project.id, instance.id, task.id);
+          }
         }
       }}
     >
@@ -387,7 +391,7 @@ const SidebarTaskItem = ({
 
             {/* Note Icon - Outside the timer box, same height as play button, aligned with bin icon */}
             <button 
-              onClick={(e) => { e.stopPropagation(); onOpenNotes(task.id); }}
+              onClick={(e) => { e.stopPropagation(); onOpenNotes(task.id, instance.id); }}
               title="Open Task Info"
               className={clsx(
                 "w-12 h-10 shrink-0 flex items-center justify-center transition-all hover:scale-110",
@@ -544,13 +548,11 @@ function App() {
     instances, activeInstance, setActiveInstance,
     projects, activeProject, setActiveProject, addProject, renameProject, deleteProject, addInstanceToProject, removeInstanceFromProject,
     updateProjectDetails, updatePersonalProjectOverride,
-    updateTaskNotes, addTaskFile,
     currentUser, users, initializeAuth, loading,
     importMaster, updateUserRole, deleteUser,
     adminClearUserFocus, adminClearUserActionSet,
     activeTaskId, setActiveTaskId, updatePresence,
     moveMaster, setLocalExpanded, clearActionSet,
-    setTaskTimer, resetTaskTimer, toggleTaskTimer, updateTaskTimer,
     isDarkMode, toggleDarkMode,
     showPlaylistSidebar, setShowPlaylistSidebar,
     showMainSidebar, setShowMainSidebar
@@ -626,7 +628,7 @@ function App() {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isEditingProjectInfo, setIsEditingProjectInfo] = useState(false);
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editingTaskInfo, setEditingTaskInfo] = useState<{ taskId: string, containerId: string } | null>(null);
   const [showAddChecklistModal, setShowAddChecklistModal] = useState(false);
 
   const [isChecklistCollapsed, setIsChecklistCollapsed] = useState(() => {
@@ -639,32 +641,6 @@ function App() {
     }
   }, [isChecklistCollapsed, activeInstance?.id]);
 
-  // Derive editingTask from global state to ensure real-time sync in modal
-  const editingTask = useMemo(() => {
-    if (!editingTaskId) return null;
-    const searchTasks = (sections: Section[]) => {
-      for (const s of sections) {
-        for (const ss of s.subsections) {
-          const found = ss.tasks.find(t => t.id === editingTaskId);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-
-    // First search active master or instance
-    let task = searchTasks((mode === 'master' ? activeMaster : activeInstance)?.sections || []);
-    if (task) return task;
-
-    // If not found (e.g. on Dashboard), search through ALL instances
-    for (const inst of instances) {
-      task = searchTasks(inst.sections);
-      if (task) return task;
-    }
-
-    return null;
-  }, [editingTaskId, mode, activeMaster, activeInstance, instances]);
-
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [showDeleteProjectConfirm, setShowDeleteProjectConfirm] = useState(false);
   const [showDeleteProjectFinalConfirm, setShowDeleteProjectFinalConfirm] = useState(false);
@@ -676,8 +652,6 @@ function App() {
   const [isDeletingProject, setIsDeletingProject] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
-  const [showModalTimerWidget, setShowModalTimerWidget] = useState(false);
-  const [modalCustomMinutes, setModalCustomMinutes] = useState('20');
   const importFileRef = useRef<HTMLInputElement>(null);
   const [importPreview, setImportPreview] = useState<Partial<MasterTasklist> | null>(null);
   const [importTemplateName, setImportTemplateName] = useState('');
@@ -903,27 +877,6 @@ function App() {
   }
 
   // --- EVENT HANDLERS ---
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isUserFile: boolean) => {
-    const file = e.target.files?.[0];
-    if (!file || !editingTask) return;
-    try {
-      await addTaskFile(editingTask.id, file, isUserFile);
-    } catch (err) {
-      console.error('Upload failed:', err);
-      alert('Upload failed. Please try again.');
-    }
-    e.target.value = '';
-  };
-
-  const handleFileDownload = (file: any) => {
-    const link = document.createElement('a');
-    link.href = file.data;
-    link.download = file.name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const handleAddSection = () => {
     if (activeMaster) {
       addSection(activeMaster.id, 'New Section');
@@ -1114,14 +1067,6 @@ function App() {
       }
     });
     setPlainTextPreview({ id: generateUUID(), title: importTemplateName || 'New Template', sections, version: 1, createdAt: Date.now(), updatedAt: Date.now() });
-  };
-
-  const formatTime = (seconds: number | undefined | null, duration?: number) => {
-    const val = seconds ?? duration ?? (20 * 60);
-    const hrs = Math.floor(val / 3600);
-    const mins = Math.floor((val % 3600) / 60);
-    const secs = val % 60;
-    return `${hrs > 0 ? `${hrs}:` : ''}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -1516,7 +1461,7 @@ function App() {
         )}
 
             {location.pathname === '/dashboard' ? (
-              <FocusDashboard onOpenNotes={(taskId) => setEditingTaskId(taskId)} />
+              <FocusDashboard onOpenNotes={(taskId, containerId) => setEditingTaskInfo({ taskId, containerId })} />
             ) : (
           <>
             {/* Selection Area */}
@@ -1658,7 +1603,10 @@ function App() {
                     <div className="space-y-6">
                       {activeInstance.sections.map(s => (
                         <div key={s.id} className="px-0 sm:px-1 md:px-2">
-                          <SectionItem section={s} onOpenNotes={(t) => setEditingTaskId(t.id)} />
+                          <SectionItem 
+                            section={s} 
+                            onOpenNotes={(taskId, containerId) => setEditingTaskInfo({ taskId, containerId })} 
+                          />
                         </div>
                       ))}
                     </div>
@@ -1785,7 +1733,10 @@ function App() {
               <div className="space-y-6">
                 {activeMaster.sections.map(s => (
                   <div key={s.id} className="px-0 sm:px-1 md:px-2">
-                    <SectionItem section={s} onOpenNotes={(t) => setEditingTaskId(t.id)} />
+                    <SectionItem 
+                      section={s} 
+                      onOpenNotes={(taskId, containerId) => setEditingTaskInfo({ taskId, containerId })} 
+                    />
                   </div>
                 ))}
                 <div className="px-0 sm:px-1 md:px-2">
@@ -1873,7 +1824,7 @@ function App() {
                               task={task}
                               instance={instance}
                               isActiveFocus={isActiveFocus}
-                              onOpenNotes={(taskId) => setEditingTaskId(taskId)}
+                              onOpenNotes={(taskId, containerId) => setEditingTaskInfo({ taskId, containerId })}
                             />
                           );
                         })}
@@ -2124,241 +2075,13 @@ function App() {
         </div>
       )}
 
-      {editingTask && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className={clsx(
-          "bg-blue-50/95 dark:bg-[#121212] w-full max-w-5xl rounded-container shadow-2xl p-8 flex flex-col h-[85vh] border transition-all duration-300 animate-in zoom-in-95 duration-200",
-          isDarkMode ? "border-gray-700" : "border-blue-200",
-          currentUser?.activeFocus?.taskId === editingTask.id && "ring-4 ring-google-green border-google-green shadow-[0_0_25px_rgba(52,168,83,0.3)]"
-        )}>
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-6 gap-4">
-              <div className="flex flex-col gap-3 flex-1 min-w-0">
-                {/* Mobile Header Row: Pomodoro + Close */}
-                <div className="flex items-center justify-between sm:hidden w-full mb-1">
-                  {mode === 'project' && currentUser?.activeFocus?.taskId === editingTask.id ? (
-                    <div className="flex items-center gap-1.5 bg-white/50 dark:bg-white/5 p-1 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm animate-in fade-in slide-in-from-left-2 duration-300">
-                      <div className="relative">
-                        <button 
-                          onClick={() => setShowModalTimerWidget(!showModalTimerWidget)}
-                          className="flex items-center gap-2 px-2 py-1 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 transition-all text-[10px] font-black"
-                        >
-                          <TomatoIcon className="w-3.5 h-3.5" />
-                          <span className="tabular-nums">
-                            {formatTime(editingTask.timerRemaining, editingTask.timerDuration)}
-                          </span>
-                        </button>
-
-                        {showModalTimerWidget && (
-                          <>
-                            <div className="fixed inset-0 z-[65]" onClick={() => setShowModalTimerWidget(false)} />
-                            <div className="absolute top-full left-0 mt-2 p-3 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-2xl shadow-2xl z-[70] min-w-[160px] animate-in fade-in slide-in-from-top-2 duration-200">
-                              <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 px-1">Set Session Duration</div>
-                              <div className="flex gap-2">
-                                <input type="number" className="w-16 h-8 bg-gray-50 dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-lg px-2 text-sm outline-none font-bold dark:text-gray-300" value={modalCustomMinutes} onChange={(e) => setModalCustomMinutes(e.target.value)} onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    const mins = parseInt(modalCustomMinutes);
-                                    if (!isNaN(mins)) {
-                                      setTaskTimer(editingTask.id, mins * 60);
-                                      setShowModalTimerWidget(false);
-                                    }
-                                  }
-                                }} />
-                                <div className="flex flex-col gap-1">
-                                  <Button size="sm" onClick={() => {
-                                    const mins = parseInt(modalCustomMinutes);
-                                    if (!isNaN(mins)) {
-                                      setTaskTimer(editingTask.id, mins * 60);
-                                      setShowModalTimerWidget(false);
-                                    }
-                                  }} className="h-7 px-2 font-black text-[10px] py-0">Set</Button>
-                                  <Button size="sm" variant="secondary" onClick={() => {
-                                    resetTaskTimer(editingTask.id);
-                                    setShowModalTimerWidget(false);
-                                  }} className="h-7 px-2 font-black text-[10px] py-0">Reset</Button>
-                                </div>
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <button 
-                          onClick={() => resetTaskTimer(editingTask.id)}
-                          className="p-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-[9px] font-black border border-gray-200 dark:border-gray-700"
-                        >
-                          Reset
-                        </button>
-                        <button 
-                          onClick={() => updateTaskTimer(editingTask.id, (editingTask.timerRemaining || 0) + (5 * 60))}
-                          className="p-1 rounded-lg bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 text-[9px] font-black"
-                        >
-                          +5m
-                        </button>
-                        <button 
-                          onClick={() => toggleTaskTimer(editingTask.id)}
-                          className="w-7 h-7 rounded-full flex items-center justify-center bg-red-500 text-white shadow-sm"
-                        >
-                          {editingTask.timerIsRunning ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current ml-0.5" />}
-                        </button>
-                      </div>
-                    </div>
-                  ) : <div />}
-                  <Button 
-                    variant="secondary" 
-                    onClick={() => setEditingTaskId(null)} 
-                    className="h-8 px-3 text-[11px] font-bold border border-blue-200 dark:border-gray-700 bg-white/50 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-white flex-shrink-0 rounded-xl"
-                  >
-                    Close
-                  </Button>
-                </div>
-                <div className="flex items-center">
-                  {/* Complexity badge logic remains here */}
-                  {mode === 'master' ? (
-                    <select
-                      className={clsx(
-                        "bg-white dark:bg-gray-900 border-2 border-blue-200 dark:border-gray-700 rounded-button px-3 py-1.5 text-xs font-black outline-none transition-all cursor-pointer",
-                        editingTask.guide?.complexity === 'Easy' && "text-green-600 border-green-200 dark:border-green-900/30 bg-green-50/50 dark:bg-green-900/10",
-                        editingTask.guide?.complexity === 'Moderate' && "text-amber-600 border-amber-200 dark:border-amber-900/30 bg-amber-50/50 dark:bg-amber-900/10",
-                        editingTask.guide?.complexity === 'Complex' && "text-red-600 border-red-200 dark:border-red-900/30 bg-red-50/50 dark:bg-red-900/10",
-                        !editingTask.guide?.complexity && "text-gray-400 dark:text-gray-300/60"
-                      )}
-                      value={editingTask.guide?.complexity || ''}
-                      onChange={(e) => {
-                        const val = e.target.value as Complexity | '';
-                        const { updateTaskGuide } = useTasklistStore.getState();
-                        updateTaskGuide(editingTask.id, { complexity: val || undefined });
-                      }}
-                    >
-                      <option value="" className="text-gray-500 dark:text-gray-300/60">Complexity...</option>
-                      <option value="Easy">Easy</option>
-                      <option value="Moderate">Moderate</option>
-                      <option value="Complex">Complex</option>
-                    </select>
-                  ) : (
-                    editingTask.guide?.complexity && (
-                      <div className={clsx(
-                        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm",
-                        editingTask.guide.complexity === 'Easy' && "bg-green-50/50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800/30",
-                        editingTask.guide.complexity === 'Moderate' && "bg-amber-50/50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800/30",
-                        editingTask.guide.complexity === 'Complex' && "bg-red-50/50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800/30"
-                      )}>
-                        <Zap className="w-3 h-3 fill-current" />
-                        {editingTask.guide.complexity}
-                      </div>
-                    )
-                  )}
-                </div>
-                {/* Mobile Pomodoro removed from here as it's now in the top row */}
-              </div>
-
-              {/* Desktop-only Pomodoro controls and Close button */}
-              <div className="hidden sm:flex items-center gap-4">
-                {mode === 'project' && currentUser?.activeFocus?.taskId === editingTask.id && (
-                  <div className="flex items-center gap-2 bg-white/50 dark:bg-white/5 p-2 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm animate-in fade-in zoom-in duration-300">
-                    <div className="relative">
-                <button 
-                  onClick={() => setShowModalTimerWidget(!showModalTimerWidget)}
-                  title="Set Duration"
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/40 text-red-600 dark:text-red-400 transition-all hover:bg-red-100"
-                >
-                  <TomatoIcon className={clsx("w-5 h-5", !editingTask.timerIsRunning && "grayscale-[0.5]")} />
-                  <span className="text-sm font-black tabular-nums">
-                    {formatTime(editingTask.timerRemaining, editingTask.timerDuration)}
-                  </span>
-                </button>
-
-                      {showModalTimerWidget && (
-                        <>
-                          <div className="fixed inset-0 z-[65]" onClick={() => setShowModalTimerWidget(false)} />
-                          <div className="absolute top-full right-0 mt-2 p-3 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-2xl shadow-2xl z-[70] min-w-[160px] animate-in fade-in slide-in-from-top-2 duration-200">
-                            <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 px-1">Set Session Duration</div>
-                            <div className="flex gap-2">
-                              <input type="number" className="w-16 h-8 bg-gray-50 dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-lg px-2 text-sm outline-none font-bold dark:text-gray-300" value={modalCustomMinutes} onChange={(e) => setModalCustomMinutes(e.target.value)} onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  const mins = parseInt(modalCustomMinutes);
-                                  if (!isNaN(mins)) {
-                                    setTaskTimer(editingTask.id, mins * 60);
-                                    setShowModalTimerWidget(false);
-                                  }
-                                }
-                              }} />
-                              <div className="flex flex-col gap-1">
-                                <Button size="sm" onClick={() => {
-                                  const mins = parseInt(modalCustomMinutes);
-                                  if (!isNaN(mins)) {
-                                    setTaskTimer(editingTask.id, mins * 60);
-                                    setShowModalTimerWidget(false);
-                                  }
-                                }} className="h-7 px-2 font-black text-[10px] py-0">Set</Button>
-                                <Button size="sm" variant="secondary" onClick={() => {
-                                  resetTaskTimer(editingTask.id);
-                                  setShowModalTimerWidget(false);
-                                }} className="h-7 px-2 font-black text-[10px] py-0">Reset</Button>
-                              </div>
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      <button 
-                        onClick={() => updateTaskTimer(editingTask.id, (editingTask.timerRemaining || 0) + (5 * 60))}
-                        className="p-1.5 rounded-lg bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 hover:bg-red-200 transition-colors text-[10px] font-black"
-                        title="Add 5 Minutes"
-                      >
-                        Add 5mins
-                      </button>
-                      <button 
-                        onClick={() => toggleTaskTimer(editingTask.id)}
-                        className="w-8 h-8 rounded-full flex items-center justify-center bg-red-500 text-white shadow-sm hover:scale-110 transition-all"
-                      >
-                        {editingTask.timerIsRunning ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
-                      </button>
-                    </div>
-                  </div>
-                )}
-                <Button variant="secondary" onClick={() => setEditingTaskId(null)} className="hidden sm:flex font-bold border border-blue-200 dark:border-gray-700 bg-white/50 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-white">Close</Button>
-              </div>
-            </div>
-            <div className="flex-1 min-h-0 flex flex-col overflow-y-auto pr-2 custom-scrollbar">
-              <div className="flex-shrink-0 mb-8">
-                {/* New TASK bounding box */}
-                <div className="flex items-center gap-2 mb-4 px-2">
-                  <Target className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                  <h4 className="text-sm font-black uppercase text-gray-600 dark:text-gray-400 tracking-widest">TASK</h4>
-                </div>
-                <div className="bg-white/50 dark:bg-black/20 border border-gray-300 dark:border-gray-800 rounded-container p-6 mb-8 shadow-sm h-fit transition-all">
-                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-300 break-words leading-relaxed px-2">
-                    {editingTask.title}
-                  </h3>
-                </div>
-
-                <TaskGuidePanel task={editingTask} mode={mode} showComplexityHeader={false} />
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {editingTask.files?.map(f => <button key={f.id} onClick={() => handleFileDownload(f)} className="px-3 py-2 bg-white dark:bg-black/40 border border-blue-200 dark:border-gray-700 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 hover:border-google-blue transition-all shadow-sm">{f.name}</button>)}
-                  {mode === 'master' && <label className="px-3 py-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-xs font-black text-google-blue dark:text-gray-300 cursor-pointer border border-blue-200 dark:border-blue-800 hover:bg-blue-200 transition-all"><Paperclip className="w-3 h-3 inline mr-1" /> Attach Reference File<input type="file" className="hidden" onChange={(e) => handleFileUpload(e, false)} /></label>}
-                </div>
-              </div>
-              
-              {mode === 'project' && (
-                <div className="flex-shrink-0 border-t-2 pt-10 pb-4 border-gray-400 dark:border-gray-800">
-                  <div className="flex items-center gap-2 mb-4 px-2">
-                    <ClipboardList className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                    <h4 className="text-sm font-black uppercase text-gray-600 dark:text-gray-400 tracking-widest">TEAM TASK FEEDBACK NOTES</h4>
-                  </div>
-                  <div className="bg-white/50 dark:bg-black/20 border border-gray-300 dark:border-gray-800 rounded-container overflow-hidden shadow-sm">
-                    <NoteEditor content={editingTask.userNotes || ''} onChange={(n) => { updateTaskNotes(editingTask.id, n, true); }} />
-                  </div>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {editingTask.userFiles?.map(f => <button key={f.id} onClick={() => handleFileDownload(f)} className="px-3 py-2 bg-white dark:bg-black/40 border border-gray-400 dark:border-gray-700 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 hover:border-google-blue transition-all shadow-sm">{f.name}</button>)}
-                    <label className="px-3 py-2 bg-white/50 dark:bg-blue-900/40 rounded-xl text-xs font-black text-gray-700 dark:text-gray-300 cursor-pointer border border-gray-400 dark:border-blue-800 hover:bg-white transition-all"><Paperclip className="w-3 h-3 inline mr-1" /> Attach File<input type="file" className="hidden" onChange={(e) => handleFileUpload(e, true)} /></label>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+      {editingTaskInfo && (
+        <TaskInfoModal 
+          taskId={editingTaskInfo.taskId}
+          containerId={editingTaskInfo.containerId}
+          onClose={() => setEditingTaskInfo(null)}
+          isDarkMode={isDarkMode}
+        />
       )}
 
       {isAdmin && showStyleConsole && (
@@ -2399,7 +2122,7 @@ function App() {
                 <div className="flex items-center gap-2 bg-white/10 p-1 rounded-xl border border-white/20">
                   <Button 
                     variant="ghost" 
-                    className="h-10 w-10 p-0 text-white hover:bg-white/10"
+                    className="h-10 w-10 p-0 text-white dark:text-white hover:bg-white/10"
                     title="Deactivate Current Task"
                     onClick={() => {
                       setAdminUserToDeactivate({ id: currentUser!.id, name: "yourself" });
@@ -2409,7 +2132,7 @@ function App() {
                   </Button>
                   <Button 
                     variant="ghost" 
-                    className="h-10 w-10 p-0 text-white hover:bg-white/10"
+                    className="h-10 w-10 p-0 text-white dark:text-white hover:bg-white/10"
                     title="Clear Users Session List"
                     onClick={() => {
                       setAdminUserToClearSession({ id: currentUser!.id, name: "yourself" });
@@ -2429,43 +2152,60 @@ function App() {
               </div>
 
               {isAdmin && (
-                <div className="space-y-4 mt-8">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-300">Team Members ({users.length})</h4>
-                  </div>
-                  
-                  <div className="grid gap-2">
-                    {users.filter(u => u.id !== currentUser?.id).map(user => {
-                      const isOnline = user.activeFocus?.timestamp ? (Date.now() - user.activeFocus.timestamp < 10 * 60 * 1000) : false;
-                      return (
-                        <div key={user.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-black/40 rounded-card border border-gray-300 dark:border-gray-700 group shadow-sm">
+                <div className="space-y-8 mt-8 pb-12">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-300">Team Members ({users.length})</h4>
+                    </div>
+                    
+                    <div className="grid gap-2">
+                      {users.filter(u => u.id !== currentUser?.id).map(user => {
+                        const isOnline = user.activeFocus?.timestamp ? (Date.now() - user.activeFocus.timestamp < 10 * 60 * 1000) : false;
+                        return (
+                        <div 
+                          key={user.id} 
+                          className={clsx(
+                            "flex items-center gap-4 p-4 rounded-card border-2 transition-all shadow-sm group",
+                            user.role === 'admin' 
+                              ? "bg-blue-50/80 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800" 
+                              : "bg-orange-50/80 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800"
+                          )}
+                        >
                           <div className="relative">
-                            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-700">
-                              <UserIcon className="w-6 h-6" />
+                            <div className={clsx(
+                              "w-12 h-12 rounded-full flex items-center justify-center border-2 shadow-sm transition-transform group-hover:scale-105",
+                              user.role === 'admin' 
+                                ? "bg-white dark:bg-gray-800 text-google-blue border-blue-100 dark:border-blue-900/50" 
+                                : "bg-white dark:bg-gray-800 text-orange-500 border-orange-100 dark:border-orange-900/50"
+                            )}>
+                              <UserIcon className="w-7 h-7" />
                             </div>
                             {isOnline && (
-                              <div className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-google-green rounded-full border-2 border-white dark:border-[#121212] animate-pulse shadow-sm" title="Online" />
+                              <div className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-google-green rounded-full border-2 border-white dark:border-[#121212] animate-pulse shadow-sm" title="Online" />
                             )}
                           </div>
                           <div className="flex-1">
-                            <h5 className="font-black text-sm flex items-center gap-2">
+                            <h5 className={clsx(
+                              "font-black text-sm flex items-center gap-2",
+                              user.role === 'admin' ? "text-google-blue dark:text-blue-300" : "text-orange-600 dark:text-orange-400"
+                            )}>
                               {user.name}
-                              {isOnline && <span className="text-[8px] font-black uppercase text-google-green tracking-tighter">Online</span>}
+                              {isOnline && <span className="text-[8px] font-black uppercase text-google-green tracking-tighter bg-google-green/10 px-1 rounded-sm">Online</span>}
                             </h5>
                             <span className={clsx(
-                              "text-[9px] font-black uppercase px-1.5 py-0.5 rounded shadow-xs border",
-                              user.role === 'admin' ? "bg-google-blue text-white border-google-blue" : "border-orange-500 text-orange-500 bg-transparent"
+                              "text-[9px] font-black uppercase px-1.5 py-0.5 rounded shadow-xs border mt-1 inline-block",
+                              user.role === 'admin' ? "bg-google-blue text-white border-google-blue" : "bg-orange-500 text-white border-orange-500"
                             )}>
                               {user.role}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            {/* Session Controls for Team Members */}
-                            <div className="flex items-center gap-1 bg-white/50 dark:bg-black/20 p-1 rounded-lg border border-gray-200 dark:border-gray-800">
+                            <div className="flex items-center gap-2">
+                              {/* Session Controls for Team Members */}
+                            <div className="flex items-center gap-1 bg-white/50 dark:bg-black/40 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                className="h-8 w-8 p-0 text-gray-500 hover:text-google-blue"
+                                className="h-8 w-8 p-0 text-gray-500 dark:text-white hover:text-google-blue dark:hover:text-blue-300"
                                 title="Deactivate Current Task"
                                 onClick={() => {
                                   setAdminUserToDeactivate({ id: user.id, name: user.name });
@@ -2476,7 +2216,7 @@ function App() {
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                className="h-8 w-8 p-0 text-gray-500 hover:text-google-red"
+                                className="h-8 w-8 p-0 text-gray-500 dark:text-white hover:text-google-red dark:hover:text-red-400"
                                 title="Clear Users Session List"
                                 onClick={() => {
                                   setAdminUserToClearSession({ id: user.id, name: user.name });
@@ -2486,37 +2226,42 @@ function App() {
                               </Button>
                             </div>
 
-                            <select 
-                              className="bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-lg text-xs font-black px-2 py-1 outline-none focus:ring-2 focus:ring-google-blue"
-                              value={user.role}
-                              onChange={(e) => updateUserRole(user.id, e.target.value as 'admin' | 'viewer')}
-                            >
-                              <option value="viewer">Viewer</option>
-                              <option value="admin">Admin</option>
-                            </select>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="text-gray-400 hover:text-google-red h-8 w-8 p-0"
-                              onClick={() => {
-                                if (confirm(`Remove profile for ${user.name}? They will still have a Firebase account but no profile record.`)) {
-                                  deleteUser(user.id);
-                                }
-                              }}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                              <select 
+                                className="bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-lg text-xs font-black px-2 py-1 outline-none focus:ring-2 focus:ring-google-blue"
+                                value={user.role}
+                                onChange={(e) => updateUserRole(user.id, e.target.value as 'admin' | 'viewer')}
+                              >
+                                <option value="viewer">Viewer</option>
+                                <option value="admin">Admin</option>
+                              </select>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-gray-400 hover:text-google-red h-8 w-8 p-0"
+                                onClick={() => {
+                                  if (confirm(`Remove profile for ${user.name}? They will still have a Firebase account but no profile record.`)) {
+                                    deleteUser(user.id);
+                                  }
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
+                        );
+                      })}
+                      {users.length <= 1 && (
+                        <div className="text-center py-8 text-gray-400 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-3xl">
+                          <Users className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                          <p className="text-xs font-black uppercase tracking-widest">No other users found</p>
+                          <p className="text-[10px] mt-1 font-bold italic">New users appear here after they sign up</p>
                         </div>
-                      );
-                    })}
-                    {users.length <= 1 && (
-                      <div className="text-center py-8 text-gray-400 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-3xl">
-                        <Users className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                        <p className="text-xs font-black uppercase tracking-widest">No other users found</p>
-                        <p className="text-[10px] mt-1 font-bold italic">New users appear here after they sign up</p>
-                      </div>
-                    )}
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 pt-8 border-t border-gray-200 dark:border-gray-800">
+                    <FeedbackLedger />
                   </div>
                 </div>
               )}
@@ -2627,7 +2372,7 @@ function App() {
               <label className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-300 mb-2 block tracking-widest">New Template Name</label>
               <input className="w-full bg-gray-100 dark:bg-black/40 border-2 border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 font-black text-lg focus:ring-2 focus:ring-google-blue outline-none transition-all" value={importTemplateName} onChange={(e) => setImportTemplateName(e.target.value)} />
             </div>
-            <div className="flex-1 overflow-y-auto bg-gray-100 dark:bg-black/40 rounded-[2rem] p-6 border border-gray-300 dark:border-gray-700 mb-6 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto bg-gray-100 dark:bg-black/40 rounded-widget p-6 border border-gray-300 dark:border-gray-700 mb-6 custom-scrollbar">
               {importPreview.sections?.map((s: any, i: number) => (
                 <div key={i} className="mb-4">
                   <h4 className="font-black text-gray-900 dark:text-gray-300 border-b border-gray-200 dark:border-gray-800 pb-1 mb-2">{s.title}</h4>
@@ -2739,7 +2484,7 @@ function PlainTextImportModal({ show, onClose, content, setContent, lines, setLi
   if (!show) return null;
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
-      <div className="bg-white dark:bg-[#121212] w-full max-w-5xl rounded-[2.5rem] p-8 flex flex-col h-[85vh] border border-gray-300 dark:border-gray-700 shadow-2xl animate-in zoom-in-95 duration-200">
+      <div className="bg-white dark:bg-[#121212] w-full max-w-5xl rounded-container p-8 flex flex-col h-[85vh] border border-gray-300 dark:border-gray-700 shadow-2xl animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between mb-8">
           <div><h3 className="text-2xl font-black text-gray-900 dark:text-gray-100">Plain Text Import</h3><p className="text-sm text-gray-600 dark:text-gray-300 font-bold uppercase tracking-tight">Quickly build a template from notes.</p></div>
           <Button variant="ghost" onClick={onClose} className="text-google-red hover:bg-red-50 dark:hover:bg-red-900/20 font-black border-2 border-transparent hover:border-red-200">Abort Import</Button>
@@ -2748,7 +2493,7 @@ function PlainTextImportModal({ show, onClose, content, setContent, lines, setLi
           <div className="flex-1 flex flex-col gap-6 min-h-0">
             <input className="w-full bg-gray-100 dark:bg-black/40 border-2 border-gray-300 dark:border-gray-700 rounded-2xl px-5 py-3 text-lg font-black" placeholder="Template Name" value={name} onChange={(e) => setName(e.target.value)} />
             {lines.length === 0 ? (
-              <textarea className="flex-1 w-full bg-gray-100 dark:bg-black/40 border-2 border-gray-300 dark:border-gray-700 rounded-[2rem] p-6 font-mono text-sm leading-relaxed font-bold custom-scrollbar" placeholder="# SECTION NAME\n## SUBSECTION NAME\n- Task 1\n- Task 2" value={content} onChange={(e) => setContent(e.target.value)} />
+              <textarea className="flex-1 w-full bg-gray-100 dark:bg-black/40 border-2 border-gray-300 dark:border-gray-700 rounded-widget p-6 font-mono text-sm leading-relaxed font-bold custom-scrollbar" placeholder="# SECTION NAME\n## SUBSECTION NAME\n- Task 1\n- Task 2" value={content} onChange={(e) => setContent(e.target.value)} />
             ) : (
               <>
                 <div className="flex items-center justify-between mb-2">
@@ -2760,7 +2505,7 @@ function PlainTextImportModal({ show, onClose, content, setContent, lines, setLi
                     ← Edit Original Text
                   </button>
                 </div>
-                <div className="flex-1 overflow-y-auto space-y-2 bg-gray-100 dark:bg-black/40 rounded-[2rem] p-4 border-2 border-gray-300 dark:border-gray-700 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto space-y-2 bg-gray-100 dark:bg-black/40 rounded-widget p-4 border-2 border-gray-300 dark:border-gray-700 custom-scrollbar">
                   {lines.map((l: any, i: number) => (
                     <div key={l.id} className={clsx("flex items-center gap-2 p-2 rounded-xl border-2 transition-all", l.type === 'section' ? "bg-google-blue border-google-blue shadow-md" : l.type === 'subsection' ? "bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800" : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-xs")}>
                       <div className="flex gap-1 border-r-2 pr-2 border-gray-200/20 dark:border-gray-700/50">
@@ -2785,14 +2530,14 @@ function PlainTextImportModal({ show, onClose, content, setContent, lines, setLi
               </div>
               <div className="text-[10px] font-black uppercase bg-google-blue text-white px-3 py-1 rounded-full shadow-sm">Preview Mode</div>
             </div>
-            <div className="flex-1 overflow-y-auto bg-gray-100 dark:bg-black/40 rounded-[2rem] p-8 border-2 border-gray-300 dark:border-gray-700 mb-8 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto bg-gray-100 dark:bg-black/40 rounded-widget p-8 border-2 border-gray-300 dark:border-gray-700 mb-8 custom-scrollbar">
               <div className="max-w-3xl mx-auto space-y-10">
                 {preview.sections.map((s: any, i: number) => (
                   <div key={i} className="relative">
                     <div className="flex items-center gap-3 mb-4 bg-white dark:bg-gray-800 p-4 rounded-2xl border-2 border-gray-300 dark:border-gray-700 shadow-sm"><h3 className="text-xl font-black">{s.title}</h3></div>
                     <div className="space-y-6 ml-6 border-l-2 border-gray-200 dark:border-gray-700/50 pl-8">
                       {s.subsections.map((ss: any, j: number) => (
-                        <div key={j} className="bg-white dark:bg-gray-800/40 rounded-[1.5rem] border-2 border-gray-300 dark:border-gray-700 p-6 relative shadow-xs">
+                        <div key={j} className="bg-white dark:bg-gray-800/40 rounded-metadata border-2 border-gray-300 dark:border-gray-700 p-6 relative shadow-xs">
                           <div className="absolute -left-[2.15rem] top-10 w-8 h-0.5 bg-gray-200 dark:bg-gray-700/50" />
                           <h4 className="font-black text-gray-800 dark:text-gray-300 mb-4 uppercase text-sm tracking-wide">{ss.title}</h4>
                           <div className="space-y-2">{ss.tasks.map((t: any, k: number) => <div key={k} className="flex items-center gap-3 py-2 px-4 bg-white dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-800 text-sm font-bold">{t.title}</div>)}</div>
@@ -2838,7 +2583,7 @@ function AuthPage() {
 
   return (
     <div className="min-h-screen bg-[#f0f2f5] dark:bg-[#0a0a0a] flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white dark:bg-[#121212] rounded-[2.5rem] shadow-2xl p-8 border-2 border-gray-200 dark:border-gray-800 animate-in zoom-in-95 duration-300">
+      <div className="w-full max-w-md bg-white dark:bg-[#121212] rounded-container shadow-2xl p-8 border-2 border-gray-200 dark:border-gray-800 animate-in zoom-in-95 duration-300">
         <div className="flex flex-col items-center mb-8 text-center">
           <Logo showText={false} className="scale-150 mb-6" />
           <h1 className="text-4xl font-semibold text-[#E67E33] tracking-tight font-sans">checkMATE</h1>
