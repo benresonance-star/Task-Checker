@@ -202,19 +202,19 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
   };
 
   const ZenAquarium = ({ isRunning }: { isRunning: boolean }) => (
-    <div className="absolute inset-x-0 bottom-0 h-40 pointer-events-none overflow-hidden opacity-20 z-0">
+    <div className="absolute inset-x-0 bottom-0 h-48 pointer-events-none overflow-hidden opacity-25 z-0">
       <div className="relative h-full w-full">
         <FishIcon 
-          className="absolute bottom-4 w-20 h-20 text-white animate-swim-slow" 
+          className="absolute bottom-4 w-28 h-28 text-white animate-swim-slow" 
           style={{ animationPlayState: isRunning ? 'running' : 'paused' }} 
         />
         <FishIcon 
-          className="absolute bottom-20 w-12 h-12 text-white animate-swim-medium" 
-          style={{ animationDelay: '-15s', animationPlayState: isRunning ? 'running' : 'paused' }} 
+          className="absolute bottom-24 w-16 h-16 text-white animate-swim-medium" 
+          style={{ animationDelay: '-20s', animationPlayState: isRunning ? 'running' : 'paused' }} 
         />
         <FishIcon 
-          className="absolute bottom-10 w-16 h-16 text-white animate-swim-fast" 
-          style={{ animationDelay: '-30s', animationPlayState: isRunning ? 'running' : 'paused' }} 
+          className="absolute bottom-12 w-22 h-22 text-white animate-swim-fast" 
+          style={{ animationDelay: '-40s', animationPlayState: isRunning ? 'running' : 'paused' }} 
         />
       </div>
     </div>

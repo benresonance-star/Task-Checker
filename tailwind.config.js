@@ -51,8 +51,8 @@ export default {
           '50%': { opacity: 0.7 },
         },
         'swim': {
-          '0%': { left: '-150px' },
-          '100%': { left: '100%' }
+          '0%': { transform: 'translateX(-250px)' },
+          '100%': { transform: 'translateX(calc(100vw + 250px))' }
         },
         'bob': {
           '0%, 100%': { transform: 'translateY(0)' },
