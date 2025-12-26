@@ -97,13 +97,22 @@
 }
 
 @keyframes completion-fade {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 1; }
+  0% { 
+    opacity: 0; 
+    animation-timing-function: ease-in-out;
+  }
+  50% { 
+    opacity: 1; 
+    animation-timing-function: ease-in-out;
+  }
+  100% { 
+    opacity: 0; 
+  }
 }
 
 .animate-completion-pulse {
   background-color: var(--brand-green-pulse);
-  animation: completion-fade var(--pulse-frequency-done, 3s) ease-in-out infinite;
+  animation: completion-fade var(--pulse-frequency-done, 3s) infinite;
 }
 
 body {
