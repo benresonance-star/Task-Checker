@@ -65,7 +65,7 @@ const SidebarTaskItem = ({
   task: Task, 
   instance: any, 
   isActiveFocus: boolean, 
-  onOpenNotes: (taskId: string, containerId: string) => void
+  onOpenNotes: (taskId: string, containerId: string, focusFeedback?: boolean) => void
 }) => {
   const { projects, toggleTask, toggleTaskFocus, toggleTaskInActionSet, setTaskTimer, resetTaskTimer, toggleTaskTimer, updateTaskTimer, currentUser, users } = useTasklistStore();
   const navigate = useNavigate();
@@ -557,9 +557,10 @@ function App() {
     showPlaylistSidebar, setShowPlaylistSidebar,
     showMainSidebar, setShowMainSidebar
   } = useTasklistStore();
-  
+
   const navigate = useNavigate();
   const location = useLocation();
+  const isExecuting = currentUser?.activeFocus?.stage === 'executing';
   const queryParams = new URLSearchParams(location.search);
   const urlTaskId = queryParams.get('task');
 
@@ -628,7 +629,7 @@ function App() {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isEditingProjectInfo, setIsEditingProjectInfo] = useState(false);
-  const [editingTaskInfo, setEditingTaskInfo] = useState<{ taskId: string, containerId: string } | null>(null);
+  const [editingTaskInfo, setEditingTaskInfo] = useState<{ taskId: string, containerId: string, focusFeedback?: boolean } | null>(null);
   const [showAddChecklistModal, setShowAddChecklistModal] = useState(false);
 
   const [isChecklistCollapsed, setIsChecklistCollapsed] = useState(() => {
@@ -1072,7 +1073,11 @@ function App() {
   return (
     <div className={theme.components.layout.screen}>
       {/* Mobile Header */}
-      <header className={theme.components.layout.header}>
+      <header className={clsx(
+        theme.components.layout.header,
+        "transition-all duration-500",
+        isExecuting && "opacity-0 -translate-y-full pointer-events-none"
+      )}>
         <Logo className="scale-75 origin-left" />
         
         <div className="flex items-center gap-2">
@@ -1245,8 +1250,8 @@ function App() {
 
         {/* Sidebar (Desktop) */}
           <aside className={clsx(
-            "hidden md:flex border-r border-gray-300 dark:border-gray-700 flex-col bg-sidebar-bg transition-all duration-300 ease-in-out relative shrink-0 overflow-hidden",
-            showMainSidebar 
+            "hidden md:flex border-r border-gray-300 dark:border-gray-700 flex-col bg-sidebar-bg transition-all duration-500 ease-in-out relative shrink-0 overflow-hidden",
+            showMainSidebar && !isExecuting
               ? "w-64 p-4 md:pt-8 md:px-4 md:pb-4 opacity-100" 
               : "w-0 p-0 border-r-0 opacity-0 pointer-events-none"
           )}>
@@ -1378,7 +1383,11 @@ function App() {
       </aside>
 
       {/* Main Content */}
-      <main className={clsx(theme.components.layout.mainContent, "transition-all duration-300 ease-in-out relative")}>
+      <main className={clsx(
+        theme.components.layout.mainContent,
+        "transition-all duration-700 ease-in-out relative",
+        isExecuting && "p-0 md:p-0"
+      )}>
         {location.pathname !== '/dashboard' && (
           <header className={theme.components.layout.contentHeader}>
             <div className="flex items-center justify-between md:justify-start gap-3 w-full md:w-auto">
@@ -1461,7 +1470,7 @@ function App() {
         )}
 
             {location.pathname === '/dashboard' ? (
-              <FocusDashboard onOpenNotes={(taskId, containerId) => setEditingTaskInfo({ taskId, containerId })} />
+              <FocusDashboard onOpenNotes={(taskId, containerId, focusFeedback) => setEditingTaskInfo({ taskId, containerId, focusFeedback })} />
             ) : (
           <>
             {/* Selection Area */}
@@ -1605,7 +1614,7 @@ function App() {
                         <div key={s.id} className="px-0 sm:px-1 md:px-2">
                           <SectionItem 
                             section={s} 
-                            onOpenNotes={(taskId, containerId) => setEditingTaskInfo({ taskId, containerId })} 
+                            onOpenNotes={(taskId, containerId, focusFeedback) => setEditingTaskInfo({ taskId, containerId, focusFeedback })} 
                           />
                         </div>
                       ))}
@@ -1735,7 +1744,7 @@ function App() {
                   <div key={s.id} className="px-0 sm:px-1 md:px-2">
                     <SectionItem 
                       section={s} 
-                      onOpenNotes={(taskId, containerId) => setEditingTaskInfo({ taskId, containerId })} 
+                      onOpenNotes={(taskId, containerId, focusFeedback) => setEditingTaskInfo({ taskId, containerId, focusFeedback })} 
                     />
                   </div>
                 ))}
@@ -1824,7 +1833,7 @@ function App() {
                               task={task}
                               instance={instance}
                               isActiveFocus={isActiveFocus}
-                              onOpenNotes={(taskId, containerId) => setEditingTaskInfo({ taskId, containerId })}
+                              onOpenNotes={(taskId, containerId, focusFeedback) => setEditingTaskInfo({ taskId, containerId, focusFeedback })}
                             />
                           );
                         })}
@@ -2081,6 +2090,7 @@ function App() {
           containerId={editingTaskInfo.containerId}
           onClose={() => setEditingTaskInfo(null)}
           isDarkMode={isDarkMode}
+          focusFeedback={editingTaskInfo.focusFeedback}
         />
       )}
 

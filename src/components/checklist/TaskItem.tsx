@@ -10,7 +10,7 @@ import { useLocation } from 'react-router-dom';
 interface TaskItemProps {
   task: Task;
   subsectionId: string;
-  onOpenNotes: (taskId: string, containerId: string) => void;
+  onOpenNotes: (taskId: string, containerId: string, focusFeedback?: boolean) => void;
 }
 
 import { TomatoIcon } from '../icons/TomatoIcon';

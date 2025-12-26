@@ -44,10 +44,12 @@
   --prereq-bg: rgba(255, 247, 237, 0.5);
   --prereq-border: #FFEDD5;
   --prereq-item-bg: rgba(255, 255, 255, 0.6);
-  --prereq-text: #EA580C;
-  --prereq-icon: #EA580C;
-  
-  /* App Atmosphere */
+    --prereq-text: #EA580C;
+    --prereq-icon: #EA580C;
+    --hub-inactive-border: rgba(0, 0, 0, 0.15);
+    --hub-step2-inactive-bg: rgba(254, 226, 226, 0.8);
+
+      /* App Atmosphere */
   --app-bg: #FFFFFF;
   --sidebar-bg: #F9FAFB;
   --console-bg: #FFFFFF;
@@ -78,6 +80,8 @@
   --foreground: #d1d5db;
   --note-personal-bg: #423b24;
   --note-project-bg: #422f1c;
+  --hub-inactive-border: rgba(255, 255, 255, 0.3);
+  --hub-step2-inactive-bg: rgba(254, 226, 226, 0.1);
 }
 
 body {

@@ -15,9 +15,10 @@ interface TaskInfoModalProps {
   containerId: string;
   onClose: () => void;
   isDarkMode: boolean;
+  focusFeedback?: boolean;
 }
 
-export const TaskInfoModal: React.FC<TaskInfoModalProps> = ({ taskId, containerId, onClose, isDarkMode }) => {
+export const TaskInfoModal: React.FC<TaskInfoModalProps> = ({ taskId, containerId, onClose, isDarkMode, focusFeedback }) => {
   const { 
     mode, masters, instances, currentUser, 
     updateTaskNotes, updateTaskGuide,
@@ -27,6 +28,7 @@ export const TaskInfoModal: React.FC<TaskInfoModalProps> = ({ taskId, containerI
   const [isHydrated, setIsHydrated] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const feedbackRef = React.useRef<HTMLDivElement>(null);
 
   // Derive the current task from store - Memoized to only change when essential task properties change
   const task = useMemo(() => {
@@ -77,6 +79,15 @@ export const TaskInfoModal: React.FC<TaskInfoModalProps> = ({ taskId, containerI
       document.body.style.overflow = 'unset';
     };
   }, []);
+
+  // Handle auto-scroll to feedback
+  useEffect(() => {
+    if (isHydrated && focusFeedback && feedbackRef.current) {
+      setTimeout(() => {
+        feedbackRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300);
+    }
+  }, [isHydrated, focusFeedback]);
 
   if (!task || !isReady) return null;
 
@@ -192,7 +203,7 @@ export const TaskInfoModal: React.FC<TaskInfoModalProps> = ({ taskId, containerI
           </div>
           
           {mode === 'project' && (
-            <div className="flex-shrink-0 border-t-2 pt-10 pb-4 border-gray-400 dark:border-gray-800">
+            <div ref={feedbackRef} className="flex-shrink-0 border-t-2 pt-10 pb-4 border-gray-400 dark:border-gray-800">
               <div className="flex items-center gap-2 mb-4 px-2">
                 <ClipboardList className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 <h4 className="text-sm font-black uppercase text-gray-600 dark:text-gray-400 tracking-widest">MY TASK FEEDBACK</h4>

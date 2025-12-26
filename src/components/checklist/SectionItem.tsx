@@ -9,7 +9,7 @@ import { Button } from '../ui/Button';
 
 interface SectionItemProps {
   section: Section;
-  onOpenNotes: (taskId: string, containerId: string) => void;
+  onOpenNotes: (taskId: string, containerId: string, focusFeedback?: boolean) => void;
 }
 
 /**

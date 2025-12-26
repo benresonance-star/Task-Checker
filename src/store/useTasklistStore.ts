@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { MasterTasklist, TasklistInstance, Section, Subsection, Project, User, TaskFile, ProjectOverride, TaskGuide, ActionSetItem, ThemeSettings, ThemePreset, ScratchpadItem } from '../types';
+import { MasterTasklist, TasklistInstance, Section, Subsection, Project, User, TaskFile, ProjectOverride, TaskGuide, ActionSetItem, ThemeSettings, ThemePreset, ScratchpadItem, FocusStage } from '../types';
 import { generateUUID } from '../utils/uuid';
 import { auth, db, storage } from '../lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -62,6 +62,7 @@ interface TasklistState {
   toggleSubsection: (subsectionId: string) => Promise<void>;
   toggleTask: (taskId: string, instanceId?: string) => Promise<void>;
   updateTaskNotes: (taskId: string, notes: string, containerId: string, isUserNotes?: boolean, immediate?: boolean) => Promise<void>;
+  updateTaskWorkbench: (taskId: string, workbench: string, containerId: string, immediate?: boolean) => Promise<void>;
   updateTaskGuide: (taskId: string, guide: Partial<TaskGuide>, containerId: string, immediate?: boolean) => Promise<void>;
   addTaskFile: (taskId: string, file: File, isUserFile?: boolean) => Promise<void>;
   removeTaskFile: (taskId: string, fileId: string, isUserFile?: boolean) => Promise<void>;
@@ -99,6 +100,8 @@ interface TasklistState {
   // Presence
   updatePresence: (taskId: string | null) => Promise<void>;
   toggleTaskFocus: (projectId: string, instanceId: string, taskId: string) => Promise<void>;
+  setFocusStage: (stage: FocusStage) => Promise<void>;
+  toggleTaskPrerequisite: (taskId: string, prereqIndex: number, containerId: string) => Promise<void>;
   toggleTaskInActionSet: (projectId: string, instanceId: string, taskId: string) => Promise<void>;
   moveTaskInActionSet: (projectId: string, instanceId: string, taskId: string, direction: 'up' | 'down') => Promise<void>;
   setActionSet: (newSet: ActionSetItem[]) => Promise<void>;
@@ -220,6 +223,8 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--prereq-item-bg', settings.colorPrereqItemBg);
     root.style.setProperty('--prereq-text', settings.colorPrereqText);
     root.style.setProperty('--prereq-icon', settings.colorPrereqIcon);
+    root.style.setProperty('--hub-inactive-border', settings.colorHubInactiveBorder);
+    root.style.setProperty('--hub-step2-inactive-bg', settings.colorHubStep2InactiveBg);
 
     // App Atmosphere
     root.style.setProperty('--app-bg', settings.colorAppBg);
@@ -295,6 +300,8 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorPrereqItemBg: oldSettings.colorPrereqItemBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.6)'),
       colorPrereqText: oldSettings.colorPrereqText || '#EA580C', // orange-600
       colorPrereqIcon: oldSettings.colorPrereqIcon || '#EA580C', // orange-600
+      colorHubInactiveBorder: oldSettings.colorHubInactiveBorder || (oldSettings.mode === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.15)'),
+      colorHubStep2InactiveBg: oldSettings.colorHubStep2InactiveBg || (oldSettings.mode === 'dark' ? 'rgba(254, 226, 226, 0.1)' : 'rgba(254, 226, 226, 0.8)'),
 
       // Defaults for new fields
       colorAppBg: oldSettings.colorAppBg || (oldSettings.mode === 'dark' ? '#121212' : '#FFFFFF'),
@@ -352,6 +359,8 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorPrereqItemBg: isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.6)',
     colorPrereqText: '#EA580C',
     colorPrereqIcon: '#EA580C',
+    colorHubInactiveBorder: isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.15)',
+    colorHubStep2InactiveBg: isDark ? 'rgba(254, 226, 226, 0.1)' : 'rgba(254, 226, 226, 0.8)',
     colorAppBg: isDark ? '#121212' : '#FFFFFF',
     colorSidebarBg: isDark ? 'rgba(0, 0, 0, 0.6)' : '#F9FAFB',
     colorConsoleBg: isDark ? '#1E1E1E' : '#FFFFFF',
@@ -521,58 +530,13 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       radiusMetadataCard: 20,
       radiusFocusCard: 48,
       radiusTaskButton: 12,
+      colorHubInactiveBorder: 'rgba(0, 0, 0, 0.15)',
+      colorHubStep2InactiveBg: 'rgba(254, 226, 226, 0.8)',
     },
     themeSettingsDark: {
-      colorAppIdentity: '#4285F4',
-      colorActiveTaskDone: '#5DB975',
-      colorCompletedState: '#34A853',
-      colorDestructive: '#EA4335',
-      colorPresenceNotice: '#FBBC05',
-      colorProjectInfoBg: 'rgba(30, 41, 59, 0.8)',
-      colorProjectInfoBorder: '#334155',
-      colorNotesBg: 'rgba(30, 41, 59, 0.8)',
-      colorNotesBorder: '#334155',
-      colorNotesEditorBg: 'rgba(0, 0, 0, 0.2)',
-      colorNotesEditorBorder: '#334155',
-      colorNotesEditorSeparator: 'rgba(255, 255, 255, 0.1)',
-      colorNotePersonalBg: '#423b24',
-      colorNoteProjectBg: '#422f1c',
-      colorNotePriorityBg: '#421c1c',
-      colorChecklistBg: 'rgba(30, 41, 59, 0.5)',
-      colorChecklistBorder: '#1e293b',
-      colorMetadataCardBg: 'rgba(0, 0, 0, 0.4)',
-      colorMetadataCardBorder: '#1e293b',
-      colorSectionIdent: '#4285F4',
-      colorSectionIdentIcon: '#4285F4',
-      colorSectionPlan: '#34A853',
-      colorSectionPlanIcon: '#34A853',
-      colorSectionBuild: '#F97316',
-      colorSectionBuildIcon: '#F97316',
-      colorHierarchyLine: '#4b5563',
-      colorPrereqBg: 'rgba(249, 115, 22, 0.1)',
-      colorPrereqBorder: 'rgba(249, 115, 22, 0.3)',
-      colorPrereqItemBg: 'rgba(0, 0, 0, 0.2)',
-      colorPrereqText: '#EA580C',
-      colorPrereqIcon: '#EA580C',
-      colorAppBg: '#121212',
-      colorSidebarBg: 'rgba(0, 0, 0, 0.6)',
-      colorConsoleBg: '#1E1E1E',
-      colorTextPrimary: '#D1D5DB',
-      colorTextSecondary: '#9CA3AF',
-      colorTextHeading: '#FFFFFF',
-      fontSizeBase: 14,
-      fontWeightHeading: '900',
-      letterSpacingHeading: 0,
-      lineHeightBase: 1.5,
-      radiusTaskCard: 20,
-      radiusInteractive: 12,
-      radiusMajorModal: 32,
-      radiusWidget: 24,
-      radiusSidebar: 0,
-      radiusProjectInfo: 32,
-      radiusMetadataCard: 20,
-      radiusFocusCard: 48,
-      radiusTaskButton: 12,
+      ...getThemeDefaults(true),
+      colorHubInactiveBorder: 'rgba(255, 255, 255, 0.3)',
+      colorHubStep2InactiveBg: 'rgba(254, 226, 226, 0.1)',
     },
     themePresets: [],
     activePresetIdLight: null,
@@ -991,10 +955,58 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
           projectId,
           instanceId,
           taskId,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          stage: 'staged' as FocusStage
         };
         await updateDoc(userRef, { activeFocus: newFocus });
         get().pauseOtherTimers(taskId);
+      }
+    },
+
+    setFocusStage: async (stage) => {
+      const { currentUser } = get();
+      if (!currentUser || !currentUser.activeFocus) return;
+
+      const userRef = doc(db, 'users', currentUser.id);
+      await updateDoc(userRef, {
+        'activeFocus.stage': stage
+      });
+    },
+
+    toggleTaskPrerequisite: async (taskId, prereqIndex, containerId) => {
+      const { instances } = get();
+      const instance = instances.find(i => i.id === containerId);
+      if (!instance) return;
+
+      const newInstances = instances.map(inst => {
+        if (inst.id !== containerId) return inst;
+        return {
+          ...inst,
+          sections: inst.sections.map(sec => ({
+            ...sec,
+            subsections: sec.subsections.map(sub => ({
+              ...sub,
+              tasks: sub.tasks.map(task => {
+                if (task.id !== taskId) return task;
+                const completedPrereqs = task.completedPrereqs || [];
+                const newCompletedPrereqs = completedPrereqs.includes(prereqIndex)
+                  ? completedPrereqs.filter(i => i !== prereqIndex)
+                  : [...completedPrereqs, prereqIndex];
+                return { ...task, completedPrereqs: newCompletedPrereqs, lastUpdated: Date.now() };
+              })
+            }))
+          }))
+        };
+      });
+
+      set({ instances: newInstances });
+      
+      const taskRef = doc(db, 'instances', containerId);
+      const updatedInstance = newInstances.find(i => i.id === containerId);
+      if (updatedInstance) {
+        await updateDoc(taskRef, {
+          sections: updatedInstance.sections
+        });
       }
     },
 
@@ -1767,6 +1779,55 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
         } else {
           debounceUpdate(`instance-notes-${targetInstance.id}`, performDbUpdate);
         }
+      }
+    },
+
+    updateTaskWorkbench: async (taskId, workbench, containerId, immediate = false) => {
+      const { instances } = get();
+      const timestamp = Date.now();
+      
+      // Track local update for protection against snapshot reverts
+      (globalThis as any)[`lastUpdate_${containerId}-${taskId}`] = timestamp;
+
+      const updateSections = (sections: Section[]) => sections.map(s => ({
+        ...s,
+        subsections: s.subsections.map(ss => ({
+          ...ss,
+          tasks: ss.tasks.map(t => t.id === taskId ? { ...t, workbench, lastUpdated: timestamp } : t)
+        }))
+      }));
+
+      const targetInstance = instances.find(i => i.id === containerId);
+      if (!targetInstance) return;
+
+      const updatedSections = updateSections(targetInstance.sections);
+      const updatedInstance = { ...targetInstance, sections: updatedSections, updatedAt: timestamp };
+      
+      // Optimistic Update
+      set(state => ({
+        instances: state.instances.map(i => i.id === targetInstance.id ? updatedInstance : i),
+        activeInstance: state.activeInstance?.id === targetInstance.id ? updatedInstance : state.activeInstance
+      }));
+
+      const performDbUpdate = async () => {
+        const latestInstance = get().instances.find(i => i.id === targetInstance.id);
+        if (!latestInstance) return;
+
+        try {
+          await updateDoc(doc(db, 'instances', targetInstance.id), sanitize({ 
+            sections: latestInstance.sections,
+            updatedAt: Date.now()
+          }));
+        } catch (err) {
+          console.error('Failed to update workbench:', err);
+        }
+      };
+
+      if (immediate) {
+        cancelDebounce(`instance-workbench-${targetInstance.id}`);
+        await performDbUpdate();
+      } else {
+        debounceUpdate(`instance-workbench-${targetInstance.id}`, performDbUpdate);
       }
     },
 

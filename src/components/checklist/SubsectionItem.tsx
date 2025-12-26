@@ -11,7 +11,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 interface SubsectionItemProps {
   subsection: Subsection;
   sectionId: string;
-  onOpenNotes: (taskId: string, containerId: string) => void;
+  onOpenNotes: (taskId: string, containerId: string, focusFeedback?: boolean) => void;
 }
 
 /**

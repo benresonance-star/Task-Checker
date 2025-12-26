@@ -38,7 +38,8 @@ export interface Task {
   completed: boolean;
   notes: string;            // Template-level notes (from Master)
   guide?: TaskGuide;        // New structured guide
-  userNotes?: string;       // Instance-specific notes (from Project)
+  userNotes?: string;       // Instance-specific notes (Template Refinement Suggestions)
+  workbench?: string;       // New: Personal working scratchpad data
   files?: TaskFile[];       // Template-level attachments
   userFiles?: TaskFile[];   // Instance-specific attachments
   lastUpdated: number;      // Timestamp of the last modification
@@ -47,6 +48,7 @@ export interface Task {
   timerIsRunning?: boolean; // Active state of the task timer
   timerLastUpdated?: number; // Timestamp of the last timer state update (for sync safety)
   timeTaken?: number | null; // Recorded time (duration - remaining) upon completion
+  completedPrereqs?: number[]; // Indices of checked prerequisite items
 }
 
 /**
@@ -91,6 +93,8 @@ export interface PresenceInfo {
   userName: string;
   lastSeen: number;
 }
+
+export type FocusStage = 'staged' | 'preparing' | 'executing';
 
 /**
  * A project-specific instance of a MasterTasklist.
@@ -221,6 +225,8 @@ export interface ThemeSettings {
   colorPrereqItemBg: string;
   colorPrereqText: string;
   colorPrereqIcon: string;
+  colorHubInactiveBorder: string;
+  colorHubStep2InactiveBg: string;
   colorAppBg: string;
   colorSidebarBg: string;
   colorConsoleBg: string;
@@ -284,6 +290,7 @@ export interface User {
     instanceId: string;
     taskId: string;
     timestamp: number;
+    stage?: FocusStage;
   } | null;
   actionSet?: ActionSetItem[]; // The user's "Work Playlist"
   scratchpad?: ScratchpadItem[]; // Private quick tasks

@@ -1,17 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { theme } from '../../styles/theme';
-import { LayoutGrid, Target, Play, Pause, RotateCcw, ThumbsUp, CheckCircle2, StickyNote } from 'lucide-react';
+import { LayoutGrid, Target, Play, Pause, RotateCcw, ThumbsUp, CheckCircle2, StickyNote, Anchor, Zap } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useNavigate } from 'react-router-dom';
 import { Music } from 'lucide-react';
 import { ScratchpadWidget } from './ScratchpadWidget';
 import { KnowledgeHub } from './KnowledgeHub';
+import { FocusStage } from '../../types';
 
 import { TomatoIcon } from '../icons/TomatoIcon';
 
 interface FocusDashboardProps {
-  onOpenNotes?: (taskId: string, containerId: string) => void;
+  onOpenNotes?: (taskId: string, containerId: string, focusFeedback?: boolean) => void;
 }
 
 export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) => {
@@ -26,15 +27,22 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
     toggleTaskTimer,
     setTaskTimer,
     toggleTask,
+    setFocusStage,
     showPlaylistSidebar,
     setShowPlaylistSidebar,
-    showMainSidebar
+    showMainSidebar,
+    isDarkMode
   } = useTasklistStore();
 
   const isWide = !showPlaylistSidebar && !showMainSidebar;
+  const currentStage = currentUser?.activeFocus?.stage || 'staged';
+  const isExecuting = currentStage === 'executing';
 
   const [showSetTimer, setShowSetTimer] = React.useState(false);
   const [customMinutes, setCustomMinutes] = React.useState('20');
+  const [showRefinementPrompt, setShowRefinementPrompt] = React.useState(false);
+  const [completedTaskId, setCompletedTaskId] = React.useState<string | null>(null);
+  const [completedInstanceId, setCompletedInstanceId] = React.useState<string | null>(null);
 
   // Find the actual task object for the active focus
   const focusData = React.useMemo(() => {
@@ -120,10 +128,69 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
            (focusData.task.userNotes && focusData.task.userNotes.length > 0);
   }, [focusData?.task]);
 
+  useEffect(() => {
+    if (isExecuting) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isExecuting]);
+
+  const WorkflowTracker = () => {
+    const stages: { id: FocusStage; label: string; icon: any; color: string }[] = [
+      { id: 'staged', label: 'TASK ESTABLISHED', icon: Anchor, color: isDarkMode ? 'text-gray-500' : 'text-gray-400' },
+      { id: 'preparing', label: 'PREPARING', icon: Zap, color: 'text-orange-500' },
+      { id: 'executing', label: 'IN FOCUS', icon: Play, color: 'text-google-green' },
+    ];
+
+    const currentIdx = stages.findIndex(s => s.id === currentStage);
+
+    return (
+      <div className="flex items-center gap-4 mb-6 px-2">
+        {stages.map((stage, idx) => {
+          const Icon = stage.icon;
+          const isActive = idx === currentIdx;
+          const isPast = idx < currentIdx;
+          
+          return (
+            <div key={stage.id} className="flex items-center gap-2">
+              <button 
+                onClick={() => setFocusStage(stage.id)}
+                className={clsx(
+                  "flex items-center gap-1.5 transition-all duration-500",
+                  isActive ? "opacity-100 scale-105" : "opacity-30 scale-95 hover:opacity-60",
+                  isActive && stage.color
+                )}
+              >
+                <Icon className={clsx("w-3 h-3", isActive && stage.id === 'preparing' && "animate-pulse")} />
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] whitespace-nowrap">{stage.label}</span>
+              </button>
+              {idx < stages.length - 1 && (
+                <div className={clsx(
+                  "w-8 h-[1px] transition-all duration-1000",
+                  isPast ? "bg-google-green" : "bg-gray-300 dark:bg-gray-800"
+                )} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 custom-scrollbar text-[var(--text-primary)]">
+    <div className={clsx(
+      "flex-1 overflow-y-auto p-4 md:p-8 space-y-8 custom-scrollbar text-[var(--text-primary)] transition-all duration-1000",
+      isExecuting && (isDarkMode ? "bg-[#050505]" : "bg-gray-50")
+    )}>
                   {/* Header Section */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                  <div className={clsx(
+                    "flex flex-col sm:flex-row sm:items-center justify-between gap-6 transition-all duration-700",
+                    isExecuting && "opacity-0 -translate-y-10 pointer-events-none"
+                  )}>
                     <div className="flex flex-col gap-1">
                       <h1 className="text-2xl md:text-4xl font-black tracking-tight flex items-center gap-3 text-[var(--text-heading)]">
                         <LayoutGrid className="w-8 h-8 md:w-10 md:h-10 text-google-blue" />
@@ -161,183 +228,302 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
       <div className="flex flex-col gap-8 text-[var(--text-primary)]">
         
         {/* Active Focus Card */}
-        <div className="space-y-4">
-          <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] ml-2">Current Focus</h3>
+        <div className={clsx(
+          "space-y-4 transition-all duration-700",
+          isExecuting && "transform scale-[1.02] md:scale-[1.05]"
+        )}>
+          {!isExecuting && <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] ml-2">Current Focus</h3>}
           
           {focusData && cardTheme ? (
             <div className={clsx(
-              "p-8 md:p-10 rounded-focus-card border-4 transition-all shadow-2xl relative overflow-hidden group min-h-[400px] flex flex-col justify-between text-[var(--text-primary)]",
+              "p-8 md:p-10 rounded-focus-card border-4 transition-all duration-700 shadow-2xl relative overflow-hidden group flex flex-col justify-between text-[var(--text-primary)]",
+              isExecuting ? "min-h-[calc(100vh-2rem)] md:min-h-[700px]" : "min-h-[400px]",
               cardTheme,
               focusData.task.timerIsRunning && !isYellow && "ring-8 ring-google-green/20 animate-pulse",
               focusData.task.timerIsRunning && isYellow && "ring-8 ring-google-yellow/20 animate-pulse"
             )}>
               <div className="relative z-10 flex flex-col h-full space-y-8">
-                {/* ... existing content ... */}
+                <WorkflowTracker />
+                
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-1.5 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h4 className={clsx("text-lg md:text-2xl font-black uppercase tracking-tight truncate", isYellow ? "text-gray-900" : "text-white")}>
-                        {focusData.project?.name || 'Unknown Project'}
-                      </h4>
-                    </div>
-                    <div className={clsx(
-                      "flex items-center gap-2 px-3 py-1 rounded-full w-fit border shadow-sm transition-colors",
-                      isYellow ? "bg-black/5 border-black/10 text-gray-700" : "bg-white/10 border-white/20 text-white/80"
-                    )}>
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span className="text-[10px] font-black uppercase tracking-wider truncate max-w-[200px] md:max-w-md">
-                        {focusData.instance.title}
-                      </span>
-                    </div>
+                    {!isExecuting && (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <h4 className={clsx("text-lg md:text-2xl font-black uppercase tracking-tight truncate", isYellow ? "text-gray-900" : "text-white")}>
+                            {focusData.project?.name || 'Unknown Project'}
+                          </h4>
+                        </div>
+                        <div className={clsx(
+                          "flex items-center gap-2 px-3 py-1 rounded-full w-fit border shadow-sm transition-colors",
+                          isYellow ? "bg-black/5 border-black/10 text-gray-700" : "bg-white/10 border-white/20 text-white/80"
+                        )}>
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span className="text-[10px] font-black uppercase tracking-wider truncate max-w-[200px] md:max-w-md">
+                            {focusData.instance.title}
+                          </span>
+                        </div>
+                      </>
+                    )}
                   </div>
                   
-                            <button 
-                              onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance.id}?task=${focusData.task.id}&scroll=true`)}
-                              className={clsx(
-                                "hidden md:flex rounded-2xl transition-all border shadow-sm flex-shrink-0 active:scale-95",
-                                showPlaylistSidebar ? "p-2" : "p-3",
-                                isYellow ? "bg-black/5 border-black/10 text-gray-600 hover:bg-black/10" : "bg-white/10 border-white/20 text-white/70 hover:bg-white/20"
-                              )}
-                              title="Open in Full Checklist"
-                            >
-                              <RotateCcw className={clsx("rotate-180", showPlaylistSidebar ? "w-5 h-5" : "w-6 h-6")} />
-                            </button>
+                  {!isExecuting && (
+                    <button 
+                      onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance.id}?task=${focusData.task.id}&scroll=true`)}
+                      className={clsx(
+                        "hidden md:flex rounded-2xl transition-all border shadow-sm flex-shrink-0 active:scale-95",
+                        showPlaylistSidebar ? "p-2" : "p-3",
+                        isYellow ? "bg-black/5 border-black/10 text-gray-600 hover:bg-black/10" : "bg-white/10 border-white/20 text-white/70 hover:bg-white/20"
+                      )}
+                      title="Open in Full Checklist"
+                    >
+                      <RotateCcw className={clsx("rotate-180", showPlaylistSidebar ? "w-5 h-5" : "w-6 h-6")} />
+                    </button>
+                  )}
                 </div>
 
                 <div className="flex-1 flex flex-col justify-center py-4">
                   <h2 className={clsx(
-                    "text-2xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight break-words",
-                    isWide && "lg:text-7xl",
+                    "text-2xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight break-words transition-all duration-700",
+                    isExecuting && "md:text-7xl lg:text-8xl text-center",
+                    isWide && !isExecuting && "lg:text-7xl",
                     isYellow ? "text-gray-900" : "text-white"
                   )}>
                     {focusData.task.title}
                   </h2>
                 </div>
 
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10">
+                <div className={clsx(
+                  "flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10 transition-all duration-700",
+                  isExecuting && "border-transparent"
+                )}>
                   <div className="flex items-center gap-2">
                     {/* Play/Pause Button */}
-                    <div className={clsx(
-                      theme.components.pomodoro.button,
-                      isYellow && theme.components.pomodoro.buttonYellow
-                    )}>
-                      <button 
-                        onClick={() => toggleTaskTimer(focusData.task.id)} 
-                        title="Start/Pause Pomodoro Timer"
-                        className="w-full h-full flex items-center justify-center hover:scale-110 transition-transform"
-                      >
-                        {focusData.task.timerIsRunning ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
-                      </button>
-                    </div>
+                    {(!(!isExecuting && !focusData.task.timerIsRunning)) && (
+                      <div className={clsx(
+                        theme.components.pomodoro.button,
+                        isYellow && theme.components.pomodoro.buttonYellow,
+                        "transition-all duration-700",
+                        isExecuting ? "w-16 h-16" : "w-10 h-10"
+                      )}>
+                        <button 
+                          onClick={() => toggleTaskTimer(focusData.task.id)} 
+                          title="Start/Pause Pomodoro Timer"
+                          className="w-full h-full flex items-center justify-center hover:scale-110 transition-transform"
+                        >
+                          {focusData.task.timerIsRunning ? <Pause className={clsx(isExecuting ? "w-8 h-8" : "w-5 h-5", "fill-current")} /> : <Play className={clsx(isExecuting ? "w-8 h-8" : "w-5 h-5", "fill-current ml-0.5")} />}
+                        </button>
+                      </div>
+                    )}
 
                     {/* Timer Controls Box */}
                     <div className={clsx(
-                      theme.components.pomodoro.container,
-                      isYellow ? "bg-black/10 text-gray-900" : "bg-white/10 text-white"
+                      "flex flex-col gap-1 items-center",
+                      !isExecuting && "mt-[-16px]"
                     )}>
-                      <div className="relative flex items-center gap-1 min-w-0 px-1">
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); setShowSetTimer(!showSetTimer); }}
-                          title="Set Timer"
-                          className="flex items-center gap-1 transition-all hover:bg-black/5 rounded-lg px-1 shrink-0"
-                        >
-                          <TomatoIcon className="w-4 h-4 shrink-0" />
-                          <span className="text-[11px] font-black tabular-nums min-w-[38px] text-center">
-                            {formatTime(focusData.task.timerRemaining ?? focusData.task.timerDuration ?? 20 * 60)}
-                          </span>
-                        </button>
-
-                        <div className="flex items-center gap-0.5 shrink-0">
+                      {!isExecuting && (
+                        <span className="text-[7px] font-black uppercase text-white/40 tracking-[0.2em] animate-pulse">Set Time</span>
+                      )}
+                      <div className={clsx(
+                        theme.components.pomodoro.container,
+                        isYellow ? "bg-black/10 text-gray-900" : "bg-white/10 text-white",
+                        "transition-all duration-700",
+                        isExecuting ? "h-16 px-6" : "h-10"
+                      )}>
+                        <div className="relative flex items-center gap-1 min-w-0 px-1">
                           <button 
-                            onClick={() => resetTaskTimer(focusData.task.id)}
+                            onClick={(e) => { e.stopPropagation(); if (!isExecuting) setShowSetTimer(!showSetTimer); }}
+                            title={isExecuting ? "" : "Set Timer"}
                             className={clsx(
-                              "px-1 py-0.5 text-[6px] font-black uppercase rounded bg-black/10 hover:bg-black/20 transition-colors",
-                              isYellow ? "text-gray-900" : "text-white"
+                              "flex items-center gap-1 transition-all rounded-lg px-1 shrink-0",
+                              !isExecuting && "hover:bg-black/5"
                             )}
                           >
-                            Reset
+                            <TomatoIcon className={clsx(isExecuting ? "w-6 h-6" : "w-4 h-4", "shrink-0")} />
+                            <span className={clsx(
+                              "font-black tabular-nums text-center",
+                              isExecuting ? "text-2xl min-w-[80px]" : "text-[11px] min-w-[38px]"
+                            )}>
+                              {formatTime(focusData.task.timerRemaining ?? focusData.task.timerDuration ?? 20 * 60)}
+                            </span>
                           </button>
-                          <button 
-                            onClick={() => updateTaskTimer(focusData.task.id, (focusData.task.timerRemaining ?? 20 * 60) + 300)}
-                            className={clsx(
-                              "px-1 py-0.5 text-[6px] font-black uppercase rounded bg-black/10 hover:bg-black/20 transition-colors",
-                              isYellow ? "text-gray-900" : "text-white"
-                            )}
-                          >
-                            +5m
-                          </button>
-                        </div>
 
-                        {showSetTimer && (
-                          <>
-                            <div className="fixed inset-0 z-[65]" onClick={(e) => { e.stopPropagation(); setShowSetTimer(false); }} />
-                            <div onClick={(e) => e.stopPropagation()} className="absolute bottom-full left-0 mb-4 p-3 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-2xl shadow-2xl z-[70] min-w-[140px] animate-in fade-in slide-in-from-bottom-2 duration-200">
-                              <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-300 mb-2">Set Session Duration</div>
-                              <div className="flex gap-2 text-[var(--text-primary)]">
-                                <input type="number" className="w-16 h-8 bg-gray-50 dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-lg px-2 text-sm outline-none font-bold text-gray-800 dark:text-gray-300" value={customMinutes} onChange={(e) => setCustomMinutes(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSetTimerSubmit()} />
-                                <div className="flex flex-col gap-1">
-                                  <button onClick={handleSetTimerSubmit} className="h-7 px-2 bg-google-blue text-white rounded-lg font-black uppercase text-[10px] tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all">Set</button>
-                                  <button onClick={() => { resetTaskTimer(focusData.task.id); setShowSetTimer(false); }} className="h-7 px-2 bg-gray-100 text-gray-700 rounded-lg font-black uppercase text-[10px] tracking-widest border border-gray-200 active:scale-95 transition-all">Reset</button>
+                          {!isExecuting && (
+                            <div className="flex items-center gap-0.5 shrink-0">
+                              <button 
+                                onClick={() => resetTaskTimer(focusData.task.id)}
+                                className={clsx(
+                                  "px-1 py-0.5 text-[6px] font-black uppercase rounded bg-black/10 hover:bg-black/20 transition-colors",
+                                  isYellow ? "text-gray-900" : "text-white"
+                                )}
+                              >
+                                Reset
+                              </button>
+                              <button 
+                                onClick={() => updateTaskTimer(focusData.task.id, (focusData.task.timerRemaining ?? 20 * 60) + 300)}
+                                className={clsx(
+                                  "px-1 py-0.5 text-[6px] font-black uppercase rounded bg-black/10 hover:bg-black/20 transition-colors",
+                                  isYellow ? "text-gray-900" : "text-white"
+                                )}
+                              >
+                                +5m
+                              </button>
+                            </div>
+                          )}
+
+                          {showSetTimer && !isExecuting && (
+                            <>
+                              <div className="fixed inset-0 z-[65]" onClick={(e) => { e.stopPropagation(); setShowSetTimer(false); }} />
+                              <div onClick={(e) => e.stopPropagation()} className="absolute bottom-full left-0 mb-4 p-3 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-2xl shadow-2xl z-[70] min-w-[140px] animate-in fade-in slide-in-from-bottom-2 duration-200">
+                                <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-300 mb-2">Set Session Duration</div>
+                                <div className="flex gap-2 text-[var(--text-primary)]">
+                                  <input type="number" className="w-16 h-8 bg-gray-50 dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-lg px-2 text-sm outline-none font-bold text-gray-800 dark:text-gray-300" value={customMinutes} onChange={(e) => setCustomMinutes(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSetTimerSubmit()} />
+                                  <div className="flex flex-col gap-1">
+                                    <button onClick={handleSetTimerSubmit} className="h-7 px-2 bg-google-blue text-white rounded-lg font-black uppercase text-[10px] tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all">Set</button>
+                                    <button onClick={() => { resetTaskTimer(focusData.task.id); setShowSetTimer(false); }} className="h-7 px-2 bg-gray-100 text-gray-700 rounded-lg font-black uppercase text-[10px] tracking-widest border border-gray-200 active:scale-95 transition-all">Reset</button>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </>
-                        )}
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Task Info Button - Matching sidebar style */}
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); onOpenNotes?.(focusData.task.id, focusData.instance.id); }}
-                      title="Open Task Info"
-                      className={clsx(
-                        "w-12 h-10 shrink-0 flex items-center justify-center transition-all hover:scale-110",
-                        isYellow ? "text-gray-900" : "text-white"
-                      )}
-                    >
-                      <StickyNote className={clsx("w-6 h-6", shouldHighlightNotes && "animate-pulse-slow")} />
-                    </button>
+                    {/* Task Info Button */}
+                    {!isExecuting && (
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); onOpenNotes?.(focusData.task.id, focusData.instance.id); }}
+                        title="Open Task Info"
+                        className={clsx(
+                          "w-12 h-10 shrink-0 flex items-center justify-center transition-all hover:scale-110",
+                          isYellow ? "text-gray-900" : "text-white"
+                        )}
+                      >
+                        <StickyNote className={clsx("w-6 h-6", shouldHighlightNotes && "animate-pulse-slow")} />
+                      </button>
+                    )}
 
-                    <button 
-                      onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance.id}?task=${focusData.task.id}&scroll=true`)}
-                      className={clsx(
-                        "md:hidden transition-all active:scale-90 flex items-center justify-center p-2",
-                        isYellow ? "text-gray-900/60 hover:text-gray-900" : "text-white/60 hover:text-white"
-                      )}
-                      title="Open in Full Checklist"
-                    >
-                      <RotateCcw className="w-10 h-10 rotate-180" />
-                    </button>
+                    {!isExecuting && (
+                      <button 
+                        onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance.id}?task=${focusData.task.id}&scroll=true`)}
+                        className={clsx(
+                          "md:hidden transition-all active:scale-90 flex items-center justify-center p-2",
+                          isYellow ? "text-gray-900/60 hover:text-gray-900" : "text-white/60 hover:text-white"
+                        )}
+                        title="Open in Full Checklist"
+                      >
+                        <RotateCcw className="w-10 h-10 rotate-180" />
+                      </button>
+                    )}
                   </div>
 
                   <button 
-                    onClick={() => toggleTask(focusData.task.id, focusData.instance.id)}
+                    onClick={async () => {
+                      if (isExecuting) {
+                        const tId = focusData.task.id;
+                        const iId = focusData.instance.id;
+                        
+                        await toggleTask(tId, iId);
+                        if (focusData.task.timerIsRunning) await toggleTaskTimer(tId);
+                        
+                        setCompletedTaskId(tId);
+                        setCompletedInstanceId(iId);
+                        setShowRefinementPrompt(true);
+                      } else if (currentStage === 'staged') {
+                        setFocusStage('preparing');
+                      } else {
+                        setFocusStage('executing');
+                        if (!focusData.task.timerIsRunning) toggleTaskTimer(focusData.task.id);
+                      }
+                    }}
                     className={clsx(
-                      "rounded-task-button flex items-center justify-center gap-2 transition-all shadow-xl active:scale-[0.98] border-4 flex-1 md:flex-none",
-                      showPlaylistSidebar ? "h-14 md:h-16 px-4 md:px-6 text-sm md:text-lg" : "h-16 md:h-20 px-8 md:px-12 text-lg md:text-2xl",
+                      "rounded-task-button flex items-center justify-center gap-2 transition-all duration-700 shadow-xl active:scale-[0.98] border-4 flex-1 md:flex-none",
+                      isExecuting ? "h-20 md:h-24 px-12 md:px-20 text-xl md:text-3xl" : (showPlaylistSidebar ? "h-14 md:h-16 px-4 md:px-6 text-sm md:text-lg" : "h-16 md:h-20 px-8 md:px-12 text-lg md:text-2xl"),
                       "font-black uppercase tracking-[0.1em]",
-                      focusData.task.completed 
-                        ? (focusData.isMultiUserActive ? "bg-white text-google-red border-white" : (isYellow ? "bg-white text-google-yellow border-white animate-pulse" : "bg-white text-google-green border-white animate-pulse"))
-                        : (isYellow 
-                            ? "bg-google-yellow text-gray-900 border-white/30 hover:animate-pulse-gold" 
-                            : (focusData.isMultiUserActive ? "bg-google-red text-white border-white/30 hover:animate-pulse-gold" : "bg-google-green-light text-white border-white/20 hover:animate-pulse-gold")
+                      isExecuting 
+                        ? "bg-white text-google-green border-white shadow-[0_0_50px_rgba(255,255,255,0.3)]"
+                        : (currentStage === 'preparing'
+                            ? "bg-orange-500 text-white border-orange-400 hover:bg-orange-600"
+                            : (focusData.task.completed 
+                                ? (focusData.isMultiUserActive ? "bg-white text-google-red border-white" : (isYellow ? "bg-white text-google-yellow border-white animate-pulse" : "bg-white text-google-green border-white animate-pulse"))
+                                : (isYellow 
+                                    ? "bg-google-yellow text-gray-900 border-white/30 hover:animate-pulse-gold" 
+                                    : (focusData.isMultiUserActive ? "bg-google-red text-white border-white/30 hover:animate-pulse-gold" : "bg-google-green-light text-white border-white/20 hover:animate-pulse-gold")
+                                  )
+                              )
                           )
                     )}
                   >
-                    {focusData.task.completed ? (
+                    {isExecuting ? (
+                      <>
+                        <ThumbsUp className="w-8 h-8 md:w-10 md:h-10" />
+                        <span>TASK DONE?</span>
+                      </>
+                    ) : focusData.task.completed ? (
                       <>
                         <CheckCircle2 className={clsx(showPlaylistSidebar ? "w-5 h-5" : "w-6 h-6 md:w-8 md:h-8", focusData.isMultiUserActive ? "text-google-red" : (isYellow ? "text-google-yellow" : "text-google-green"))} />
                         <span className={clsx(focusData.isMultiUserActive ? "text-google-red" : (isYellow ? "text-google-yellow" : "text-google-green"))}>Task Completed</span>
                       </>
+                    ) : currentStage === 'staged' ? (
+                      <>
+                        <Zap className={showPlaylistSidebar ? "w-5 h-5" : "w-6 h-6 md:w-8 md:h-8"} />
+                        <span>BEGIN PREPARATION</span>
+                      </>
                     ) : (
                       <>
-                        <ThumbsUp className={showPlaylistSidebar ? "w-5 h-5" : "w-6 h-6 md:w-8 md:h-8"} />
-                        <span>TASK DONE?</span>
+                        <Play className={showPlaylistSidebar ? "w-5 h-5" : "w-6 h-6 md:w-8 md:h-8"} />
+                        <span>START FOCUS SESSION</span>
                       </>
                     )}
                   </button>
                 </div>
               </div>
+
+              {/* Post-Completion Refinement Prompt */}
+              {showRefinementPrompt && (
+                <div className="absolute inset-0 z-50 bg-google-blue/95 backdrop-blur-xl flex flex-col items-center justify-center text-center p-8 animate-in fade-in zoom-in duration-300">
+                  <div className="max-w-md space-y-6">
+                    <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <ThumbsUp className="w-10 h-10 text-white" />
+                    </div>
+                    <h2 className="text-3xl font-black text-white uppercase tracking-tight">Task Completed!</h2>
+                    <p className="text-white/80 font-bold text-lg leading-relaxed">
+                      Would you like to suggest a refinement for this checklist template before finishing?
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                      <button 
+                        onClick={async () => {
+                          setShowRefinementPrompt(false);
+                          await setFocusStage('staged');
+                          setCompletedTaskId(null);
+                          setCompletedInstanceId(null);
+                        }}
+                        className="flex-1 px-8 py-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-black uppercase tracking-widest transition-all"
+                      >
+                        No, Just Finish
+                      </button>
+                      <button 
+                        onClick={async () => {
+                          const tId = completedTaskId;
+                          const iId = completedInstanceId;
+                          setShowRefinementPrompt(false);
+                          await setFocusStage('staged');
+                          if (tId && iId) {
+                            onOpenNotes?.(tId, iId, true);
+                            // Auto-scroll logic will be handled in TaskInfoModal
+                          }
+                          setCompletedTaskId(null);
+                          setCompletedInstanceId(null);
+                        }}
+                        className="flex-1 px-8 py-4 bg-white text-google-blue rounded-2xl font-black uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all"
+                      >
+                        Yes, Add Feedback
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="p-12 rounded-focus-card border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center text-center space-y-6 bg-white/30 dark:bg-black/10 min-h-[400px]">
@@ -361,10 +547,18 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
         </div>
 
         {/* Knowledge Hub (Task Intelligence) */}
-        <KnowledgeHub task={focusData?.task || null} />
+        <div className={clsx(
+          "transition-all duration-700",
+          isExecuting && "opacity-0 translate-y-20 pointer-events-none"
+        )}>
+          <KnowledgeHub task={focusData?.task || null} stage={currentStage} />
+        </div>
 
         {/* Scratchpad (My Notes) */}
-        <div className="space-y-4">
+        <div className={clsx(
+          "space-y-4 transition-all duration-1000",
+          isExecuting && "opacity-0 translate-y-40 pointer-events-none"
+        )}>
           <ScratchpadWidget />
         </div>
       </div>

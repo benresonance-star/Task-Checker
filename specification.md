@@ -36,12 +36,14 @@ The system features a robust sync engine:
   - **Unified Header System**: Consistent `text-sm`, `font-black`, `uppercase` headers for instruction blocks with standardized left-aligned collapse toggles.
   - **What this Task Achieves**: High-level context of the task intent (formerly Task Description). **Admin Mode shows a pulsing orange alert icon on tasks with empty descriptions.**
   - **Task Complexity**: Color-coded rating (**Easy**, **Moderate**, **Complex**) to assist in resource allocation. Located **directly under the task title** in the guide. Visible as a badge in Project Mode and an inline editable dropdown for Admins.
-  - **Can I Proceed?**: A "Go/No-Go" list of items required to initiate work (formerly Required Before Starting). Featuring a **fully dynamic styling engine** allowing for custom background, border, item background, font, and icon colors. This styling is synchronized between the Task Info modal and the Dashboard Knowledge Hub for absolute visual consistency. **Hidden from users if empty.**
+    - **Can I Proceed?**: A "Go/No-Go" list of items required to initiate work (formerly Required Before Starting). Featuring a **fully dynamic styling engine** allowing for custom background, border, item background, font, and icon colors. This styling is synchronized between the Task Info modal and the Dashboard Knowledge Hub for absolute visual consistency. **Checkboxes are interactive and circular for high readability.** **Hidden from users if empty.**
   - **Helpful (Optional)**: A "Preparation Shelf" containing links (Internal/External) or text-based notes (formerly Helpful to Prepare). **Hidden from users if empty.**
   - **Watch For**: A focused list of pitfalls (max 3) to prevent common errors (formerly Keep an Eye On). **Hidden from users if empty.**
   - **Additional Guidance**: Progressive disclosure rich-text area for deep technical instructions. **Hidden from users if empty** to maintain a clean interface.
-- **MY TASK FEEDBACK**: A dedicated, visually distinct section for users to record instance-specific feedback or project logs. 
-  - **Collapsible Workspace**: Users can collapse the entire Task Guide via a toggle to focus purely on MY TASK FEEDBACK. This state is persisted per task in `localStorage`. **The Task Notes modal header is responsive: on mobile, the 'Close' button and Pomodoro controls are reduced in size and sit together in a single top row for better accessibility; on desktop, all controls are aligned horizontally in the main header row for efficient space usage.**
+    - **MY TASK FEEDBACK**: A dedicated section for users to suggest template refinements or record admin-facing logs.
+      - **Post-Action Debrief**: Upon clicking "TASK DONE?" in Zen Mode, users are prompted: *"Would you like to suggest a refinement for this checklist template before finishing?"*. 
+      - **Auto-Focus Refinement**: Selecting "Yes" opens the Task Info modal and automatically scrolls to the feedback section for immediate entry.
+      - **Collapsible Workspace**: Users can collapse the entire Task Guide via a toggle to focus purely on MY TASK FEEDBACK. This state is persisted per task in `localStorage`.
 - **Persistent Active Focus**: Whichever task a user last made active remains focused and highlighted across sessions. 
   - **Auto-Navigation**: Upon refresh or application launch, the user is automatically navigated back to their last active Project, Checklist, and Task.
   - **Auto-Expansion**: The system automatically expands the Section and Subsection hierarchy containing the focused task.
@@ -112,7 +114,14 @@ The system features a robust sync engine:
 - **Conflict Prevention**: Visual **pulsing red background** ("Danger Alert") triggers when two or more users have the exact same task active in their profiles. Unlike heartbeat-based presence, this alert is **persistent regardless of online status**, clearing only when a user officially changes their task focus.
     - **Work Session Reordering**: The "My Session" sidebar supports fluid **Drag & Drop reordering** (powered by `dnd-kit`) for custom session planning.
     - **High-Impact Dashboard Typography**: The Active Focus card on the dashboard features **extra-bold (font-black)** and **large-scale (up to 6xl)** task titles. The interactive controls—including the Play/Pause button, Pomodoro box, and Task Info icon (`StickyNote`, white outline)—are styled to match the sidebar's active task layout for cross-interface consistency.
-    - **Knowledge Hub (Smart Widgets)**: Integrated task intelligence center positioned directly below the Current Focus. Includes dynamic widgets like **Task Guidance**, **Can I Proceed?**, and **My Task Feedback**, providing immediate context for the currently focused task. To maintain a clean dashboard, the redundant Task Info button has been removed from the Focus Card in favor of this integrated view.
+    - **Flow-State Workstation (Zen Mode)**: A three-stage task lifecycle designed to move the user from planning to execution.
+      1. **Established**: Task selected, standard dashboard view. In this initial stage, Knowledge Hub steps remain inactive (no highlighting) to provide a clean overview.
+      2. **Preparing**: Focused on requirements and guidance. Initiated via the "BEGIN PREPARATION" button, which automatically highlights Step 1 of the Knowledge Hub. The "Confirm Doable" widget features a soft red background when inactive to signal its critical status.
+      3. **Executing (Zen Mode)**: Full-screen isolation. All widgets (Notes, Hub, Sidebar, Header) are hidden. The background dims (Dark Mode: `#050505`) or blurs (Light Mode: `#F9FAFB`). The Task Card expands to fill the screen, and the timer starts automatically. A "Workflow Tracker" at the top of the card shows progress through these stages.
+    - **Knowledge Hub (Smart Widgets)**: Integrated task intelligence center positioned directly below the Current Focus. It uses a guided 3-step workflow (1. Understand Intent, 2. Confirm Doable, 3. Technical Briefing) with numerical badges and flow arrows. 
+      - **Spotlight System**: Highlights the active step and dims inactive ones to guide the user's attention. 
+      - **Interactive Prerequisites**: Step 2 features high-contrast, round checkboxes that persist their completion state in Firestore.
+      - **Workbench (Gather & Log)**: A dedicated, full-width personal scratchpad positioned below the 3-step briefing grid. Unlike task feedback, the workbench is intended for the user's private project notes and persistent working data.
 - **Personal Scratchpad (My Notes)**: A modular widget on the dashboard for personal and project-linked tasks. Supports rich text editing, category assignments, and **Priority flagging**. Features a **"Clean Entry" workflow** with an absolute-positioned floating plus button and a taller header for better balance. When editing, the interface features a high-visibility **white X on a red background** for closing, matching the action button's geometry. **Category filtering is handled via a streamlined dropdown interface.**
 - **Completed Task Feedback**: 
   - **Active State**: Pulsing green card (`animate-pulse`) with a **thumbs up** icon on the completion button.
@@ -187,6 +196,7 @@ The system features a robust sync engine:
 - **Stable Interaction Policy**: All modal interactions are subject to a 20ms mount-stabilization delay before complex child components (like Tiptap) are permitted to mount, preventing thread-locking on low-powered mobile processors.
 - **Mobile Optimization**: Portrait-first responsive layout with compressed headers, reduced padding, and intelligently repositioned primary action buttons. **The "+ New Project/Template" button is positioned to the right of the section title on mobile for immediate access.** Export Checklist features are hidden on mobile to optimize screen real estate.
   - **GPU Safety**: Resource-intensive CSS filters like `backdrop-blur` are automatically disabled on mobile modal surfaces to prevent GPU-induced browser tab crashes.
+  - **Auto-Zoom Prevention**: Forces a `16px` font-size on all active inputs, textareas, and rich-text editors for mobile devices (`max-width: 768px`). This prevents iOS Safari from automatically zooming in during text entry, maintaining the application's intended framing.
   - **Hydration Orchestration**: Heavy rich-text editors utilize a platform-aware 400ms-500ms staggered hydration delay on mobile, ensuring animations remain smooth before the editor engine initializes.
 - **Navigation Styling**: Active project buttons are styled in **Google Green** to visually synchronize the project context with active work items.
 
@@ -212,11 +222,12 @@ The system features a robust sync engine:
 - **`instances` Collection**: 
   - `masterId` (Source Template), `projectId`, `title`, `version`
   - `sections`: `Array<Section>` (Recursive tree: Section -> Subsection -> Task)
+    - `Task` level: `completed`, `completedPrereqs` (indices), `userNotes` (feedback), `workbench` (personal notes), `timeTaken`
   - `activeUsers`: `Record<userId, { userName, taskId, timestamp }>` (Real-time presence)
 - **`masters` Collection**: 
   - `title`, `version`, `sections` (Template structure)
 - **`settings` Collection**:
-  - `theme`: `{ colorAppIdentity, colorActiveTaskDone, colorCompletedState, colorDestructive, colorPresenceNotice, colorProjectInfoBg, colorProjectInfoBorder, colorChecklistBg, colorChecklistBorder, colorMetadataCardBg, colorMetadataCardBorder, colorSectionIdent, colorSectionIdentIcon, colorSectionPlan, colorSectionPlanIcon, colorSectionBuild, colorSectionBuildIcon, colorHierarchyLine, colorPrereqBg, colorPrereqBorder, colorPrereqItemBg, colorPrereqText, colorPrereqIcon, colorNotesBg, colorNotesBorder, colorNotesEditorBg, colorNotesEditorBorder, colorNotesEditorSeparator, colorNotePersonalBg, colorNoteProjectBg, colorNotePriorityBg, radiusTaskCard, radiusInteractive, radiusMajorModal, radiusWidget, radiusSidebar, radiusProjectInfo, radiusMetadataCard, radiusFocusCard, radiusTaskButton }`
+  - `theme`: `{ colorAppIdentity, colorActiveTaskDone, colorCompletedState, colorDestructive, colorPresenceNotice, colorProjectInfoBg, colorProjectInfoBorder, colorChecklistBg, colorChecklistBorder, colorMetadataCardBg, colorMetadataCardBorder, colorSectionIdent, colorSectionIdentIcon, colorSectionPlan, colorSectionPlanIcon, colorSectionBuild, colorSectionBuildIcon, colorHierarchyLine, colorPrereqBg, colorPrereqBorder, colorPrereqItemBg, colorPrereqText, colorPrereqIcon, colorHubInactiveBorder, colorHubStep2InactiveBg, colorNotesBg, colorNotesBorder, colorNotesEditorBg, colorNotesEditorBorder, colorNotesEditorSeparator, colorNotePersonalBg, colorNoteProjectBg, colorNotePriorityBg, radiusTaskCard, radiusInteractive, radiusMajorModal, radiusWidget, radiusSidebar, radiusProjectInfo, radiusMetadataCard, radiusFocusCard, radiusTaskButton }`
 - **`themePresets` Collection**:
   - `id`, `name`, `settings` (ThemeSettings), `createdAt`, `createdBy`
 
@@ -247,6 +258,26 @@ The system features a robust sync engine:
 - **No System Dialogs**: All confirmations (Delete, Clear, Deactivate) MUST use the standard high-visibility in-app modals.
 - **Input Stability**: All title/text edits MUST use a `localState` + `useEffect` pattern to prevent cursor jumping during remote Firestore syncs.
 - **Radius & Color Tiers**: Strictly adhere to `rounded-button/card/container` and Google branding colors (`google-blue`, `google-red`, etc.).
+- **Mobile Verification**: UI changes must be vetted for iOS Safari quirks (like the 16px auto-zoom prevention) and touch-target accessibility.
+
+### 6. AI Development Rules & SOP
+To maintain the integrity and high-speed deployment cycle of checkMATE, all AI agents must adhere to the following operational rules:
+
+1. **Deployment Protocol**: 
+   - **Always push to Firebase** at the end of every successful set of code changes. Use the command: `npm run build; if ($?) { npx firebase-tools deploy }`.
+   - Before ending a turn, the agent must verify the build is successful and the app is live.
+
+2. **Proactive Documentation & Version Control**:
+   - **Specification Sync**: After any significant codebase changes (new features, structural shifts, schema updates), the agent must ask: *"Would you like to update the `specification.md` to reflect these changes?"*
+   - **GitHub Persistence**: After completing a major task or milestone, the agent must ask: *"Would you like to push these changes to GitHub?"*
+
+3. **Data & State Safety**:
+   - **Firestore Sanitization**: Every `updateDoc` call MUST use the `sanitize()` helper to strip `undefined` values, preventing synchronization failures.
+   - **Theme Synchronization**: When adding new UI elements with customizable styles, ensure the new properties are integrated into the `ThemeSettings` interface and all relevant functions in `useTasklistStore.ts` (`getThemeDefaults`, `migrateThemeSettings`, `applyThemeToRoot`).
+   - **Performance Hygiene**: Any heavy derived data or complex list rendering must be wrapped in `useMemo` to prevent UI stutter.
+
+4. **Prompt Maintenance**:
+   - Update the **"One-Shot Agentic Rebuild Prompt"** at the bottom of this file whenever a new significant architectural feature is added.
 
 ---
 
@@ -316,4 +347,4 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 24, 2025 (v1.5.0 - Dynamic Branding & Structural Refinement)*
+*Updated: December 26, 2025 (v1.6.1 - AI Development Rules & SOP)*
