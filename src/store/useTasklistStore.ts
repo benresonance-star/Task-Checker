@@ -196,7 +196,9 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--brand-green', settings.colorCompletedState);
     root.style.setProperty('--brand-green-light', settings.colorActiveTaskDone);
     root.style.setProperty('--brand-green-pulse', settings.colorActiveTaskPulse);
+    root.style.setProperty('--brand-focus-pulse', settings.colorFocusPulse);
     root.style.setProperty('--pulse-frequency-done', `${settings.pulseFrequencyDone || 0.8}s`);
+    root.style.setProperty('--pulse-frequency-focus', `${settings.pulseFrequencyFocus || 4.0}s`);
     root.style.setProperty('--brand-red', settings.colorDestructive);
     root.style.setProperty('--brand-yellow', settings.colorPresenceNotice);
     
@@ -286,7 +288,9 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorAppIdentity: oldSettings.colorAppIdentity || oldSettings.brandBlue || '#4285F4',
       colorActiveTaskDone: oldSettings.colorActiveTaskDone || oldSettings.brandGreenLight || '#5DB975',
       colorActiveTaskPulse: oldSettings.colorActiveTaskPulse || '#34A853', // Default to brand green
+      colorFocusPulse: oldSettings.colorFocusPulse || '#4285F4', // Default to brand blue
       pulseFrequencyDone: oldSettings.pulseFrequencyDone || 0.8,
+      pulseFrequencyFocus: oldSettings.pulseFrequencyFocus || 4.0,
       colorCompletedState: oldSettings.colorCompletedState || oldSettings.brandGreen || '#34A853',
       colorDestructive: oldSettings.colorDestructive || oldSettings.brandRed || '#EA4335',
       colorPresenceNotice: oldSettings.colorPresenceNotice || oldSettings.brandYellow || '#FBBC05',
@@ -360,7 +364,9 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorAppIdentity: '#4285F4',
     colorActiveTaskDone: '#5DB975',
     colorActiveTaskPulse: '#34A853',
+    colorFocusPulse: '#4285F4',
     pulseFrequencyDone: 4.0,
+    pulseFrequencyFocus: 4.0,
     colorCompletedState: '#34A853',
     colorDestructive: '#EA4335',
     colorPresenceNotice: '#FBBC05',

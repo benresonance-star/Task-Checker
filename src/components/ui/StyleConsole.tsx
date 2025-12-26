@@ -326,13 +326,15 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 <div className="grid grid-cols-2 gap-3">
                   <ColorControl label="Task Done Highlight" value={themeSettings.colorActiveTaskDone} onChange={(v) => handleChange('colorActiveTaskDone', v)} />
                   <ColorControl label="Completion Pulse" value={themeSettings.colorActiveTaskPulse} onChange={(v) => handleChange('colorActiveTaskPulse', v)} />
+                  <ColorControl label="In Focus Breathing" value={themeSettings.colorFocusPulse} onChange={(v) => handleChange('colorFocusPulse', v)} />
                   <ColorControl label="Zen Water Level" value={themeSettings.colorFocusWater} onChange={(v) => handleChange('colorFocusWater', v)} />
                   <ColorControl label="Inactive Hub Border" value={themeSettings.colorHubInactiveBorder} onChange={(v) => handleChange('colorHubInactiveBorder', v)} />
                   <ColorControl label="Hub Step 2 Inactive Bg" value={themeSettings.colorHubStep2InactiveBg} onChange={(v) => handleChange('colorHubStep2InactiveBg', v)} />
                 </div>
                 
                 <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
-                  <SliderControl label="Pulse Frequency" value={themeSettings.pulseFrequencyDone} min={0.1} max={5} step={0.1} onChange={(v) => handleChange('pulseFrequencyDone', v)} />
+                  <SliderControl label="Completion Frequency" value={themeSettings.pulseFrequencyDone} min={0.1} max={10} step={0.1} onChange={(v) => handleChange('pulseFrequencyDone', v)} />
+                  <SliderControl label="In Focus Frequency" value={themeSettings.pulseFrequencyFocus} min={0.1} max={10} step={0.1} onChange={(v) => handleChange('pulseFrequencyFocus', v)} />
                 </div>
                 
                 <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">

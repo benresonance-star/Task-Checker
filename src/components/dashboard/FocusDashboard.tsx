@@ -21,6 +21,12 @@ const CompletionTransition = () => (
   </div>
 );
 
+const FocusTransition = () => (
+  <div className="absolute inset-0 z-0 pointer-events-none">
+    <div className="absolute inset-0 bg-[var(--brand-focus-pulse)] opacity-20 animate-focus-breathing" />
+  </div>
+);
+
 export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) => {
   const navigate = useNavigate();
   const { 
@@ -41,8 +47,6 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
   } = useTasklistStore();
 
   const isWide = !showPlaylistSidebar && !showMainSidebar;
-  const currentStage = currentUser?.activeFocus?.stage || 'staged';
-  const isExecuting = currentStage === 'executing';
 
   const [showSetTimer, setShowSetTimer] = React.useState(false);
   const [customMinutes, setCustomMinutes] = React.useState('20');
@@ -103,6 +107,9 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
       isYellowState
     };
   }, [currentUser?.activeFocus, instances, projects, users]);
+
+  const currentStage = focusData?.task.completed ? (currentUser?.activeFocus?.stage || 'executing') : (currentUser?.activeFocus?.stage || 'staged');
+  const isExecuting = currentStage === 'executing';
 
   const formatTime = (val: number) => {
     const mins = Math.floor(val / 60);
@@ -295,6 +302,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                 />
               )}
               {focusData.task.completed && <CompletionTransition />}
+              {isExecuting && !focusData.task.completed && <FocusTransition />}
               <div className="relative z-10 flex flex-col h-full space-y-8">
                 <WorkflowTracker />
                 
@@ -567,7 +575,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                       <button 
                         onClick={async () => {
                           setShowRefinementPrompt(false);
-                          await setFocusStage('staged');
+                          // Keep the stage as is (usually 'executing' during completion)
                           setCompletedTaskId(null);
                           setCompletedInstanceId(null);
                         }}
@@ -580,7 +588,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                           const tId = completedTaskId;
                           const iId = completedInstanceId;
                           setShowRefinementPrompt(false);
-                          await setFocusStage('staged');
+                          // Keep stage as is
                           if (tId && iId) {
                             onOpenNotes?.(tId, iId, true);
                             // Auto-scroll logic will be handled in TaskInfoModal

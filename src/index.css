@@ -101,8 +101,17 @@
   50% { opacity: 1; }
 }
 
+@keyframes focus-breathing {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
 .animate-completion-breathing {
   animation: completion-breathing var(--pulse-frequency-done, 4s) ease-in-out infinite;
+}
+
+.animate-focus-breathing {
+  animation: focus-breathing var(--pulse-frequency-focus, 4s) ease-in-out infinite;
 }
 
 body {
