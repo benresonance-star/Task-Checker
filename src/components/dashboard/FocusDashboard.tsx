@@ -10,7 +10,6 @@ import { KnowledgeHub } from './KnowledgeHub';
 import { FocusStage } from '../../types';
 
 import { TomatoIcon } from '../icons/TomatoIcon';
-import { FishIcon } from '../icons/FishIcon';
 
 interface FocusDashboardProps {
   onOpenNotes?: (taskId: string, containerId: string, focusFeedback?: boolean) => void;
@@ -201,36 +200,6 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
     );
   };
 
-  const ZenAquarium = ({ isRunning }: { isRunning: boolean }) => (
-    <div className="absolute inset-x-0 bottom-0 h-48 pointer-events-none overflow-hidden opacity-25 z-0">
-      <div className="relative h-full w-full">
-        <FishIcon 
-          className="absolute bottom-4 w-28 h-28 text-white animate-swim-slow will-change-[left]" 
-          style={{ 
-            animationPlayState: isRunning ? 'running' : 'paused',
-            transform: 'translateZ(0)'
-          }} 
-        />
-        <FishIcon 
-          className="absolute bottom-24 w-16 h-16 text-white animate-swim-medium will-change-[left]" 
-          style={{ 
-            animationDelay: '-20s', 
-            animationPlayState: isRunning ? 'running' : 'paused',
-            transform: 'translateZ(0)'
-          }} 
-        />
-        <FishIcon 
-          className="absolute bottom-12 w-22 h-22 text-white animate-swim-fast will-change-[left]" 
-          style={{ 
-            animationDelay: '-40s', 
-            animationPlayState: isRunning ? 'running' : 'paused',
-            transform: 'translateZ(0)'
-          }} 
-        />
-      </div>
-    </div>
-  );
-
   return (
     <div className={clsx(
       "flex-1 overflow-y-auto p-4 md:p-8 space-y-8 custom-scrollbar text-[var(--text-primary)] transition-all duration-1000",
@@ -290,10 +259,9 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
               isExecuting ? "min-h-[calc(100vh-2rem)] md:min-h-[700px]" : "min-h-[400px]",
               cardTheme,
               focusData.task.timerIsRunning && !isYellow && "ring-8 ring-google-green/20",
-              focusData.task.timerIsRunning && isYellow && "ring-8 ring-google-yellow/20"
-            )}>
-              {isExecuting && <ZenAquarium isRunning={!!focusData.task.timerIsRunning} />}
-              <div className="relative z-10 flex flex-col h-full space-y-8">
+            focusData.task.timerIsRunning && isYellow && "ring-8 ring-google-yellow/20"
+          )}>
+            <div className="relative z-10 flex flex-col h-full space-y-8">
                 <WorkflowTracker />
                 
                 <div className="flex items-start justify-between gap-4">

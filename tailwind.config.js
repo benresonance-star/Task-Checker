@@ -50,22 +50,10 @@ export default {
           '0%, 100%': { opacity: 1 },
           '50%': { opacity: 0.7 },
         },
-        'swim': {
-          '0%': { left: '-300px' },
-          '100%': { left: '100%' }
-        },
-        'bob': {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-15px)' }
-        }
       },
       animation: {
         'pulse-gold': 'pulse-gold 2s ease-in-out infinite',
         'pulse-slow': 'pulse-slow 4s ease-in-out infinite',
-        'swim-slow': 'swim 60s linear infinite',
-        'swim-medium': 'swim 45s linear infinite',
-        'swim-fast': 'swim 30s linear infinite',
-        'bob': 'bob 4s ease-in-out infinite',
       }
     },
   },
