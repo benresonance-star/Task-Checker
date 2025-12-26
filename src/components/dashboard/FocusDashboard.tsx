@@ -176,19 +176,19 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
           
           return (
             <div key={stage.id} className="flex items-center gap-2">
-              <button 
-                onClick={async () => {
-                  if (stage.id === 'executing' && focusData) {
-                    await setFocusStage('executing');
-                    if (!focusData.task.timerIsRunning) {
+                <button 
+                  onClick={async () => {
+                    // If moving back to staged/preparing manually, and it's marked completed, un-complete it
+                    const isMovingBack = (stage.id === 'staged' || stage.id === 'preparing') && currentStage !== stage.id;
+                    if (focusData?.task.completed && isMovingBack) {
+                      await toggleTask(focusData.task.id, focusData.instance.id);
+                    }
+                    
+                    await setFocusStage(stage.id);
+                    if (stage.id === 'executing' && focusData && !focusData.task.timerIsRunning) {
                       await toggleTaskTimer(focusData.task.id);
                     }
-                  } else if (stage.id === 'preparing') {
-                    await setFocusStage('preparing');
-                  } else {
-                    await setFocusStage('staged');
-                  }
-                }}
+                  }}
                 className={clsx(
                   "flex items-center gap-2 transition-all duration-500",
                   isActive ? "opacity-100 scale-105 text-orange-950" : "opacity-50 scale-95 hover:opacity-80 text-white",
@@ -485,20 +485,24 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
 
                   <button 
                     onClick={async () => {
-                      if (isExecuting) {
-                        const tId = focusData.task.id;
-                        const iId = focusData.instance.id;
-                        
-                        await toggleTask(tId, iId);
-                        if (focusData.task.timerIsRunning) await toggleTaskTimer(tId);
-                        
-                        setCompletedTaskId(tId);
-                        setCompletedInstanceId(iId);
-                        setShowRefinementPrompt(true);
-                      } else if (currentStage === 'staged') {
-                        await setFocusStage('preparing');
-                      } else {
-                        await setFocusStage('executing');
+                        if (isExecuting) {
+                          const tId = focusData.task.id;
+                          const iId = focusData.instance.id;
+                          
+                          await toggleTask(tId, iId);
+                          if (focusData.task.timerIsRunning) await toggleTaskTimer(tId);
+                          
+                          setCompletedTaskId(tId);
+                          setCompletedInstanceId(iId);
+                          setShowRefinementPrompt(true);
+                        } else if (currentStage === 'staged') {
+                          // Moving from Established to Preparing: Un-complete if already completed
+                          if (focusData.task.completed) {
+                            await toggleTask(focusData.task.id, focusData.instance.id);
+                          }
+                          await setFocusStage('preparing');
+                        } else {
+                          await setFocusStage('executing');
                         // Always ensure timer starts when moving to executing stage
                         if (!focusData.task.timerIsRunning) {
                           await toggleTaskTimer(focusData.task.id);
