@@ -2,20 +2,22 @@ import React from 'react';
 
 export const FishIcon: React.FC<{ className?: string; style?: React.CSSProperties }> = ({ className, style }) => (
   <svg 
-    viewBox="0 0 24 24" 
+    viewBox="0 0 30 24" 
     fill="currentColor" 
     className={className}
     style={style}
     xmlns="http://www.w3.org/2000/svg"
   >
-    {/* Body */}
-    <path d="M2,12 C2,12 5,7 12,7 C19,7 22,12 22,12 C22,12 19,17 12,17 C5,17 2,12 2,12" />
-    {/* Tail */}
-    <path d="M2,12 L-1,16 L-1,8 L2,12" />
-    {/* Fin */}
-    <path d="M12,7 L10,5 L14,5 L12,7" opacity="0.5" />
+    {/* Tail - Bigger and more flowing */}
+    <path d="M8,12 C8,12 3,19 1,21 L1,3 C3,5 8,12 8,12" />
+    {/* Body - Slightly wider and smoother */}
+    <path d="M8,12 C8,12 11,6 18,6 C25,6 29,12 29,12 C29,12 25,18 18,18 C11,18 8,12 8,12" />
+    {/* Top Fin */}
+    <path d="M18,6 L16,3 L20,3 L18,6" opacity="0.6" />
+    {/* Bottom Fin */}
+    <path d="M18,18 L16,21 L20,21 L18,18" opacity="0.4" />
     {/* Eye */}
-    <circle cx="18" cy="11" r="0.8" fill="white" />
+    <circle cx="24" cy="11" r="1" fill="white" />
   </svg>
 );
 
