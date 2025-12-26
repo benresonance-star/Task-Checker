@@ -236,7 +236,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
         {/* Active Focus Card */}
         <div className={clsx(
           "space-y-4 transition-all duration-700",
-          isExecuting && "transform scale-[1.02] md:scale-[1.05]"
+          isExecuting && "transform scale-[1.01]"
         )}>
           {!isExecuting && <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] ml-2">Current Focus</h3>}
           
@@ -245,8 +245,8 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
               "p-8 md:p-10 rounded-focus-card border-4 transition-all duration-700 shadow-2xl relative overflow-hidden group flex flex-col justify-between text-[var(--text-primary)]",
               isExecuting ? "min-h-[calc(100vh-2rem)] md:min-h-[700px]" : "min-h-[400px]",
               cardTheme,
-              focusData.task.timerIsRunning && !isYellow && "ring-8 ring-google-green/20 animate-pulse",
-              focusData.task.timerIsRunning && isYellow && "ring-8 ring-google-yellow/20 animate-pulse"
+              focusData.task.timerIsRunning && !isYellow && "ring-8 ring-google-green/20",
+              focusData.task.timerIsRunning && isYellow && "ring-8 ring-google-yellow/20"
             )}>
               <div className="relative z-10 flex flex-col h-full space-y-8">
                 <WorkflowTracker />
@@ -293,7 +293,8 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                     "text-2xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight break-words transition-all duration-700",
                     isExecuting && "md:text-7xl lg:text-8xl text-center",
                     isWide && !isExecuting && "lg:text-7xl",
-                    isYellow ? "text-gray-900" : "text-white"
+                    isYellow ? "text-gray-900" : "text-white",
+                    focusData.task.timerIsRunning && "animate-pulse-slow"
                   )}>
                     {focusData.task.title}
                   </h2>
@@ -437,10 +438,13 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                         setCompletedInstanceId(iId);
                         setShowRefinementPrompt(true);
                       } else if (currentStage === 'staged') {
-                        setFocusStage('preparing');
+                        await setFocusStage('preparing');
                       } else {
-                        setFocusStage('executing');
-                        if (!focusData.task.timerIsRunning) toggleTaskTimer(focusData.task.id);
+                        await setFocusStage('executing');
+                        // Always ensure timer starts when moving to executing stage
+                        if (!focusData.task.timerIsRunning) {
+                          await toggleTaskTimer(focusData.task.id);
+                        }
                       }
                     }}
                     className={clsx(

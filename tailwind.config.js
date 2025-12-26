@@ -45,10 +45,15 @@ export default {
         'pulse-gold': {
           '0%, 100%': { backgroundColor: 'var(--brand-green-light)' }, // lighter green
           '50%': { backgroundColor: 'var(--brand-yellow)' }, // gold
+        },
+        'pulse-slow': {
+          '0%, 100%': { opacity: 1 },
+          '50%': { opacity: 0.7 },
         }
       },
       animation: {
         'pulse-gold': 'pulse-gold 2s ease-in-out infinite',
+        'pulse-slow': 'pulse-slow 4s ease-in-out infinite',
       }
     },
   },
