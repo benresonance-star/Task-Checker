@@ -279,7 +279,12 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
               {isExecuting && (
                 <ProgressFill 
                   key={`${focusData.task.id}-${focusData.task.timerDuration}`}
-                  progress={1 - ((focusData.task.timerRemaining ?? focusData.task.timerDuration ?? 1) / (focusData.task.timerDuration || 1))} 
+                  progress={(() => {
+                    const remaining = focusData.task.timerRemaining ?? focusData.task.timerDuration ?? 0;
+                    const duration = focusData.task.timerDuration || 1;
+                    // Proportional filling: 0% at start (rem=dur), 100% at end (rem=0)
+                    return 1 - (remaining / duration);
+                  })()} 
                   isRunning={!!focusData.task.timerIsRunning} 
                 />
               )}

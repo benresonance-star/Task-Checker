@@ -794,14 +794,15 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
             // PROTECT LOCAL STATE: Use a grace period after local updates to prevent stale Firestore overwrites.
             // This is CRITICAL for the timer to prevent it "reverting" to old values on pause/toggle.
             const localTaskState = new Map<string, { 
-              remaining: number; 
-              running: boolean; 
-              notes: string;
-              userNotes: string;
-              guide: TaskGuide;
-              lastLocalTimer: number;
-              lastLocalContent: number;
-              timerLastUpdated: number;
+              timerRemaining: number; 
+              timerDuration: number;
+              timerIsRunning: boolean;
+              notes: string; 
+              userNotes: string; 
+              guide: TaskGuide; 
+              lastLocalTimer: number; 
+              lastLocalContent: number; 
+              timerLastUpdated: number; 
             }>();
             get().instances.forEach(inst => {
               inst.sections.forEach(s => {
@@ -810,15 +811,16 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
                     const lastLocalTimer = (globalThis as any)[`lastToggle_${inst.id}-${t.id}`] || 0;
                     const lastLocalContent = (globalThis as any)[`lastUpdate_${inst.id}-${t.id}`] || 0;
                     localTaskState.set(`${inst.id}-${t.id}`, { 
-                      remaining: t.timerRemaining ?? 20 * 60, 
-                      running: t.timerIsRunning ?? false,
-                      notes: t.notes || '',
-                      userNotes: t.userNotes || '',
-                      guide: t.guide || {},
-                      lastLocalTimer,
-                      lastLocalContent,
-                      timerLastUpdated: t.timerLastUpdated || 0
-                    });
+              timerRemaining: t.timerRemaining ?? 20 * 60, 
+              timerDuration: t.timerDuration ?? 20 * 60,
+              timerIsRunning: t.timerIsRunning ?? false,
+              notes: t.notes || '',
+              userNotes: t.userNotes || '',
+              guide: t.guide || {},
+              lastLocalTimer,
+              lastLocalContent,
+              timerLastUpdated: t.timerLastUpdated || 0
+            });
                   });
                 });
               });
@@ -850,8 +852,9 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
 
                         return { 
                           ...tWithDefaults, 
-                          timerRemaining: useLocalTimer ? local.remaining : tWithDefaults.timerRemaining,
-                          timerIsRunning: useLocalTimer ? local.running : tWithDefaults.timerIsRunning,
+                          timerRemaining: useLocalTimer ? local.timerRemaining : tWithDefaults.timerRemaining,
+                          timerDuration: useLocalTimer ? local.timerDuration : tWithDefaults.timerDuration,
+                          timerIsRunning: useLocalTimer ? local.timerIsRunning : tWithDefaults.timerIsRunning,
                           timerLastUpdated: useLocalTimer ? local.timerLastUpdated : t.timerLastUpdated,
                           notes: isRecentContent ? local.notes : t.notes,
                           userNotes: isRecentContent ? local.userNotes : t.userNotes,
