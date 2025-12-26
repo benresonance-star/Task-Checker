@@ -8,8 +8,14 @@ export const FishIcon: React.FC<{ className?: string; style?: React.CSSPropertie
     style={style}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path d="M22,12C22,12 19,15 15,15C11,15 8,11 2,12C2,12 5,13 5,16C5,19 2,20 2,20C8,21 11,17 15,17C19,17 22,20 22,20V12Z" />
-    <circle cx="18" cy="13.5" r="1" fill="white" />
+    {/* Body */}
+    <path d="M2,12 C2,12 5,7 12,7 C19,7 22,12 22,12 C22,12 19,17 12,17 C5,17 2,12 2,12" />
+    {/* Tail */}
+    <path d="M2,12 L-1,16 L-1,8 L2,12" />
+    {/* Fin */}
+    <path d="M12,7 L10,5 L14,5 L12,7" opacity="0.5" />
+    {/* Eye */}
+    <circle cx="18" cy="11" r="0.8" fill="white" />
   </svg>
 );
 

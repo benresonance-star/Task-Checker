@@ -51,21 +51,21 @@ export default {
           '50%': { opacity: 0.7 },
         },
         'swim': {
-          '0%': { transform: 'translateX(-100%)' },
-          '100%': { transform: 'translateX(100vw)' }
+          '0%': { transform: 'translateX(-100px)' },
+          '100%': { transform: 'translateX(calc(100% + 100px))' }
         },
         'bob': {
           '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-10px)' }
+          '50%': { transform: 'translateY(-15px)' }
         }
       },
       animation: {
         'pulse-gold': 'pulse-gold 2s ease-in-out infinite',
         'pulse-slow': 'pulse-slow 4s ease-in-out infinite',
-        'swim-slow': 'swim 20s linear infinite',
-        'swim-medium': 'swim 15s linear infinite',
-        'swim-fast': 'swim 10s linear infinite',
-        'bob': 'bob 3s ease-in-out infinite',
+        'swim-slow': 'swim 45s linear infinite',
+        'swim-medium': 'swim 35s linear infinite',
+        'swim-fast': 'swim 25s linear infinite',
+        'bob': 'bob 4s ease-in-out infinite',
       }
     },
   },

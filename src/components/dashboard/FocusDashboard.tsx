@@ -201,12 +201,21 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
     );
   };
 
-  const ZenAquarium = () => (
-    <div className="absolute inset-x-0 bottom-0 h-24 pointer-events-none overflow-hidden opacity-10 z-0">
+  const ZenAquarium = ({ isRunning }: { isRunning: boolean }) => (
+    <div className="absolute inset-x-0 bottom-0 h-32 pointer-events-none overflow-hidden opacity-15 z-0">
       <div className="relative h-full w-full">
-        <FishIcon className="absolute bottom-2 left-0 w-10 h-10 text-white animate-swim-slow" />
-        <FishIcon className="absolute bottom-8 left-0 w-6 h-6 text-white animate-swim-medium" style={{ animationDelay: '-5s' }} />
-        <FishIcon className="absolute bottom-4 left-0 w-8 h-8 text-white animate-swim-fast" style={{ animationDelay: '-12s' }} />
+        <FishIcon 
+          className="absolute bottom-4 left-0 w-16 h-16 text-white animate-swim-slow" 
+          style={{ animationPlayState: isRunning ? 'running' : 'paused' }} 
+        />
+        <FishIcon 
+          className="absolute bottom-16 left-0 w-10 h-10 text-white animate-swim-medium" 
+          style={{ animationDelay: '-10s', animationPlayState: isRunning ? 'running' : 'paused' }} 
+        />
+        <FishIcon 
+          className="absolute bottom-8 left-0 w-12 h-12 text-white animate-swim-fast" 
+          style={{ animationDelay: '-20s', animationPlayState: isRunning ? 'running' : 'paused' }} 
+        />
       </div>
     </div>
   );
@@ -272,7 +281,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
               focusData.task.timerIsRunning && !isYellow && "ring-8 ring-google-green/20",
               focusData.task.timerIsRunning && isYellow && "ring-8 ring-google-yellow/20"
             )}>
-              {isExecuting && <ZenAquarium />}
+              {isExecuting && <ZenAquarium isRunning={!!focusData.task.timerIsRunning} />}
               <div className="relative z-10 flex flex-col h-full space-y-8">
                 <WorkflowTracker />
                 
