@@ -120,7 +120,9 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
   );
 
   const CompletionPulse = () => (
-    <div className="absolute inset-0 z-0 pointer-events-none animate-completion-pulse" />
+    <div className="absolute inset-0 z-0 pointer-events-none bg-[var(--brand-green-light)] animate-in fade-in duration-1000">
+      <div className="absolute inset-0 animate-completion-pulse" />
+    </div>
   );
 
   const handleSetTimerSubmit = () => {
@@ -276,9 +278,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
             <div className={clsx(
               "p-8 md:p-10 rounded-focus-card border-4 transition-all duration-700 shadow-2xl relative overflow-hidden group flex flex-col justify-between text-[var(--text-primary)]",
               isExecuting ? "min-h-[calc(100vh-2rem)] md:min-h-[700px]" : "min-h-[400px]",
-              focusData.task.completed 
-                ? cardTheme?.split(' ').filter(c => !c.startsWith('bg-')).join(' ') 
-                : cardTheme,
+              cardTheme,
               focusData.task.timerIsRunning && !isYellow && "ring-8 ring-google-green/20",
               focusData.task.timerIsRunning && isYellow && "ring-8 ring-google-yellow/20"
             )}>
