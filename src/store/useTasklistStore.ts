@@ -560,18 +560,22 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     },
 
     toggleLocalExpanded: (id) => {
-      const { expandedStates } = get();
+      const { expandedStates, currentUser } = get();
       const newState = { ...expandedStates, [id]: !expandedStates[id] };
       set({ expandedStates: newState });
-      localStorage.setItem('expandedStates', JSON.stringify(newState));
+      
+      const key = currentUser ? `expandedStates_${currentUser.id}` : 'expandedStates';
+      localStorage.setItem(key, JSON.stringify(newState));
     },
 
     setLocalExpanded: (id, expanded) => {
-      const { expandedStates } = get();
+      const { expandedStates, currentUser } = get();
       if (expandedStates[id] === expanded) return;
       const newState = { ...expandedStates, [id]: expanded };
       set({ expandedStates: newState });
-      localStorage.setItem('expandedStates', JSON.stringify(newState));
+      
+      const key = currentUser ? `expandedStates_${currentUser.id}` : 'expandedStates';
+      localStorage.setItem(key, JSON.stringify(newState));
     },
 
     isLocalExpanded: (id, defaultValue = true) => {
@@ -669,6 +673,10 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
             await setDoc(userDocRef, userData);
           }
           set({ currentUser: userData });
+
+          // Load user-specific expansion states
+          const userExpandedStates = JSON.parse(localStorage.getItem(`expandedStates_${userData.id}`) || '{}');
+          set({ expandedStates: userExpandedStates });
 
           // Users Listener (for everyone, but UI will restrict visibility)
           onSnapshot(collection(db, 'users'), (snapshot) => {
@@ -874,7 +882,9 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
 
           set({ loading: false });
         } else {
-          set({ currentUser: null, loading: false });
+          // Reset to generic expansion states on logout
+          const genericStates = JSON.parse(localStorage.getItem('expandedStates') || '{}');
+          set({ currentUser: null, expandedStates: genericStates, loading: false });
         }
       });
     },

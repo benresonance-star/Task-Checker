@@ -688,8 +688,22 @@ function App() {
     }
 
     // Track last active IDs for smarter navigation
-    if (projectId) localStorage.setItem('lastActiveProjectId', projectId);
-    if (masterId) localStorage.setItem('lastActiveMasterId', masterId);
+    if (projectId) {
+      localStorage.setItem('lastActiveProjectId', projectId);
+      if (currentUser) {
+        localStorage.setItem(`lastProjectId_${currentUser.id}`, projectId);
+      }
+    }
+    if (masterId) {
+      localStorage.setItem('lastActiveMasterId', masterId);
+      if (currentUser) {
+        localStorage.setItem(`lastMasterId_${currentUser.id}`, masterId);
+      }
+    }
+    
+    if (projectId && instanceId && currentUser) {
+      localStorage.setItem(`lastInstanceId_${currentUser.id}_${projectId}`, instanceId);
+    }
     
     // Store the last path to remember if user was on Dashboard
     localStorage.setItem('lastActivePath', path);
@@ -729,8 +743,19 @@ function App() {
       if (instance && activeInstance?.id !== instanceId) {
         setActiveInstance(instance);
       }
-    } else if (!instanceId && path.includes('/project/') && activeInstance) {
-      setActiveInstance(null);
+    } else if (projectId && path.startsWith('/project/')) {
+      // If we are at /project/:projectId but no instance is selected, 
+      // try to restore the last active instance for this user and project
+      if (currentUser && !path.includes('/instance/')) {
+        const lastInstanceId = localStorage.getItem(`lastInstanceId_${currentUser.id}_${projectId}`);
+        if (lastInstanceId) {
+          navigate(`/project/${projectId}/instance/${lastInstanceId}`, { replace: true });
+        }
+      }
+      
+      if (activeInstance) {
+        setActiveInstance(null);
+      }
     }
 
     // Task sync
