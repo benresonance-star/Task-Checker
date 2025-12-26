@@ -140,10 +140,10 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
   }, [isExecuting]);
 
   const WorkflowTracker = () => {
-    const stages: { id: FocusStage; label: string; color: string }[] = [
-      { id: 'staged', label: 'TASK ESTABLISHED', color: isDarkMode ? 'text-gray-500' : 'text-gray-400' },
-      { id: 'preparing', label: 'PREPARING', color: 'text-orange-500' },
-      { id: 'executing', label: 'IN FOCUS', color: 'text-google-green' },
+    const stages: { id: FocusStage; label: string }[] = [
+      { id: 'staged', label: 'TASK ESTABLISHED' },
+      { id: 'preparing', label: 'PREPARING' },
+      { id: 'executing', label: 'IN FOCUS' },
     ];
 
     const currentIdx = stages.findIndex(s => s.id === currentStage);
@@ -161,23 +161,25 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                 onClick={() => setFocusStage(stage.id)}
                 className={clsx(
                   "flex items-center gap-2 transition-all duration-500",
-                  isActive ? "opacity-100 scale-105" : "opacity-30 scale-95 hover:opacity-60",
-                  isActive && stage.color
+                  isActive ? "opacity-100 scale-105 text-orange-950" : "opacity-50 scale-95 hover:opacity-80 text-white",
                 )}
               >
                 <div className={clsx(
-                  "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black border transition-all",
-                  isActive ? "border-current scale-110" : "border-gray-500",
+                  "w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black border transition-all",
+                  isActive ? "border-orange-950 bg-orange-950 text-white scale-110 shadow-lg" : "border-white/40 text-white",
                   isActive && stage.id === 'preparing' && "animate-pulse"
                 )}>
                   {stepNum}
                 </div>
-                <span className="text-[11px] font-black uppercase tracking-[0.2em] whitespace-nowrap">{stage.label}</span>
+                <span className={clsx(
+                  "text-[12px] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-colors",
+                  isActive ? "text-orange-950" : "text-white"
+                )}>{stage.label}</span>
               </button>
               {idx < stages.length - 1 && (
                 <div className={clsx(
                   "hidden md:block w-8 h-[1px] transition-all duration-1000",
-                  isPast ? "bg-google-green" : "bg-gray-300 dark:bg-gray-800"
+                  isPast ? "bg-white" : "bg-white/30"
                 )} />
               )}
             </div>
@@ -300,11 +302,11 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                   
                   {focusData.task.guide?.complexity && (
                     <div className={clsx(
-                      "mt-4 flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit transition-all duration-700",
+                      "mt-4 flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit transition-all duration-700 shadow-sm",
                       isExecuting && "mx-auto scale-125 mb-4",
-                      focusData.task.guide.complexity === 'Easy' && "bg-green-50/20 text-green-400 border-green-500/30",
-                      focusData.task.guide.complexity === 'Moderate' && "bg-amber-50/20 text-amber-400 border-amber-500/30",
-                      focusData.task.guide.complexity === 'Complex' && "bg-red-50/20 text-red-400 border-red-500/30"
+                      focusData.task.guide.complexity === 'Easy' && "bg-green-600/30 text-white border-green-400/50",
+                      focusData.task.guide.complexity === 'Moderate' && "bg-amber-600/30 text-white border-amber-400/50",
+                      focusData.task.guide.complexity === 'Complex' && "bg-red-600/30 text-white border-red-400/50"
                     )}>
                       <Zap className="w-3.5 h-3.5 fill-current" />
                       <span>{focusData.task.guide.complexity}</span>
@@ -323,14 +325,14 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                         theme.components.pomodoro.button,
                         isYellow && theme.components.pomodoro.buttonYellow,
                         "transition-all duration-700",
-                        isExecuting ? "w-16 h-16" : "w-10 h-10"
+                        isExecuting ? "w-16 h-16" : "w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20"
                       )}>
                         <button 
                           onClick={() => toggleTaskTimer(focusData.task.id)} 
                           title="Start/Pause Pomodoro Timer"
                           className="w-full h-full flex items-center justify-center hover:scale-110 transition-transform"
                         >
-                          {focusData.task.timerIsRunning ? <Pause className={clsx(isExecuting ? "w-8 h-8" : "w-5 h-5", "fill-current")} /> : <Play className={clsx(isExecuting ? "w-8 h-8" : "w-5 h-5", "fill-current ml-0.5")} />}
+                          {focusData.task.timerIsRunning ? <Pause className={clsx(isExecuting ? "w-8 h-8" : "w-6 h-6 lg:w-8 lg:h-8", "fill-current")} /> : <Play className={clsx(isExecuting ? "w-8 h-8" : "w-6 h-6 lg:w-8 lg:h-8", "fill-current ml-0.5")} />}
                         </button>
                       </div>
                     )}
@@ -341,13 +343,13 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                       !isExecuting && "mt-[-16px]"
                     )}>
                       {!isExecuting && (
-                        <span className="text-[7px] font-black uppercase text-white/40 tracking-[0.2em] animate-pulse">Set Time</span>
+                        <span className="text-[8px] md:text-[9px] font-black uppercase text-white/60 tracking-[0.2em] animate-pulse">Set Time</span>
                       )}
                       <div className={clsx(
                         theme.components.pomodoro.container,
                         isYellow ? "bg-black/10 text-gray-900" : "bg-white/10 text-white",
                         "transition-all duration-700",
-                        isExecuting ? "h-16 px-6" : "h-10"
+                        isExecuting ? "h-16 px-6" : "h-14 md:h-16 lg:h-20"
                       )}>
                         <div className="relative flex items-center gap-1 min-w-0 px-1">
                           <button 
@@ -361,18 +363,18 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                             <TomatoIcon className={clsx(isExecuting ? "w-6 h-6" : "w-4 h-4", "shrink-0")} />
                             <span className={clsx(
                               "font-black tabular-nums text-center",
-                              isExecuting ? "text-2xl min-w-[80px]" : "text-[11px] min-w-[38px]"
+                              isExecuting ? "text-2xl min-w-[80px]" : "text-sm md:text-lg lg:text-xl min-w-[38px]"
                             )}>
                               {formatTime(focusData.task.timerRemaining ?? focusData.task.timerDuration ?? 20 * 60)}
                             </span>
                           </button>
 
                           {!isExecuting && (
-                            <div className="flex items-center gap-0.5 shrink-0">
+                            <div className="flex items-center gap-1 shrink-0">
                               <button 
                                 onClick={() => resetTaskTimer(focusData.task.id)}
                                 className={clsx(
-                                  "px-1 py-0.5 text-[6px] font-black uppercase rounded bg-black/10 hover:bg-black/20 transition-colors",
+                                  "px-1.5 py-1 text-[8px] md:text-[9px] font-black uppercase rounded bg-black/10 hover:bg-black/20 transition-colors",
                                   isYellow ? "text-gray-900" : "text-white"
                                 )}
                               >
@@ -381,7 +383,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                               <button 
                                 onClick={() => updateTaskTimer(focusData.task.id, (focusData.task.timerRemaining ?? 20 * 60) + 300)}
                                 className={clsx(
-                                  "px-1 py-0.5 text-[6px] font-black uppercase rounded bg-black/10 hover:bg-black/20 transition-colors",
+                                  "px-1.5 py-1 text-[8px] md:text-[9px] font-black uppercase rounded bg-black/10 hover:bg-black/20 transition-colors",
                                   isYellow ? "text-gray-900" : "text-white"
                                 )}
                               >
@@ -415,11 +417,11 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                         onClick={(e) => { e.stopPropagation(); onOpenNotes?.(focusData.task.id, focusData.instance.id); }}
                         title="Open Task Info"
                         className={clsx(
-                          "w-12 h-10 shrink-0 flex items-center justify-center transition-all hover:scale-110",
+                          "w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 shrink-0 flex items-center justify-center transition-all hover:scale-110",
                           isYellow ? "text-gray-900" : "text-white"
                         )}
                       >
-                        <StickyNote className={clsx("w-6 h-6", shouldHighlightNotes && "animate-pulse-slow")} />
+                        <StickyNote className={clsx("w-6 h-6 lg:w-8 lg:h-8", shouldHighlightNotes && "animate-pulse-slow")} />
                       </button>
                     )}
 
@@ -427,12 +429,12 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                       <button 
                         onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance.id}?task=${focusData.task.id}&scroll=true`)}
                         className={clsx(
-                          "md:hidden transition-all active:scale-90 flex items-center justify-center p-2",
+                          "md:hidden transition-all active:scale-90 flex items-center justify-center w-14 h-14",
                           isYellow ? "text-gray-900/60 hover:text-gray-900" : "text-white/60 hover:text-white"
                         )}
                         title="Open in Full Checklist"
                       >
-                        <RotateCcw className="w-10 h-10 rotate-180" />
+                        <RotateCcw className="w-8 h-8 rotate-180" />
                       </button>
                     )}
                   </div>
