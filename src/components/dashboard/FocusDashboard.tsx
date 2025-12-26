@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { theme } from '../../styles/theme';
-import { LayoutGrid, Target, Play, Pause, RotateCcw, ThumbsUp, CheckCircle2, StickyNote, Anchor, Zap } from 'lucide-react';
+import { LayoutGrid, Target, Play, Pause, RotateCcw, ThumbsUp, CheckCircle2, StickyNote, Zap } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useNavigate } from 'react-router-dom';
 import { Music } from 'lucide-react';
@@ -140,37 +140,43 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
   }, [isExecuting]);
 
   const WorkflowTracker = () => {
-    const stages: { id: FocusStage; label: string; icon: any; color: string }[] = [
-      { id: 'staged', label: 'TASK ESTABLISHED', icon: Anchor, color: isDarkMode ? 'text-gray-500' : 'text-gray-400' },
-      { id: 'preparing', label: 'PREPARING', icon: Zap, color: 'text-orange-500' },
-      { id: 'executing', label: 'IN FOCUS', icon: Play, color: 'text-google-green' },
+    const stages: { id: FocusStage; label: string; color: string }[] = [
+      { id: 'staged', label: 'TASK ESTABLISHED', color: isDarkMode ? 'text-gray-500' : 'text-gray-400' },
+      { id: 'preparing', label: 'PREPARING', color: 'text-orange-500' },
+      { id: 'executing', label: 'IN FOCUS', color: 'text-google-green' },
     ];
 
     const currentIdx = stages.findIndex(s => s.id === currentStage);
 
     return (
-      <div className="flex items-center gap-4 mb-6 px-2">
+      <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 mb-6 px-2">
         {stages.map((stage, idx) => {
-          const Icon = stage.icon;
           const isActive = idx === currentIdx;
           const isPast = idx < currentIdx;
+          const stepNum = idx + 1;
           
           return (
             <div key={stage.id} className="flex items-center gap-2">
               <button 
                 onClick={() => setFocusStage(stage.id)}
                 className={clsx(
-                  "flex items-center gap-1.5 transition-all duration-500",
+                  "flex items-center gap-2 transition-all duration-500",
                   isActive ? "opacity-100 scale-105" : "opacity-30 scale-95 hover:opacity-60",
                   isActive && stage.color
                 )}
               >
-                <Icon className={clsx("w-3 h-3", isActive && stage.id === 'preparing' && "animate-pulse")} />
+                <div className={clsx(
+                  "w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black border transition-all",
+                  isActive ? "border-current scale-110" : "border-gray-500",
+                  isActive && stage.id === 'preparing' && "animate-pulse"
+                )}>
+                  {stepNum}
+                </div>
                 <span className="text-[9px] font-black uppercase tracking-[0.2em] whitespace-nowrap">{stage.label}</span>
               </button>
               {idx < stages.length - 1 && (
                 <div className={clsx(
-                  "w-8 h-[1px] transition-all duration-1000",
+                  "hidden md:block w-8 h-[1px] transition-all duration-1000",
                   isPast ? "bg-google-green" : "bg-gray-300 dark:bg-gray-800"
                 )} />
               )}
