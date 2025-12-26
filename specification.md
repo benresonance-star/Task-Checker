@@ -70,6 +70,13 @@ The system features a robust sync engine:
 
 ### 7. Branding & Live Style System
 - **Branding Console**: A floating, draggable, and resizable HUD available to admins. It features a **"Draft Mode" workflow** where stylistic changes (colors, radii) are applied locally for real-time exploration but are only persisted to Firestore when explicitly saved via "Save as Workspace Default" or by overwriting an existing snapshot.
+- **Interface-First Organization**: The console is organized into collapsible, logic-based sections (Accordions) to streamline branding across different app areas:
+  - **Style Snapshots**: High-level theme management and capturing current states.
+  - **Atmosphere & Identity**: Core brand colors, app backgrounds, and typography engine.
+  - **My Dashboard (Focus)**: Specific styling for the Active Focus card, **Knowledge Hub** (including inactive step borders and backgrounds), prerequisites, and scratchpads.
+  - **Project Interface**: Dashboard metadata sections and card styling.
+  - **Checklist & Templates**: Task list hierarchy, connector lines, and task container styles.
+  - **System Corner Radii**: Global management of all corner radii from buttons to major modals.
 - **Style Snapshots (Theme Library)**: Admins can capture the current brand styling and save it as a named snapshot (e.g., "Happy Mode"). Presets support **Active Style Tracking**, highlighting the currently applied theme and allowing for **Incremental Updates** (overwriting an existing snapshot with new tweaks) via a dedicated save icon.
 - **Smooth Interaction Engine**: Utilizes hardware-accelerated `translate3d` and `requestAnimationFrame` for buttery-smooth window movement and resizing. Transitions are dynamically disabled during active interactions to eliminate "input lag."
 - **Semantic Theme Engine**: Uses CSS Variables linked to descriptive, role-based technical keys (e.g., `colorAppIdentity` instead of `brandBlue`). This ensures the codebase remains logical even when colors are dramatically altered.
@@ -347,4 +354,4 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 26, 2025 (v1.6.1 - AI Development Rules & SOP)*
+*Updated: December 26, 2025 (v1.6.2 - Branding Console Reorganization)*

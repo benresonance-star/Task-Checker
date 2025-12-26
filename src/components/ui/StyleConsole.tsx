@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, GripHorizontal, RotateCcw, Palette, Maximize2, Minimize2, Camera, Trash2, Check, Save } from 'lucide-react';
+import { X, GripHorizontal, RotateCcw, Palette, Maximize2, Minimize2, Camera, Trash2, Check, Save, ChevronDown, ChevronRight, LayoutGrid, ClipboardList, Settings, Briefcase } from 'lucide-react';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { clsx } from 'clsx';
+import { ThemeSettings } from '../../types';
 
 interface StyleConsoleProps {
   onClose: () => void;
@@ -37,7 +38,19 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [newPresetName, setNewPresetName] = useState('');
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    presets: true,
+    atmosphere: false,
+    dashboard: true,
+    projects: false,
+    checklist: false,
+    radii: false
+  });
   
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
   const toggleTheme = (targetMode: 'light' | 'dark') => {
     toggleDarkMode(targetMode === 'dark');
   };
@@ -120,9 +133,22 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
     };
   }, [isDragging, isResizing]);
 
-  const handleChange = (key: keyof typeof themeSettings, value: string | number) => {
+  const handleChange = (key: keyof ThemeSettings, value: string | number) => {
     previewThemeSettings({ [key]: value });
   };
+
+  const SectionHeader: React.FC<{ id: string; label: string; icon: any }> = ({ id, label, icon: Icon }) => (
+    <button 
+      onClick={() => toggleSection(id)}
+      className="w-full flex items-center justify-between py-2 px-1 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors rounded-lg group"
+    >
+      <div className="flex items-center gap-2">
+        <Icon className="w-3.5 h-3.5 text-google-blue" />
+        <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest group-hover:text-google-blue transition-colors">{label}</span>
+      </div>
+      {expandedSections[id] ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" /> : <ChevronRight className="w-3.5 h-3.5 text-gray-400" />}
+    </button>
+  );
 
   return (
     <div
@@ -171,7 +197,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
       </div>
 
       {!isMinimized && (
-        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-6">
           {/* Dual-Status Mode Switcher */}
           <section className="bg-gray-50 dark:bg-black/40 p-2 rounded-xl border border-gray-200 dark:border-gray-800">
             <h3 className="text-[8px] font-black uppercase text-gray-400 tracking-widest mb-2 px-1">Global Workspace Context</h3>
@@ -209,455 +235,171 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
             </div>
           </section>
 
-          <div className="h-px bg-gray-100 dark:bg-gray-800 mx-[-1.5rem]" />
+          <div className="h-px bg-gray-100 dark:bg-gray-800 mx-[-1rem]" />
 
-          <section>
-            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">
-              Currently Editing: {isDarkMode ? 'Dark Mode' : 'Light Mode'}
-            </h3>
-            {/* Snapshots Section */}
-            <div className="space-y-4">
-              {/* Save New Preset */}
-              <div className="flex gap-2">
-                <input 
-                  type="text" 
-                  placeholder={`Name ${isDarkMode ? 'Dark' : 'Light'} Style...`}
-                  value={newPresetName}
-                  onChange={(e) => setNewPresetName(e.target.value)}
-                  className="flex-1 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-[10px] font-bold"
-                />
-                <button
-                  disabled={!newPresetName.trim()}
-                  onClick={() => {
-                    saveThemePreset(newPresetName);
-                    setNewPresetName('');
-                  }}
-                  className="w-10 h-10 flex items-center justify-center bg-google-blue text-white rounded-lg disabled:opacity-50 transition-all hover:shadow-md active:scale-95"
-                  title="Capture Current State"
-                >
-                  <Camera className="w-4 h-4" />
-                </button>
-              </div>
+          {/* Snapshots Section (Always prominent) */}
+          <section className="space-y-3">
+            <SectionHeader id="presets" label="Style Snapshots" icon={Camera} />
+            {expandedSections.presets && (
+              <div className="space-y-4 animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    placeholder={`Name ${isDarkMode ? 'Dark' : 'Light'} Style...`}
+                    value={newPresetName}
+                    onChange={(e) => setNewPresetName(e.target.value)}
+                    className="flex-1 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-[10px] font-bold"
+                  />
+                  <button
+                    disabled={!newPresetName.trim()}
+                    onClick={() => {
+                      saveThemePreset(newPresetName);
+                      setNewPresetName('');
+                    }}
+                    className="w-10 h-10 flex items-center justify-center bg-google-blue text-white rounded-lg disabled:opacity-50 transition-all hover:shadow-md active:scale-95"
+                  >
+                    <Save className="w-4 h-4" />
+                  </button>
+                </div>
 
-              {/* Presets List (Filtered by Mode) */}
-              <div className="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
-                {themePresets.filter(p => p.mode === (isDarkMode ? 'dark' : 'light')).map(preset => {
-                  const isActive = activePresetId === preset.id;
-                  
-                  return (
-                    <div 
-                      key={preset.id}
-                      className={clsx(
+                <div className="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                  {themePresets.filter(p => p.mode === (isDarkMode ? 'dark' : 'light')).map(preset => {
+                    const isActive = activePresetId === preset.id;
+                    return (
+                      <div key={preset.id} className={clsx(
                         "flex items-center justify-between p-2 rounded-lg border transition-all group",
-                        isActive 
-                          ? "bg-google-blue/10 border-google-blue shadow-sm" 
-                          : "bg-gray-50 dark:bg-black/20 border-gray-100 dark:border-gray-800 hover:border-google-blue/30"
-                      )}
-                    >
-                      <div className="flex flex-col min-w-0 flex-1 cursor-pointer" onClick={() => applyThemePreset(preset.id)}>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-black truncate">{preset.name}</span>
-                          {isActive && <div className="w-1 h-1 rounded-full bg-google-blue animate-pulse" />}
-                        </div>
-                        <div className="flex gap-1 mt-1">
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorAppIdentity }} />
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorActiveTaskDone }} />
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.settings.colorPresenceNotice }} />
-                        </div>
-                      </div>
-                      <div className={clsx(
-                        "flex items-center gap-1 transition-opacity",
-                        isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                        isActive ? "bg-google-blue/10 border-google-blue shadow-sm" : "bg-gray-50 dark:bg-black/20 border-gray-100 dark:border-gray-800 hover:border-google-blue/30"
                       )}>
-                        {isActive && (
-                          <button 
-                            onClick={() => updateThemePreset(preset.id)}
-                            className="p-1.5 hover:bg-google-green/10 text-google-green rounded-md transition-colors"
-                            title="Overwrite Snapshot with Current Settings"
-                          >
-                            <Save className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                        {!isActive && (
-                          <button 
-                            onClick={() => applyThemePreset(preset.id)}
-                            className="p-1.5 hover:bg-google-blue/10 text-google-blue rounded-md transition-colors"
-                            title="Apply Preset"
-                          >
-                            <Check className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                        <button 
-                          onClick={() => deleteThemePreset(preset.id)}
-                          className="p-1.5 hover:bg-google-red/10 text-google-red rounded-md transition-colors"
-                          title="Delete Preset"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="flex flex-col min-w-0 flex-1 cursor-pointer" onClick={() => applyThemePreset(preset.id)}>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-black truncate">{preset.name}</span>
+                            {isActive && <div className="w-1 h-1 rounded-full bg-google-blue animate-pulse" />}
+                          </div>
+                        </div>
+                        <div className={clsx("flex items-center gap-1", isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100")}>
+                          {isActive && (
+                            <button onClick={() => updateThemePreset(preset.id)} className="p-1.5 hover:bg-google-green/10 text-google-green rounded-md"><Save className="w-3.5 h-3.5" /></button>
+                          )}
+                          {!isActive && (
+                            <button onClick={() => applyThemePreset(preset.id)} className="p-1.5 hover:bg-google-blue/10 text-google-blue rounded-md"><Check className="w-3.5 h-3.5" /></button>
+                          )}
+                          <button onClick={() => deleteThemePreset(preset.id)} className="p-1.5 hover:bg-google-red/10 text-google-red rounded-md"><Trash2 className="w-3.5 h-3.5" /></button>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-                {themePresets.filter(p => p.mode === (isDarkMode ? 'dark' : 'light')).length === 0 && (
-                  <p className="text-[9px] text-center text-gray-500 italic py-2">No {isDarkMode ? 'dark' : 'light'} snapshots saved yet.</p>
-                )}
-              </div>
-            </div>
-          </section>
-
-          {/* Atmosphere Section */}
-          <section>
-            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">APP ATMOSPHERE</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <ColorControl 
-                label="Main App Background" 
-                value={themeSettings.colorAppBg} 
-                onChange={(v) => handleChange('colorAppBg', v)} 
-              />
-              <ColorControl 
-                label="Sidebar Background" 
-                value={themeSettings.colorSidebarBg} 
-                onChange={(v) => handleChange('colorSidebarBg', v)} 
-              />
-              <ColorControl 
-                label="Console Background" 
-                value={themeSettings.colorConsoleBg} 
-                onChange={(v) => handleChange('colorConsoleBg', v)} 
-              />
-            </div>
-          </section>
-
-          {/* Typography Section */}
-          <section>
-            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">TYPOGRAPHY & CONTENT</h3>
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <ColorControl 
-                label="Primary Content Color" 
-                value={themeSettings.colorTextPrimary} 
-                onChange={(v) => handleChange('colorTextPrimary', v)} 
-              />
-              <ColorControl 
-                label="Secondary / Muted Color" 
-                value={themeSettings.colorTextSecondary} 
-                onChange={(v) => handleChange('colorTextSecondary', v)} 
-              />
-              <ColorControl 
-                label="Heading Accent Color" 
-                value={themeSettings.colorTextHeading} 
-                onChange={(v) => handleChange('colorTextHeading', v)} 
-              />
-            </div>
-            <div className="space-y-6">
-              <SliderControl 
-                label="Global Text Scale" 
-                value={themeSettings.fontSizeBase} 
-                min={10} max={24} 
-                onChange={(v) => handleChange('fontSizeBase', v)} 
-              />
-              <SliderControl 
-                label="Line Spacing (Leading)" 
-                value={themeSettings.lineHeightBase} 
-                min={1} max={2} step={0.1}
-                onChange={(v) => handleChange('lineHeightBase', v)} 
-              />
-              <div className="flex flex-col gap-2">
-                <label className="text-[9px] font-black uppercase text-gray-500 tracking-tight">Heading Weight</label>
-                <div className="flex bg-gray-50 dark:bg-black/20 p-1 rounded-lg">
-                  {['500', '700', '900'].map(w => (
-                    <button
-                      key={w}
-                      onClick={() => handleChange('fontWeightHeading', w)}
-                      className={clsx(
-                        "flex-1 py-1.5 text-[10px] font-black rounded-md transition-all",
-                        themeSettings.fontWeightHeading === w 
-                          ? "bg-white dark:bg-gray-800 text-google-blue shadow-sm" 
-                          : "text-gray-400 hover:text-gray-600"
-                      )}
-                    >
-                      {w === '500' ? 'Medium' : w === '700' ? 'Bold' : 'Heavy'}
-                    </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
-              <SliderControl 
-                label="Header Letter Spacing" 
-                value={themeSettings.letterSpacingHeading} 
-                min={-0.05} max={0.5} step={0.01}
-                onChange={(v) => handleChange('letterSpacingHeading', v)} 
-              />
-            </div>
+            )}
           </section>
 
-          <div className="h-px bg-gray-100 dark:bg-gray-800 mx-[-1.5rem]" />
-
-          {/* Colors Section */}
-          <section>
-            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">IDENTITY & NAVIGATION</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <ColorControl 
-                label="Application Brand Identity" 
-                value={themeSettings.colorAppIdentity} 
-                onChange={(v) => handleChange('colorAppIdentity', v)} 
-              />
-            </div>
-          </section>
-
-          <section>
-            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">TASK EXECUTION</h3>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <ColorControl 
-                label="Task Done Button Highlight" 
-                value={themeSettings.colorActiveTaskDone} 
-                onChange={(v) => handleChange('colorActiveTaskDone', v)} 
-              />
-              <ColorControl 
-                label="Completed Task Background" 
-                value={themeSettings.colorCompletedState} 
-                onChange={(v) => handleChange('colorCompletedState', v)} 
-              />
-            </div>
-            <div className="space-y-4">
-              <SliderControl 
-                label="Checklist Task Container Radius" 
-                value={themeSettings.radiusTaskCard} 
-                min={0} max={40} 
-                onChange={(v) => handleChange('radiusTaskCard', v)} 
-              />
-            </div>
-          </section>
-
-          <section>
-            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">TEAM & STATUS</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <ColorControl 
-                label="Team Presence & Indicators" 
-                value={themeSettings.colorPresenceNotice} 
-                onChange={(v) => handleChange('colorPresenceNotice', v)} 
-              />
-              <ColorControl 
-                label="Destructive Action Alerts" 
-                value={themeSettings.colorDestructive} 
-                onChange={(v) => handleChange('colorDestructive', v)} 
-              />
-            </div>
-          </section>
-
-          <section>
-            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">DASHBOARD & WORKSPACE</h3>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <ColorControl 
-                label="Project Info Container Background" 
-                value={themeSettings.colorProjectInfoBg} 
-                onChange={(v) => handleChange('colorProjectInfoBg', v)} 
-              />
-              <ColorControl 
-                label="Project Info Container Outline" 
-                value={themeSettings.colorProjectInfoBorder} 
-                onChange={(v) => handleChange('colorProjectInfoBorder', v)} 
-              />
-              <ColorControl 
-                label="Active Checklist Background" 
-                value={themeSettings.colorChecklistBg} 
-                onChange={(v) => handleChange('colorChecklistBg', v)} 
-              />
-              <ColorControl 
-                label="Active Checklist Outline" 
-                value={themeSettings.colorChecklistBorder} 
-                onChange={(v) => handleChange('colorChecklistBorder', v)} 
-              />
-              <ColorControl 
-                label="Project Info Card Background" 
-                value={themeSettings.colorMetadataCardBg} 
-                onChange={(v) => handleChange('colorMetadataCardBg', v)} 
-              />
-              <ColorControl 
-                label="Project Info Card Outline" 
-                value={themeSettings.colorMetadataCardBorder} 
-                onChange={(v) => handleChange('colorMetadataCardBorder', v)} 
-              />
-            </div>
-          </section>
-
-          <section>
-            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">MY NOTES WIDGET</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <ColorControl 
-                label="Widget Background" 
-                value={themeSettings.colorNotesBg} 
-                onChange={(v) => handleChange('colorNotesBg', v)} 
-              />
-              <ColorControl 
-                label="Widget Outline" 
-                value={themeSettings.colorNotesBorder} 
-                onChange={(v) => handleChange('colorNotesBorder', v)} 
-              />
-              <ColorControl 
-                label="Editor Background" 
-                value={themeSettings.colorNotesEditorBg} 
-                onChange={(v) => handleChange('colorNotesEditorBg', v)} 
-              />
-              <ColorControl 
-                label="Editor Outline" 
-                value={themeSettings.colorNotesEditorBorder} 
-                onChange={(v) => handleChange('colorNotesEditorBorder', v)} 
-              />
-              <ColorControl 
-                label="Editor Separator" 
-                value={themeSettings.colorNotesEditorSeparator} 
-                onChange={(v) => handleChange('colorNotesEditorSeparator', v)} 
-              />
-              <div className="col-span-2 mt-2 pt-2 border-t border-gray-100 dark:border-gray-800">
-                <div className="grid grid-cols-2 gap-4">
-                  <ColorControl 
-                    label="Personal Note Bg" 
-                    value={themeSettings.colorNotePersonalBg} 
-                    onChange={(v) => handleChange('colorNotePersonalBg', v)} 
-                  />
-                  <ColorControl 
-                    label="Project Note Bg" 
-                    value={themeSettings.colorNoteProjectBg} 
-                    onChange={(v) => handleChange('colorNoteProjectBg', v)} 
-                  />
-                  <ColorControl 
-                    label="Priority Note Bg" 
-                    value={themeSettings.colorNotePriorityBg} 
-                    onChange={(v) => handleChange('colorNotePriorityBg', v)} 
-                  />
+          {/* 1. Global App & Identity */}
+          <section className="space-y-3">
+            <SectionHeader id="atmosphere" label="Atmosphere & Identity" icon={Palette} />
+            {expandedSections.atmosphere && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-top-1 duration-200 px-1">
+                <div className="grid grid-cols-2 gap-3">
+                  <ColorControl label="Brand Identity" value={themeSettings.colorAppIdentity} onChange={(v) => handleChange('colorAppIdentity', v)} />
+                  <ColorControl label="Main App Bg" value={themeSettings.colorAppBg} onChange={(v) => handleChange('colorAppBg', v)} />
+                  <ColorControl label="Sidebar Bg" value={themeSettings.colorSidebarBg} onChange={(v) => handleChange('colorSidebarBg', v)} />
+                  <ColorControl label="Console Bg" value={themeSettings.colorConsoleBg} onChange={(v) => handleChange('colorConsoleBg', v)} />
+                </div>
+                
+                <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Text Primary" value={themeSettings.colorTextPrimary} onChange={(v) => handleChange('colorTextPrimary', v)} />
+                    <ColorControl label="Text Muted" value={themeSettings.colorTextSecondary} onChange={(v) => handleChange('colorTextSecondary', v)} />
+                    <ColorControl label="Heading Color" value={themeSettings.colorTextHeading} onChange={(v) => handleChange('colorTextHeading', v)} />
+                  </div>
+                  <SliderControl label="Global Text Scale" value={themeSettings.fontSizeBase} min={10} max={24} onChange={(v) => handleChange('fontSizeBase', v)} />
+                  <SliderControl label="Line Spacing" value={themeSettings.lineHeightBase} min={1} max={2} step={0.1} onChange={(v) => handleChange('lineHeightBase', v)} />
                 </div>
               </div>
-            </div>
+            )}
           </section>
 
-          <section>
-            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">DASHBOARD SECTIONS</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <ColorControl 
-                label="Identification Header Color" 
-                value={themeSettings.colorSectionIdent} 
-                onChange={(v) => handleChange('colorSectionIdent', v)} 
-              />
-              <ColorControl 
-                label="Identification Icon Color" 
-                value={themeSettings.colorSectionIdentIcon} 
-                onChange={(v) => handleChange('colorSectionIdentIcon', v)} 
-              />
-              <ColorControl 
-                label="Planning Header Color" 
-                value={themeSettings.colorSectionPlan} 
-                onChange={(v) => handleChange('colorSectionPlan', v)} 
-              />
-              <ColorControl 
-                label="Planning Icon Color" 
-                value={themeSettings.colorSectionPlanIcon} 
-                onChange={(v) => handleChange('colorSectionPlanIcon', v)} 
-              />
-              <ColorControl 
-                label="Building Header Color" 
-                value={themeSettings.colorSectionBuild} 
-                onChange={(v) => handleChange('colorSectionBuild', v)} 
-              />
-              <ColorControl 
-                label="Building Icon Color" 
-                value={themeSettings.colorSectionBuildIcon} 
-                onChange={(v) => handleChange('colorSectionBuildIcon', v)} 
-              />
-            </div>
+          {/* 2. My Dashboard (Focus & Workflow) */}
+          <section className="space-y-3">
+            <SectionHeader id="dashboard" label="My Dashboard (Focus)" icon={LayoutGrid} />
+            {expandedSections.dashboard && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-top-1 duration-200 px-1">
+                <div className="grid grid-cols-2 gap-3">
+                  <ColorControl label="Task Done Highlight" value={themeSettings.colorActiveTaskDone} onChange={(v) => handleChange('colorActiveTaskDone', v)} />
+                  <ColorControl label="Inactive Hub Border" value={themeSettings.colorHubInactiveBorder} onChange={(v) => handleChange('colorHubInactiveBorder', v)} />
+                  <ColorControl label="Hub Step 2 Inactive Bg" value={themeSettings.colorHubStep2InactiveBg} onChange={(v) => handleChange('colorHubStep2InactiveBg', v)} />
+                </div>
+                
+                <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <h4 className="text-[8px] font-black uppercase text-gray-400 tracking-widest\">"Can I Proceed?" Styling</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Container Bg" value={themeSettings.colorPrereqBg} onChange={(v) => handleChange('colorPrereqBg', v)} />
+                    <ColorControl label="Container Border" value={themeSettings.colorPrereqBorder} onChange={(v) => handleChange('colorPrereqBorder', v)} />
+                    <ColorControl label="Item Background" value={themeSettings.colorPrereqItemBg} onChange={(v) => handleChange('colorPrereqItemBg', v)} />
+                    <ColorControl label="Icon & Text Color" value={themeSettings.colorPrereqIcon} onChange={(v) => handleChange('colorPrereqIcon', v)} />
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <h4 className="text-[8px] font-black uppercase text-gray-400 tracking-widest\">My Notes & Workbench</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Widget Bg" value={themeSettings.colorNotesBg} onChange={(v) => handleChange('colorNotesBg', v)} />
+                    <ColorControl label="Widget Outline" value={themeSettings.colorNotesBorder} onChange={(v) => handleChange('colorNotesBorder', v)} />
+                    <ColorControl label="Editor Bg" value={themeSettings.colorNotesEditorBg} onChange={(v) => handleChange('colorNotesEditorBg', v)} />
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
 
-          <section>
-            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">HIERARCHY & CONNECTORS</h3>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <ColorControl 
-                label="Hierarchical Connector Lines (CHECKLIST)" 
-                value={themeSettings.colorHierarchyLine} 
-                onChange={(v) => handleChange('colorHierarchyLine', v)} 
-              />
-            </div>
+          {/* 3. Project Interface */}
+          <section className="space-y-3">
+            <SectionHeader id="projects" label="Project Interface" icon={Briefcase} />
+            {expandedSections.projects && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-top-1 duration-200 px-1">
+                <div className="grid grid-cols-2 gap-3">
+                  <ColorControl label="Project Info Bg" value={themeSettings.colorProjectInfoBg} onChange={(v) => handleChange('colorProjectInfoBg', v)} />
+                  <ColorControl label="Project Info Border" value={themeSettings.colorProjectInfoBorder} onChange={(v) => handleChange('colorProjectInfoBorder', v)} />
+                  <ColorControl label="Metadata Card Bg" value={themeSettings.colorMetadataCardBg} onChange={(v) => handleChange('colorMetadataCardBg', v)} />
+                  <ColorControl label="Metadata Card Border" value={themeSettings.colorMetadataCardBorder} onChange={(v) => handleChange('colorMetadataCardBorder', v)} />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <ColorControl label="Identification Header" value={themeSettings.colorSectionIdent} onChange={(v) => handleChange('colorSectionIdent', v)} />
+                  <ColorControl label="Planning Header" value={themeSettings.colorSectionPlan} onChange={(v) => handleChange('colorSectionPlan', v)} />
+                  <ColorControl label="Building Header" value={themeSettings.colorSectionBuild} onChange={(v) => handleChange('colorSectionBuild', v)} />
+                </div>
+              </div>
+            )}
           </section>
 
-          <section>
-            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">"CAN I PROCEED?" SECTION</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <ColorControl 
-                label="Container Background" 
-                value={themeSettings.colorPrereqBg} 
-                onChange={(v) => handleChange('colorPrereqBg', v)} 
-              />
-        <ColorControl 
-          label="Container Outline" 
-          value={themeSettings.colorPrereqBorder} 
-          onChange={(v) => handleChange('colorPrereqBorder', v)} 
-        />
-        <ColorControl 
-          label="Item Background" 
-          value={themeSettings.colorPrereqItemBg} 
-          onChange={(v) => handleChange('colorPrereqItemBg', v)} 
-        />
-        <ColorControl 
-          label="Header Font Color" 
-                value={themeSettings.colorPrereqText} 
-                onChange={(v) => handleChange('colorPrereqText', v)} 
-              />
-              <ColorControl 
-                label="Header Icon Color" 
-                value={themeSettings.colorPrereqIcon} 
-                onChange={(v) => handleChange('colorPrereqIcon', v)} 
-              />
-            </div>
+          {/* 4. Checklist & Templates */}
+          <section className="space-y-3">
+            <SectionHeader id="checklist" label="Checklist & Templates" icon={ClipboardList} />
+            {expandedSections.checklist && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-top-1 duration-200 px-1">
+                <div className="grid grid-cols-2 gap-3">
+                  <ColorControl label="Checklist Bg" value={themeSettings.colorChecklistBg} onChange={(v) => handleChange('colorChecklistBg', v)} />
+                  <ColorControl label="Checklist Border" value={themeSettings.colorChecklistBorder} onChange={(v) => handleChange('colorChecklistBorder', v)} />
+                  <ColorControl label="Connector Line" value={themeSettings.colorHierarchyLine} onChange={(v) => handleChange('colorHierarchyLine', v)} />
+                  <ColorControl label="Completed State" value={themeSettings.colorCompletedState} onChange={(v) => handleChange('colorCompletedState', v)} />
+                </div>
+                <SliderControl label="Task Container Radius" value={themeSettings.radiusTaskCard} min={0} max={40} onChange={(v) => handleChange('radiusTaskCard', v)} />
+              </div>
+            )}
           </section>
 
-          <section>
-            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">SYSTEM CONTROLS</h3>
-            <div className="space-y-4">
-              <SliderControl 
-                label="Interactive Button Corners" 
-                value={themeSettings.radiusInteractive} 
-                min={0} max={20} 
-                onChange={(v) => handleChange('radiusInteractive', v)} 
-              />
-              <SliderControl 
-                label="Major Modal & UI Corners" 
-                value={themeSettings.radiusMajorModal} 
-                min={0} max={60} 
-                onChange={(v) => handleChange('radiusMajorModal', v)} 
-              />
-              <SliderControl 
-                label="Active Task Focus Card" 
-                value={themeSettings.radiusFocusCard} 
-                min={0} max={100} 
-                onChange={(v) => handleChange('radiusFocusCard', v)} 
-              />
-              <SliderControl 
-                label="Task Completion Button" 
-                value={themeSettings.radiusTaskButton} 
-                min={0} max={40} 
-                onChange={(v) => handleChange('radiusTaskButton', v)} 
-              />
-              <SliderControl 
-                label="Dashboard Widget Corners" 
-                value={themeSettings.radiusWidget} 
-                min={0} max={40} 
-                onChange={(v) => handleChange('radiusWidget', v)} 
-              />
-              <SliderControl 
-                label="Sidebar & Control Panel Corners" 
-                value={themeSettings.radiusSidebar} 
-                min={0} max={40} 
-                onChange={(v) => handleChange('radiusSidebar', v)} 
-              />
-              <SliderControl 
-                label="Project Dashboard Container" 
-                value={themeSettings.radiusProjectInfo} 
-                min={0} max={60} 
-                onChange={(v) => handleChange('radiusProjectInfo', v)} 
-              />
-              <SliderControl 
-                label="Inner Information Card Corners" 
-                value={themeSettings.radiusMetadataCard} 
-                min={0} max={40} 
-                onChange={(v) => handleChange('radiusMetadataCard', v)} 
-              />
-            </div>
+          {/* 5. Master Radii (System Corners) */}
+          <section className="space-y-3">
+            <SectionHeader id="radii" label="System Corner Radii" icon={Settings} />
+            {expandedSections.radii && (
+              <div className="space-y-4 animate-in fade-in slide-in-from-top-1 duration-200 px-1">
+                <SliderControl label="Focus Card" value={themeSettings.radiusFocusCard} min={0} max={100} onChange={(v) => handleChange('radiusFocusCard', v)} />
+                <SliderControl label="Widgets" value={themeSettings.radiusWidget} min={0} max={40} onChange={(v) => handleChange('radiusWidget', v)} />
+                <SliderControl label="Interactive Buttons" value={themeSettings.radiusInteractive} min={0} max={20} onChange={(v) => handleChange('radiusInteractive', v)} />
+                <SliderControl label="Major Modals" value={themeSettings.radiusMajorModal} min={0} max={60} onChange={(v) => handleChange('radiusMajorModal', v)} />
+                <SliderControl label="Project Dashboard" value={themeSettings.radiusProjectInfo} min={0} max={60} onChange={(v) => handleChange('radiusProjectInfo', v)} />
+              </div>
+            )}
           </section>
 
           {/* Footer Actions */}
@@ -694,7 +436,6 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
 };
 
 const ColorControl: React.FC<{ label: string; value: string; onChange: (v: string) => void }> = ({ label, value, onChange }) => {
-  // Helper to ensure the native color picker gets a valid hex even if the value is rgba
   const getHexValue = (val: string) => {
     if (val.startsWith('#')) return val;
     if (val.startsWith('rgba') || val.startsWith('rgb')) {
@@ -711,9 +452,9 @@ const ColorControl: React.FC<{ label: string; value: string; onChange: (v: strin
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-[9px] font-black uppercase text-gray-500 tracking-tight">{label}</label>
-      <div className="flex items-center gap-2">
-        <div className="relative w-8 h-8 flex-shrink-0">
+      <label className="text-[7px] font-black uppercase text-gray-500 tracking-tight">{label}</label>
+      <div className="flex items-center gap-1.5">
+        <div className="relative w-6 h-6 flex-shrink-0">
           <input 
             type="color" 
             value={getHexValue(value)} 
@@ -722,14 +463,14 @@ const ColorControl: React.FC<{ label: string; value: string; onChange: (v: strin
           />
           <div 
             style={{ backgroundColor: value }}
-            className="w-full h-full rounded-md border border-gray-600 shadow-sm"
+            className="w-full h-full rounded border border-gray-400 dark:border-gray-600 shadow-sm"
           />
         </div>
         <input 
           type="text" 
           value={value.toUpperCase()} 
           onChange={(e) => onChange(e.target.value)}
-          className="flex-1 min-w-0 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 rounded-lg px-2 py-1 text-[10px] font-mono"
+          className="flex-1 min-w-0 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 rounded px-1.5 py-1 text-[8px] font-mono"
         />
       </div>
     </div>
@@ -739,8 +480,8 @@ const ColorControl: React.FC<{ label: string; value: string; onChange: (v: strin
 const SliderControl: React.FC<{ label: string; value: number; min: number; max: number; step?: number; onChange: (v: number) => void }> = ({ label, value, min, max, step = 1, onChange }) => (
   <div className="flex flex-col gap-2">
     <div className="flex items-center justify-between">
-      <label className="text-[9px] font-black uppercase text-gray-500 tracking-tight">{label}</label>
-      <span className="text-[10px] font-mono text-google-blue">{value}{step < 1 ? '' : 'px'}</span>
+      <label className="text-[8px] font-black uppercase text-gray-500 tracking-tight">{label}</label>
+      <span className="text-[9px] font-mono text-google-blue">{value}{step < 1 ? '' : 'px'}</span>
     </div>
     <input 
       type="range" 
