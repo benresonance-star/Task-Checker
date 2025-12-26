@@ -158,7 +158,18 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
           return (
             <div key={stage.id} className="flex items-center gap-2">
               <button 
-                onClick={() => setFocusStage(stage.id)}
+                onClick={async () => {
+                  if (stage.id === 'executing' && focusData) {
+                    await setFocusStage('executing');
+                    if (!focusData.task.timerIsRunning) {
+                      await toggleTaskTimer(focusData.task.id);
+                    }
+                  } else if (stage.id === 'preparing') {
+                    await setFocusStage('preparing');
+                  } else {
+                    await setFocusStage('staged');
+                  }
+                }}
                 className={clsx(
                   "flex items-center gap-2 transition-all duration-500",
                   isActive ? "opacity-100 scale-105 text-orange-950" : "opacity-50 scale-95 hover:opacity-80 text-white",
@@ -338,8 +349,8 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
 
                     {/* Timer Controls Box */}
                     <div className={clsx(
-                      "flex flex-col gap-1 items-center",
-                      !isExecuting && "mt-[-16px]"
+                      "flex flex-col items-center",
+                      !isExecuting && "mt-[-16px] gap-1"
                     )}>
                       {!isExecuting && (
                         <span className="text-[8px] md:text-[9px] font-black uppercase text-white/60 tracking-[0.2em] animate-pulse">Set Time</span>
@@ -348,7 +359,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                         theme.components.pomodoro.container,
                         isYellow ? "bg-black/10 text-gray-900" : "bg-white/10 text-white",
                         "transition-all duration-700",
-                        isExecuting ? "h-20 md:h-24 px-8 md:px-10" : "h-14 md:h-16 lg:h-20"
+                        isExecuting ? "h-20 md:h-24 px-8 md:px-10 shrink-0" : "h-14 md:h-16 lg:h-20"
                       )}>
                         <div className="relative flex items-center gap-1 min-w-0 px-1">
                           <button 
