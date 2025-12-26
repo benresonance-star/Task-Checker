@@ -74,7 +74,7 @@ export const KnowledgeHub: React.FC<KnowledgeHubProps> = ({ task, stage }) => {
 
   // Auto-advance spotlight when all prereqs are checked
   const allPrereqsDone = React.useMemo(() => {
-    if (!task?.guide?.requiredBefore?.length) return true;
+    if (!task?.guide?.requiredBefore?.length) return false;
     return (task.completedPrereqs?.length || 0) === task.guide.requiredBefore.length;
   }, [task]);
 
