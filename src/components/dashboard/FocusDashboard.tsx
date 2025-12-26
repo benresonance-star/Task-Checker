@@ -10,6 +10,7 @@ import { KnowledgeHub } from './KnowledgeHub';
 import { FocusStage } from '../../types';
 
 import { TomatoIcon } from '../icons/TomatoIcon';
+import { FishIcon } from '../icons/FishIcon';
 
 interface FocusDashboardProps {
   onOpenNotes?: (taskId: string, containerId: string, focusFeedback?: boolean) => void;
@@ -200,6 +201,16 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
     );
   };
 
+  const ZenAquarium = () => (
+    <div className="absolute inset-x-0 bottom-0 h-24 pointer-events-none overflow-hidden opacity-10 z-0">
+      <div className="relative h-full w-full">
+        <FishIcon className="absolute bottom-2 left-0 w-10 h-10 text-white animate-swim-slow" />
+        <FishIcon className="absolute bottom-8 left-0 w-6 h-6 text-white animate-swim-medium" style={{ animationDelay: '-5s' }} />
+        <FishIcon className="absolute bottom-4 left-0 w-8 h-8 text-white animate-swim-fast" style={{ animationDelay: '-12s' }} />
+      </div>
+    </div>
+  );
+
   return (
     <div className={clsx(
       "flex-1 overflow-y-auto p-4 md:p-8 space-y-8 custom-scrollbar text-[var(--text-primary)] transition-all duration-1000",
@@ -261,6 +272,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
               focusData.task.timerIsRunning && !isYellow && "ring-8 ring-google-green/20",
               focusData.task.timerIsRunning && isYellow && "ring-8 ring-google-yellow/20"
             )}>
+              {isExecuting && <ZenAquarium />}
               <div className="relative z-10 flex flex-col h-full space-y-8">
                 <WorkflowTracker />
                 
@@ -314,9 +326,9 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                   {focusData.task.guide?.complexity && !isExecuting && (
                     <div className={clsx(
                       "mt-4 flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit transition-all duration-700 shadow-sm",
-                      focusData.task.guide.complexity === 'Easy' && "bg-green-600/30 text-white border-green-400/50",
-                      focusData.task.guide.complexity === 'Moderate' && "bg-amber-600/30 text-white border-amber-400/50",
-                      focusData.task.guide.complexity === 'Complex' && "bg-red-600/30 text-white border-red-400/50"
+                      focusData.task.guide.complexity === 'Easy' && "bg-green-700 text-white border-green-500",
+                      focusData.task.guide.complexity === 'Moderate' && "bg-amber-700 text-white border-amber-500",
+                      focusData.task.guide.complexity === 'Complex' && "bg-red-700 text-white border-red-500"
                     )}>
                       <Zap className="w-3.5 h-3.5 fill-current" />
                       <span>{focusData.task.guide.complexity}</span>
@@ -325,10 +337,10 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                 </div>
 
                 <div className={clsx(
-                  "flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10 transition-all duration-700",
+                  "flex flex-col md:flex-row items-stretch justify-between gap-4 pt-4 border-t border-white/10 transition-all duration-700",
                   isExecuting && "border-transparent"
                 )}>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-stretch gap-2">
                     {/* Play/Pause Button */}
                     {(!(!isExecuting && !focusData.task.timerIsRunning)) && (
                       <div className={clsx(
