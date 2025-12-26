@@ -236,6 +236,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--prereq-icon', settings.colorPrereqIcon);
     root.style.setProperty('--hub-inactive-border', settings.colorHubInactiveBorder);
     root.style.setProperty('--hub-step2-inactive-bg', settings.colorHubStep2InactiveBg);
+    root.style.setProperty('--focus-water', settings.colorFocusWater);
 
     // App Atmosphere
     root.style.setProperty('--app-bg', settings.colorAppBg);
@@ -323,6 +324,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorPrereqIcon: oldSettings.colorPrereqIcon || '#EA580C', // orange-600
       colorHubInactiveBorder: oldSettings.colorHubInactiveBorder || (oldSettings.mode === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.15)'),
       colorHubStep2InactiveBg: oldSettings.colorHubStep2InactiveBg || (oldSettings.mode === 'dark' ? 'rgba(254, 226, 226, 0.1)' : 'rgba(254, 226, 226, 0.8)'),
+      colorFocusWater: oldSettings.colorFocusWater || (oldSettings.mode === 'dark' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.3)'),
 
       // Defaults for new fields
       colorAppBg: oldSettings.colorAppBg || (oldSettings.mode === 'dark' ? '#121212' : '#FFFFFF'),
@@ -392,6 +394,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorPrereqIcon: '#EA580C',
     colorHubInactiveBorder: isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.15)',
     colorHubStep2InactiveBg: isDark ? 'rgba(254, 226, 226, 0.1)' : 'rgba(254, 226, 226, 0.8)',
+    colorFocusWater: isDark ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.3)',
     colorAppBg: isDark ? '#121212' : '#FFFFFF',
     colorSidebarBg: isDark ? 'rgba(0, 0, 0, 0.6)' : '#F9FAFB',
     colorConsoleBg: isDark ? '#1E1E1E' : '#FFFFFF',

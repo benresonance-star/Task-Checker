@@ -112,8 +112,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
       )}
       style={{ 
         height: `${Math.min(100, Math.max(0, progress * 100))}%`,
-        background: 'linear-gradient(to top, rgba(34, 197, 94, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)',
-        borderTop: '2px solid rgba(255, 255, 255, 0.3)',
+        backgroundColor: 'var(--focus-water)',
       }}
     />
   );

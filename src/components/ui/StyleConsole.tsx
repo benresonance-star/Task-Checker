@@ -325,6 +325,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
               <div className="space-y-6 animate-in fade-in slide-in-from-top-1 duration-200 px-1">
                 <div className="grid grid-cols-2 gap-3">
                   <ColorControl label="Task Done Highlight" value={themeSettings.colorActiveTaskDone} onChange={(v) => handleChange('colorActiveTaskDone', v)} />
+                  <ColorControl label="Zen Water Level" value={themeSettings.colorFocusWater} onChange={(v) => handleChange('colorFocusWater', v)} />
                   <ColorControl label="Inactive Hub Border" value={themeSettings.colorHubInactiveBorder} onChange={(v) => handleChange('colorHubInactiveBorder', v)} />
                   <ColorControl label="Hub Step 2 Inactive Bg" value={themeSettings.colorHubStep2InactiveBg} onChange={(v) => handleChange('colorHubStep2InactiveBg', v)} />
                 </div>

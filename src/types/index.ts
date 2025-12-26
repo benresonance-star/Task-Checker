@@ -235,6 +235,7 @@ export interface ThemeSettings {
   colorPrereqIcon: string;
   colorHubInactiveBorder: string;
   colorHubStep2InactiveBg: string;
+  colorFocusWater: string;
   colorAppBg: string;
   colorSidebarBg: string;
   colorConsoleBg: string;
