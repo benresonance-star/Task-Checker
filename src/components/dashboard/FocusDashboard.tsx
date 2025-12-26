@@ -292,7 +292,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                 <div className="flex-1 flex flex-col justify-center py-4">
                   <h2 className={clsx(
                     "text-2xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight break-words transition-all duration-700",
-                    isExecuting && "md:text-7xl lg:text-8xl text-center",
+                    isExecuting && "md:text-7xl lg:text-8xl",
                     isWide && !isExecuting && "lg:text-7xl",
                     isYellow ? "text-gray-900" : "text-white",
                     focusData.task.timerIsRunning && "animate-pulse-slow"
@@ -300,10 +300,9 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                     {focusData.task.title}
                   </h2>
                   
-                  {focusData.task.guide?.complexity && (
+                  {focusData.task.guide?.complexity && !isExecuting && (
                     <div className={clsx(
                       "mt-4 flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit transition-all duration-700 shadow-sm",
-                      isExecuting && "mx-auto scale-125 mb-4",
                       focusData.task.guide.complexity === 'Easy' && "bg-green-600/30 text-white border-green-400/50",
                       focusData.task.guide.complexity === 'Moderate' && "bg-amber-600/30 text-white border-amber-400/50",
                       focusData.task.guide.complexity === 'Complex' && "bg-red-600/30 text-white border-red-400/50"
@@ -325,14 +324,14 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                         theme.components.pomodoro.button,
                         isYellow && theme.components.pomodoro.buttonYellow,
                         "transition-all duration-700",
-                        isExecuting ? "w-16 h-16" : "w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20"
+                        isExecuting ? "w-20 h-20 md:w-24 md:h-24" : "w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20"
                       )}>
                         <button 
                           onClick={() => toggleTaskTimer(focusData.task.id)} 
                           title="Start/Pause Pomodoro Timer"
                           className="w-full h-full flex items-center justify-center hover:scale-110 transition-transform"
                         >
-                          {focusData.task.timerIsRunning ? <Pause className={clsx(isExecuting ? "w-8 h-8" : "w-6 h-6 lg:w-8 lg:h-8", "fill-current")} /> : <Play className={clsx(isExecuting ? "w-8 h-8" : "w-6 h-6 lg:w-8 lg:h-8", "fill-current ml-0.5")} />}
+                          {focusData.task.timerIsRunning ? <Pause className={clsx(isExecuting ? "w-10 h-10 md:w-12 md:h-12" : "w-6 h-6 lg:w-8 lg:h-8", "fill-current")} /> : <Play className={clsx(isExecuting ? "w-10 h-10 md:w-12 md:h-12" : "w-6 h-6 lg:w-8 lg:h-8", "fill-current ml-0.5")} />}
                         </button>
                       </div>
                     )}
@@ -349,7 +348,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                         theme.components.pomodoro.container,
                         isYellow ? "bg-black/10 text-gray-900" : "bg-white/10 text-white",
                         "transition-all duration-700",
-                        isExecuting ? "h-16 px-6" : "h-14 md:h-16 lg:h-20"
+                        isExecuting ? "h-20 md:h-24 px-8 md:px-10" : "h-14 md:h-16 lg:h-20"
                       )}>
                         <div className="relative flex items-center gap-1 min-w-0 px-1">
                           <button 
@@ -360,10 +359,10 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                               !isExecuting && "hover:bg-black/5"
                             )}
                           >
-                            <TomatoIcon className={clsx(isExecuting ? "w-6 h-6" : "w-4 h-4", "shrink-0")} />
+                            <TomatoIcon className={clsx(isExecuting ? "w-8 h-8 md:w-10 md:h-10" : "w-4 h-4", "shrink-0")} />
                             <span className={clsx(
                               "font-black tabular-nums text-center",
-                              isExecuting ? "text-2xl min-w-[80px]" : "text-sm md:text-lg lg:text-xl min-w-[38px]"
+                              isExecuting ? "text-3xl md:text-4xl min-w-[100px]" : "text-sm md:text-lg lg:text-xl min-w-[38px]"
                             )}>
                               {formatTime(focusData.task.timerRemaining ?? focusData.task.timerDuration ?? 20 * 60)}
                             </span>
