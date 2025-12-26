@@ -15,6 +15,12 @@ interface FocusDashboardProps {
   onOpenNotes?: (taskId: string, containerId: string, focusFeedback?: boolean) => void;
 }
 
+const CompletionTransition = () => (
+  <div className="absolute inset-0 z-0 pointer-events-none bg-[var(--brand-green-light)]">
+    <div className="absolute inset-0 bg-[var(--brand-green-pulse)] animate-completion-breathing" />
+  </div>
+);
+
 export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) => {
   const navigate = useNavigate();
   const { 
@@ -117,10 +123,6 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
         backgroundColor: 'var(--focus-water)',
       }}
     />
-  );
-
-  const CompletionTransition = () => (
-    <div className="absolute inset-0 z-0 pointer-events-none animate-completion-transition animate-in fade-in duration-1000" />
   );
 
   const handleSetTimerSubmit = () => {
