@@ -1210,12 +1210,12 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
                 changed = true;
                 targetInstanceId = inst.id;
                 (globalThis as any)[`lastToggle_${inst.id}-${t.id}`] = Date.now();
-                // Setting timer always resets remaining to duration and starts countdown
+                // Setting timer resets remaining to duration and keeps current running state (usually paused during prep)
                 return { 
                   ...t, 
                   timerDuration: duration, 
                   timerRemaining: duration, 
-                  timerIsRunning: true,
+                  timerIsRunning: false,
                   timerLastUpdated: Date.now() 
                 };
               }
@@ -1259,11 +1259,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
                 changed = true;
                 targetInstanceId = inst.id;
                 (globalThis as any)[`lastToggle_${inst.id}-${t.id}`] = Date.now();
-                // Resetting timer sets remaining back to duration and starts countdown
+                // Resetting timer sets remaining back to duration and stops countdown
                 return { 
                   ...t, 
                   timerRemaining: t.timerDuration || 20 * 60, 
-                  timerIsRunning: true,
+                  timerIsRunning: false,
                   timerLastUpdated: Date.now()
                 };
               }
