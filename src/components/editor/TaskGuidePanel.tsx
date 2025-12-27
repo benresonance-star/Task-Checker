@@ -108,6 +108,11 @@ const InlineInput: React.FC<InlineInputProps> = ({ value, onSave, className, pla
 export const TaskGuidePanel: React.FC<TaskGuidePanelProps> = React.memo(({ task, mode, containerId, showComplexityHeader = true }) => {
   const { updateTaskGuide } = useTasklistStore();
   const [showFullInstructions, setShowFullInstructions] = useState(false);
+  
+  const handleGuideContentChange = React.useCallback((content: string, imm?: boolean) => {
+    updateTaskGuide(task.id, { content }, containerId, !!imm);
+  }, [task.id, containerId, updateTaskGuide]);
+
   const [isGuideCollapsed, setIsGuideCollapsed] = useState(() => {
     return localStorage.getItem(`guide_collapsed_${task.id}`) === 'true';
   });
@@ -519,7 +524,7 @@ export const TaskGuidePanel: React.FC<TaskGuidePanelProps> = React.memo(({ task,
             <div className="animate-in fade-in slide-in-from-top-2 duration-300">
               <NoteEditor 
                 content={guide.content || ''} 
-                onChange={(content, imm) => handleUpdate({ content }, imm)} 
+                onChange={handleGuideContentChange} 
                 readOnly={!isMaster}
               />
             </div>

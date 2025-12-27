@@ -3,6 +3,7 @@ import { useTasklistStore } from '../../store/useTasklistStore';
 import { theme } from '../../styles/theme';
 import { LayoutGrid, Target, Play, Pause, RotateCcw, ThumbsUp, CheckCircle2, StickyNote, Zap } from 'lucide-react';
 import { clsx } from 'clsx';
+import { formatTime } from '../../utils/time';
 import { useNavigate } from 'react-router-dom';
 import { Music } from 'lucide-react';
 import { ScratchpadWidget } from './ScratchpadWidget';
@@ -110,12 +111,6 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
 
   const currentStage = focusData?.task.completed ? (currentUser?.activeFocus?.stage || 'executing') : (currentUser?.activeFocus?.stage || 'staged');
   const isExecuting = currentStage === 'executing';
-
-  const formatTime = (val: number) => {
-    const mins = Math.floor(val / 60);
-    const secs = val % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
 
   const ProgressFill = ({ progress, isRunning }: { progress: number; isRunning: boolean }) => (
     <div 

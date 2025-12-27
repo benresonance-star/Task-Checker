@@ -14,6 +14,7 @@ interface TaskItemProps {
 }
 
 import { TomatoIcon } from '../icons/TomatoIcon';
+import { formatTime } from '../../utils/time';
 
 /**
  * TaskItem component represents a single task in the checklist.
@@ -122,15 +123,6 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
   }, [task.id, location.search]);
 
   // Removed individual timer logic to prevent race conditions
-
-  const formatTime = (seconds: number | undefined | null, duration?: number) => {
-    let val = seconds ?? duration ?? (20 * 60);
-    if (isNaN(val) || val < 0) val = 20 * 60;
-    const hrs = Math.floor(val / 3600);
-    const mins = Math.floor((val % 3600) / 60);
-    const secs = val % 60;
-    return `${hrs > 0 ? `${hrs}:` : ''}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
 
   const handleSetTimer = () => {
     const mins = parseInt(customMinutes);
@@ -360,7 +352,11 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
             size="sm" 
             onClick={(e) => {
               e.stopPropagation();
-              onOpenNotes(task.id, activeInstance?.id || activeMaster?.id || '');
+              // Explicitly pass the correct container ID based on the current mode
+              const containerId = mode === 'master' ? activeMaster?.id : activeInstance?.id;
+              if (containerId) {
+                onOpenNotes(task.id, containerId);
+              }
             }}
             className={clsx(
               'h-7 w-7 sm:h-8 sm:w-8 p-0 transition-all rounded-full border-2', 
@@ -480,7 +476,11 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
               size="sm" 
               onClick={(e) => {
                 e.stopPropagation();
-                onOpenNotes(task.id, activeInstance?.id || activeMaster?.id || '');
+                // Explicitly pass the correct container ID based on the current mode
+                const containerId = mode === 'master' ? activeMaster?.id : activeInstance?.id;
+                if (containerId) {
+                  onOpenNotes(task.id, containerId);
+                }
               }}
               className={clsx(
                 'h-12 w-12 p-0 transition-all rounded-2xl border-2 shadow-sm', 

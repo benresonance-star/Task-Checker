@@ -56,7 +56,7 @@ The system features a robust sync engine:
   - **Comprehensive Controls**: Includes Toggle (Play/Pause), Set (custom duration in minutes), and Reset (reverts to the set duration).
   - **Quick Extension**: An **Add 5mins** button is available in the "My Session" sidebar and mobile view for rapid session adjustments.
 - **One Active Timer Rule**: The system enforces focus by automatically pausing any running timers across all checklists when a user switches their active task focus.
-- **Stable Interaction Engine**: The Task Info modal utilizes component-level isolation for high-frequency updates. The Pomodoro timer is decoupled from the main modal structure, ensuring that 1-second ticks do not trigger expensive re-renders of rich-text editors or instruction panels, maintaining a fluid 60fps UI.
+- **Stable Interaction Engine**: The Task Info modal utilizes component-level isolation for high-frequency updates. The Pomodoro timer is decoupled from the main modal structure, ensuring that 1-second ticks do not trigger expensive re-renders of rich-text editors or instruction panels, maintaining a fluid 60fps UI. **The modal also employs custom equality selectors to ignore non-essential state changes (like timer countdowns) and features an Auto-Close Safety mechanism to prevent interface crashes if a task is inaccessible.**
 - **Precision Recording**: Upon task completion, the application calculates and records the exact time spent (Original Duration minus Remaining Time) into a persistent `timeTaken` field.
   - **State Protection**: Optimized for multi-user sync with a **3-second local grace period** that prevents incoming cloud data from reverting local timer states immediately after a user interaction.
   - **Cloud Heartbeat**: Running timers perform a **10-second heartbeat sync** to Firestore, ensuring progress is preserved across page refreshes and multi-device sessions.
@@ -196,7 +196,8 @@ The system features a robust sync engine:
   - Outlines: Standardized to a consistent dark grey (`dark:border-gray-800`) across project info, checklists, and consultant cards.
 - **Typography**: Uses a modern **System Font Stack** (-apple-system, Segoe UI, Roboto) for a native app feel on all platforms.
 - **Visual Connectors**: Precision-engineered **1px** vertical and horizontal link lines ensuring zero visual gaps and a refined hierarchy. **All primary action icons are aligned along a single vertical axis from the top-level title down to the smallest subsection, maintained via precision-calibrated horizontal padding.**
-- **Input Stability**: Hierarchical titles (Templates, Sections, Subsections, and Tasks) utilize **local state synchronization** to prevent cursor jumping during collaborative editing, ensuring a fluid typing experience while maintaining real-time cloud persistence.
+- **Input Stability**: Hierarchical titles (Templates, Sections, Subsections, and Tasks) utilize **local state synchronization** to prevent cursor jumping during collaborative editing, ensuring a fluid typing experience while maintaining real-time cloud persistence. **The rich-text editor (NoteEditor) features advanced content normalization to ignore minor structural variations and uses stable callback references to prevent infinite render loops during store synchronization.**
+- **Robust Task Resolution**: The Task Info window employs a multi-tier search strategy, prioritizing the currently viewed Master or Instance before falling back to a global workspace scan. This ensures high reliability across complex navigation paths and mode switches.
 - **Performance "Red Lines"**:
   - **60fps Scrolling**: To maintain fluid performance with 100+ tasks, all complex derived data must be wrapped in `useMemo`. 
   - **Re-render Optimization**: Components like `TaskItem` and `TaskInfoModal` must minimize internal state changes. High-frequency updates (like the 1s timer tick) are isolated into specialized leaf components to prevent global re-render cycles of heavy parent containers.
@@ -354,4 +355,4 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 26, 2025 (v1.8.0 - Zen Focus Breathing & Inactive Text Controls)*
+*Updated: December 27, 2025 (v1.9.0 - Stable Interaction Engine & Global Fallback Search)*

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { Section, Complexity } from '../../types';
 import { Button } from '../ui/Button';
@@ -19,20 +19,16 @@ interface TaskInfoModalProps {
 }
 
 export const TaskInfoModal: React.FC<TaskInfoModalProps> = ({ taskId, containerId, onClose, isDarkMode, focusFeedback }) => {
-  const { 
-    mode, masters, instances, currentUser, 
-    updateTaskNotes, updateTaskGuide,
-    handleFileUpload, handleFileDownload
-  } = useTasklistStore();
+  // Use specific selectors to avoid unnecessary re-renders when other parts of the store change
+  const mode = useTasklistStore(state => state.mode);
+  const currentUser = useTasklistStore(state => state.currentUser);
+  const updateTaskNotes = useTasklistStore(state => state.updateTaskNotes);
+  const updateTaskGuide = useTasklistStore(state => state.updateTaskGuide);
+  const handleFileUpload = useTasklistStore(state => state.handleFileUpload);
+  const handleFileDownload = useTasklistStore(state => state.handleFileDownload);
 
-  const [isHydrated, setIsHydrated] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isReady, setIsReady] = useState(false);
-  const feedbackRef = React.useRef<HTMLDivElement>(null);
-
-  // Derive the current task from store - Memoized to only change when essential task properties change
-  const task = useMemo(() => {
-    if (!taskId || !containerId) return null;
+  // Selector for the task that stabilizes the object to prevent re-renders on every timer tick
+  const task = useTasklistStore(state => {
     const searchTasks = (sections: Section[]) => {
       if (!Array.isArray(sections)) return null;
       for (const s of sections) {
@@ -40,45 +36,108 @@ export const TaskInfoModal: React.FC<TaskInfoModalProps> = ({ taskId, containerI
         for (const ss of s.subsections) {
           if (!ss.tasks) continue;
           const found = ss.tasks.find(t => t?.id === taskId);
-          // Return a stable version of the task without the timer properties to avoid re-renders on every tick
-          if (found) {
-            // No longer stripping timer props here, isolation is handled by TaskTimerControls
-            return found;
-          }
+          if (found) return found;
         }
       }
       return null;
     };
 
-    if (mode === 'master') {
-      const master = (masters || []).find(m => m.id === containerId);
-      if (master) return searchTasks(master.sections || []);
+    let foundTask = null;
+    if (state.mode === 'master') {
+      // First check activeMaster for speed and reliability in the Template view
+      if (state.activeMaster?.id === containerId) {
+        foundTask = searchTasks(state.activeMaster.sections || []);
+      }
+      // Fallback to searching all masters if not found or activeMaster doesn't match
+      if (!foundTask) {
+        const master = (state.masters || []).find(m => m.id === containerId);
+        if (master) foundTask = searchTasks(master.sections || []);
+      }
     } else {
-      const instance = (instances || []).find(i => i.id === containerId);
-      if (instance) return searchTasks(instance.sections || []);
+      // First check activeInstance for speed and reliability in the Project view
+      if (state.activeInstance?.id === containerId) {
+        foundTask = searchTasks(state.activeInstance.sections || []);
+      }
+      // Fallback to searching all instances
+      if (!foundTask) {
+        const instance = (state.instances || []).find(i => i.id === containerId);
+        if (instance) foundTask = searchTasks(instance.sections || []);
+      }
     }
-    return null;
-  }, [taskId, containerId, mode, masters, instances]);
 
-  // Handle mobile detection and hydration delays
+    // FINAL GLOBAL FALLBACK: If still not found (e.g. containerId mismatch or stale props),
+    // search EVERYTHING as a safety measure to prevent the modal from auto-closing unnecessarily.
+    if (!foundTask) {
+      for (const master of state.masters || []) {
+        foundTask = searchTasks(master.sections || []);
+        if (foundTask) break;
+      }
+    }
+    if (!foundTask) {
+      for (const inst of state.instances || []) {
+        foundTask = searchTasks(inst.sections || []);
+        if (foundTask) break;
+      }
+    }
+
+    return foundTask;
+  }, (prev, next) => {
+    // Custom equality check: Ignore timer-related changes to prevent modal re-renders every second
+    if (!prev || !next) return prev === next;
+    
+    // Check core properties that should trigger a re-render
+    return (
+      prev.id === next.id &&
+      prev.title === next.title &&
+      prev.completed === next.completed &&
+      prev.notes === next.notes &&
+      prev.userNotes === next.userNotes &&
+      prev.workbench === next.workbench &&
+      JSON.stringify(prev.guide) === JSON.stringify(next.guide) &&
+      (prev.files?.length === next.files?.length) &&
+      (prev.userFiles?.length === next.userFiles?.length)
+    );
+  });
+
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const feedbackRef = React.useRef<HTMLDivElement>(null);
+
+  const handleNotesChange = useCallback((n: string, imm?: boolean) => {
+    updateTaskNotes(taskId, n, containerId, true, imm);
+  }, [taskId, containerId, updateTaskNotes]);
+
+  const onFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>, isUserFile: boolean) => {
+    handleFileUpload(e, taskId, containerId, isUserFile);
+  }, [taskId, containerId, handleFileUpload]);
+
+  // Handle mobile detection and mount stabilization
   useEffect(() => {
     const mobile = window.innerWidth < 768;
     setIsMobile(mobile);
     
-    // Mount stabilization
-    const readyTimer = setTimeout(() => setIsReady(true), 20);
-    // Hydration delay
-    const hydrateTimer = setTimeout(() => setIsHydrated(true), mobile ? 500 : 100);
+    const hydrateTimer = setTimeout(() => {
+      setIsHydrated(true);
+    }, mobile ? 300 : 100);
 
-    // Prevent body scroll
-    document.body.style.overflow = 'hidden';
+    // Prevent body scroll only if the modal is actually going to render a task
+    if (task) {
+      document.body.style.overflow = 'hidden';
+    }
 
     return () => {
-      clearTimeout(readyTimer);
       clearTimeout(hydrateTimer);
       document.body.style.overflow = 'unset';
     };
-  }, []);
+  }, [!!task]); // Depend on task existence to manage scroll lock
+
+  // AUTO-CLOSE SAFETY: If the task is missing (e.g. deleted or ID mismatch), close the modal
+  // to prevent "ghost" states and interface crashes.
+  useEffect(() => {
+    if (!task) {
+      onClose();
+    }
+  }, [task, onClose]);
 
   // Handle auto-scroll to feedback
   useEffect(() => {
@@ -89,11 +148,7 @@ export const TaskInfoModal: React.FC<TaskInfoModalProps> = ({ taskId, containerI
     }
   }, [isHydrated, focusFeedback]);
 
-  if (!task || !isReady) return null;
-
-  const onFileUpload = (e: React.ChangeEvent<HTMLInputElement>, isUserFile: boolean) => {
-    handleFileUpload(e, task.id, containerId, isUserFile);
-  };
+  if (!task) return null;
 
   const isActiveFocus = currentUser?.activeFocus?.taskId === task.id;
 
@@ -186,7 +241,7 @@ export const TaskInfoModal: React.FC<TaskInfoModalProps> = ({ taskId, containerI
             </div>
 
             <TaskGuidePanel 
-              task={task as any} 
+              task={task} 
               mode={mode} 
               containerId={containerId}
               showComplexityHeader={false} 
@@ -212,9 +267,7 @@ export const TaskInfoModal: React.FC<TaskInfoModalProps> = ({ taskId, containerI
                 {isHydrated ? (
                   <NoteEditor 
                     content={String(task.userNotes || '')} 
-                    onChange={(n, imm) => { 
-                      updateTaskNotes(task.id, n, containerId, true, imm); 
-                    }} 
+                    onChange={handleNotesChange} 
                   />
                 ) : (
                   <div className="w-full h-[300px] flex flex-col items-center justify-center gap-3 text-gray-400">

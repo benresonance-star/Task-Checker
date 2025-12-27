@@ -53,6 +53,7 @@ import {
 } from 'react-router-dom';
 
 import { TomatoIcon } from './components/icons/TomatoIcon';
+import { formatTime } from './utils/time';
 
 const SidebarTaskItem = ({ 
   item, 
@@ -93,15 +94,6 @@ const SidebarTaskItem = ({
     zIndex: isDragging ? 50 : undefined,
     opacity: isDragging ? 0.8 : undefined,
   } as React.CSSProperties;
-
-  const formatTime = (seconds: number | undefined | null, duration?: number) => {
-    let val = seconds ?? duration ?? (20 * 60);
-    if (isNaN(val) || val < 0) val = 20 * 60;
-    const hrs = Math.floor(val / 3600);
-    const mins = Math.floor((val % 3600) / 60);
-    const secs = val % 60;
-    return `${hrs > 0 ? `${hrs}:` : ''}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
 
   const handleSetTimer = () => {
     const mins = parseInt(customMinutes);

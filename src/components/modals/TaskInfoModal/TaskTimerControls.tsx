@@ -4,6 +4,7 @@ import { Button } from '../../ui/Button';
 import { TomatoIcon } from '../../icons/TomatoIcon';
 import { Play, Pause } from 'lucide-react';
 import { clsx } from 'clsx';
+import { formatTime } from '../../../utils/time';
 
 interface TaskTimerControlsProps {
   taskId: string;
@@ -11,13 +12,14 @@ interface TaskTimerControlsProps {
 }
 
 export const TaskTimerControls: React.FC<TaskTimerControlsProps> = React.memo(({ taskId, isMobile }) => {
-  const { instances, setTaskTimer, resetTaskTimer, updateTaskTimer, toggleTaskTimer } = useTasklistStore();
-  const [showWidget, setShowWidget] = useState(false);
-  const [customMins, setCustomMins] = useState('20');
+  const setTaskTimer = useTasklistStore(state => state.setTaskTimer);
+  const resetTaskTimer = useTasklistStore(state => state.resetTaskTimer);
+  const updateTaskTimer = useTasklistStore(state => state.updateTaskTimer);
+  const toggleTaskTimer = useTasklistStore(state => state.toggleTaskTimer);
 
   // Find the specific task to get its latest timer state without re-rendering the parent modal
-  const task = React.useMemo(() => {
-    for (const inst of instances) {
+  const task = useTasklistStore(state => {
+    for (const inst of state.instances) {
       for (const s of inst.sections) {
         for (const ss of s.subsections) {
           const t = ss.tasks.find(t => t.id === taskId);
@@ -26,18 +28,12 @@ export const TaskTimerControls: React.FC<TaskTimerControlsProps> = React.memo(({
       }
     }
     return null;
-  }, [instances, taskId]);
+  });
+
+  const [showWidget, setShowWidget] = useState(false);
+  const [customMins, setCustomMins] = useState('20');
 
   if (!task) return null;
-
-  const formatTime = (seconds: number | undefined | null, duration?: number) => {
-    let val = seconds ?? duration ?? (20 * 60);
-    if (isNaN(val) || val < 0) val = 20 * 60;
-    const hrs = Math.floor(val / 3600);
-    const mins = Math.floor((val % 3600) / 60);
-    const secs = val % 60;
-    return `${hrs > 0 ? `${hrs}:` : ''}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
 
   const handleSet = () => {
     const mins = parseInt(customMins);

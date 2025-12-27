@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useEditor, EditorContent, NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
+import { useEditor, EditorContent, NodeViewWrapper, ReactNodeViewRenderer, NodeViewProps } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
@@ -21,7 +21,7 @@ interface NoteEditorProps {
 }
 
 // Image Node View Component for Manual Resizing
-const ImageNodeView = ({ node, updateAttributes, selected }: any) => {
+const ImageNodeView = ({ node, updateAttributes, selected }: NodeViewProps) => {
   const [resizing, setResizing] = useState(false);
   const [localWidth, setLocalWidth] = useState(node.attrs.width || '100%');
   const containerRef = useRef<HTMLDivElement>(null);
@@ -163,7 +163,13 @@ const ResizableImage = Image.extend({
 
 export const NoteEditor = ({ content, onChange, readOnly = false }: NoteEditorProps) => {
   const lastUpdateRef = useRef(content);
+  const onChangeRef = useRef(onChange);
   const [isFocused, setIsFocused] = useState(false);
+  
+  // Update the ref whenever onChange changes so the unmount effect always has the latest
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
   
   const editor = useEditor({
     editable: !readOnly,
@@ -232,7 +238,11 @@ export const NoteEditor = ({ content, onChange, readOnly = false }: NoteEditorPr
     // Normalize both for comparison to avoid infinite loops due to minor HTML differences
     const normalize = (html: string | null | undefined) => {
       if (typeof html !== 'string') return '';
-      return html.replace(/\s/g, '').replace(/<br\/?>/g, '<br>');
+      return html
+        .replace(/\s/g, '')
+        .replace(/<br\/?>/g, '<br>')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/<p><\/p>/g, '');
     };
     
     const normalizedContent = normalize(content);
@@ -244,18 +254,18 @@ export const NoteEditor = ({ content, onChange, readOnly = false }: NoteEditorPr
     }
   }, [content, editor, isFocused]);
 
-  // Flush changes on unmount
+  // Flush changes on unmount - using ref to avoid dependency on onChange which could be unstable
   useEffect(() => {
     return () => {
       if (editor && !editor.isDestroyed) {
         const html = editor.getHTML();
         // Only flush if it's different from what we last saved
         if (html !== lastUpdateRef.current) {
-          onChange(html, true);
+          onChangeRef.current(html, true);
         }
       }
     };
-  }, [editor, onChange]);
+  }, [editor]);
 
   if (!editor) return null;
 
