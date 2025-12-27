@@ -223,6 +223,8 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--subsection-bg', settings.colorSubsectionBg);
     root.style.setProperty('--subsection-border', settings.colorSubsectionBorder);
     root.style.setProperty('--subsection-title', settings.colorSubsectionTitle);
+    root.style.setProperty('--task-bg', settings.colorTaskBg);
+    root.style.setProperty('--task-active-bg', settings.colorTaskActiveBg);
     root.style.setProperty('--task-title', settings.colorTaskTitle);
     root.style.setProperty('--task-inactive-text', settings.colorTaskInactiveText);
     root.style.setProperty('--metadata-card-bg', settings.colorMetadataCardBg);
@@ -268,6 +270,26 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--radius-metadata-card', `${settings.radiusMetadataCard || 20}px`);
     root.style.setProperty('--radius-focus-card', `${settings.radiusFocusCard || 48}px`);
     root.style.setProperty('--radius-task-button', `${settings.radiusTaskButton || 12}px`);
+
+    // Task Info Modal
+    root.style.setProperty('--modal-overlay', settings.colorModalOverlay);
+    root.style.setProperty('--modal-bg', settings.colorModalBg);
+    root.style.setProperty('--modal-border', settings.colorModalBorder);
+    root.style.setProperty('--modal-section-bg', settings.colorModalSectionBg);
+    root.style.setProperty('--modal-section-border', settings.colorModalSectionBorder);
+    root.style.setProperty('--modal-section-title', settings.colorModalSectionTitle);
+    root.style.setProperty('--modal-icon', settings.colorModalIcon);
+    root.style.setProperty('--modal-prereq-bg', settings.colorModalPrereqBg);
+    root.style.setProperty('--modal-prereq-border', settings.colorModalPrereqBorder);
+    root.style.setProperty('--modal-input-bg', settings.colorModalInputBg);
+    root.style.setProperty('--modal-input-border', settings.colorModalInputBorder);
+    root.style.setProperty('--modal-btn-primary-bg', settings.colorModalButtonPrimaryBg);
+    root.style.setProperty('--modal-btn-primary-text', settings.colorModalButtonPrimaryText);
+    root.style.setProperty('--modal-btn-secondary-bg', settings.colorModalButtonSecondaryBg);
+    root.style.setProperty('--modal-btn-secondary-text', settings.colorModalButtonSecondaryText);
+    root.style.setProperty('--modal-close-btn', settings.colorModalCloseButton);
+    root.style.setProperty('--radius-modal-section', `${settings.radiusModalSection}px`);
+    root.style.setProperty('--radius-modal-input', `${settings.radiusModalInput}px`);
   };
 
   /**
@@ -316,6 +338,8 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorSubsectionBg: oldSettings.colorSubsectionBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.6)'),
       colorSubsectionBorder: oldSettings.colorSubsectionBorder || (oldSettings.mode === 'dark' ? '#1e293b' : '#DBEAFE'),
       colorSubsectionTitle: oldSettings.colorSubsectionTitle || (oldSettings.mode === 'dark' ? '#D1D5DB' : '#4B5563'),
+      colorTaskBg: oldSettings.colorTaskBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.6)' : '#FFFFFF'),
+      colorTaskActiveBg: oldSettings.colorTaskActiveBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.6)' : '#F3F4F6'),
       colorTaskTitle: oldSettings.colorTaskTitle || (oldSettings.mode === 'dark' ? '#D1D5DB' : '#4B5563'),
       colorTaskInactiveText: oldSettings.colorTaskInactiveText || (oldSettings.mode === 'dark' ? '#9CA3AF' : '#6B7280'),
       colorMetadataCardBg: oldSettings.colorMetadataCardBg || 'rgba(255, 255, 255, 0.8)',
@@ -359,6 +383,26 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       radiusMetadataCard: oldSettings.radiusMetadataCard || 20,
       radiusFocusCard: oldSettings.radiusFocusCard || 48,
       radiusTaskButton: oldSettings.radiusTaskButton || 12,
+
+      // Task Info Modal Defaults
+      colorModalOverlay: oldSettings.colorModalOverlay || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.8)' : 'rgba(0, 0, 0, 0.5)'),
+      colorModalBg: oldSettings.colorModalBg || (oldSettings.mode === 'dark' ? '#0f172a' : '#ffffff'),
+      colorModalBorder: oldSettings.colorModalBorder || (oldSettings.mode === 'dark' ? '#1e293b' : '#e2e8f0'),
+      colorModalSectionBg: oldSettings.colorModalSectionBg || (oldSettings.mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)'),
+      colorModalSectionBorder: oldSettings.colorModalSectionBorder || (oldSettings.mode === 'dark' ? '#1e293b' : '#e2e8f0'),
+      colorModalSectionTitle: oldSettings.colorModalSectionTitle || (oldSettings.mode === 'dark' ? '#94a3b8' : '#64748b'),
+      colorModalIcon: oldSettings.colorModalIcon || (oldSettings.mode === 'dark' ? '#94a3b8' : '#64748b'),
+      colorModalPrereqBg: oldSettings.colorModalPrereqBg || 'transparent',
+      colorModalPrereqBorder: oldSettings.colorModalPrereqBorder || (oldSettings.mode === 'dark' ? '#1e293b' : '#e2e8f0'),
+      colorModalInputBg: oldSettings.colorModalInputBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : '#f8fafc'),
+      colorModalInputBorder: oldSettings.colorModalInputBorder || (oldSettings.mode === 'dark' ? '#1e293b' : '#e2e8f0'),
+      colorModalButtonPrimaryBg: oldSettings.colorModalButtonPrimaryBg || '#4285F4',
+      colorModalButtonPrimaryText: oldSettings.colorModalButtonPrimaryText || '#ffffff',
+      colorModalButtonSecondaryBg: oldSettings.colorModalButtonSecondaryBg || (oldSettings.mode === 'dark' ? '#1e293b' : '#f1f5f9'),
+      colorModalButtonSecondaryText: oldSettings.colorModalButtonSecondaryText || (oldSettings.mode === 'dark' ? '#cbd5e1' : '#475569'),
+      colorModalCloseButton: oldSettings.colorModalCloseButton || (oldSettings.mode === 'dark' ? '#475569' : '#94a3b8'),
+      radiusModalSection: oldSettings.radiusModalSection || 16,
+      radiusModalInput: oldSettings.radiusModalInput || 8,
     };
   };
 
@@ -391,6 +435,8 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorSubsectionBg: isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.6)',
     colorSubsectionBorder: isDark ? '#1e293b' : '#DBEAFE',
     colorSubsectionTitle: isDark ? '#D1D5DB' : '#4B5563',
+    colorTaskBg: isDark ? 'rgba(0, 0, 0, 0.6)' : '#FFFFFF',
+    colorTaskActiveBg: isDark ? 'rgba(0, 0, 0, 0.6)' : '#F3F4F6',
     colorTaskTitle: isDark ? '#D1D5DB' : '#4B5563',
     colorTaskInactiveText: isDark ? '#9CA3AF' : '#6B7280',
     colorMetadataCardBg: isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.8)',
@@ -431,6 +477,24 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     radiusMetadataCard: 20,
     radiusFocusCard: 48,
     radiusTaskButton: 12,
+    colorModalOverlay: isDark ? 'rgba(0, 0, 0, 0.8)' : 'rgba(0, 0, 0, 0.5)',
+    colorModalBg: isDark ? '#0f172a' : '#ffffff',
+    colorModalBorder: isDark ? '#1e293b' : '#e2e8f0',
+    colorModalSectionBg: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
+    colorModalSectionBorder: isDark ? '#1e293b' : '#e2e8f0',
+    colorModalSectionTitle: isDark ? '#94a3b8' : '#64748b',
+    colorModalIcon: isDark ? '#94a3b8' : '#64748b',
+    colorModalPrereqBg: 'transparent',
+    colorModalPrereqBorder: isDark ? '#1e293b' : '#e2e8f0',
+    colorModalInputBg: isDark ? 'rgba(0, 0, 0, 0.2)' : '#f8fafc',
+    colorModalInputBorder: isDark ? '#1e293b' : '#e2e8f0',
+    colorModalButtonPrimaryBg: '#4285F4',
+    colorModalButtonPrimaryText: '#ffffff',
+    colorModalButtonSecondaryBg: isDark ? '#1e293b' : '#f1f5f9',
+    colorModalButtonSecondaryText: isDark ? '#cbd5e1' : '#475569',
+    colorModalCloseButton: isDark ? '#475569' : '#94a3b8',
+    radiusModalSection: 16,
+    radiusModalInput: 8,
   });
 
   /**

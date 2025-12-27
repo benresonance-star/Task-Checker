@@ -148,7 +148,7 @@ export const SectionItem = ({ section, onOpenNotes }: SectionItemProps) => {
           <textarea
             ref={textareaRef}
             rows={1}
-            className={clsx(theme.components.hierarchy.sectionTitle, "bg-transparent border-none focus:ring-0 focus:outline-none pt-2 pb-2 px-1 sm:px-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 focus:bg-white dark:focus:bg-gray-800 flex-1 transition-colors resize-none overflow-visible min-h-[2.5rem] min-w-0 break-words leading-relaxed")}
+            className={clsx(theme.components.hierarchy.sectionTitle, "bg-transparent border-none focus:ring-0 focus:outline-none pt-2 pb-2 px-1 sm:px-2 rounded-lg flex-1 transition-colors resize-none overflow-visible min-h-[2.5rem] min-w-0 break-words leading-relaxed")}
             value={localTitle}
             onChange={(e) => {
               const newVal = e.target.value;
@@ -245,7 +245,7 @@ export const SectionItem = ({ section, onOpenNotes }: SectionItemProps) => {
           {isMaster && (
             <div className="pt-6 relative">
               <button 
-                onClick={() => addSubsection(section.id, 'New Subsection')}
+                onClick={() => addSubsection(section.id, '')}
                 className={theme.components.hierarchy.addSubsectionButton}
               >
                 <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Add subsection

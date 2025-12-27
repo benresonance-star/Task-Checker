@@ -70,12 +70,13 @@ The system features a robust sync engine:
 
 ### 7. Branding & Live Style System
 - **Branding Console**: A floating, draggable, and resizable HUD available to admins. It features a **"Draft Mode" workflow** where stylistic changes (colors, radii) are applied locally for real-time exploration but are only persisted to Firestore when explicitly saved via "Save as Workspace Default" or by overwriting an existing snapshot.
-- **Interface-First Organization**: The console provides direct access to all **68 theme properties**, organized into collapsible sections:
+- **Interface-First Organization**: The console provides direct access to all **84 theme properties**, organized into collapsible sections:
   - **Style Snapshots**: High-level theme management and capturing current states.
   - **Atmosphere & Identity**: Core brand colors (including Danger/Warning alerts), app backgrounds, and a comprehensive typography engine.
   - **My Dashboard (Focus)**: Specific styling for the Active Focus card, **Knowledge Hub** (including inactive step borders and backgrounds), and **Notes/Workbench backgrounds** (Personal, Project, and Priority specific).
   - **Project Interface**: Dashboard metadata sections, card styling, and multi-color Section Header icons.
-  - **Checklist & Templates**: Task list hierarchy, connector lines, and highly granular controls for **Section/Subsection backgrounds, borders, radii, and font colors**, as well as **Task and Checklist title colors**, and a specific **Inactive Text** color for receded tasks.
+  - **Checklist & Templates**: Task list hierarchy, connector lines, and highly granular controls for **Section/Subsection backgrounds, borders, radii, and font colors**, as well as **Task and Checklist title colors**, **Task backgrounds (Idle/Active)**, and a specific **Inactive Text** color for receded tasks.
+  - **Task Info Window**: Overlay, window backgrounds, section styling (including specialized **"Can I Proceed?" background/outline**), input/button themes, and custom radii.
   - **System Corner Radii**: Global management of all corner radii from checklist components to major modals, sidebars, and metadata cards.
 - **Style Snapshots (Theme Library)**: Admins can capture the current brand styling and save it as a named snapshot (e.g., "Happy Mode"). Presets support **Active Style Tracking**, highlighting the currently applied theme and allowing for **Incremental Updates** (overwriting an existing snapshot with new tweaks) via a dedicated save icon.
 - **Smooth Interaction Engine**: Utilizes hardware-accelerated `translate3d` and `requestAnimationFrame` for buttery-smooth window movement and resizing. Transitions are dynamically disabled during active interactions to eliminate "input lag."
@@ -319,7 +320,7 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > 
 > **Visual Identity**:
 > - Implement a high-contrast UI (Light and Dark) with theme persistence.
-> - **Branding & Style System**: Implement a dynamic theme engine using CSS Variables linked to **semantic technical keys** (e.g. `colorAppIdentity`, `radiusTaskCard`). Add a floating, draggable, and resizable **Branding Console** for admins to live-adjust colors and corner radii across **68 properties**. Support **Style Snapshots** (Theme Library) with the ability to **highlight the active theme** and **overwrite/sync existing snapshots** with new iterative tweaks. Include consolidated styling sections for **My Notes** (widget containers, rich-text surfaces, note types) and **"Can I Proceed?"** (background, border, item background, font, and icon colors). Ensure real-time global sync via Firestore `settings/theme` and `themePresets`. Use `translate3d` and `requestAnimationFrame` for smooth HUD movement.
+> - **Branding & Style System**: Implement a dynamic theme engine using CSS Variables linked to **semantic technical keys** (e.g. `colorAppIdentity`, `radiusTaskCard`). Add a floating, draggable, and resizable **Branding Console** for admins to live-adjust colors and corner radii across **88 properties**. Support **Style Snapshots** (Theme Library) with the ability to **highlight the active theme** and **overwrite/sync existing snapshots** with new iterative tweaks. Include consolidated styling sections for **My Notes** (widget containers, rich-text surfaces, note types) and **"Can I Proceed?"** (background, border, item background, font, and icon colors), and **Task Info Window** (overlay, window backgrounds, section styling, input/button themes, and custom radii). Ensure real-time global sync via Firestore `settings/theme` and `themePresets`. Use `translate3d` and `requestAnimationFrame` for smooth HUD movement.
 > - **Standardized Radii Scales**: Define and use dynamic classes (`rounded-button`, `rounded-card`, `rounded-container`, `rounded-widget`, `rounded-sidebar`, `rounded-project-info`, `rounded-metadata`, `rounded-focus-card`, `rounded-task-button`) linked to a central semantic theme engine.
 > - **Project Context (Light Mode)**: Use `bg-blue-100/70` for main sections and `bg-white/80` for inner metadata cards (Identification, Planning, Building) with outlines matching text color.
 > - **Brand Identity**: Logo is a simple white tick inside an orange circle (`#E67E33`). Brand name stylized as `checkMATE`.
@@ -352,4 +353,30 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 28, 2025 (v1.9.5 - Admin Console & Styling Engine Alignment)*
+*Updated: December 28, 2025 (v1.9.6 - Advanced Branding & Task Surface Controls)*
+
+## Future Optimization Roadmap (Conceptual)
+
+The following architectural enhancements are identified for long-term scalability and codebase robustness. **CRITICAL: None of these optimizations are to be implemented without explicit approval from the lead developer.**
+
+### 1. Domain-Specific Store Decoupling
+As the application scales, the centralized state store should be split into domain-specific modules to prevent performance bottlenecks and improve maintainability:
+- **`useAuthStore`**: Dedicated to user identity, roles, and RBAC permissions.
+- **`useHierarchyStore`**: Focused on Master templates, Sections, Subsections, and Tasks.
+- **`useProjectStore`**: Managing project metadata and document explorer state.
+- **`useBrandingStore`**: Isolating the 68+ theme properties and CSS variable injection logic.
+
+### 2. Service Layer Extraction
+Move complex business logic out of the state containers and into a dedicated `src/services/` layer. This includes:
+- **Structural Sync Engine**: The `performSync` deep-merge algorithm.
+- **Hierarchical Parser**: The logic for transforming plain text into structured checklists.
+- **File Processing**: Centralized logic for Firebase Storage interactions.
+
+### 3. Atomic Selector Pattern
+Refine component subscriptions to use atomic selectors (e.g., `useStore(state => state.activeMaster)`) rather than broad destructuring. This ensures components only re-render when their specific dependencies update, maintaining a consistent 60fps experience as the UI complexity grows.
+
+### 4. Standardized Sync Hook
+Implement a unified `useCollaborativeSync` hook to encapsulate the "3-second grace period" and "sanitization" logic, providing a robust, reusable pattern for any new real-time features.
+
+---
+*Would you like to re-look at implementing one or more of these steps?*

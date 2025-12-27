@@ -222,6 +222,8 @@ export interface ThemeSettings {
   colorSubsectionBg: string;
   colorSubsectionBorder: string;
   colorSubsectionTitle: string;
+  colorTaskBg: string;
+  colorTaskActiveBg: string;
   colorTaskTitle: string;
   colorTaskInactiveText: string;
   colorMetadataCardBg: string;
@@ -262,6 +264,24 @@ export interface ThemeSettings {
   radiusMetadataCard: number;
   radiusFocusCard: number;
   radiusTaskButton: number;
+  colorModalOverlay: string;
+  colorModalBg: string;
+  colorModalBorder: string;
+  colorModalSectionBg: string;
+  colorModalSectionBorder: string;
+  colorModalSectionTitle: string;
+  colorModalIcon: string;
+  colorModalPrereqBg: string;
+  colorModalPrereqBorder: string;
+  colorModalInputBg: string;
+  colorModalInputBorder: string;
+  colorModalButtonPrimaryBg: string;
+  colorModalButtonPrimaryText: string;
+  colorModalButtonSecondaryBg: string;
+  colorModalButtonSecondaryText: string;
+  colorModalCloseButton: string;
+  radiusModalSection: number;
+  radiusModalInput: number;
 }
 
 export interface ThemePreset {

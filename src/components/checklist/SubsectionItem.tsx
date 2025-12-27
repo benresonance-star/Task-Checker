@@ -96,7 +96,7 @@ export const SubsectionItem = ({ subsection, sectionId, onOpenNotes }: Subsectio
           <textarea
             ref={textareaRef}
             rows={1}
-            className={clsx(theme.components.hierarchy.subsectionTitle, "bg-transparent border-none focus:ring-0 focus:outline-none pt-2 pb-2 px-1 sm:px-2 rounded hover:bg-white dark:hover:bg-gray-800 focus:bg-white dark:focus:bg-gray-800 flex-1 transition-colors resize-none overflow-visible min-h-[2.2rem] sm:min-h-[2.5rem] min-w-0 break-words leading-relaxed")}
+            className={clsx(theme.components.hierarchy.subsectionTitle, "bg-transparent border-none focus:ring-0 focus:outline-none pt-2 pb-2 px-1 sm:px-2 rounded flex-1 transition-colors resize-none overflow-visible min-h-[2.2rem] sm:min-h-[2.5rem] min-w-0 break-words leading-relaxed")}
             value={localTitle}
             onChange={(e) => {
               const newVal = e.target.value;

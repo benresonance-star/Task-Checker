@@ -45,11 +45,11 @@ export const TaskTimerControls: React.FC<TaskTimerControlsProps> = React.memo(({
 
   if (isMobile) {
     return (
-      <div className="flex items-center gap-1.5 bg-white/50 dark:bg-white/5 p-1 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
+      <div className="flex items-center gap-1.5 bg-[var(--modal-section-bg)] p-1 rounded-[var(--radius-modal-input)] border border-[var(--modal-section-border)] shadow-sm">
         <div className="relative">
           <button 
             onClick={() => setShowWidget(!showWidget)}
-            className="flex items-center gap-2 px-2 py-1 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 transition-all text-[10px] font-black"
+            className="flex items-center gap-2 px-2 py-1 rounded-lg bg-[var(--modal-btn-secondary-bg)] text-[var(--modal-btn-secondary-text)] transition-all text-[10px] font-black"
           >
             <TomatoIcon className="w-3.5 h-3.5" />
             <span className="tabular-nums">
@@ -60,19 +60,19 @@ export const TaskTimerControls: React.FC<TaskTimerControlsProps> = React.memo(({
           {showWidget && (
             <>
               <div className="fixed inset-0 z-[2010]" onClick={() => setShowWidget(false)} />
-              <div onClick={(e) => e.stopPropagation()} className="absolute top-full left-0 mt-2 p-3 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-2xl shadow-2xl z-[2020] min-w-[160px] animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 px-1">Set Duration</div>
+              <div onClick={(e) => e.stopPropagation()} className="absolute top-full left-0 mt-2 p-3 bg-[var(--modal-bg)] border-2 border-[var(--modal-border)] rounded-[var(--radius-modal-section)] shadow-2xl z-[2020] min-w-[160px] animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="text-[10px] font-black uppercase tracking-widest text-[var(--modal-section-title)] mb-2 px-1">Set Duration</div>
                 <div className="flex gap-2">
                   <input 
                     type="number" 
-                    className="w-16 h-8 bg-gray-50 dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-lg px-2 text-sm outline-none font-bold dark:text-gray-300" 
+                    className="w-16 h-8 bg-[var(--modal-input-bg)] border-2 border-[var(--modal-input-border)] rounded-[var(--radius-modal-input)] px-2 text-sm outline-none font-bold text-[var(--text-primary)]" 
                     value={customMins} 
                     onChange={(e) => setCustomMins(e.target.value)} 
                     onKeyDown={(e) => e.key === 'Enter' && handleSet()} 
                   />
                   <div className="flex flex-col gap-1">
-                    <Button size="sm" onClick={handleSet} className="h-7 px-2 font-black text-[10px] py-0">Set</Button>
-                    <Button size="sm" variant="secondary" onClick={() => { resetTaskTimer(taskId); setShowWidget(false); }} className="h-7 px-2 font-black text-[10px] py-0">Reset</Button>
+                    <Button size="sm" onClick={handleSet} className="h-7 px-2 font-black text-[10px] py-0 bg-[var(--modal-btn-primary-bg)] text-[var(--modal-btn-primary-text)] rounded-[var(--radius-modal-input)]">Set</Button>
+                    <Button size="sm" variant="secondary" onClick={() => { resetTaskTimer(taskId); setShowWidget(false); }} className="h-7 px-2 font-black text-[10px] py-0 border-[var(--modal-section-border)] bg-[var(--modal-btn-secondary-bg)] text-[var(--modal-btn-secondary-text)] rounded-[var(--radius-modal-input)]">Reset</Button>
                   </div>
                 </div>
               </div>
@@ -82,7 +82,7 @@ export const TaskTimerControls: React.FC<TaskTimerControlsProps> = React.memo(({
         <div className="flex items-center gap-1">
           <button 
             onClick={() => resetTaskTimer(taskId)}
-            className="p-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-[9px] font-black border border-gray-200 dark:border-gray-700"
+            className="p-1 rounded-lg bg-[var(--modal-btn-secondary-bg)] text-[var(--modal-btn-secondary-text)] text-[9px] font-black border border-[var(--modal-section-border)]"
           >
             Reset
           </button>
@@ -104,12 +104,12 @@ export const TaskTimerControls: React.FC<TaskTimerControlsProps> = React.memo(({
   }
 
   return (
-    <div className="flex items-center gap-2 bg-white/50 dark:bg-white/5 p-2 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+    <div className="flex items-center gap-2 bg-[var(--modal-section-bg)] p-2 rounded-[var(--radius-modal-section)] border border-[var(--modal-section-border)] shadow-sm">
       <div className="relative">
         <button 
           onClick={() => setShowWidget(!showWidget)}
           title="Set Duration"
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/40 text-red-600 dark:text-red-400 transition-all hover:bg-red-100"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-modal-input)] bg-[var(--modal-btn-secondary-bg)] border border-[var(--modal-section-border)] text-[var(--modal-btn-secondary-text)] transition-all hover:opacity-80"
         >
           <TomatoIcon className={clsx("w-5 h-5", !task.timerIsRunning && "grayscale-[0.5]")} />
           <span className="text-sm font-black tabular-nums">
@@ -120,19 +120,19 @@ export const TaskTimerControls: React.FC<TaskTimerControlsProps> = React.memo(({
         {showWidget && (
           <>
             <div className="fixed inset-0 z-[2010]" onClick={() => setShowWidget(false)} />
-            <div onClick={(e) => e.stopPropagation()} className="absolute top-full right-0 mt-2 p-3 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-2xl shadow-2xl z-[2020] min-w-[160px] animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 px-1">Set Duration</div>
+            <div onClick={(e) => e.stopPropagation()} className="absolute top-full right-0 mt-2 p-3 bg-[var(--modal-bg)] border-2 border-[var(--modal-border)] rounded-[var(--radius-modal-section)] shadow-2xl z-[2020] min-w-[160px] animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="text-[10px] font-black uppercase tracking-widest text-[var(--modal-section-title)] mb-2 px-1">Set Duration</div>
               <div className="flex gap-2">
                 <input 
                   type="number" 
-                  className="w-16 h-8 bg-gray-50 dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-lg px-2 text-sm outline-none font-bold dark:text-gray-300" 
+                  className="w-16 h-8 bg-[var(--modal-input-bg)] border-2 border-[var(--modal-input-border)] rounded-[var(--radius-modal-input)] px-2 text-sm outline-none font-bold text-[var(--text-primary)]" 
                   value={customMins} 
                   onChange={(e) => setCustomMins(e.target.value)} 
                   onKeyDown={(e) => e.key === 'Enter' && handleSet()} 
                 />
                 <div className="flex flex-col gap-1">
-                  <Button size="sm" onClick={handleSet} className="h-7 px-2 font-black text-[10px] py-0">Set</Button>
-                  <Button size="sm" variant="secondary" onClick={() => { resetTaskTimer(taskId); setShowWidget(false); }} className="h-7 px-2 font-black text-[10px] py-0">Reset</Button>
+                  <Button size="sm" onClick={handleSet} className="h-7 px-2 font-black text-[10px] py-0 bg-[var(--modal-btn-primary-bg)] text-[var(--modal-btn-primary-text)] rounded-[var(--radius-modal-input)]">Set</Button>
+                  <Button size="sm" variant="secondary" onClick={() => { resetTaskTimer(taskId); setShowWidget(false); }} className="h-7 px-2 font-black text-[10px] py-0 border-[var(--modal-section-border)] bg-[var(--modal-btn-secondary-bg)] text-[var(--modal-btn-secondary-text)] rounded-[var(--radius-modal-input)]">Reset</Button>
                 </div>
               </div>
             </div>
@@ -143,7 +143,7 @@ export const TaskTimerControls: React.FC<TaskTimerControlsProps> = React.memo(({
       <div className="flex items-center gap-1">
         <button 
           onClick={() => updateTaskTimer(taskId, (task.timerRemaining || 0) + (5 * 60))}
-          className="p-1.5 rounded-lg bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 hover:bg-red-200 transition-colors text-[10px] font-black"
+          className="p-1.5 rounded-[var(--radius-modal-input)] bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 hover:bg-red-200 transition-colors text-[10px] font-black"
           title="Add 5 Minutes"
         >
           Add 5mins

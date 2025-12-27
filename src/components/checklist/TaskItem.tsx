@@ -147,10 +147,7 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
           ? theme.components.checklist.containerMulti
           : isActive 
             ? theme.components.checklist.containerActive
-            : clsx(
-                theme.components.checklist.containerInactive,
-                !isAnyTaskActive ? "dark:bg-black/60" : "dark:bg-[#121212]"
-              ),
+            : theme.components.checklist.containerInactive,
         shouldRecede && !isMultiUser && "opacity-40 grayscale-[0.5] scale-[0.98]"
       )}
     >
@@ -199,7 +196,7 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
               <textarea
                 ref={textareaRef}
                 rows={1}
-                className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-[var(--task-title)] text-sm font-medium py-0.5 px-1 rounded hover:bg-white dark:hover:bg-gray-800 focus:bg-white dark:focus:bg-gray-800 transition-colors resize-none overflow-hidden min-h-[1.5rem]"
+                className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-[var(--task-title)] text-sm font-medium py-0.5 px-1 rounded transition-colors resize-none overflow-hidden min-h-[1.5rem]"
                 value={localTitle}
                 onChange={(e) => {
                   const newVal = e.target.value;

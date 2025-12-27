@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, GripHorizontal, RotateCcw, Palette, Maximize2, Minimize2, Camera, Trash2, Check, Save, ChevronDown, ChevronRight, LayoutGrid, ClipboardList, Settings, Briefcase } from 'lucide-react';
+import { X, GripHorizontal, RotateCcw, Palette, Maximize2, Minimize2, Camera, Trash2, Check, Save, ChevronDown, ChevronRight, LayoutGrid, ClipboardList, Settings, Briefcase, Info } from 'lucide-react';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { clsx } from 'clsx';
 import { ThemeSettings } from '../../types';
@@ -44,6 +44,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
     dashboard: true,
     projects: false,
     checklist: false,
+    modal: false,
     radii: false
   });
   
@@ -442,6 +443,8 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
                   <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest\">Task Styling</h4>
                   <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Task Background" value={themeSettings.colorTaskBg} onChange={(v) => handleChange('colorTaskBg', v)} />
+                    <ColorControl label="Active Task Bg" value={themeSettings.colorTaskActiveBg} onChange={(v) => handleChange('colorTaskActiveBg', v)} />
                     <ColorControl label="Task Title" value={themeSettings.colorTaskTitle} onChange={(v) => handleChange('colorTaskTitle', v)} />
                     <ColorControl label="Inactive Text" value={themeSettings.colorTaskInactiveText} onChange={(v) => handleChange('colorTaskInactiveText', v)} />
                     <ColorControl label="Completed State" value={themeSettings.colorCompletedState} onChange={(v) => handleChange('colorCompletedState', v)} />
@@ -451,7 +454,54 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
             )}
           </section>
 
-          {/* 5. Master Radii (System Corners) */}
+          {/* 5. Task Info Window (Modal) */}
+          <section className="space-y-3">
+            <SectionHeader id="modal" label="Task Info Window" icon={Info} />
+            {expandedSections.modal && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-top-1 duration-200 px-1">
+                <div className="grid grid-cols-2 gap-3">
+                  <ColorControl label="Overlay Color" value={themeSettings.colorModalOverlay} onChange={(v) => handleChange('colorModalOverlay', v)} />
+                  <ColorControl label="Window Background" value={themeSettings.colorModalBg} onChange={(v) => handleChange('colorModalBg', v)} />
+                  <ColorControl label="Window Border" value={themeSettings.colorModalBorder} onChange={(v) => handleChange('colorModalBorder', v)} />
+                  <ColorControl label="Close Button" value={themeSettings.colorModalCloseButton} onChange={(v) => handleChange('colorModalCloseButton', v)} />
+                </div>
+
+                <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest\">Section & Content</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Section Bg" value={themeSettings.colorModalSectionBg} onChange={(v) => handleChange('colorModalSectionBg', v)} />
+                    <ColorControl label="Prereq Section Bg" value={themeSettings.colorModalPrereqBg} onChange={(v) => handleChange('colorModalPrereqBg', v)} />
+                    <ColorControl label="Section Border" value={themeSettings.colorModalSectionBorder} onChange={(v) => handleChange('colorModalSectionBorder', v)} />
+                    <ColorControl label="Prereq Section Border" value={themeSettings.colorModalPrereqBorder} onChange={(v) => handleChange('colorModalPrereqBorder', v)} />
+                    <ColorControl label="Section Title" value={themeSettings.colorModalSectionTitle} onChange={(v) => handleChange('colorModalSectionTitle', v)} />
+                    <ColorControl label="Icon Color" value={themeSettings.colorModalIcon} onChange={(v) => handleChange('colorModalIcon', v)} />
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest\">Inputs & Radii</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Input Bg" value={themeSettings.colorModalInputBg} onChange={(v) => handleChange('colorModalInputBg', v)} />
+                    <ColorControl label="Input Border" value={themeSettings.colorModalInputBorder} onChange={(v) => handleChange('colorModalInputBorder', v)} />
+                  </div>
+                  <SliderControl label="Section Radius" value={themeSettings.radiusModalSection} min={0} max={40} onChange={(v) => handleChange('radiusModalSection', v)} />
+                  <SliderControl label="Input Radius" value={themeSettings.radiusModalInput} min={0} max={20} onChange={(v) => handleChange('radiusModalInput', v)} />
+                </div>
+
+                <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest\">Buttons</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Primary Btn Bg" value={themeSettings.colorModalButtonPrimaryBg} onChange={(v) => handleChange('colorModalButtonPrimaryBg', v)} />
+                    <ColorControl label="Primary Btn Text" value={themeSettings.colorModalButtonPrimaryText} onChange={(v) => handleChange('colorModalButtonPrimaryText', v)} />
+                    <ColorControl label="Secondary Btn Bg" value={themeSettings.colorModalButtonSecondaryBg} onChange={(v) => handleChange('colorModalButtonSecondaryBg', v)} />
+                    <ColorControl label="Secondary Btn Text" value={themeSettings.colorModalButtonSecondaryText} onChange={(v) => handleChange('colorModalButtonSecondaryText', v)} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* 6. Master Radii (System Corners) */}
           <section className="space-y-3">
             <SectionHeader id="radii" label="System Corner Radii" icon={Settings} />
             {expandedSections.radii && (

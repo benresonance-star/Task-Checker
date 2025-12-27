@@ -903,7 +903,7 @@ function App() {
   // --- EVENT HANDLERS ---
   const handleAddSection = () => {
     if (activeMaster) {
-      addSection(activeMaster.id, 'New Section');
+      addSection(activeMaster.id, '');
     }
   };
 
@@ -2100,7 +2100,6 @@ function App() {
           taskId={editingTaskInfo.taskId}
           containerId={editingTaskInfo.containerId}
           onClose={() => setEditingTaskInfo(null)}
-          isDarkMode={isDarkMode}
           focusFeedback={editingTaskInfo.focusFeedback}
         />
       )}
