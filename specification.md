@@ -2,11 +2,15 @@
 
 > **MANDATORY AGENT PROTOCOL**: 
 > 1. Any AI agent working on this codebase MUST read this entire specification before proposing or implementing changes.
+>    - *Comment: Ensure full context before any code modification.*
 > 2. All changes must be reflected in the **Admin > App Protocol** interface.
+>    - *Comment: Keep the internal Admin documentation synchronized with reality.*
 > 3. The version number below MUST match the `version` field in `package.json` and the version text at the bottom of the sidebar.
+>    - *Comment: Maintain a single source of truth for the application version.*
 > 4. Failure to adhere to Section 6 (AI Development Rules & SOP) will result in architectural drift and session termination.
+>    - *Comment: Strictly follow technical and deployment SOPs to prevent regressions.*
 
-*Current Version: 1.9.7*
+*Current Version: 1.9.9*
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It operates on a "Master-Instance" model, where users can define master templates and instantiate them within specific projects. The application is built for high reliability, real-time team synchronization, and cross-platform accessibility.
@@ -278,18 +282,22 @@ To maintain the integrity and high-speed deployment cycle of checkMATE, all AI a
 1. **Deployment Protocol**: 
    - **Always push to Firebase** at the end of every successful set of code changes. Use the command: `npm run build; if ($?) { npx firebase-tools deploy }`.
    - Before ending a turn, the agent must verify the build is successful and the app is live.
+   - *Comment: Automate live updates to ensure the latest version is always accessible.*
 
 2. **Proactive Documentation & Version Control**:
    - **Specification Sync**: After any significant codebase changes (new features, structural shifts, schema updates), the agent must update the `specification.md` to reflect these changes.
    - **GitHub Persistence**: After completing a major task or milestone, the agent must push these changes to GitHub.
+   - *Comment: Preserve institutional knowledge and maintain a clean git history.*
 
 3. **Data & State Safety**:
    - **Firestore Sanitization**: Every `updateDoc` call MUST use the `sanitize()` helper to strip `undefined` values, preventing synchronization failures.
    - **Theme Synchronization**: When adding new UI elements with customizable styles, ensure the new properties are integrated into the `ThemeSettings` interface and all relevant functions in `useTasklistStore.ts` (`getThemeDefaults`, `migrateThemeSettings`, `applyThemeToRoot`).
    - **Performance Hygiene**: Any heavy derived data or complex list rendering must be wrapped in `useMemo` to prevent UI stutter.
+   - *Comment: Prevent synchronization errors and maintain 60fps UI performance.*
 
 4. **Prompt Maintenance**:
    - Update the **"One-Shot Agentic Rebuild Prompt"** at the bottom of this file whenever a new significant architectural feature is added.
+   - *Comment: Keep the architectural 'blueprints' accurate for future system rebuilds.*
 
 ---
 
@@ -361,7 +369,22 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 28, 2025 (v1.9.6 - Advanced Branding & Task Surface Controls)*
+*Updated: December 28, 2025 (v1.9.9 - Enhanced Mandatory Agent Protocol & Global HUD)*
+
+## UI Architecture & Layering Strategy
+To ensure a consistent and predictable user interface, the application follows a standardized vertical stacking order (z-index hierarchy). This "Global HUD" strategy ensures that critical tools like the Branding Console remain accessible regardless of the current workspace state.
+
+- **z-[0-99]**: Base Content, Sidebars, Dashboard elements.
+- **z-[100]**: Persistent Navigation Aids (Sidebar Tab, Mobile Menu).
+- **z-[1000]**: Standard Modals (Confirmations, Small Popups, Import/Export dialogs).
+- **z-[2000]**: Major Workspace Modals (Task Info Window, Document Explorer, Admin Console).
+- **z-[3000]**: Branding HUD (Live Styling Console).
+- **z-[4000]**: Global Toasts & Critical System Alerts.
+
+### Branding Console Interaction
+- The Branding Console is designed to "pierce through" all modal layers.
+- It prevents event propagation to underlying layers, allowing live styling of active modals (like the Task Info Window) without closing them.
+- Position and minimized state are persisted across sessions.
 
 ## Future Optimization Roadmap (Conceptual)
 

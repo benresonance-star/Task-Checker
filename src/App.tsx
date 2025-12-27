@@ -525,7 +525,7 @@ function NotificationToast() {
 
   return (
     <div className={clsx(
-      "fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-4 duration-300",
+      "fixed bottom-8 left-1/2 -translate-x-1/2 z-[4000] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-4 duration-300",
       notification.type === 'error' ? "bg-google-red text-white border-2 border-white/20" : "bg-google-green text-white border-2 border-white/20"
     )}>
       {notification.type === 'error' ? <AlertTriangle className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
@@ -1898,7 +1898,7 @@ function App() {
 
       {/* Admin: Deactivate Current Task Modal */}
       {adminUserToDeactivate && (
-        <div className={clsx(theme.components.modal.overlay, "z-[110]")}>
+        <div className={theme.components.modal.overlay}>
           <div className={clsx(theme.components.modal.container, theme.components.modal.containerBlue)}>
             <div className={clsx(theme.components.modal.iconContainer, theme.components.modal.iconContainerBlue)}>
               <ShieldOff className="w-10 h-10 text-google-blue" />
@@ -1935,7 +1935,7 @@ function App() {
 
       {/* Admin: Clear Users Session List Modal */}
       {adminUserToClearSession && (
-        <div className={clsx(theme.components.modal.overlay, "z-[110]")}>
+        <div className={theme.components.modal.overlay}>
           <div className={clsx(theme.components.modal.container, theme.components.modal.containerRed)}>
             <div className={clsx(theme.components.modal.iconContainer, theme.components.modal.iconContainerRed)}>
               <Eraser className="w-10 h-10 text-google-red" />
@@ -2110,7 +2110,7 @@ function App() {
       )}
 
       {isAdmin && showAdminPanel && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-[2000]">
           <div className="bg-white dark:bg-[#121212] w-full max-w-2xl rounded-container border border-gray-300 dark:border-gray-700 flex flex-col max-h-[90vh] shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
             {/* Header */}
             <div className="p-8 pb-4 flex items-center justify-between">
@@ -2376,6 +2376,9 @@ function App() {
                         <p className="text-sm font-bold text-gray-700 dark:text-gray-300 leading-relaxed italic">
                           "Any AI agent working on this codebase MUST read the entire specification.md before proposing or implementing changes. Failure to do so will result in session termination."
                         </p>
+                        <p className="text-[10px] font-black uppercase text-google-blue/60 mt-2 tracking-widest border-t border-google-blue/10 pt-2">
+                          Comment: Ensure full context before any code modification.
+                        </p>
                       </div>
                     </section>
 
@@ -2392,9 +2395,14 @@ function App() {
                           <span className="text-xs font-black text-gray-500 uppercase tracking-widest">Specification Header</span>
                           <span className="text-xs font-black text-google-blue bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded">v{pkg.version}</span>
                         </div>
-                        <p className="text-[10px] font-bold text-red-500 uppercase px-1">
-                          CRITICAL: If these do not match, sync them immediately before continuing.
-                        </p>
+                        <div className="flex flex-col gap-1 px-1">
+                          <p className="text-[10px] font-bold text-red-500 uppercase">
+                            CRITICAL: If these do not match, sync them immediately before continuing.
+                          </p>
+                          <p className="text-[10px] font-black uppercase text-google-blue/60 tracking-widest">
+                            Comment: Maintain a single source of truth for the application version.
+                          </p>
+                        </div>
                       </div>
                     </section>
 
@@ -2404,15 +2412,20 @@ function App() {
                       </h5>
                       <div className="grid gap-2">
                         {[
-                          "Run 'npm run build' to verify type safety.",
-                          "Push to Firebase: 'npx firebase-tools deploy'.",
-                          "Sync specification.md with all logic changes.",
-                          "Bump version in package.json & specification.",
-                          "Final commit and push to GitHub repository."
+                          { title: "Run 'npm run build' to verify type safety.", comment: "Automate live updates to ensure the latest version is always accessible." },
+                          { title: "Push to Firebase: 'npx firebase-tools deploy'.", comment: "Ensure latest version availability." },
+                          { title: "Sync specification.md with all logic changes.", comment: "Preserve institutional knowledge and maintain a clean git history." },
+                          { title: "Bump version in package.json & specification.", comment: "Maintain a single source of truth." },
+                          { title: "Final commit and push to GitHub repository.", comment: "Preserve clean version control history." }
                         ].map((step, i) => (
-                          <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-black/20 rounded-lg border border-transparent hover:border-google-blue/30 transition-colors">
-                            <span className="w-5 h-5 rounded-full bg-google-blue text-white text-[10px] font-black flex items-center justify-center flex-shrink-0 shadow-sm">{i+1}</span>
-                            <span className="text-xs font-bold text-gray-600 dark:text-gray-300">{step}</span>
+                          <div key={i} className="flex flex-col gap-1 p-3 bg-gray-50 dark:bg-black/20 rounded-lg border border-transparent hover:border-google-blue/30 transition-colors">
+                            <div className="flex items-center gap-3">
+                              <span className="w-5 h-5 rounded-full bg-google-blue text-white text-[10px] font-black flex items-center justify-center flex-shrink-0 shadow-sm">{i+1}</span>
+                              <span className="text-xs font-bold text-gray-600 dark:text-gray-300">{step.title}</span>
+                            </div>
+                            <p className="ml-8 text-[9px] font-black uppercase text-google-blue/50 tracking-wider italic">
+                              {step.comment}
+                            </p>
                           </div>
                         ))}
                       </div>
@@ -2422,7 +2435,7 @@ function App() {
                       <h5 className="flex items-center gap-2 text-xs font-black uppercase text-google-blue tracking-[0.2em]">
                         <Database className="w-4 h-4" /> 4. Data Integrity
                       </h5>
-                      <div className="p-4 bg-gray-50 dark:bg-black/20 rounded-xl border border-gray-200 dark:border-gray-700 space-y-2">
+                      <div className="p-4 bg-gray-50 dark:bg-black/20 rounded-xl border border-gray-200 dark:border-gray-700 space-y-2 relative overflow-hidden">
                         <div className="flex items-start gap-2">
                           <div className="w-1.5 h-1.5 rounded-full bg-google-blue mt-1.5 flex-shrink-0" />
                           <p className="text-xs font-bold text-gray-600 dark:text-gray-400">Always use <code className="bg-white dark:bg-black/40 px-1 rounded text-google-blue">sanitize()</code> for Firestore updates.</p>
@@ -2434,6 +2447,11 @@ function App() {
                         <div className="flex items-start gap-2">
                           <div className="w-1.5 h-1.5 rounded-full bg-google-blue mt-1.5 flex-shrink-0" />
                           <p className="text-xs font-bold text-gray-600 dark:text-gray-400">Never use system dialogs; use high-visibility modals.</p>
+                        </div>
+                        <div className="pt-2 mt-2 border-t border-google-blue/10">
+                          <p className="text-[10px] font-black uppercase text-google-blue/60 tracking-widest">
+                            Comment: Prevent synchronization errors and maintain 60fps UI performance.
+                          </p>
                         </div>
                       </div>
                     </section>
@@ -2536,7 +2554,7 @@ function App() {
       )}
 
       {importPreview && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-[70]">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-[1000]">
           <div className="bg-white dark:bg-[#121212] w-full max-w-2xl rounded-3xl p-8 flex flex-col h-[80vh] border border-gray-300 dark:border-gray-700 shadow-2xl animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-black">Import Preview</h3>
@@ -2579,7 +2597,7 @@ function App() {
 
       {/* Add Checklist Modal */}
       {showAddChecklistModal && activeProject && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-[1000]">
           <div className="bg-white dark:bg-[#121212] w-full max-w-2xl rounded-container p-8 border border-gray-300 dark:border-gray-700 flex flex-col max-h-[85vh] shadow-2xl animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
@@ -2657,7 +2675,7 @@ function App() {
 function PlainTextImportModal({ show, onClose, content, setContent, lines, setLines, onProcess, preview, onPreview, onConvert, name, setName, onBack }: any) {
   if (!show) return null;
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-[1000]">
       <div className="bg-white dark:bg-[#121212] w-full max-w-5xl rounded-container p-8 flex flex-col h-[85vh] border border-gray-300 dark:border-gray-700 shadow-2xl animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between mb-8">
           <div><h3 className="text-2xl font-black text-gray-900 dark:text-gray-100">Plain Text Import</h3><p className="text-sm text-gray-600 dark:text-gray-300 font-bold uppercase tracking-tight">Quickly build a template from notes.</p></div>

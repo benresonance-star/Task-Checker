@@ -164,10 +164,11 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
         backgroundColor: 'var(--console-bg)',
       }}
       className={clsx(
-        "z-[1000] border-2 border-google-blue rounded-container shadow-2xl flex flex-col overflow-hidden",
+        "z-[3000] border-2 border-google-blue rounded-container shadow-2xl flex flex-col overflow-hidden",
         (isDragging || isResizing) ? "" : "transition-all duration-200",
         isMinimized && "bg-google-blue"
       )}
+      onClick={(e) => e.stopPropagation()}
     >
       {/* Header / Drag Handle */}
       <div 

@@ -42,7 +42,7 @@ export const theme = {
       avatar: 'w-9 h-9 rounded-full bg-google-blue/10 flex items-center justify-center text-google-blue flex-shrink-0',
     },
     modal: {
-      overlay: 'fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-in fade-in duration-300',
+      overlay: 'fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-[1000] animate-in fade-in duration-300',
       container: 'bg-white dark:bg-[#121212] w-full max-w-md rounded-container border-4 p-8 animate-in zoom-in-95 duration-200 text-center',
       containerBlue: 'border-google-blue shadow-[0_0_50px_rgba(66,133,244,0.3)]',
       containerRed: 'border-google-red shadow-[0_0_50px_rgba(234,67,53,0.3)]',
@@ -58,7 +58,7 @@ export const theme = {
       buttonSecondary: 'w-full h-14 rounded-button font-black uppercase tracking-widest border-2 border-gray-200 dark:border-gray-700',
     },
     dangerModal: {
-      overlay: 'fixed inset-0 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 z-[110] animate-in fade-in duration-300',
+      overlay: 'fixed inset-0 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 z-[1000] animate-in fade-in duration-300',
       container: 'bg-white dark:bg-[#121212] w-full max-w-md rounded-container border-[6px] border-google-red p-8 shadow-[0_0_100px_rgba(234,67,53,0.5)] animate-in zoom-in-95 duration-200 text-center',
       iconContainer: 'w-24 h-24 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce shadow-2xl',
       title: 'text-3xl font-black text-red-600 dark:text-red-500 mb-4 uppercase tracking-tighter',
@@ -68,7 +68,7 @@ export const theme = {
       buttonSecondary: 'w-full h-14 rounded-button font-black uppercase tracking-widest bg-google-green border-google-green text-white shadow-lg',
     },
     generalModal: {
-      overlay: 'fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-[2000]',
+      overlay: 'fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-[1000]',
       container: 'bg-white dark:bg-[#121212] w-full max-w-md rounded-container p-8 border border-gray-300 dark:border-gray-700 animate-in zoom-in-95 duration-200 shadow-2xl',
       header: 'flex items-center justify-between mb-8',
       title: 'text-xl font-black uppercase tracking-widest',
@@ -110,7 +110,7 @@ export const theme = {
       itemPrep: 'flex flex-col bg-[var(--modal-input-bg)] p-4 rounded-[var(--radius-modal-input)] border border-[var(--modal-section-border)] shadow-sm group',
     },
     docExplorer: {
-      overlay: 'fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4',
+      overlay: 'fixed inset-0 bg-black/70 backdrop-blur-sm z-[2000] flex items-center justify-center p-4',
       shell: 'bg-white dark:bg-[#121212] w-full max-w-5xl h-[80vh] rounded-widget border border-gray-300 dark:border-gray-700 shadow-2xl flex flex-col overflow-hidden',
       header: 'p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-black/20',
       toolbar: 'p-4 border-b border-gray-100 dark:border-gray-800 flex flex-col gap-4',

@@ -462,7 +462,7 @@ export const DocumentExplorer = ({ project, onClose }: DocumentExplorerProps) =>
 
       {/* New Folder Modal */}
       {isCreatingFolder && (
-        <div className="fixed inset-0 bg-black/50 z-[110] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 z-[2010] flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#121212] w-full max-w-sm rounded-3xl p-8 border border-gray-300 dark:border-gray-700 shadow-2xl animate-in zoom-in-95 duration-200">
             <h3 className="text-lg font-black uppercase tracking-tight mb-6">Create New Folder</h3>
             <input 
@@ -483,7 +483,7 @@ export const DocumentExplorer = ({ project, onClose }: DocumentExplorerProps) =>
 
       {/* Rename Modal */}
       {renamingItem && (
-        <div className="fixed inset-0 bg-black/50 z-[120] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 z-[2020] flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#121212] w-full max-w-sm rounded-3xl p-8 border border-gray-300 dark:border-gray-700 shadow-2xl animate-in zoom-in-95 duration-200">
             <h3 className="text-lg font-black uppercase tracking-tight mb-6">Rename Item</h3>
             <input 
@@ -504,7 +504,7 @@ export const DocumentExplorer = ({ project, onClose }: DocumentExplorerProps) =>
 
       {/* Item Actions Modal */}
       {selectedItem && (
-        <div className="fixed inset-0 bg-black/50 z-[110] flex items-center justify-center p-4" onClick={() => setSelectedItem(null)}>
+        <div className="fixed inset-0 bg-black/50 z-[2010] flex items-center justify-center p-4" onClick={() => setSelectedItem(null)}>
           <div className="bg-white dark:bg-[#121212] w-full max-w-xs rounded-3xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 border border-gray-300 dark:border-gray-700" onClick={e => e.stopPropagation()}>
             <div className="p-6 border-b border-gray-100 dark:border-gray-800">
               <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">{selectedItem.type}</p>
@@ -561,7 +561,7 @@ export const DocumentExplorer = ({ project, onClose }: DocumentExplorerProps) =>
 
       {/* Move Item Tree Modal */}
       {movingItem && (
-        <div className="fixed inset-0 bg-black/50 z-[120] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 z-[2020] flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#121212] w-full max-w-md rounded-3xl p-8 border border-gray-300 dark:border-gray-700 shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col max-h-[70vh]">
             <h3 className="text-lg font-black uppercase tracking-tight mb-2">Move to Folder</h3>
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-6">Moving: {movingItem.name}</p>
