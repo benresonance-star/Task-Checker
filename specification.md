@@ -1,5 +1,13 @@
 # checkMATE - Project Specification
 
+> **MANDATORY AGENT PROTOCOL**: 
+> 1. Any AI agent working on this codebase MUST read this entire specification before proposing or implementing changes.
+> 2. All changes must be reflected in the **Admin > App Protocol** interface.
+> 3. The version number below MUST match the `version` field in `package.json` and the version text at the bottom of the sidebar.
+> 4. Failure to adhere to Section 6 (AI Development Rules & SOP) will result in architectural drift and session termination.
+
+*Current Version: 1.9.7*
+
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It operates on a "Master-Instance" model, where users can define master templates and instantiate them within specific projects. The application is built for high reliability, real-time team synchronization, and cross-platform accessibility.
 

@@ -19,7 +19,8 @@ import {
 } from 'firebase/auth';
 import { 
   CheckCircle2, StickyNote, Trash2, ListOrdered, Music, ListPlus, Play, Pause, X, Menu, LogOut, Mail, Lock, User as UserIcon, Loader2, GripVertical, ThumbsUp, AlertTriangle, Target,
-  Plus, LayoutGrid, ClipboardList, Moon, Sun, Download, Upload, UserCircle2, FileText, FileSpreadsheet, File as FileIcon, ChevronUp, ChevronDown, ShieldCheck, Eye, ShieldOff, Eraser, ChevronLeft, ChevronRight, Palette
+  Plus, LayoutGrid, ClipboardList, Moon, Sun, Download, Upload, UserCircle2, FileText, FileSpreadsheet, File as FileIcon, ChevronUp, ChevronDown, ShieldCheck, Eye, ShieldOff, Eraser, ChevronLeft, ChevronRight, Palette,
+  Terminal, BookOpen, Activity, GitBranch, Database
 } from 'lucide-react';
 import { StyleConsole } from './components/ui/StyleConsole';
 import {
@@ -628,7 +629,7 @@ function App() {
   const [showAddChecklistModal, setShowAddChecklistModal] = useState(false);
 
   const [showAdminPanel, setShowAdminPanel] = useState(false);
-  const [activeAdminTab, setActiveAdminTab] = useState<'users' | 'projects'>('users');
+  const [activeAdminTab, setActiveAdminTab] = useState<'users' | 'projects' | 'protocol'>('users');
   const [showDeleteProjectConfirm, setShowDeleteProjectConfirm] = useState(false);
   const [showDeleteProjectFinalConfirm, setShowDeleteProjectFinalConfirm] = useState(false);
   const [showDeleteChecklistConfirm, setShowDeleteChecklistConfirm] = useState(false);
@@ -2143,6 +2144,15 @@ function App() {
               >
                 Project Registry
               </button>
+              <button 
+                onClick={() => setActiveAdminTab('protocol')}
+                className={clsx(
+                  "px-6 py-3 text-xs font-black uppercase tracking-widest transition-all border-b-4",
+                  activeAdminTab === 'protocol' ? "border-google-blue text-google-blue" : "border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                )}
+              >
+                App Protocol
+              </button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-8 pt-6 space-y-4 custom-scrollbar">
@@ -2303,7 +2313,7 @@ function App() {
                     <FeedbackLedger />
                   </div>
                 </>
-              ) : (
+              ) : activeAdminTab === 'projects' ? (
                 <div className="space-y-4 pb-8">
                   <div className="flex items-center justify-between">
                     <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-300">Project Registry ({projects.length})</h4>
@@ -2337,6 +2347,96 @@ function App() {
                         <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">No projects in registry</p>
                       </div>
                     )}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-8 py-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="p-6 bg-google-blue/10 border-2 border-google-blue rounded-card relative overflow-hidden">
+                    <div className="flex items-center gap-4 relative z-10">
+                      <div className="w-16 h-16 rounded-full bg-google-blue flex items-center justify-center text-white shadow-lg">
+                        <ShieldCheck className="w-10 h-10" />
+                      </div>
+                      <div>
+                        <h4 className="text-xl font-black text-google-blue uppercase tracking-tighter italic">checkMATE Agent Protocol</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[10px] font-black uppercase bg-google-blue text-white px-2 py-0.5 rounded shadow-sm">v{pkg.version}</span>
+                          <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Active Enforcement Mode</span>
+                        </div>
+                      </div>
+                    </div>
+                    <Terminal className="absolute -right-4 -bottom-4 w-32 h-32 text-google-blue/10 rotate-12" />
+                  </div>
+
+                  <div className="space-y-6 px-2">
+                    <section className="space-y-3">
+                      <h5 className="flex items-center gap-2 text-xs font-black uppercase text-google-blue tracking-[0.2em]">
+                        <BookOpen className="w-4 h-4" /> 1. The Golden Rule
+                      </h5>
+                      <div className="p-4 bg-gray-50 dark:bg-black/20 rounded-xl border-2 border-gray-100 dark:border-gray-800">
+                        <p className="text-sm font-bold text-gray-700 dark:text-gray-300 leading-relaxed italic">
+                          "Any AI agent working on this codebase MUST read the entire specification.md before proposing or implementing changes. Failure to do so will result in session termination."
+                        </p>
+                      </div>
+                    </section>
+
+                    <section className="space-y-3">
+                      <h5 className="flex items-center gap-2 text-xs font-black uppercase text-google-blue tracking-[0.2em]">
+                        <Activity className="w-4 h-4" /> 2. Version Parity
+                      </h5>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                          <span className="text-xs font-black text-gray-500 uppercase tracking-widest">Current App Version</span>
+                          <span className="text-xs font-black text-google-blue bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded">v{pkg.version}</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                          <span className="text-xs font-black text-gray-500 uppercase tracking-widest">Specification Header</span>
+                          <span className="text-xs font-black text-google-blue bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded">v{pkg.version}</span>
+                        </div>
+                        <p className="text-[10px] font-bold text-red-500 uppercase px-1">
+                          CRITICAL: If these do not match, sync them immediately before continuing.
+                        </p>
+                      </div>
+                    </section>
+
+                    <section className="space-y-3">
+                      <h5 className="flex items-center gap-2 text-xs font-black uppercase text-google-blue tracking-[0.2em]">
+                        <GitBranch className="w-4 h-4" /> 3. Deployment SOP
+                      </h5>
+                      <div className="grid gap-2">
+                        {[
+                          "Run 'npm run build' to verify type safety.",
+                          "Push to Firebase: 'npx firebase-tools deploy'.",
+                          "Sync specification.md with all logic changes.",
+                          "Bump version in package.json & specification.",
+                          "Final commit and push to GitHub repository."
+                        ].map((step, i) => (
+                          <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-black/20 rounded-lg border border-transparent hover:border-google-blue/30 transition-colors">
+                            <span className="w-5 h-5 rounded-full bg-google-blue text-white text-[10px] font-black flex items-center justify-center flex-shrink-0 shadow-sm">{i+1}</span>
+                            <span className="text-xs font-bold text-gray-600 dark:text-gray-300">{step}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+
+                    <section className="space-y-3">
+                      <h5 className="flex items-center gap-2 text-xs font-black uppercase text-google-blue tracking-[0.2em]">
+                        <Database className="w-4 h-4" /> 4. Data Integrity
+                      </h5>
+                      <div className="p-4 bg-gray-50 dark:bg-black/20 rounded-xl border border-gray-200 dark:border-gray-700 space-y-2">
+                        <div className="flex items-start gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-google-blue mt-1.5 flex-shrink-0" />
+                          <p className="text-xs font-bold text-gray-600 dark:text-gray-400">Always use <code className="bg-white dark:bg-black/40 px-1 rounded text-google-blue">sanitize()</code> for Firestore updates.</p>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-google-blue mt-1.5 flex-shrink-0" />
+                          <p className="text-xs font-bold text-gray-600 dark:text-gray-400">Wrap heavy derived state in <code className="bg-white dark:bg-black/40 px-1 rounded text-google-blue">useMemo</code>.</p>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-google-blue mt-1.5 flex-shrink-0" />
+                          <p className="text-xs font-bold text-gray-600 dark:text-gray-400">Never use system dialogs; use high-visibility modals.</p>
+                        </div>
+                      </div>
+                    </section>
                   </div>
                 </div>
               )}
