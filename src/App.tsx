@@ -19,7 +19,7 @@ import {
 } from 'firebase/auth';
 import { 
   CheckCircle2, StickyNote, Trash2, ListOrdered, Music, ListPlus, Play, Pause, X, Menu, LogOut, Mail, Lock, User as UserIcon, Loader2, GripVertical, ThumbsUp, AlertTriangle, Target,
-  Plus, LayoutGrid, ClipboardList, Moon, Sun, Download, Upload, UserCircle2, Users, FileText, FileSpreadsheet, File as FileIcon, ChevronUp, ChevronDown, ShieldCheck, Eye, ShieldOff, Eraser, ChevronLeft, ChevronRight, Palette
+  Plus, LayoutGrid, ClipboardList, Moon, Sun, Download, Upload, UserCircle2, FileText, FileSpreadsheet, File as FileIcon, ChevronUp, ChevronDown, ShieldCheck, Eye, ShieldOff, Eraser, ChevronLeft, ChevronRight, Palette
 } from 'lucide-react';
 import { StyleConsole } from './components/ui/StyleConsole';
 import {
@@ -556,6 +556,9 @@ function App() {
   const queryParams = new URLSearchParams(location.search);
   const urlTaskId = queryParams.get('task');
 
+  // Calculate the valid tasks in the user's session (those that actually exist in current instances)
+  const validActionSet = useTasklistStore(state => state.getValidActionSet());
+
   const [isTemplatesStacked, setIsTemplatesStacked] = useState(() => {
     return localStorage.getItem('isTemplatesStacked') === 'true';
   });
@@ -624,7 +627,8 @@ function App() {
   const [editingTaskInfo, setEditingTaskInfo] = useState<{ taskId: string, containerId: string, focusFeedback?: boolean } | null>(null);
   const [showAddChecklistModal, setShowAddChecklistModal] = useState(false);
 
-  const [showUserManagement, setShowUserManagement] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [activeAdminTab, setActiveAdminTab] = useState<'users' | 'projects'>('users');
   const [showDeleteProjectConfirm, setShowDeleteProjectConfirm] = useState(false);
   const [showDeleteProjectFinalConfirm, setShowDeleteProjectFinalConfirm] = useState(false);
   const [showDeleteChecklistConfirm, setShowDeleteChecklistConfirm] = useState(false);
@@ -726,7 +730,13 @@ function App() {
         setActiveProject(project);
       }
     } else if (path === '/project') {
-      setActiveProject(null);
+      // Try to recover last project if we are at the generic /project route
+      const lastId = localStorage.getItem('lastActiveProjectId');
+      if (lastId && projects.some(p => p.id === lastId)) {
+        navigate(`/project/${lastId}`, { replace: true });
+      } else {
+        setActiveProject(null);
+      }
     }
 
     // Instance sync
@@ -742,6 +752,12 @@ function App() {
         const lastInstanceId = localStorage.getItem(`lastInstanceId_${currentUser.id}_${projectId}`);
         if (lastInstanceId) {
           navigate(`/project/${projectId}/instance/${lastInstanceId}`, { replace: true });
+        } else {
+          // Fallback: Just pick the first instance if one exists
+          const project = projects.find(p => p.id === projectId);
+          if (project && project.instanceIds && project.instanceIds.length > 0) {
+            navigate(`/project/${projectId}/instance/${project.instanceIds[0]}`, { replace: true });
+          }
         }
       }
       
@@ -1103,16 +1119,16 @@ function App() {
                 "h-9 px-3 flex items-center gap-2 border-2 transition-all duration-500 font-bold rounded-button shadow-sm text-[10px] uppercase tracking-wider",
                 showPlaylistSidebar 
                   ? "opacity-0 pointer-events-none -translate-y-4" 
-                  : (currentUser?.actionSet?.length || 0) > 0
+                  : validActionSet.length > 0
                     ? "bg-google-blue/10 text-google-blue border-google-blue/30 hover:bg-google-blue hover:text-white"
                     : "bg-white dark:bg-black/40 text-gray-400 border-gray-300 dark:border-gray-700 hover:border-google-blue hover:text-google-blue"
               )}
             >
-              <Music className={clsx("w-3.5 h-3.5", (currentUser?.actionSet?.length || 0) > 0 && "animate-pulse")} />
+              <Music className={clsx("w-3.5 h-3.5", validActionSet.length > 0 && "animate-pulse")} />
               <span>My Session</span>
-              {(currentUser?.actionSet?.length || 0) > 0 && (
+              {validActionSet.length > 0 && (
                 <span className="flex items-center justify-center bg-white dark:bg-google-blue text-google-blue dark:text-gray-300 w-4 h-4 rounded-full text-[8px] font-black shadow-sm">
-                  {currentUser?.actionSet?.length}
+                  {validActionSet.length}
                 </span>
               )}
             </button>
@@ -1205,8 +1221,8 @@ function App() {
               </button>
             )}
             {isAdmin && (
-              <button onClick={() => { setShowUserManagement(true); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 px-4 py-3 rounded-button hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                <Users className="w-5 h-5" /><span className="font-bold">User Management</span>
+              <button onClick={() => { setShowAdminPanel(true); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 px-4 py-3 rounded-button hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <ShieldCheck className="w-5 h-5" /><span className="font-bold">Admin</span>
               </button>
             )}
             {isAdmin && (
@@ -1342,8 +1358,8 @@ function App() {
                 </button>
               )}
               {isAdmin && (
-                <button onClick={() => setShowUserManagement(true)} className={clsx(theme.components.nav.item, theme.components.nav.itemInactive)}>
-                  <Users className="w-5 h-5" /><span className="font-medium">User Management</span>
+                <button onClick={() => setShowAdminPanel(true)} className={clsx(theme.components.nav.item, theme.components.nav.itemInactive)}>
+                  <ShieldCheck className="w-5 h-5" /><span className="font-medium">Admin</span>
                 </button>
               )}
             </nav>
@@ -1457,16 +1473,16 @@ function App() {
                       "h-10 px-4 flex items-center gap-2 border-2 transition-all duration-500 font-bold rounded-button shadow-sm",
                       showPlaylistSidebar 
                         ? "opacity-0 pointer-events-none translate-x-4" 
-                        : (currentUser?.actionSet?.length || 0) > 0
+                        : validActionSet.length > 0
                           ? "bg-google-blue/10 text-google-blue border-google-blue/30 hover:bg-google-blue hover:text-white"
                           : "bg-white dark:bg-black/40 text-gray-400 border-gray-300 dark:border-gray-700 hover:border-google-blue hover:text-google-blue"
                     )}
                   >
-                    <Music className={clsx("w-4 h-4", (currentUser?.actionSet?.length || 0) > 0 && "animate-pulse")} />
+                    <Music className={clsx("w-4 h-4", validActionSet.length > 0 && "animate-pulse")} />
                     <span>My Session</span>
-                    {(currentUser?.actionSet?.length || 0) > 0 && (
+                    {validActionSet.length > 0 && (
                       <span className="flex items-center justify-center bg-white dark:bg-google-blue text-google-blue dark:text-gray-300 w-5 h-5 rounded-full text-[10px] font-black ml-1 shadow-sm">
-                        {currentUser?.actionSet?.length}
+                        {validActionSet.length}
                       </span>
                     )}
                   </Button>
@@ -1548,18 +1564,6 @@ function App() {
                 />
               </div>
               
-              {isAdmin && (
-                <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-center">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setShowDeleteProjectConfirm(true)} 
-                    className="font-black text-red-600 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800/50 hover:bg-red-100 hover:text-red-700 px-4 h-9 transition-all flex items-center gap-2 rounded-xl shadow-sm"
-                  >
-                    <Trash2 className="w-4 h-4" /> Delete Project
-                  </Button>
-                </div>
-              )}
             </div>
 
             <ProjectDashboard 
@@ -1802,7 +1806,7 @@ function App() {
           </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
-                {(!currentUser?.actionSet || currentUser.actionSet.length === 0) ? (
+                {validActionSet.length === 0 ? (
                   <div className={theme.components.sidebar.emptyState}>
                     <div className={theme.components.sidebar.emptyIcon}>
                       <ListPlus className="w-8 h-8" />
@@ -1819,17 +1823,17 @@ function App() {
                     modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
                   >
                     <SortableContext 
-                      items={currentUser.actionSet.map(i => `${i.projectId}-${i.instanceId}-${i.taskId}`)}
+                      items={validActionSet.map(i => `${i.projectId}-${i.instanceId}-${i.taskId}`)}
                       strategy={verticalListSortingStrategy}
                     >
                       <div className="space-y-3">
-                        {currentUser.actionSet.map((item) => {
+                        {validActionSet.map((item) => {
                           const compositeKey = `${item.projectId}-${item.instanceId}-${item.taskId}`;
                           const instance = instances.find(i => i.id === item.instanceId);
                           const task = instance?.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => t.id === item.taskId);
-                          const isActiveFocus = currentUser.activeFocus?.projectId === item.projectId && 
-                                               currentUser.activeFocus?.instanceId === item.instanceId && 
-                                               currentUser.activeFocus?.taskId === item.taskId;
+                          const isActiveFocus = currentUser?.activeFocus?.projectId === item.projectId && 
+                                               currentUser?.activeFocus?.instanceId === item.instanceId && 
+                                               currentUser?.activeFocus?.taskId === item.taskId;
 
                           if (!task || !instance) return null;
 
@@ -2105,71 +2109,94 @@ function App() {
         <StyleConsole onClose={() => setShowStyleConsole(false)} />
       )}
 
-      {isAdmin && showUserManagement && (
+      {isAdmin && showAdminPanel && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-[#121212] w-full max-w-2xl rounded-container p-8 border border-gray-300 dark:border-gray-700 flex flex-col max-h-[90vh] shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between mb-8">
+          <div className="bg-white dark:bg-[#121212] w-full max-w-2xl rounded-container border border-gray-300 dark:border-gray-700 flex flex-col max-h-[90vh] shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
+            {/* Header */}
+            <div className="p-8 pb-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Users className="w-8 h-8 text-google-blue" />
+                <ShieldCheck className="w-8 h-8 text-google-blue" />
                 <div>
-                  <h3 className="text-2xl font-black text-gray-900 dark:text-gray-300">User Management</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 font-bold">Manage access and permissions</p>
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-gray-300">Admin Console</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 font-bold">Manage workspace, projects, and users</p>
                 </div>
               </div>
-              <Button variant="secondary" onClick={() => setShowUserManagement(false)} className="border border-gray-300 dark:border-gray-700 font-bold">Close</Button>
+              <Button variant="secondary" onClick={() => setShowAdminPanel(false)} className="border border-gray-300 dark:border-gray-700 font-bold">Close</Button>
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
-              {/* Current User Profile Card */}
-              <div className="p-6 bg-google-green border-google-green text-white rounded-card border-2 flex items-center gap-4 shadow-lg">
-                <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-white">
-                  <UserCircle2 className="w-10 h-10" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-black text-lg">{currentUser?.name} (You)</h4>
-                    <span className="text-[10px] font-black uppercase px-2 py-0.5 bg-white/20 text-white rounded-md shadow-sm border border-white/30">
-                      {currentUser?.role}
-                    </span>
+            {/* Tabs */}
+            <div className="flex px-8 gap-1 border-b border-gray-200 dark:border-gray-800">
+              <button 
+                onClick={() => setActiveAdminTab('users')}
+                className={clsx(
+                  "px-6 py-3 text-xs font-black uppercase tracking-widest transition-all border-b-4",
+                  activeAdminTab === 'users' ? "border-google-blue text-google-blue" : "border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                )}
+              >
+                Team Members
+              </button>
+              <button 
+                onClick={() => setActiveAdminTab('projects')}
+                className={clsx(
+                  "px-6 py-3 text-xs font-black uppercase tracking-widest transition-all border-b-4",
+                  activeAdminTab === 'projects' ? "border-google-blue text-google-blue" : "border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                )}
+              >
+                Project Registry
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-8 pt-6 space-y-4 custom-scrollbar">
+              {activeAdminTab === 'users' ? (
+                <>
+                  {/* Current User Profile Card */}
+                  <div className="p-6 bg-google-green border-google-green text-white rounded-card border-2 flex items-center gap-4 shadow-lg mb-6">
+                    <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-white">
+                      <UserCircle2 className="w-10 h-10" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-black text-lg">{currentUser?.name} (You)</h4>
+                        <span className="text-[10px] font-black uppercase px-2 py-0.5 bg-white/20 text-white rounded-md shadow-sm border border-white/30">
+                          {currentUser?.role}
+                        </span>
+                      </div>
+                      <p className="text-sm font-bold text-white/80">{auth.currentUser?.email}</p>
+                    </div>
+                    
+                    {/* Admin Self-Session Controls */}
+                    <div className="flex items-center gap-2 bg-white/10 p-1 rounded-xl border border-white/20">
+                      <Button 
+                        variant="ghost" 
+                        className="h-10 w-10 p-0 text-white dark:text-white hover:bg-white/10"
+                        title="Deactivate Current Task"
+                        onClick={() => {
+                          setAdminUserToDeactivate({ id: currentUser!.id, name: "yourself" });
+                        }}
+                      >
+                        <ShieldOff className="w-5 h-5" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="h-10 w-10 p-0 text-white dark:text-white hover:bg-white/10"
+                        title="Clear Users Session List"
+                        onClick={() => {
+                          setAdminUserToClearSession({ id: currentUser!.id, name: "yourself" });
+                        }}
+                      >
+                        <Eraser className="w-5 h-5" />
+                      </Button>
+                    </div>
+
+                    <Button 
+                      variant="ghost" 
+                      className="!text-white border-2 border-white hover:bg-white/10 font-black px-4 py-1 rounded-xl transition-all" 
+                      onClick={() => signOut(auth)}
+                    >
+                      Sign Out
+                    </Button>
                   </div>
-                  <p className="text-sm font-bold text-white/80">{auth.currentUser?.email}</p>
-                </div>
-                
-                {/* Admin Self-Session Controls */}
-                <div className="flex items-center gap-2 bg-white/10 p-1 rounded-xl border border-white/20">
-                  <Button 
-                    variant="ghost" 
-                    className="h-10 w-10 p-0 text-white dark:text-white hover:bg-white/10"
-                    title="Deactivate Current Task"
-                    onClick={() => {
-                      setAdminUserToDeactivate({ id: currentUser!.id, name: "yourself" });
-                    }}
-                  >
-                    <ShieldOff className="w-5 h-5" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    className="h-10 w-10 p-0 text-white dark:text-white hover:bg-white/10"
-                    title="Clear Users Session List"
-                    onClick={() => {
-                      setAdminUserToClearSession({ id: currentUser!.id, name: "yourself" });
-                    }}
-                  >
-                    <Eraser className="w-5 h-5" />
-                  </Button>
-                </div>
 
-                <Button 
-                  variant="ghost" 
-                  className="!text-white border-2 border-white hover:bg-white/10 font-black px-4 py-1 rounded-xl transition-all" 
-                  onClick={() => signOut(auth)}
-                >
-                  Sign Out
-                </Button>
-              </div>
-
-              {isAdmin && (
-                <div className="space-y-8 mt-8 pb-12">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-300">Team Members ({users.length})</h4>
@@ -2201,6 +2228,7 @@ function App() {
                               <div className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-google-green rounded-full border-2 border-white dark:border-[#121212] animate-pulse shadow-sm" title="Online" />
                             )}
                           </div>
+                          
                           <div className="flex-1">
                             <h5 className={clsx(
                               "font-black text-sm flex items-center gap-2",
@@ -2243,42 +2271,73 @@ function App() {
                               </Button>
                             </div>
 
-                              <select 
-                                className="bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-lg text-xs font-black px-2 py-1 outline-none focus:ring-2 focus:ring-google-blue"
-                                value={user.role}
-                                onChange={(e) => updateUserRole(user.id, e.target.value as 'admin' | 'viewer')}
-                              >
-                                <option value="viewer">Viewer</option>
-                                <option value="admin">Admin</option>
-                              </select>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="text-gray-400 hover:text-google-red h-8 w-8 p-0"
-                                onClick={() => {
-                                  if (confirm(`Remove profile for ${user.name}? They will still have a Firebase account but no profile record.`)) {
-                                    deleteUser(user.id);
-                                  }
-                                }}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
+                            <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
+
+                            <select 
+                              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-google-blue cursor-pointer"
+                              value={user.role}
+                              onChange={(e) => updateUserRole(user.id, e.target.value as 'admin' | 'viewer')}
+                            >
+                              <option value="viewer">Viewer</option>
+                              <option value="admin">Admin</option>
+                            </select>
+                            
+                            <Button 
+                              variant="ghost" 
+                              className="h-9 w-9 p-0 rounded-lg hover:bg-google-red/10 text-gray-400 hover:text-google-red"
+                              title="Delete User"
+                              onClick={() => {
+                                if (confirm(`Are you sure you want to PERMANENTLY delete user ${user.name}? This cannot be undone.`)) {
+                                  deleteUser(user.id);
+                                }
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
-                        );
-                      })}
-                      {users.length <= 1 && (
-                        <div className="text-center py-8 text-gray-400 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-3xl">
-                          <Users className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                          <p className="text-xs font-black uppercase tracking-widest">No other users found</p>
-                          <p className="text-[10px] mt-1 font-bold italic">New users appear here after they sign up</p>
                         </div>
-                      )}
+                      )})}
                     </div>
                   </div>
 
                   <div className="space-y-4 pt-8 border-t border-gray-200 dark:border-gray-800">
                     <FeedbackLedger />
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-4 pb-8">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-300">Project Registry ({projects.length})</h4>
+                  </div>
+                  <div className="grid gap-2">
+                    {projects.map(project => (
+                      <div key={project.id} className="flex items-center gap-4 p-4 rounded-card bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-800 group hover:border-google-blue transition-all">
+                        <div className="w-10 h-10 rounded-xl bg-google-blue/10 flex items-center justify-center text-google-blue font-black text-xs shrink-0">
+                          {project.projectNumber || '??'}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h5 className="font-black text-sm text-gray-900 dark:text-gray-200 truncate">{project.name}</h5>
+                          <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 truncate uppercase tracking-widest">{project.address || 'No Address Provided'}</p>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-gray-400 hover:text-google-red border border-transparent hover:border-google-red/20 rounded-xl opacity-0 group-hover:opacity-100 transition-all gap-2 px-4"
+                          onClick={() => {
+                            setActiveProject(project);
+                            setShowDeleteProjectConfirm(true);
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Delete Project</span>
+                        </Button>
+                      </div>
+                    ))}
+                    {projects.length === 0 && (
+                      <div className="text-center py-12 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-2xl">
+                        <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">No projects in registry</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -2286,7 +2345,6 @@ function App() {
           </div>
         </div>
       )}
-
       {showExportModal && (
         <div className={theme.components.generalModal.overlay}>
           <div className={theme.components.generalModal.container}>

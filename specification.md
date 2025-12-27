@@ -45,7 +45,7 @@ The system features a robust sync engine:
       - **Auto-Focus Refinement**: Selecting "Yes" opens the Task Info modal and automatically scrolls to the feedback section for immediate entry.
       - **Collapsible Workspace**: Users can collapse the entire Task Guide via a toggle to focus purely on MY TASK FEEDBACK. This state is persisted per task in `localStorage`.
 - **Persistent Active Focus**: Whichever task a user last made active remains focused and highlighted across sessions. 
-  - **Auto-Navigation**: Upon refresh or application launch, the user is automatically navigated back to their last active Project, Checklist, and Task.
+  - **Auto-Navigation**: Upon refresh or application launch, the user is automatically navigated back to their last active Project, Checklist, and Task. **URL context is the source of truth, but the system "heals" incomplete URLs by restoring the last viewed project and instance from localStorage.**
   - **Auto-Expansion**: The system automatically expands the Section and Subsection hierarchy containing the focused task.
   - **State Persistence**: Focus state is stored in the User Profile in Firestore, ensuring it survives refreshes and multi-device logins.
   - **Explicit Control**: Users can disable the focus state by clicking again on the active task card.
@@ -60,7 +60,7 @@ The system features a robust sync engine:
 - **Precision Recording**: Upon task completion, the application calculates and records the exact time spent (Original Duration minus Remaining Time) into a persistent `timeTaken` field.
   - **State Protection**: Optimized for multi-user sync with a **3-second local grace period** that prevents incoming cloud data from reverting local timer states immediately after a user interaction.
   - **Cloud Heartbeat**: Running timers perform a **10-second heartbeat sync** to Firestore, ensuring progress is preserved across page refreshes and multi-device sessions.
-- **Session Integration**: An "Add to Session" icon is positioned to the left of the task checkbox for rapid session building. In mobile view, secondary action icons (Add to Session, Notes) are reinstated for all inactive tasks to ensure full functionality.
+- **Session Integration**: An "Add to Session" icon is positioned to the left of the task checkbox for rapid session building. In mobile view, secondary action icons (Add to Session, Notes) are reinstated for all inactive tasks to ensure full functionality. **The "My Session" counter features Automated Filtering logic (`getValidActionSet`) to ensure the displayed count only reflects tasks that still exist in the current project workspace.**
 - **Time Recording**: Automatically records exact time taken if a timer was used.
 - **Active Focus Tracking**: Selected tasks feature a **high-saturation focus ring (4px)** and a pulsing outline when multiple users are present.
 
@@ -70,13 +70,13 @@ The system features a robust sync engine:
 
 ### 7. Branding & Live Style System
 - **Branding Console**: A floating, draggable, and resizable HUD available to admins. It features a **"Draft Mode" workflow** where stylistic changes (colors, radii) are applied locally for real-time exploration but are only persisted to Firestore when explicitly saved via "Save as Workspace Default" or by overwriting an existing snapshot.
-- **Interface-First Organization**: The console is organized into collapsible, logic-based sections (Accordions) to streamline branding across different app areas:
+- **Interface-First Organization**: The console provides direct access to all **68 theme properties**, organized into collapsible sections:
   - **Style Snapshots**: High-level theme management and capturing current states.
-  - **Atmosphere & Identity**: Core brand colors, app backgrounds, and typography engine.
-  - **My Dashboard (Focus)**: Specific styling for the Active Focus card, **Knowledge Hub** (including inactive step borders and backgrounds), prerequisites, and scratchpads.
-  - **Project Interface**: Dashboard metadata sections and card styling.
+  - **Atmosphere & Identity**: Core brand colors (including Danger/Warning alerts), app backgrounds, and a comprehensive typography engine.
+  - **My Dashboard (Focus)**: Specific styling for the Active Focus card, **Knowledge Hub** (including inactive step borders and backgrounds), and **Notes/Workbench backgrounds** (Personal, Project, and Priority specific).
+  - **Project Interface**: Dashboard metadata sections, card styling, and multi-color Section Header icons.
   - **Checklist & Templates**: Task list hierarchy, connector lines, and highly granular controls for **Section/Subsection backgrounds, borders, radii, and font colors**, as well as **Task and Checklist title colors**, and a specific **Inactive Text** color for receded tasks.
-  - **System Corner Radii**: Global management of all corner radii from checklist components to major modals.
+  - **System Corner Radii**: Global management of all corner radii from checklist components to major modals, sidebars, and metadata cards.
 - **Style Snapshots (Theme Library)**: Admins can capture the current brand styling and save it as a named snapshot (e.g., "Happy Mode"). Presets support **Active Style Tracking**, highlighting the currently applied theme and allowing for **Incremental Updates** (overwriting an existing snapshot with new tweaks) via a dedicated save icon.
 - **Smooth Interaction Engine**: Utilizes hardware-accelerated `translate3d` and `requestAnimationFrame` for buttery-smooth window movement and resizing. Transitions are dynamically disabled during active interactions to eliminate "input lag."
 - **Semantic Theme Engine**: Uses CSS Variables linked to descriptive, role-based technical keys (e.g., `colorAppIdentity` instead of `brandBlue`). This ensures the codebase remains logical even when colors are dramatically altered.
@@ -89,7 +89,7 @@ The system features a robust sync engine:
 - **Repository**: [GitHub - benresonance-star/Task-Checker](https://github.com/benresonance-star/Task-Checker)
 - **Security & Environment**: Sensitive configuration (Firebase keys, API endpoints) are stored in a `.env` file (excluded from Git via `.gitignore`). The application uses `import.meta.env` to access these variables securely.
 - **Library**: [Zustand](https://github.com/pmndrs/zustand)
-- **Navigation Persistence**: **URL Routing** via `react-router-dom`. The application tracks user position (Mode, Project, Instance, Task) in the browser address bar, enabling deep linking and functional browser "Back/Forward" buttons.
+- **Navigation Persistence**: **URL Routing** via `react-router-dom`. The application tracks user position (Mode, Project, Instance, Task) in the browser address bar, enabling deep linking and functional browser "Back/Forward" buttons. **The system includes a smart "Project Persistence" layer that redirects generic routes back to the user's last active project dashboard.**
 - **Cloud Backend**: **Google Firebase** (Authentication, Firestore, Storage, Hosting).
 - **Data Integrity**: Real-time listeners and a `sanitize` helper ensure zero `undefined` values in Firestore and instant multi-device sync.
 - **Local UI State**: Expand/collapse (folding) preferences are stored in `localStorage` per browser, providing individual control over the workspace hierarchy without affecting other users.
@@ -149,20 +149,15 @@ The system features a robust sync engine:
   - **UI Toggle**: Persistent toggle in the sidebar and mobile menu with **pulsing orange styling** when active.
   - **Visual Safety**: Compact "VIEWER" label in the mobile header prevents role confusion without compressing the primary "My Session" navigation.
   - **Persistence**: Simulation state is stored in `sessionStorage` (resets on tab close) for security.
+- **Admin Console**: A centralized administrative "Command Center" featuring a tabbed interface:
+  - **Team Members Tab**: Manage user roles, online status, and session clearing. Includes the **Admin Feedback Ledger** for workspace-wide task refinement logs. **Administrative icons (Shield/Eraser) are styled in high-contrast white for clarity in dark mode.**
+  - **Project Registry Tab**: A master list of all active projects.
+  - **Centralized Project Deletion**: Destructive project removal is exclusively managed here via a robust **two-stage protocol** (Warning -> Final Confirmation) to prevent accidental data loss in the main project interface.
 - **Role-Based Access Control (RBAC)**: 
-  - **Administrator**: Full system control (Master mode, User Management, role promotion). **User cards feature role-aware background colors (e.g., light blue for admins, soft orange for viewers) for rapid identification.**
-    - **Administrative Session Controls**: Within the User Management console, admins can forcefully deactivate any user's active task focus (ShieldOff icon) or empty their entire session list (Eraser icon). This includes self-clearing and clearing other admins for maximum coordination. All administrative actions use high-visibility in-app modals. **Administrative icons (Shield/Eraser) are styled in high-contrast white for clarity in dark mode.**
-    - **Admin Feedback Ledger**: A centralized, scrollable audit feed of all user task feedback notes across the workspace.
-      - **Contextual Intelligence**: Each entry uses a **Breadcrumb Context** (`PROJECT / Checklist / Task`) for instant orientation.
-      - **Ledger Row Design**: Entries are styled as elegant cards with a light blue background (`bg-blue-50/20`), relative timestamps (e.g., "2 hours ago"), and prose content blocks.
-      - **Administrative Cleanup**: Admins can directly delete feedback entries from the ledger, which erases the `userNotes` from the original project task.
-      - **Smart Tools**: Includes real-time multi-field search, date-based sorting, and a "View in Project" link for deep-task inspection.
+  - **Administrator**: Full system control (Master mode, Admin console, role promotion). **User cards feature role-aware background colors (e.g., light blue for admins, soft orange for viewers) for rapid identification.**
   - **Project Team (Viewer)**: Focused on progress tracking in Project Mode. Restricted administrative views and sub-headers are hidden.
 - **Self-Service**: Automatic profile creation for new signups as `viewers`.
-- **Project Deletion Safety**: A robust **two-stage confirmation** process for deleting projects.
-  - **Stage 1**: Warning modal detailing permanent data loss (metadata, checklists, and documents).
-  - **Stage 2 (Last Chance)**: High-alert modal ("Are you really sure?") with high-contrast Red (Confirm) and Green (Safety) buttons.
-  - **Automatic Cleanup**: Deletion automatically wipes all associated instances, Firestore records, and the entire Online Documents root folder from cloud storage.
+- **Atomic Cleanup**: Project deletion automatically wipes all associated instances, Firestore records, and the entire Online Documents root folder from cloud storage.
 
 ### UI & UX Design Language
 - **Brand Identity**: Logo is a simple white tick inside an orange circle (`#E67E33`). Brand name is stylized as `checkMATE`.
@@ -180,7 +175,7 @@ The system features a robust sync engine:
   - **Icon Size Standard**: Primary action icons (Delete, Export, Reallocate) are standardized to **h-9** (container height) or **w-5 h-5** (standard icon). Mobile focus icons are **w-6 h-6**.
   - **Color Semantic Logic**: 
     - `gray-400`: Inactive/Secondary actions.
-    - `google-blue`: Primary interactive actions (Checklists, "My Session").
+    - `google-blue`: Primary interactive actions (Checklists, "My Session", Admin Console).
     - `google-red`: Destructive/High-alert actions (Delete, Errors).
     - `google-green`: Success/Active work states (Active Project, Completed Task).
     - `google-yellow`: Collaborative presence and shared data.
@@ -253,7 +248,7 @@ The system features a robust sync engine:
 - **Atomic Presence**: Always use Firestore dot-notation (`updateDoc(docRef, { [`activeUsers.${userId}`]: data })`) to update presence without risk of overwriting other users.
 
 ### 4. Component Responsibility Map
-- **`App.tsx`**: Application shell, Sidebar management, Navigation logic, and global Administrative modals.
+- **`App.tsx`**: Application shell, Sidebar management, Navigation logic, and the centralized **Admin Console** modals.
 - **`TaskItem.tsx`**: Complex task state manager. Handles multi-tier responsive layouts, Pomodoro widget, and collaborative pulsing logic.
 - **`ProjectDashboard.tsx`**: Project metadata management and the "Checklist Navigation Shelf".
 - **`NoteEditor.tsx`**: Tiptap-based rich text editor for "MY TASK FEEDBACK".
@@ -276,8 +271,8 @@ To maintain the integrity and high-speed deployment cycle of checkMATE, all AI a
    - Before ending a turn, the agent must verify the build is successful and the app is live.
 
 2. **Proactive Documentation & Version Control**:
-   - **Specification Sync**: After any significant codebase changes (new features, structural shifts, schema updates), the agent must ask: *"Would you like to update the `specification.md` to reflect these changes?"*
-   - **GitHub Persistence**: After completing a major task or milestone, the agent must ask: *"Would you like to push these changes to GitHub?"*
+   - **Specification Sync**: After any significant codebase changes (new features, structural shifts, schema updates), the agent must update the `specification.md` to reflect these changes.
+   - **GitHub Persistence**: After completing a major task or milestone, the agent must push these changes to GitHub.
 
 3. **Data & State Safety**:
    - **Firestore Sanitization**: Every `updateDoc` call MUST use the `sanitize()` helper to strip `undefined` values, preventing synchronization failures.
@@ -298,6 +293,7 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > **Core Architecture**:
 > - Use Zustand for state management with real-time Firebase Firestore integration.
 > - Implement **React Router** for navigation persistence (Deep linking to /master/:id or /project/:id/instance/:id?task=:id).
+> - **Smart Persistence**: Implement logic to automatically restore the user's last viewed project and instance if navigating to generic routes or refreshing.
 > - Implement a Master-Instance model where a Master Template (versioned) syncs its structure to multiple Project Instances while preserving user progress.
 > - Use Firebase Auth for RBAC (Admin vs Project Team).
 > - Use Firebase Storage for task-level file attachments and project documents.
@@ -307,6 +303,7 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > - **Unique Task Identification**: Ensure all tasks are managed using a composite key of `projectId + instanceId + taskId` to prevent conflicts when the same task ID exists across multiple projects.
 > - Add a visual **high-saturation focus ring (4px)** and pulsing effect for tasks with multiple active users.
 > - Implement a **Drag & Drop** reorganization system for the "My Session" sidebar using `dnd-kit`.
+> - **Session Reliability**: Use a filtered `getValidActionSet` helper to ensure the "My Session" counter and sidebar only display existing tasks.
 > - Use atomic dot-notation updates for presence state to prevent race conditions.
 > - **Completed Task Feedback**: Style active completed tasks with a green pulse and **thumbs up** icon; style deactivated completed tasks with a soft, translucent green.
 > 
@@ -322,7 +319,7 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > 
 > **Visual Identity**:
 > - Implement a high-contrast UI (Light and Dark) with theme persistence.
-> - **Branding & Style System**: Implement a dynamic theme engine using CSS Variables linked to **semantic technical keys** (e.g. `colorAppIdentity`, `radiusTaskCard`). Add a floating, draggable, and resizable **Branding Console** for admins to live-adjust colors and corner radii. Support **Style Snapshots** (Theme Library) with the ability to **highlight the active theme** and **overwrite/sync existing snapshots** with new iterative tweaks. Include consolidated styling sections for **My Notes** (widget containers, rich-text surfaces, note types) and **"Can I Proceed?"** (background, border, item background, font, and icon colors). Ensure real-time global sync via Firestore `settings/theme` and `themePresets`. Use `translate3d` and `requestAnimationFrame` for smooth HUD movement.
+> - **Branding & Style System**: Implement a dynamic theme engine using CSS Variables linked to **semantic technical keys** (e.g. `colorAppIdentity`, `radiusTaskCard`). Add a floating, draggable, and resizable **Branding Console** for admins to live-adjust colors and corner radii across **68 properties**. Support **Style Snapshots** (Theme Library) with the ability to **highlight the active theme** and **overwrite/sync existing snapshots** with new iterative tweaks. Include consolidated styling sections for **My Notes** (widget containers, rich-text surfaces, note types) and **"Can I Proceed?"** (background, border, item background, font, and icon colors). Ensure real-time global sync via Firestore `settings/theme` and `themePresets`. Use `translate3d` and `requestAnimationFrame` for smooth HUD movement.
 > - **Standardized Radii Scales**: Define and use dynamic classes (`rounded-button`, `rounded-card`, `rounded-container`, `rounded-widget`, `rounded-sidebar`, `rounded-project-info`, `rounded-metadata`, `rounded-focus-card`, `rounded-task-button`) linked to a central semantic theme engine.
 > - **Project Context (Light Mode)**: Use `bg-blue-100/70` for main sections and `bg-white/80` for inner metadata cards (Identification, Planning, Building) with outlines matching text color.
 > - **Brand Identity**: Logo is a simple white tick inside an orange circle (`#E67E33`). Brand name stylized as `checkMATE`.
@@ -333,15 +330,15 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > 
 > **Features**:
 > - **Admin Simulation Mode**: Persistent toggle for admins to simulate the "Viewer" role with pulsing orange indicators and mobile header alerts.
-> - **Administrative Session Controls**: User management interface with 'Deactivate Current Task' (ShieldOff) and 'Clear Users Session List' (Eraser) buttons using custom in-app modals. Support an **Admin Feedback Ledger** with contextual breadcrumbs (`PROJECT / Checklist / Task`), relative timestamps, and the ability to directly delete entries to clear user task notes.
-> - **Two-Stage Project Deletion**: Secure deletion workflow with a secondary 'Last Chance' warning and complete cloud storage cleanup.
+> - **Admin Console**: Centralized tabbed interface for managing Team Members (user roles, session clearing) and Project Registry. Support an **Admin Feedback Ledger** with contextual breadcrumbs (`PROJECT / Checklist / Task`), relative timestamps, and the ability to directly delete entries to clear user task notes.
+> - **Two-Stage Project Deletion**: Secure deletion workflow managed within the Admin Registry with a secondary 'Last Chance' warning and complete cloud storage cleanup.
 > - **Checklist Removal Safety**: In-app confirmation modal for removing checklists from projects, warning about potential work loss.
 > - Multi-format Import/Export (JSON, ZIP, CSV). **Hide Export on mobile.**
 > - Intelligent Plain Text parser for hierarchical lists.
-|> - **Branding Console**: Floating, resizable HUD for live-adjusting brand colors and corner radii with real-time sync and iterative snapshot updates.
-|> - **Main Sidebar Toggle**: A smooth, animated toggle to collapse the primary navigation sidebar in Desktop Mode, enabling an immersive, wide-screen view. State is persisted in `localStorage`.
-|> - **Dynamic Versioning**: Link the UI version display directly to the `version` field in `package.json`.
-|> - Personalized UI Folding: Store section expand/collapse states in localStore for individual workspace control.
+> - **Branding Console**: Floating, resizable HUD for live-adjusting brand colors and corner radii with real-time sync and iterative snapshot updates.
+> - **Main Sidebar Toggle**: A smooth, animated toggle to collapse the primary navigation sidebar in Desktop Mode, enabling an immersive, wide-screen view. State is persisted in `localStorage`.
+> - **Dynamic Versioning**: Link the UI version display directly to the `version` field in `package.json`.
+> - Personalized UI Folding: Store section expand/collapse states in localStore for individual workspace control.
 > - **Persistent Dashboard**: Implement a project-view layout with a collapsible metadata dashboard organized into Identification, Planning, and Building sections. **Optimize mobile layout with bordered Edit buttons and stacked controls.** The Active Focus card must use **font-black** and **large-scale typography (up to 6xl)** for the primary task title.
 > - **Add Logic Workflow**: Provide an "+ Add Checklist" modal to select and assign master templates to projects.
 > - **Online Documents**: Implement a project-specific file explorer with Firebase Storage integration, global search, and a recursive "Deep List" view mode. Grid view features "shapes only" icons (amber folders, blue files) for a modern feel.
@@ -351,8 +348,8 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > - **Knowledge Hub & Widgets**: Implement a modular dashboard intelligence center positioned directly below the focus card. Include **Task Guidance** widget (displaying structured description and additional content), **Can I Proceed?** widget (fully dynamic styling for requirements including item backgrounds), and **My Task Feedback** widget (showing real-time instance-specific logs).
 > - **My Notes Widget**: Modular dashboard widget with category filtering, priority flagging, and a **"Clean Entry" collapsible rich-text editor** with fade-in animations and automatic collapse upon entry.
 > - **Input Stability**: Implement local state synchronization for all hierarchical titles to prevent collaborative cursor jumping.
-> 
+> - 
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 27, 2025 (v1.9.0 - Stable Interaction Engine & Global Fallback Search)*
+*Updated: December 28, 2025 (v1.9.5 - Admin Console & Styling Engine Alignment)*

@@ -107,6 +107,7 @@ interface TasklistState {
   toggleTaskInActionSet: (projectId: string, instanceId: string, taskId: string) => Promise<void>;
   moveTaskInActionSet: (projectId: string, instanceId: string, taskId: string, direction: 'up' | 'down') => Promise<void>;
   setActionSet: (newSet: ActionSetItem[]) => Promise<void>;
+  getValidActionSet: () => ActionSetItem[];
   clearActionSet: () => Promise<void>;
   
   // Scratchpad
@@ -225,7 +226,6 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--task-title', settings.colorTaskTitle);
     root.style.setProperty('--task-inactive-text', settings.colorTaskInactiveText);
     root.style.setProperty('--metadata-card-bg', settings.colorMetadataCardBg);
-    root.style.setProperty('--metadata-card-border', settings.colorMetadataCardBorder);
     root.style.setProperty('--metadata-card-border', settings.colorMetadataCardBorder);
     root.style.setProperty('--section-ident', settings.colorSectionIdent);
     root.style.setProperty('--section-ident-icon', settings.colorSectionIdentIcon);
@@ -1078,6 +1078,19 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       const { currentUser } = get();
       if (!currentUser) return;
       await updateDoc(doc(db, 'users', currentUser.id), { actionSet: newSet });
+    },
+
+    getValidActionSet: () => {
+      const { currentUser, instances } = get();
+      if (!currentUser?.actionSet) return [];
+      return currentUser.actionSet.filter(item => {
+        const instance = instances.find(i => i.id === item.instanceId);
+        if (!instance) return false;
+        const task = instance.sections
+          .flatMap(s => s.subsections.flatMap(ss => ss.tasks))
+          .find(t => t.id === item.taskId);
+        return !!task;
+      });
     },
 
     clearActionSet: async () => {

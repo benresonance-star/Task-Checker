@@ -303,6 +303,8 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                   <ColorControl label="Main App Bg" value={themeSettings.colorAppBg} onChange={(v) => handleChange('colorAppBg', v)} />
                   <ColorControl label="Sidebar Bg" value={themeSettings.colorSidebarBg} onChange={(v) => handleChange('colorSidebarBg', v)} />
                   <ColorControl label="Console Bg" value={themeSettings.colorConsoleBg} onChange={(v) => handleChange('colorConsoleBg', v)} />
+                  <ColorControl label="Alert: Danger" value={themeSettings.colorDestructive} onChange={(v) => handleChange('colorDestructive', v)} />
+                  <ColorControl label="Alert: Warning" value={themeSettings.colorPresenceNotice} onChange={(v) => handleChange('colorPresenceNotice', v)} />
                 </div>
                 
                 <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
@@ -313,6 +315,24 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                   </div>
                   <SliderControl label="Global Text Scale" value={themeSettings.fontSizeBase} min={10} max={24} onChange={(v) => handleChange('fontSizeBase', v)} />
                   <SliderControl label="Line Spacing" value={themeSettings.lineHeightBase} min={1} max={2} step={0.1} onChange={(v) => handleChange('lineHeightBase', v)} />
+                  <div className="grid grid-cols-2 gap-3">
+                    <SliderControl label="Heading Kerning" value={themeSettings.letterSpacingHeading} min={-0.1} max={0.5} step={0.01} onChange={(v) => handleChange('letterSpacingHeading', v)} />
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-black uppercase text-gray-500 tracking-tight">Heading Weight</label>
+                      <select 
+                        value={themeSettings.fontWeightHeading} 
+                        onChange={(e) => handleChange('fontWeightHeading', e.target.value)}
+                        className="bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 rounded px-2 py-1.5 text-xs font-bold"
+                      >
+                        <option value="400">Regular</option>
+                        <option value="500">Medium</option>
+                        <option value="600">Semibold</option>
+                        <option value="700">Bold</option>
+                        <option value="800">Extrabold</option>
+                        <option value="900">Black</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -338,21 +358,25 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 </div>
                 
                 <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
-                  <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest\">"Can I Proceed?" Styling</h4>
+                  <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest">"Can I Proceed?" Styling</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <ColorControl label="Container Bg" value={themeSettings.colorPrereqBg} onChange={(v) => handleChange('colorPrereqBg', v)} />
                     <ColorControl label="Container Border" value={themeSettings.colorPrereqBorder} onChange={(v) => handleChange('colorPrereqBorder', v)} />
                     <ColorControl label="Item Background" value={themeSettings.colorPrereqItemBg} onChange={(v) => handleChange('colorPrereqItemBg', v)} />
-                    <ColorControl label="Icon & Text Color" value={themeSettings.colorPrereqIcon} onChange={(v) => handleChange('colorPrereqIcon', v)} />
+                    <ColorControl label="Item Text" value={themeSettings.colorPrereqText} onChange={(v) => handleChange('colorPrereqText', v)} />
+                    <ColorControl label="Icon Color" value={themeSettings.colorPrereqIcon} onChange={(v) => handleChange('colorPrereqIcon', v)} />
                   </div>
                 </div>
 
                 <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
-                  <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest\">My Notes & Workbench</h4>
+                  <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest">My Notes & Workbench</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <ColorControl label="Widget Bg" value={themeSettings.colorNotesBg} onChange={(v) => handleChange('colorNotesBg', v)} />
                     <ColorControl label="Widget Outline" value={themeSettings.colorNotesBorder} onChange={(v) => handleChange('colorNotesBorder', v)} />
                     <ColorControl label="Editor Bg" value={themeSettings.colorNotesEditorBg} onChange={(v) => handleChange('colorNotesEditorBg', v)} />
+                    <ColorControl label="Personal Note Bg" value={themeSettings.colorNotePersonalBg} onChange={(v) => handleChange('colorNotePersonalBg', v)} />
+                    <ColorControl label="Project Note Bg" value={themeSettings.colorNoteProjectBg} onChange={(v) => handleChange('colorNoteProjectBg', v)} />
+                    <ColorControl label="Priority Note Bg" value={themeSettings.colorNotePriorityBg} onChange={(v) => handleChange('colorNotePriorityBg', v)} />
                   </div>
                 </div>
               </div>
@@ -373,8 +397,11 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 
                 <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100 dark:border-gray-800">
                   <ColorControl label="Identification Header" value={themeSettings.colorSectionIdent} onChange={(v) => handleChange('colorSectionIdent', v)} />
+                  <ColorControl label="Ident Icon" value={themeSettings.colorSectionIdentIcon} onChange={(v) => handleChange('colorSectionIdentIcon', v)} />
                   <ColorControl label="Planning Header" value={themeSettings.colorSectionPlan} onChange={(v) => handleChange('colorSectionPlan', v)} />
+                  <ColorControl label="Planning Icon" value={themeSettings.colorSectionPlanIcon} onChange={(v) => handleChange('colorSectionPlanIcon', v)} />
                   <ColorControl label="Building Header" value={themeSettings.colorSectionBuild} onChange={(v) => handleChange('colorSectionBuild', v)} />
+                  <ColorControl label="Building Icon" value={themeSettings.colorSectionBuildIcon} onChange={(v) => handleChange('colorSectionBuildIcon', v)} />
                 </div>
               </div>
             )}
@@ -390,6 +417,8 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                   <ColorControl label="Checklist Border" value={themeSettings.colorChecklistBorder} onChange={(v) => handleChange('colorChecklistBorder', v)} />
                   <ColorControl label="Checklist Title" value={themeSettings.colorChecklistTitle} onChange={(v) => handleChange('colorChecklistTitle', v)} />
                   <ColorControl label="Connector Line" value={themeSettings.colorHierarchyLine} onChange={(v) => handleChange('colorHierarchyLine', v)} />
+                  <ColorControl label="Editor Border" value={themeSettings.colorNotesEditorBorder} onChange={(v) => handleChange('colorNotesEditorBorder', v)} />
+                  <ColorControl label="Editor Divider" value={themeSettings.colorNotesEditorSeparator} onChange={(v) => handleChange('colorNotesEditorSeparator', v)} />
                 </div>
                 
                 <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
@@ -432,9 +461,12 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 <SliderControl label="Task Card" value={themeSettings.radiusTaskCard} min={0} max={40} onChange={(v) => handleChange('radiusTaskCard', v)} />
                 <SliderControl label="Focus Card" value={themeSettings.radiusFocusCard} min={0} max={100} onChange={(v) => handleChange('radiusFocusCard', v)} />
                 <SliderControl label="Widgets" value={themeSettings.radiusWidget} min={0} max={40} onChange={(v) => handleChange('radiusWidget', v)} />
+                <SliderControl label="Sidebar" value={themeSettings.radiusSidebar} min={0} max={40} onChange={(v) => handleChange('radiusSidebar', v)} />
                 <SliderControl label="Interactive Buttons" value={themeSettings.radiusInteractive} min={0} max={20} onChange={(v) => handleChange('radiusInteractive', v)} />
                 <SliderControl label="Major Modals" value={themeSettings.radiusMajorModal} min={0} max={60} onChange={(v) => handleChange('radiusMajorModal', v)} />
                 <SliderControl label="Project Dashboard" value={themeSettings.radiusProjectInfo} min={0} max={60} onChange={(v) => handleChange('radiusProjectInfo', v)} />
+                <SliderControl label="Metadata Cards" value={themeSettings.radiusMetadataCard} min={0} max={40} onChange={(v) => handleChange('radiusMetadataCard', v)} />
+                <SliderControl label="Task Actions" value={themeSettings.radiusTaskButton} min={0} max={20} onChange={(v) => handleChange('radiusTaskButton', v)} />
               </div>
             )}
           </section>

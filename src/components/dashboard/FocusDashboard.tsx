@@ -44,9 +44,11 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
     showPlaylistSidebar,
     setShowPlaylistSidebar,
     showMainSidebar,
-    isDarkMode
+    isDarkMode,
+    getValidActionSet
   } = useTasklistStore();
 
+  const validActionSet = getValidActionSet();
   const isWide = !showPlaylistSidebar && !showMainSidebar;
 
   const [showSetTimer, setShowSetTimer] = React.useState(false);
@@ -250,16 +252,16 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                           "h-12 px-6 flex items-center gap-3 border-2 transition-all duration-500 font-black rounded-2xl shadow-lg uppercase tracking-widest text-xs",
                           showPlaylistSidebar 
                             ? "opacity-0 pointer-events-none translate-x-4" 
-                            : (currentUser?.actionSet?.length || 0) > 0
+                            : validActionSet.length > 0
                               ? "bg-google-blue/10 text-google-blue border-google-blue/30 hover:bg-google-blue hover:text-white"
                               : "bg-white dark:bg-black/40 text-gray-400 border-gray-300 dark:border-gray-700 hover:border-google-blue hover:text-google-blue"
                         )}
                       >
-                        <Music className={clsx("w-5 h-5", (currentUser?.actionSet?.length || 0) > 0 && "animate-pulse")} />
+                        <Music className={clsx("w-5 h-5", validActionSet.length > 0 && "animate-pulse")} />
                         <span>My Session</span>
-                        {(currentUser?.actionSet?.length || 0) > 0 && (
+                        {validActionSet.length > 0 && (
                           <span className="flex items-center justify-center bg-white dark:bg-google-blue text-google-blue dark:text-gray-300 w-5 h-5 rounded-full text-[10px] font-black shadow-sm">
-                            {currentUser?.actionSet?.length}
+                            {validActionSet.length}
                           </span>
                         )}
                       </button>
