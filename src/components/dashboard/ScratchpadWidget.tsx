@@ -176,6 +176,13 @@ export const ScratchpadWidget: React.FC<{ projects?: Project[] }> = ({ projects:
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [isAddCategoryMenuOpen, setIsAddCategoryMenuOpen] = useState(false);
 
+  // New Note State
+  const [newNotePriority, setNewNotePriority] = useState(false);
+  const [newNoteInSession, setNewNoteInSession] = useState(false);
+  const [showNewNoteReminderPicker, setShowNewNoteReminderPicker] = useState(false);
+  const [newNoteReminderTime, setNewNoteReminderTime] = useState('');
+  const [newNoteReminder, setNewNoteReminder] = useState<any>(null);
+
   // Sync state to localStorage
   useEffect(() => {
     localStorage.setItem('notes_active_category', activeCategory);
@@ -277,9 +284,15 @@ export const ScratchpadWidget: React.FC<{ projects?: Project[] }> = ({ projects:
     // Check if empty (tiptap returns <p></p> for empty)
     if (content === '<p></p>' || !addEditor.getText().trim()) return;
     
-    addScratchpadTask(content, selectedCategory);
+    addScratchpadTask(content, selectedCategory, newNotePriority, newNoteReminder, newNoteInSession);
     addEditor.commands.setContent('');
     setIsEditorOpen(false);
+    
+    // Reset states
+    setNewNotePriority(false);
+    setNewNoteInSession(false);
+    setNewNoteReminder(null);
+    setNewNoteReminderTime('');
   };
 
   const startEditing = (task: any) => {
@@ -344,6 +357,97 @@ export const ScratchpadWidget: React.FC<{ projects?: Project[] }> = ({ projects:
                 <button onClick={() => addEditor?.chain().focus().toggleBold().run()} className={clsx("p-1.5 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", addEditor?.isActive('bold') && "bg-gray-200 dark:bg-white/10")}><Bold className="w-3 h-3" /></button>
                 <button onClick={() => addEditor?.chain().focus().toggleBulletList().run()} className={clsx("p-1.5 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", addEditor?.isActive('bulletList') && "bg-gray-200 dark:bg-white/10")}><List className="w-3 h-3" /></button>
                 <button onClick={() => addEditor?.chain().focus().toggleOrderedList().run()} className={clsx("p-1.5 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", addEditor?.isActive('orderedList') && "bg-gray-200 dark:bg-white/10")}><ListOrdered className="w-3 h-3" /></button>
+                
+                <div className="w-px h-4 bg-gray-200 dark:bg-gray-800 mx-1" />
+
+                <button 
+                  onClick={() => setNewNoteInSession(!newNoteInSession)} 
+                  className={clsx("p-1.5 rounded transition-all", newNoteInSession ? "bg-google-blue text-white shadow-sm" : "text-gray-400 hover:text-google-blue hover:bg-google-blue/10")}
+                  title="Add to My Session"
+                >
+                  <ListPlus className="w-3.5 h-3.5" />
+                </button>
+
+                <button 
+                  onClick={() => setNewNotePriority(!newNotePriority)} 
+                  className={clsx("p-1.5 rounded transition-all", newNotePriority ? "bg-google-red text-white shadow-sm" : "text-gray-400 hover:text-google-red hover:bg-google-red/10")}
+                  title="Flag as Priority"
+                >
+                  <Flag className={clsx("w-3.5 h-3.5", newNotePriority && "fill-current")} />
+                </button>
+
+                <div className="relative">
+                  <button 
+                    onClick={() => setShowNewNoteReminderPicker(!showNewNoteReminderPicker)} 
+                    className={clsx("p-1.5 rounded transition-all", newNoteReminder ? "bg-orange-500 text-white shadow-sm" : "text-gray-400 hover:text-orange-500 hover:bg-orange-500/10")}
+                    title="Set Alert"
+                  >
+                    <Bell className={clsx("w-3.5 h-3.5", newNoteReminder && "fill-current")} />
+                  </button>
+
+                  {showNewNoteReminderPicker && (
+                    <>
+                      <div 
+                        className="fixed inset-0 z-[7000] bg-black/10 backdrop-blur-[2px]" 
+                        onClick={(e) => { e.stopPropagation(); setShowNewNoteReminderPicker(false); }} 
+                      />
+                      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-900 border-2 border-orange-200 dark:border-gray-700 rounded-2xl p-4 shadow-2xl z-[7001] min-w-[280px] animate-in fade-in zoom-in-95 duration-200">
+                        <div className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-4 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Bell className="w-4 h-4 text-orange-500" />
+                            <span>Set Reminder</span>
+                          </div>
+                        </div>
+                        <input 
+                          type="datetime-local" 
+                          className="w-full bg-gray-50 dark:bg-black/40 border-2 border-gray-200 dark:border-gray-800 rounded-xl px-3 py-2.5 text-xs font-bold outline-none focus:border-orange-500 transition-all mb-4 text-[var(--text-primary)]"
+                          value={newNoteReminderTime}
+                          onChange={(e) => setNewNoteReminderTime(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const date = new Date(newNoteReminderTime);
+                              if (!isNaN(date.getTime())) {
+                                setNewNoteReminder({ dateTime: date.getTime(), status: 'active', snoozeCount: 0 });
+                                setShowNewNoteReminderPicker(false);
+                              }
+                            }
+                            if (e.key === 'Escape') setShowNewNoteReminderPicker(false);
+                          }}
+                          autoFocus
+                        />
+                        <div className="flex flex-col gap-2">
+                          <button 
+                            onClick={() => {
+                              const date = new Date(newNoteReminderTime);
+                              if (!isNaN(date.getTime())) {
+                                setNewNoteReminder({ dateTime: date.getTime(), status: 'active', snoozeCount: 0 });
+                                setShowNewNoteReminderPicker(false);
+                              }
+                            }}
+                            disabled={!newNoteReminderTime}
+                            className="w-full py-3 bg-google-blue text-white hover:bg-blue-600 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:pointer-events-none"
+                          >
+                            Set Alert
+                          </button>
+                          {newNoteReminder && (
+                            <button 
+                              onClick={() => { setNewNoteReminder(null); setNewNoteReminderTime(''); setShowNewNoteReminderPicker(false); }}
+                              className="w-full py-3 bg-google-red/10 text-google-red hover:bg-google-red/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                            >
+                              Remove Alert
+                            </button>
+                          )}
+                          <button 
+                            onClick={() => setShowNewNoteReminderPicker(false)}
+                            className="w-full py-3 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                          >
+                            Dismiss
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex gap-2 p-2 pt-1 items-stretch">

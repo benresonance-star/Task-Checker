@@ -117,7 +117,7 @@ interface TasklistState {
   clearActionSet: () => Promise<void>;
   
   // Scratchpad
-  addScratchpadTask: (text: string, category: string) => Promise<void>;
+  addScratchpadTask: (text: string, category: string, priority?: boolean, reminder?: ReminderInfo | null, inSession?: boolean) => Promise<void>;
   updateScratchpadTask: (id: string, updates: { text?: string; category?: string; priority?: boolean; reminder?: any }) => Promise<void>;
   toggleScratchpadTask: (id: string) => Promise<void>;
   toggleScratchpadPriority: (id: string) => Promise<void>;
@@ -1309,21 +1309,36 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       await updateDoc(doc(db, 'users', currentUser.id), { actionSet: [] });
     },
 
-    addScratchpadTask: async (text, category) => {
+    addScratchpadTask: async (text, category, priority = false, reminder = null, inSession = false) => {
       const { currentUser } = get();
       if (!currentUser) return;
       
+      const userRef = doc(db, 'users', currentUser.id);
       const newItem: ScratchpadItem = {
         id: Math.random().toString(36).substr(2, 9),
         text,
         category,
         completed: false,
-        priority: false,
+        priority,
+        reminder: reminder || undefined,
         createdAt: Date.now()
       };
 
       const scratchpad = [...(currentUser.scratchpad || []), newItem];
-      await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
+      const actionSet = [...(currentUser.actionSet || [])];
+
+      if (inSession) {
+        actionSet.unshift({
+          type: 'note',
+          taskId: newItem.id,
+          addedAt: Date.now()
+        });
+      }
+
+      await updateDoc(userRef, { 
+        scratchpad,
+        actionSet
+      });
     },
 
     updateScratchpadTask: async (id, updates) => {
