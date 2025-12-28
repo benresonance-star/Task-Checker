@@ -10,7 +10,7 @@
 > 4. Failure to adhere to Section 6 (AI Development Rules & SOP) will result in architectural drift and session termination.
 >    - *Comment: Strictly follow technical and deployment SOPs to prevent regressions.*
 
-*Current Version: 1.9.9*
+*Current Version: 1.9.10*
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It operates on a "Master-Instance" model, where users can define master templates and instantiate them within specific projects. The application is built for high reliability, real-time team synchronization, and cross-platform accessibility.
@@ -369,7 +369,7 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 28, 2025 (v1.9.9 - Enhanced Mandatory Agent Protocol & Global HUD)*
+*Updated: December 28, 2025 (v1.9.10 - Dynamic Header Alignment & UI Polish)*
 
 ## UI Architecture & Layering Strategy
 To ensure a consistent and predictable user interface, the application follows a standardized vertical stacking order (z-index hierarchy). This "Global HUD" strategy ensures that critical tools like the Branding Console remain accessible regardless of the current workspace state.

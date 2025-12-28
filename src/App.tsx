@@ -1414,7 +1414,10 @@ function App() {
       )}>
         {location.pathname !== '/dashboard' && (
           <header className={theme.components.layout.contentHeader}>
-            <div className="flex items-center justify-between md:justify-start gap-3 w-full md:w-auto">
+            <div className={clsx(
+              "flex items-center justify-between md:justify-start gap-3 w-full md:w-auto transition-all duration-500",
+              showPlaylistSidebar && "md:flex-shrink-0"
+            )}>
               <div className="flex items-center gap-3">
                 {mode === 'master' ? (
                   <CheckCircle2 className="w-8 h-8 text-google-blue" />
@@ -1444,7 +1447,10 @@ function App() {
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className={clsx(
+              "flex items-center gap-2 transition-all duration-500",
+              showPlaylistSidebar && "md:flex-1 md:justify-end"
+            )}>
               {mode === 'master' && (
                     <Button 
                       variant="ghost" 
@@ -1473,7 +1479,7 @@ function App() {
                     className={clsx(
                       "h-10 px-4 flex items-center gap-2 border-2 transition-all duration-500 font-bold rounded-button shadow-sm",
                       showPlaylistSidebar 
-                        ? "opacity-0 pointer-events-none translate-x-4" 
+                        ? "w-0 h-0 p-0 border-0 opacity-0 pointer-events-none overflow-hidden" 
                         : validActionSet.length > 0
                           ? "bg-google-blue/10 text-google-blue border-google-blue/30 hover:bg-google-blue hover:text-white"
                           : "bg-white dark:bg-black/40 text-gray-400 border-gray-300 dark:border-gray-700 hover:border-google-blue hover:text-google-blue"
