@@ -1162,12 +1162,19 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       const userRef = doc(db, 'users', currentUser.id);
       const currentSet = currentUser.actionSet || [];
       
+      // Ensure we have a valid type discriminator
+      const itemToInject: ActionSetItem = {
+        ...item,
+        type: item.type || 'task',
+        addedAt: Date.now()
+      };
+
       // Check if it already exists
       const existsIdx = currentSet.findIndex(i => 
-        i.type === item.type && 
-        i.projectId === item.projectId && 
-        i.instanceId === item.instanceId && 
-        i.taskId === item.taskId
+        (i.type === itemToInject.type || (!i.type && itemToInject.type === 'task')) && 
+        i.projectId === itemToInject.projectId && 
+        i.instanceId === itemToInject.instanceId && 
+        i.taskId === itemToInject.taskId
       );
 
       let newSet = [...currentSet];
@@ -1178,11 +1185,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       // If no active task in session, it becomes the active task (Index 0)
       // Otherwise, put it at Index 1 (Next Up)
       if (newSet.length === 0 || !currentUser.activeFocus) {
-        newSet.unshift(item);
+        newSet.unshift(itemToInject);
         // Also make it the active focus
-        await toggleTaskFocus(item.projectId || '', item.instanceId || '', item.taskId);
+        await toggleTaskFocus(itemToInject.projectId || '', itemToInject.instanceId || '', itemToInject.taskId);
       } else {
-        newSet.splice(1, 0, item);
+        newSet.splice(1, 0, itemToInject);
       }
 
       await updateDoc(userRef, { actionSet: newSet });

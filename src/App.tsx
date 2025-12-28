@@ -818,51 +818,48 @@ function App() {
   const handleReminderAction = async (action: 'session' | 'snooze' | 'dismiss' | 'adjust', snoozeMins?: number) => {
     if (!triggeredReminder) return;
 
+    const currentTriggered = { ...triggeredReminder };
+    setTriggeredReminder(null); // Close modal immediately for responsiveness
+
     if (action === 'session') {
       await injectTaskIntoSession({
-        type: triggeredReminder.type,
-        projectId: triggeredReminder.projectId,
-        instanceId: triggeredReminder.instanceId,
-        taskId: triggeredReminder.taskId,
+        type: currentTriggered.type,
+        projectId: currentTriggered.projectId,
+        instanceId: currentTriggered.instanceId,
+        taskId: currentTriggered.taskId,
         addedAt: Date.now()
       });
       // Clear the reminder from the task/note
-      if (triggeredReminder.type === 'note') {
-        await updateScratchpadTask(triggeredReminder.taskId, { reminder: null });
+      if (currentTriggered.type === 'note') {
+        await updateScratchpadTask(currentTriggered.taskId, { reminder: null });
       } else {
-        await updateTaskReminder(triggeredReminder.taskId, null, triggeredReminder.instanceId!);
+        await updateTaskReminder(currentTriggered.taskId, null, currentTriggered.instanceId!);
       }
-      setTriggeredReminder(null);
     } else if (action === 'snooze' && snoozeMins) {
       const newTime = Date.now() + (snoozeMins * 60000);
       const reminderUpdate = {
         dateTime: newTime,
         status: 'active' as const,
-        snoozeCount: 1 // We'll just set it to 1 for now, or increment if we had it
+        snoozeCount: 1 
       };
-      if (triggeredReminder.type === 'note') {
-        await updateScratchpadTask(triggeredReminder.taskId, { reminder: reminderUpdate });
+      if (currentTriggered.type === 'note') {
+        await updateScratchpadTask(currentTriggered.taskId, { reminder: reminderUpdate });
       } else {
-        await updateTaskReminder(triggeredReminder.taskId, reminderUpdate, triggeredReminder.instanceId!);
+        await updateTaskReminder(currentTriggered.taskId, reminderUpdate, currentTriggered.instanceId!);
       }
-      setTriggeredReminder(null);
       setShowSnoozeOptions(false);
     } else if (action === 'dismiss') {
-      if (triggeredReminder.type === 'note') {
-        await updateScratchpadTask(triggeredReminder.taskId, { reminder: null });
+      if (currentTriggered.type === 'note') {
+        await updateScratchpadTask(currentTriggered.taskId, { reminder: null });
       } else {
-        await updateTaskReminder(triggeredReminder.taskId, null, triggeredReminder.instanceId!);
+        await updateTaskReminder(currentTriggered.taskId, null, currentTriggered.instanceId!);
       }
-      setTriggeredReminder(null);
     } else if (action === 'adjust') {
-      // Logic to open adjustment UI (could be opening the task info modal or a specific date picker)
-      if (triggeredReminder.type === 'note') {
-        // Jump to Home Planner and focus notes?
+      if (currentTriggered.type === 'note') {
         navigate('/home');
       } else {
-        setEditingTaskInfo({ taskId: triggeredReminder.taskId, containerId: triggeredReminder.instanceId! });
+        setEditingTaskInfo({ taskId: currentTriggered.taskId, containerId: currentTriggered.instanceId! });
       }
-      setTriggeredReminder(null);
     }
   };
 
