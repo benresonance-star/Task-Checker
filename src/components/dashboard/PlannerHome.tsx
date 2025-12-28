@@ -37,6 +37,8 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
   const todayAlerts = getTodayAlerts();
   const validActionSet = getValidActionSet();
 
+  const [activeSpotlightId, setActiveSpotlightId] = useState<string | null>(null);
+
   // Get the top 3 staged items from the action set with full data
   const stagedItems = useMemo(() => {
     return validActionSet.slice(0, 3).map(item => {
@@ -106,6 +108,23 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
 
     return Array.from(projectMap.values());
   }, [validActionSet, projects, instances, currentUser?.scratchpad]);
+
+  // Set initial spotlight focus to the project with the most staged items or the first project
+  useEffect(() => {
+    if (!activeSpotlightId && activeCommitments.length > 0) {
+      // Find project with most staged items
+      const projectCounts = activeCommitments.map(c => ({
+        id: c.project.id,
+        count: stagedItems.filter(s => s.projectId === c.project.id).length
+      }));
+      const topProject = projectCounts.sort((a, b) => b.count - a.count)[0];
+      setActiveSpotlightId(topProject.id);
+    }
+  }, [activeCommitments, stagedItems, activeSpotlightId]);
+
+  const spotlightData = useMemo(() => {
+    return activeCommitments.find(c => c.project.id === activeSpotlightId) || activeCommitments[0] || null;
+  }, [activeCommitments, activeSpotlightId]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -278,168 +297,218 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
         </div>
       </div>
 
-      {/* Main Commitment Section */}
-      <div className="space-y-12">
+      {/* Project Spotlight Switchboard */}
+      <div className="space-y-6">
         <div className="flex items-center justify-between px-2">
           <h2 className="flex items-center gap-3 text-[10px] font-black uppercase text-gray-500 tracking-[0.2em]">
             <Target className="w-5 h-5 text-google-green" />
-            My Projects & Checklists
+            Project Activity Spotlight
           </h2>
-          <Button variant="ghost" size="sm" className="text-[10px] font-black text-google-blue uppercase tracking-widest">Explore All</Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-[10px] font-black text-google-blue uppercase tracking-widest hover:bg-google-blue/5"
+            onClick={() => navigate('/projects')} // Assuming there's a projects route
+          >
+            Explore All
+          </Button>
         </div>
 
-        <div className="space-y-6">
-          {activeCommitments.length === 0 ? (
-            <div className="py-20 text-center bg-gray-50 dark:bg-black/10 rounded-[2.5rem] border-2 border-dashed border-gray-200 dark:border-gray-800">
-              <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">No active commitments found.</p>
-              <p className="text-xs text-gray-500 mt-2">Stage a task or add a note to see your projects here.</p>
-            </div>
-          ) : (
-            activeCommitments.map(({ project, activeInstances, associatedNotes }) => {
-              const taskCount = validActionSet.filter(i => i.projectId === project.id).length;
-              const noteCount = associatedNotes.length;
+        {activeCommitments.length === 0 ? (
+          <div className="py-12 text-center bg-gray-50 dark:bg-black/10 rounded-[2.5rem] border-2 border-dashed border-gray-200 dark:border-gray-800">
+            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">No active commitments found.</p>
+            <p className="text-xs text-gray-500 mt-2">Stage a task or add a note to see your projects here.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {/* The Switchboard Ribbon */}
+            <div className="flex items-center gap-3 overflow-x-auto pb-2 px-1 custom-scrollbar no-scrollbar">
+              {activeCommitments.map(({ project, associatedNotes }) => {
+                const isActive = activeSpotlightId === project.id;
+                const stagedCount = stagedItems.filter(s => s.projectId === project.id).length;
+                const noteCount = associatedNotes.length;
 
-              return (
-                <div 
-                  key={project.id}
-                  className="bg-white dark:bg-black/20 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-xl transition-all group"
-                >
-                  {/* Project Header */}
-                  <div className="p-6 border-b border-gray-50 dark:border-gray-800/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 bg-google-green/10 rounded-2xl text-google-green group-hover:scale-110 transition-transform">
-                        <Briefcase className="w-6 h-6" />
+                return (
+                  <button
+                    key={project.id}
+                    onClick={() => setActiveSpotlightId(project.id)}
+                    className={clsx(
+                      "flex-shrink-0 flex items-center gap-3 px-5 py-3 rounded-2xl border-2 transition-all relative group",
+                      isActive 
+                        ? "bg-google-green border-google-green text-white shadow-lg shadow-google-green/20 scale-105 z-10" 
+                        : "bg-white dark:bg-black/20 border-gray-100 dark:border-gray-800 text-gray-500 hover:border-google-green/50"
+                    )}
+                  >
+                    <div className={clsx(
+                      "p-1.5 rounded-lg transition-colors",
+                      isActive ? "bg-white/20 text-white" : "bg-google-green/10 text-google-green group-hover:bg-google-green/20"
+                    )}>
+                      <Briefcase className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm font-black whitespace-nowrap tracking-tight">{project.name}</span>
+                    
+                    {/* Energy Dots */}
+                    {(stagedCount > 0 || noteCount > 0) && (
+                      <div className="flex gap-1 ml-1">
+                        {Array.from({ length: stagedCount }).map((_, i) => (
+                          <div key={`task-${i}`} className={clsx("w-1.5 h-1.5 rounded-full animate-pulse", isActive ? "bg-white" : "bg-google-blue")} />
+                        ))}
+                        {Array.from({ length: noteCount }).map((_, i) => (
+                          <div key={`note-${i}`} className={clsx("w-1.5 h-1.5 rounded-full animate-pulse", isActive ? "bg-white/60" : "bg-indigo-400")} />
+                        ))}
                       </div>
-                      <div className="space-y-0.5">
-                        <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 tracking-tight">{project.name}</h3>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* The Spotlight Container (Single Screen Focus) */}
+            {spotlightData && (
+              <div className="bg-white dark:bg-black/20 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 overflow-hidden shadow-xl animate-fade-in">
+                <div className="flex flex-col xl:flex-row min-h-[300px]">
+                  {/* Column 1: Project Identity (Slim) */}
+                  <div className="w-full xl:w-64 bg-gray-50/50 dark:bg-black/40 border-b xl:border-b-0 xl:border-r border-gray-100 dark:border-gray-800 p-8 flex flex-col justify-between group">
+                    <div>
+                      <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tighter leading-tight break-words mb-4">
+                        {spotlightData.project.name}
+                      </h3>
+                      <div className="space-y-3">
                         <div className="flex items-center gap-3">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-google-blue">
-                            {taskCount} {taskCount === 1 ? 'TASK' : 'TASKS'} IN SESSION
-                          </span>
-                          <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
-                          <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">
-                            {noteCount} {noteCount === 1 ? 'NOTE' : 'NOTES'} ASSOCIATED
-                          </span>
+                          <div className="w-8 h-8 rounded-xl bg-google-blue/10 flex items-center justify-center text-google-blue">
+                            <Zap className="w-4 h-4" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Active Tasks</span>
+                            <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                              {validActionSet.filter(i => i.projectId === spotlightData.project.id).length} in session
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                            <StickyNote className="w-4 h-4" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Knowledge</span>
+                            <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                              {spotlightData.associatedNotes.length} linked notes
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
+                    
                     <Button 
                       variant="ghost" 
-                      onClick={() => navigate(`/project/${project.id}`)}
-                      className="h-10 px-4 rounded-xl border border-gray-100 dark:border-gray-800 text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-google-green/5 hover:text-google-green hover:border-google-green/30"
+                      onClick={() => navigate(`/project/${spotlightData.project.id}`)}
+                      className="mt-8 h-12 w-full rounded-2xl border border-gray-200 dark:border-gray-700 text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-google-green hover:text-white hover:border-google-green transition-all"
                     >
-                      Enter Project Dashboard <ChevronRight className="w-4 h-4" />
+                      Deep Dive <ArrowRight className="w-4 h-4" />
                     </Button>
                   </div>
 
-                  {/* Activity Islands (Ribbons) */}
-                  <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Zone A: Live Checklists */}
-                    <div className="space-y-4">
-                      <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.1em] flex items-center gap-2">
-                        <ClipboardList className="w-4 h-4 text-google-blue" />
-                        Live Checklists
-                      </h4>
-                      <div className="flex flex-nowrap overflow-x-auto pb-4 gap-3 custom-scrollbar snap-x">
-                        {activeInstances.length === 0 ? (
-                          <div className="h-[60px] flex items-center px-4 bg-gray-50 dark:bg-white/5 rounded-xl text-[10px] font-bold text-gray-400 italic">
-                            No specific checklists staged.
-                          </div>
-                        ) : (
-                          activeInstances.map(instance => {
-                            // Calculate completion for the instance
-                            const totalTasks = instance.sections.reduce((acc, s) => acc + s.subsections.reduce((a, ss) => a + ss.tasks.length, 0), 0);
-                            const completedTasks = instance.sections.reduce((acc, s) => acc + s.subsections.reduce((a, ss) => a + ss.tasks.filter(t => t.completed).length, 0), 0);
-                            const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-                            const nextTask = instance.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => !t.completed);
+                  {/* Column 2: Live Checklists (Wide) */}
+                  <div className="flex-1 p-8 space-y-4 border-b xl:border-b-0 xl:border-r border-gray-100 dark:border-gray-800">
+                    <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] flex items-center gap-2 mb-2">
+                      <ClipboardList className="w-4 h-4 text-google-blue" />
+                      Live Checklists
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {spotlightData.activeInstances.length === 0 ? (
+                        <div className="col-span-full py-8 flex items-center justify-center bg-gray-50/50 dark:bg-white/5 rounded-2xl text-[10px] font-bold text-gray-400 italic">
+                          No specific checklists staged.
+                        </div>
+                      ) : (
+                        spotlightData.activeInstances.map(instance => {
+                          const totalTasks = instance.sections.reduce((acc, s) => acc + s.subsections.reduce((a, ss) => a + ss.tasks.length, 0), 0);
+                          const completedTasks = instance.sections.reduce((acc, s) => acc + s.subsections.reduce((a, ss) => a + ss.tasks.filter(t => t.completed).length, 0), 0);
+                          const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                          const nextTask = instance.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => !t.completed);
 
-                            return (
-                              <div 
-                                key={instance.id}
-                                onClick={() => navigate(`/project/${project.id}/instance/${instance.id}`)}
-                                className="snap-start flex-shrink-0 w-[240px] bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 hover:border-google-blue transition-all cursor-pointer group/pill"
-                              >
-                                <div className="flex items-center justify-between mb-3">
-                                  <span className="text-xs font-black text-gray-900 dark:text-gray-100 truncate flex-1 pr-2">{instance.title}</span>
-                                  <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
-                                    <svg className="w-8 h-8 -rotate-90">
-                                      <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="3" className="text-gray-200 dark:text-gray-800" />
-                                      <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray={88} strokeDashoffset={88 - (88 * progress) / 100} className="text-google-blue transition-all duration-1000" />
-                                    </svg>
-                                    <span className="absolute text-[8px] font-black">{progress}%</span>
-                                  </div>
-                                </div>
-                                {nextTask && (
-                                  <div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 group-hover/pill:text-google-blue transition-colors">
-                                    <ChevronRight className="w-3 h-3 shrink-0" />
-                                    <span className="truncate">Next: {nextTask.title}</span>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Zone B: Associated Notes */}
-                    <div className="space-y-4">
-                      <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.1em] flex items-center gap-2">
-                        <StickyNote className="w-4 h-4 text-indigo-500" />
-                        Project Notes
-                      </h4>
-                      <div className="flex flex-nowrap overflow-x-auto pb-4 gap-3 custom-scrollbar snap-x">
-                        {associatedNotes.length === 0 ? (
-                          <div className="h-[60px] flex items-center px-4 bg-gray-50 dark:bg-white/5 rounded-xl text-[10px] font-bold text-gray-400 italic">
-                            No notes tagged for this project.
-                          </div>
-                        ) : (
-                          associatedNotes.map(note => (
+                          return (
                             <div 
-                              key={note.id}
-                              style={{ backgroundColor: note.priority ? 'var(--note-priority-bg)' : 'var(--note-project-bg)' }}
-                              className={clsx(
-                                "snap-start flex-shrink-0 w-[180px] border rounded-2xl p-4 transition-all cursor-pointer group/note shadow-sm hover:shadow-md h-[100px] flex flex-col",
-                                note.priority ? "border-red-200 dark:border-red-900/30" : "border-transparent"
-                              )}
-                              onClick={() => {
-                                // Find where this note is being rendered and focus it, or stage it
-                                toggleNoteInActionSet(note.id);
-                              }}
+                              key={instance.id}
+                              onClick={() => navigate(`/project/${spotlightData.project.id}/instance/${instance.id}`)}
+                              className="bg-gray-50/50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 hover:border-google-blue hover:shadow-lg transition-all cursor-pointer group/pill"
                             >
-                              <div 
-                                className="text-[11px] font-bold text-gray-800 dark:text-gray-200 line-clamp-3 prose prose-sm dark:prose-invert max-w-none"
-                                dangerouslySetInnerHTML={{ __html: note.text }}
-                              />
-                              {note.reminder && (
-                                <div className="mt-auto flex items-center gap-1 text-[8px] font-black text-orange-600 animate-pulse">
-                                  <Bell className="w-2.5 h-2.5 fill-current" />
-                                  {new Date(note.reminder.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              <div className="flex items-center justify-between mb-3">
+                                <span className="text-xs font-black text-gray-900 dark:text-gray-100 truncate flex-1 pr-2">{instance.title}</span>
+                                <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
+                                  <svg className="w-8 h-8 -rotate-90">
+                                    <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="3" className="text-gray-200 dark:text-gray-800" />
+                                    <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray={88} strokeDashoffset={88 - (88 * progress) / 100} className="text-google-blue transition-all duration-1000" />
+                                  </svg>
+                                  <span className="absolute text-[8px] font-black">{progress}%</span>
+                                </div>
+                              </div>
+                              {nextTask && (
+                                <div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 group-hover/pill:text-google-blue transition-colors">
+                                  <ChevronRight className="w-3 h-3 shrink-0" />
+                                  <span className="truncate">Next: {nextTask.title}</span>
                                 </div>
                               )}
                             </div>
-                          ))
-                        )}
-                      </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Column 3: Project Notes (Medium) */}
+                  <div className="w-full xl:w-80 p-8 space-y-4 bg-gray-50/30 dark:bg-black/20">
+                    <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] flex items-center gap-2 mb-2">
+                      <StickyNote className="w-4 h-4 text-indigo-500" />
+                      Associated Notes
+                    </h4>
+                    <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                      {spotlightData.associatedNotes.length === 0 ? (
+                        <div className="py-8 flex items-center justify-center bg-gray-50/50 dark:bg-white/5 rounded-2xl text-[10px] font-bold text-gray-400 italic text-center px-4">
+                          No notes tagged for this project.
+                        </div>
+                      ) : (
+                        spotlightData.associatedNotes.map(note => (
+                          <div 
+                            key={note.id}
+                            style={{ backgroundColor: note.priority ? 'var(--note-priority-bg)' : 'var(--note-project-bg)' }}
+                            className={clsx(
+                              "border rounded-2xl p-4 transition-all cursor-pointer group/note shadow-sm hover:shadow-md flex flex-col gap-2",
+                              note.priority ? "border-red-200 dark:border-red-900/30 shadow-red-100/50" : "border-gray-100 dark:border-gray-800"
+                            )}
+                            onClick={() => toggleNoteInActionSet(note.id)}
+                          >
+                            <div 
+                              className="text-[11px] font-bold text-gray-800 dark:text-gray-200 line-clamp-3 prose prose-sm dark:prose-invert max-w-none"
+                              dangerouslySetInnerHTML={{ __html: note.text }}
+                            />
+                            {note.reminder && (
+                              <div className="flex items-center gap-1 text-[8px] font-black text-orange-600 animate-pulse">
+                                <Bell className="w-2.5 h-2.5 fill-current" />
+                                {new Date(note.reminder.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 </div>
-              );
-            })
-          )}
-        </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* MY NOTES (Full Width) */}
-      <div className="space-y-6">
+      {/* MY NOTES (Compressed for Screen Fit) */}
+      <div className="space-y-4">
         <div className="px-2">
           <h2 className="flex items-center gap-3 text-[10px] font-black uppercase text-gray-500 tracking-[0.2em]">
             <StickyNote className="w-5 h-5 text-google-blue" />
-            My Notes
+            General Notes & Triage
           </h2>
         </div>
         
-        <div className="p-8 bg-white dark:bg-black/40 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 min-h-[400px] shadow-xl">
+        <div className="p-4 md:p-6 bg-white dark:bg-black/40 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 shadow-xl overflow-hidden">
           <ScratchpadWidget projects={projects} />
         </div>
       </div>

@@ -12,14 +12,14 @@
 > 5. **Sync Protocol**: All protocol changes must be reflected in the **Admin > App Protocol** interface.
 >    - *Comment: Keep the internal Admin documentation synchronized with reality.*
 
-*Current Version: 1.13.26*
+*Current Version: 1.13.30*
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It features a dual-interface architectural model:
-1.  **Home: The Planner**: A stress-free orientation environment for reviewing projects and triaging personal tasks.
-    - **Today's Horizon (Staging Zone)**: A high-visibility panel featuring a real-time clock, today's alerts, and three "Session Sprint" slots. This zone encourages calm, playful staging of tasks before committing to a work session.
-    - **Project Activity Islands**: A commitment-focused layout replacing the global project list. Each "Island" represents an active project (one with tasks in the session or associated personal notes) and features horizontal ribbons for live checklists and associated project notes.
-    - **MY NOTES (Triage)**: A full-width section for managing personal notes and general triage, positioned below the project islands.
+1.  **Home: The Planner**: A high-fidelity, single-screen "Command Center" for orientation and planning.
+    - **Today's Horizon (Staging Zone)**: A horizontal staging strip where users curate their "Daily Trio" of tasks.
+    - **Project Spotlight Switchboard**: A tactile project switcher that focuses the entire interface on a single project at a time, reducing cognitive load and eliminating long scrolls.
+    - **Compressed Triage**: A streamlined general notes area for rapid entry and personal organization.
 2.  **Work: My Work Session**: A specialized deep-work environment for executing project tasks and recording progress.
 
 The application operates on a "Master-Instance" model, where users can define master templates and instantiate them within specific projects. It is built for high reliability, real-time team synchronization, and cross-platform accessibility.
@@ -44,7 +44,7 @@ The application uses a 3-level hierarchical navigation system in the header:
 6.  **Locked Context**: The header is sticky-pinned (`top-0`) using glassmorphism, ensuring global situational awareness during long scrolls. **The header is persistent across both Home Planner and Project/Template views, providing consistent access to the "My Session" action set.**
 
 **Core Views:**
-- **Home Planner** (`/home`): The landing screen for orientation. Contains the **Project Pulse** grid, a **Quick Access** sidebar, and the **MY NOTES** triage (full-width section) for daily planning.
+- **Home Planner** (`/home`): The landing screen for orientation. Features the **Project Spotlight Switchboard** model, providing a single-screen overview of active commitments.
 - **My Work Session** (`/session`): The execution engine. Displays the **Active Focus Card** (Task or Note) and the **Knowledge Hub**. Optimized for deep focus by removing non-essential widgets like MY NOTES.
 6. **Contextual Controls**: 
     - **Browse Layout**: Toggle between Grid and List views within the Discovery shelves to customize how Projects/Templates are searched.
