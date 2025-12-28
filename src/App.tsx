@@ -19,9 +19,9 @@ import {
   updateProfile
 } from 'firebase/auth';
 import { 
-    CheckCircle2, StickyNote, Trash2, ListOrdered, Music, ListPlus, Play, Pause, X, Menu, LogOut, Mail, Lock, User as UserIcon, Loader2, GripVertical, ThumbsUp, AlertTriangle, Target,
-    Plus, LayoutGrid, ClipboardList, Moon, Sun, Download, Upload, UserCircle2, FileText, FileSpreadsheet, File as FileIcon, ChevronUp, ChevronDown, ShieldCheck, Eye, ShieldOff, Eraser, ChevronLeft, ChevronRight, Palette,
-    Terminal, BookOpen, Activity, GitBranch, Database, Search, Edit2, Settings, TrendingUp, Clock, Bell
+    CheckCircle2, Trash2, ListOrdered, Music, ListPlus, Play, Pause, X, Menu, LogOut, Mail, Lock, User as UserIcon, Loader2, GripVertical, ThumbsUp, AlertTriangle, Target,
+    Plus, LayoutGrid, ClipboardList, UserCircle2, FileText, FileSpreadsheet, File as FileIcon, ChevronUp, ChevronDown, ShieldCheck, ShieldOff, Eraser, ChevronRight,
+    Terminal, BookOpen, Activity, GitBranch, Database, Search, Edit2, Settings, TrendingUp, Clock, Bell, Trophy, RotateCcw, Zap, Eye, Palette, Upload, Sun, Moon, ChevronLeft, Download
   } from 'lucide-react';
 import { StyleConsole } from './components/ui/StyleConsole';
 import {
@@ -54,7 +54,6 @@ import {
   matchPath
 } from 'react-router-dom';
 
-import { TomatoIcon } from './components/icons/TomatoIcon';
 import { formatTime } from './utils/time';
 
 const SidebarNoteItem = ({ 
@@ -68,7 +67,7 @@ const SidebarNoteItem = ({
   isActiveFocus: boolean,
   isTopTask: boolean
 }) => {
-  const { toggleTaskFocus, toggleNoteInActionSet, toggleScratchpadTask } = useTasklistStore();
+  const { toggleNoteInActionSet, toggleScratchpadTask } = useTasklistStore();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -88,38 +87,32 @@ const SidebarNoteItem = ({
     opacity: isDragging ? 0.8 : undefined,
   } as React.CSSProperties;
 
-  const isDeactivatedCompleted = !isActiveFocus && note.completed;
+  const isActuallyCompleted = note.completed;
 
   return (
     <div 
       ref={setNodeRef}
-      style={{
-        ...style,
-        backgroundColor: isActiveFocus 
-          ? undefined 
-          : (note.completed 
-              ? undefined 
-              : (note.priority ? 'var(--note-priority-bg)' : undefined))
-      }}
+      style={style}
       className={clsx(
-        "group flex flex-col rounded-container border-2 transition-all relative overflow-hidden cursor-pointer",
-        isActiveFocus 
-          ? "bg-indigo-600 border-indigo-500 shadow-lg shadow-indigo-500/20" 
-          : (isDeactivatedCompleted 
-              ? "bg-indigo-50/50 dark:bg-indigo-900/10 border-indigo-200/50 dark:border-indigo-800/50 opacity-60" 
-              : (note.priority 
-                  ? "border-red-200 dark:border-red-900/30 shadow-md" 
-                  : "bg-white dark:bg-black/40 border-gray-200 dark:border-gray-800 hover:border-indigo-400 shadow-sm"))
+        "group flex flex-col rounded-container border-2 transition-all relative overflow-hidden",
+        isActuallyCompleted
+          ? theme.components.sidebar.ledgerItem
+          : isActiveFocus 
+            ? "bg-indigo-600 border-indigo-500 shadow-lg shadow-indigo-500/20" 
+            : (note.priority 
+                ? "border-red-200 dark:border-red-900/30 shadow-md" 
+                : "bg-white dark:bg-black/40 border-gray-200 dark:border-gray-800 hover:border-indigo-400 shadow-sm")
       )}
       onClick={() => {
         const isPlanner = location.pathname === '/' || location.pathname === '/home';
         const isSession = location.pathname === '/session';
         
         if (isPlanner || isSession) {
-          toggleTaskFocus('', '', note.id);
+          // Just navigate if not in session, but don't change focus manually
+          if (!isSession) navigate('/session');
         } else {
+          // Default: jump to session context
           navigate('/session');
-          toggleTaskFocus('', '', note.id);
         }
       }}
     >
@@ -129,69 +122,77 @@ const SidebarNoteItem = ({
           {...listeners}
           className={clsx(
             "flex flex-col items-center pt-1 transition-opacity cursor-grab active:cursor-grabbing flex-shrink-0 touch-none",
-            isActiveFocus ? "text-white/40" : "text-gray-400 dark:text-gray-600 opacity-40 group-hover:opacity-100"
+            isActuallyCompleted ? "text-gray-400" : (isActiveFocus ? "text-white/40" : "text-gray-400 dark:text-gray-600 opacity-40 group-hover:opacity-100")
           )}
           style={{ touchAction: 'none' }}
         >
-          <GripVertical className="w-4 h-4" />
+          {isActuallyCompleted ? <Trophy className="w-4 h-4 text-google-blue" /> : <GripVertical className="w-4 h-4" />}
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center justify-between gap-2 mb-1">
             <span className={clsx(
               "text-[8px] font-black uppercase tracking-[0.2em]",
-              isActiveFocus ? "text-white/70" : "text-indigo-600 dark:text-indigo-400"
+              isActuallyCompleted ? "text-gray-400" : (isActiveFocus ? "text-white/70" : "text-indigo-600 dark:text-indigo-400")
             )}>
-              Personal Note {note.reminder && (
+              Personal Note {note.reminder && !isActuallyCompleted && (
                 <span className="ml-2 inline-flex items-center gap-1 text-orange-500 animate-pulse">
                   <Bell className="w-2 h-2 fill-current" />
                   {new Date(note.reminder.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
               )}
             </span>
-            {!isActiveFocus && (
-              <button 
-                onClick={(e) => { e.stopPropagation(); toggleNoteInActionSet(note.id); }}
-                className={clsx(
-                  "p-1 rounded-md opacity-0 group-hover:opacity-100 transition-all",
-                  "text-gray-400 hover:text-indigo-600"
-                )}
-              >
-                <X className="w-3 h-3" />
-              </button>
+            
+            {/* Action Row for Ledger */}
+            {isActuallyCompleted && (
+              <div className="flex items-center gap-1 pointer-events-auto">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleScratchpadTask(note.id);
+                  }}
+                  className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors text-gray-400 hover:text-google-blue"
+                  title="Revert Note"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleNoteInActionSet(note.id);
+                  }}
+                  className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors text-gray-400 hover:text-google-red"
+                  title="Clear from Session"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
             )}
           </div>
           <div 
             className={clsx(
               "text-xs font-bold break-words transition-all prose prose-sm max-w-none prose-p:my-0",
-              isActiveFocus ? "text-white" : "text-gray-700 dark:text-gray-200",
-              note.completed && "line-through opacity-50"
+              isActuallyCompleted ? "text-gray-400 line-through" : (isActiveFocus ? "text-white" : "text-gray-700 dark:text-gray-200")
             )}
             dangerouslySetInnerHTML={{ __html: note.text }}
           />
           <span className={clsx(
             "text-[8px] font-bold uppercase mt-1 block",
-            isActiveFocus ? "text-white/50" : "text-gray-400"
+            isActiveFocus && !isActuallyCompleted ? "text-white/50" : "text-gray-400"
           )}>
             {note.category}
           </span>
+          
+          {isActuallyCompleted && item.completedAt && (
+            <p className="text-[8px] font-black uppercase text-google-blue/60 mt-1">
+              Victory at {new Date(item.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </p>
+          )}
         </div>
       </div>
       
-      {isActiveFocus && (
+      {isActiveFocus && !isActuallyCompleted && (
         <div className="px-4 pb-4 animate-in slide-in-from-top-2 duration-300">
-          <div className="flex items-center gap-2">
-            {!isTopTask && (
-              <button 
-                onClick={(e) => { e.stopPropagation(); toggleNoteInActionSet(note.id); }}
-                className="w-10 h-10 rounded-xl bg-white/10 ml-auto flex items-center justify-center text-white hover:bg-white/20 hover:text-google-red transition-all"
-                title="Remove from Session"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
-            )}
-          </div>
-
           {isTopTask && (
             <div className="flex items-center gap-2 mt-3">
               <button 
@@ -209,7 +210,7 @@ const SidebarNoteItem = ({
               
               <button 
                 onClick={(e) => { e.stopPropagation(); toggleNoteInActionSet(note.id); }}
-                className="w-12 h-12 rounded-2xl bg-white/10 border-2 border-white/10 flex items-center justify-center text-white hover:bg-white/20 hover:text-google-red transition-all"
+                className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white hover:bg-white/20 hover:text-google-red transition-all border-2 border-white/10"
                 title="Remove from Session"
               >
                 <Trash2 className="w-5 h-5" />
@@ -236,16 +237,9 @@ const SidebarTaskItem = ({
   isTopTask: boolean,
   onOpenNotes: (taskId: string, containerId: string, focusFeedback?: boolean) => void
 }) => {
-  const { projects, toggleTask, toggleTaskFocus, toggleTaskInActionSet, setTaskTimer, resetTaskTimer, toggleTaskTimer, updateTaskTimer, currentUser, users } = useTasklistStore();
+  const { projects, toggleTask, toggleTaskInActionSet, toggleTaskTimer, updateTaskTimer, currentUser, users } = useTasklistStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const [showTimerWidget, setShowTimerWidget] = useState(false);
-  const [customMinutes, setCustomMinutes] = useState('20');
-
-  const handleResetTimer = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    resetTaskTimer(task.id);
-  };
 
   const {
     attributes,
@@ -263,21 +257,9 @@ const SidebarTaskItem = ({
     opacity: isDragging ? 0.8 : undefined,
   } as React.CSSProperties;
 
-  const handleSetTimer = () => {
-    const mins = parseInt(customMinutes);
-    if (!isNaN(mins)) {
-      setTaskTimer(task.id, mins * 60);
-      setShowTimerWidget(false);
-    }
-  };
-
   const hasNotes = (task.notes && task.notes !== '<p></p>') || (task.userNotes && task.userNotes !== '<p></p>');
   const hasFiles = (task.files && task.files.length > 0) || (task.userFiles && task.userFiles.length > 0);
   const shouldHighlightNotes = hasNotes || hasFiles;
-
-  const otherActiveUsers = Object.entries(instance?.activeUsers || {})
-    .filter(([uid, info]: [string, any]) => info.taskId === task.id && uid !== currentUser?.id && Date.now() - info.lastSeen < 45000)
-    .map(([_, info]: [string, any]) => info);
 
   const otherClaimants = users
     .filter(u => u.id !== currentUser?.id && u.actionSet?.some(i => i.projectId === item.projectId && i.instanceId === item.instanceId && i.taskId === task.id))
@@ -296,6 +278,7 @@ const SidebarTaskItem = ({
     const project = projects.find(p => p.id === item.projectId);
     const isYellowState = isActiveFocus && otherClaimants.length > 0;
     const isDeactivatedCompleted = !isActiveFocus && !isMultiUserActive && task.completed;
+    const isActuallyCompleted = task.completed;
 
   const handlePlayPause = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -308,24 +291,32 @@ const SidebarTaskItem = ({
     updateTaskTimer(task.id, currentRemaining + (5 * 60));
   };
 
+  const handleResetTimer = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const { resetTaskTimer } = useTasklistStore.getState();
+    resetTaskTimer(task.id);
+  };
+
   return (
     <div 
       ref={setNodeRef}
       style={style}
       className={clsx(
         theme.components.sidebar.activeTask,
-        isMultiUserActive 
-          ? theme.components.sidebar.activeTaskMulti
-          : isActiveFocus 
-            ? (isYellowState 
-                ? theme.components.sidebar.activeTaskYellow
-                : clsx(
-                    theme.components.sidebar.activeTaskFocus,
-                    task.completed && "animate-pulse"
-                  ))
-            : isDeactivatedCompleted
-              ? theme.components.sidebar.deactivatedCompleted
-              : theme.components.sidebar.inactiveTask
+        isActuallyCompleted
+          ? theme.components.sidebar.ledgerItem
+          : isMultiUserActive 
+            ? theme.components.sidebar.activeTaskMulti
+            : isActiveFocus 
+              ? (isYellowState 
+                  ? theme.components.sidebar.activeTaskYellow
+                  : clsx(
+                      theme.components.sidebar.activeTaskFocus,
+                      task.completed && "animate-pulse"
+                    ))
+              : isDeactivatedCompleted
+                ? theme.components.sidebar.deactivatedCompleted
+                : theme.components.sidebar.inactiveTask
       )}
       onClick={() => {
         if (instance && project) {
@@ -334,308 +325,227 @@ const SidebarTaskItem = ({
           const isProjectView = location.pathname.startsWith('/project/');
           
           if (isPlanner || isSession) {
-            // Stay in Planning/Session view, just update focus
-            toggleTaskFocus(project.id, instance.id, task.id);
+            // Stay in Planning/Session view, but allow jump to project context if clicked
+            if (!isSession) navigate(`/project/${project.id}/instance/${instance.id}`);
           } else if (isProjectView) {
             // Check if we are already in THIS project context
             const pathParts = location.pathname.split('/');
             const currentProjectId = pathParts[2];
             const currentInstanceId = pathParts[4];
             
-            if (currentProjectId === project.id && currentInstanceId === instance.id) {
-              // Same project, just toggle focus
-              toggleTaskFocus(project.id, instance.id, task.id);
-            } else {
+            if (currentProjectId !== project.id || currentInstanceId !== instance.id) {
               // Different project, jump to it
               navigate(`/project/${project.id}/instance/${instance.id}`, { replace: true });
-              toggleTaskFocus(project.id, instance.id, task.id);
             }
           } else {
             // Default (e.g. Master Mode): jump to project context
             navigate(`/project/${project.id}/instance/${instance.id}`, { replace: true });
-            toggleTaskFocus(project.id, instance.id, task.id);
           }
         }
       }}
     >
       {/* Top Zone: Identification & Drag Handle */}
-      <div className={clsx("flex items-start gap-3 p-4", !isActiveFocus && !isMultiUserActive && "pb-3")}>
+      <div className={clsx("flex items-start gap-3 p-4", !isActiveFocus && !isMultiUserActive && !isActuallyCompleted && "pb-3")}>
         <div 
           {...attributes} 
           {...listeners}
           className={clsx(
             "flex flex-col items-center pt-1 transition-opacity cursor-grab active:cursor-grabbing flex-shrink-0 touch-none",
-            (isActiveFocus || isMultiUserActive || (task.completed && !isDeactivatedCompleted)) ? "text-white/40" : (isDeactivatedCompleted ? "text-google-green/40" : "text-gray-400 dark:text-gray-600 opacity-40 group-hover:opacity-100")
+            isActuallyCompleted ? "text-gray-400" : (isActiveFocus || isMultiUserActive || (task.completed && !isDeactivatedCompleted)) ? "text-white/40" : (isDeactivatedCompleted ? "text-google-green/40" : "text-gray-400 dark:text-gray-600 opacity-40 group-hover:opacity-100")
           )}
           style={{ touchAction: 'none' }}
         >
-          <GripVertical className="w-4 h-4" />
+          {isActuallyCompleted ? <Trophy className="w-4 h-4 text-google-blue" /> : <GripVertical className="w-4 h-4" />}
         </div>
 
-        {!isActiveFocus && !isMultiUserActive && isTopTask && (
-          <div className={clsx(
-            "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors relative",
-            (isActiveFocus || isMultiUserActive || (task.completed && !isDeactivatedCompleted)) ? (isYellowState ? "bg-black/10" : "bg-white/20") : (isDeactivatedCompleted ? "bg-google-green/20" : "bg-gray-100 dark:bg-white/5 text-gray-400")
-          )}>
-            <button onClick={handlePlayPause} className="w-full h-full flex items-center justify-center transition-transform">
-              {(isActiveFocus || isMultiUserActive || task.completed)
-                ? (task.timerIsRunning ? <Pause className={clsx("w-4 h-4 fill-current", isYellowState ? "text-gray-900" : (isDeactivatedCompleted ? "text-google-green" : "text-white"))} /> : <Play className={clsx("w-4 h-4 fill-current ml-0.5", isYellowState ? "text-gray-900" : (isDeactivatedCompleted ? "text-google-green" : "text-white"))} />)
-                : <Play className="w-3 h-3 fill-current ml-0.5 opacity-40 group-hover:opacity-100 transition-opacity" />
-              }
-            </button>
-
-            {otherActiveUsers.length > 0 && (
-              <div className="absolute -top-1.5 -right-1.5 flex -space-x-1.5">
-                {otherActiveUsers.map((user: any, i: number) => (
-                  <div 
-                    key={i}
-                    title={`${user.userName} is looking here`}
-                    className="w-4 h-4 rounded-full bg-google-blue border border-white dark:border-gray-900 flex items-center justify-center text-[6px] font-black text-white shadow-sm ring-1 ring-white/20"
-                    style={{ zIndex: 5 - i }}
-                  >
-                    {user.userName.charAt(0).toUpperCase()}
-                  </div>
-                ))}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <p className={clsx(
+              "text-[9px] font-black uppercase tracking-wider truncate",
+              isActuallyCompleted ? "text-gray-400" : (isActiveFocus || isMultiUserActive ? "text-white/60" : "text-google-blue/60")
+            )}>{project?.name || 'Project'}</p>
+            
+            {/* Action Row for Ledger */}
+            {isActuallyCompleted && (
+              <div className="flex items-center gap-1 pointer-events-auto">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleTask(task.id, instance.id);
+                  }}
+                  className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors text-gray-400 hover:text-google-blue"
+                  title="Revert Task"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleTaskInActionSet(item.projectId, item.instanceId, item.taskId);
+                  }}
+                  className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors text-gray-400 hover:text-google-red"
+                  title="Clear from Session"
+                >
+                  <X className="w-3 h-3" />
+                </button>
               </div>
             )}
           </div>
-        )}
-
-        <div className="flex-1 min-w-0">
-          {project?.name && (
-            <div className={clsx(
-              "text-[10px] font-black uppercase tracking-widest mb-0.5 flex items-center gap-2",
-              (isMultiUserActive || (isActiveFocus && !isYellowState) || (task.completed && !isDeactivatedCompleted)) ? "text-white/90" : (isActiveFocus && isYellowState) ? "text-gray-900/90" : isDeactivatedCompleted ? "text-google-green/90" : "text-gray-500 dark:text-gray-400"
-            )}>
-              <span>{project.name}</span>
-              {task.reminder && (
-                <span className="inline-flex items-center gap-1 text-orange-500 animate-pulse font-black">
-                  <Bell className="w-2.5 h-2.5 fill-current" />
-                  {new Date(task.reminder.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              )}
-            </div>
-          )}
           <h4 className={clsx(
-            (isActiveFocus || isMultiUserActive) ? "text-base font-bold mb-1" : "text-[13px] font-bold mt-0.5",
-            "leading-tight whitespace-pre-wrap break-words", 
-            (isMultiUserActive || (isActiveFocus && !isYellowState) || (task.completed && !isDeactivatedCompleted)) ? "text-white" : (isActiveFocus && isYellowState) ? "text-gray-900" : isDeactivatedCompleted ? "text-google-green" : "text-gray-600 dark:text-gray-300"
+            "text-xs font-bold leading-snug break-words",
+            isActuallyCompleted ? "text-gray-400 line-through" : (isActiveFocus || isMultiUserActive ? "text-white" : "text-gray-900 dark:text-gray-100")
           )}>
             {task.title}
           </h4>
-          <div className="flex flex-col">
-            <span className={clsx(
-              "text-[9px] font-bold uppercase block opacity-70 whitespace-pre-wrap break-words", 
-              (isMultiUserActive || (isActiveFocus && !isYellowState) || (task.completed && !isDeactivatedCompleted)) ? "text-white" : (isActiveFocus && isYellowState) ? "text-gray-900" : isDeactivatedCompleted ? "text-google-green" : "text-gray-500"
-            )}>
-              {instance?.title}
-            </span>
-          </div>
-          
-          <div className="flex flex-wrap items-center gap-1.5 mt-1">
-            {otherClaimants.length > 0 && otherClaimants.map(u => (
-              <span key={u.id} className={clsx(
-                "text-[7px] font-black uppercase px-1 rounded border", 
-                isMultiUserActive ? "bg-white/20 border-white/30 text-white animate-pulse" :
-                isActiveFocus 
-                  ? (isYellowState ? "bg-black/10 border-black/20 text-gray-900 animate-pulse" : "bg-white/10 border-white/20 text-white") 
-                  : "bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-400"
-              )}>
-                [{u.name.substring(0,2).toUpperCase()}] GATHERED
-              </span>
-            ))}
-
-            {task.guide?.complexity && (
-              <span className={clsx(
-                "text-[7px] font-black uppercase px-1 rounded-sm border shrink-0",
-                (isMultiUserActive || (isActiveFocus && !isYellowState) || (task.completed && !isDeactivatedCompleted)) ? "bg-white/10 border-white/20 text-white" :
-                isActiveFocus && isYellowState 
-                  ? "bg-black/10 border-black/20 text-gray-900" 
-                  : isDeactivatedCompleted 
-                    ? "bg-google-green/10 border-google-green/20 text-google-green"
-                    : task.guide.complexity === 'Easy' ? "bg-green-50 dark:bg-green-900/20 text-green-600 border-green-200 dark:border-green-800/30"
-                    : task.guide.complexity === 'Moderate' ? "bg-amber-50 dark:bg-amber-900/20 text-amber-600 border-amber-200 dark:border-amber-800/30"
-                    : "bg-red-50 dark:bg-red-900/20 text-red-600 border-red-200 dark:border-red-800/30"
-              )}>
-                {task.guide.complexity}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="flex flex-col items-end gap-1 flex-shrink-0">
-          {!isActiveFocus && !isMultiUserActive && (
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleTaskInActionSet(item.projectId, item.instanceId, item.taskId);
-              }}
-              className="p-1 text-gray-400 hover:text-google-red transition-all opacity-0 group-hover:opacity-100 hover:scale-110"
-              title="Remove from Setlist"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+          {!isActuallyCompleted && (
+            <p className={clsx(
+              "text-[9px] font-black uppercase mt-1 tracking-wider",
+              isActiveFocus || isMultiUserActive ? "text-white/50" : "text-gray-400"
+            )}>{instance.title}</p>
           )}
-          {!isActiveFocus && !isMultiUserActive && task.completed && (
-            <CheckCircle2 className="w-4 h-4 text-google-green" />
+          
+          {isActuallyCompleted && item.completedAt && (
+            <p className="text-[8px] font-black uppercase text-google-blue/60 mt-1">
+              Victory at {new Date(item.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </p>
           )}
         </div>
       </div>
 
-      {/* Middle Zone: Timer Controls (Expanded only for active or multi-user alert) */}
-      {(isActiveFocus || isMultiUserActive) && (
-        <div className="px-4 pb-4 animate-in slide-in-from-top-2 duration-200">
+      {/* Expanded Controls for Active Task */}
+      {isActiveFocus && !isActuallyCompleted && (
+        <div className="px-4 pb-4 space-y-4 animate-in slide-in-from-top-2 duration-300">
           <div className="flex items-center gap-2">
-            {/* Play/Pause Button - Aligned with left edge of card content */}
-            {isTopTask && (
-              <div className={clsx(
-                theme.components.pomodoro.button,
-                isYellowState && theme.components.pomodoro.buttonYellow
-              )}>
-                <button 
-                  onClick={handlePlayPause} 
-                  title="Start/Pause Pomodoro Timer"
-                  className="w-full h-full flex items-center justify-center hover:scale-110 transition-transform"
-                >
-                  {task.timerIsRunning ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
-                </button>
-              </div>
-            )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenNotes(task.id, instance.id, true);
+              }}
+              className={clsx(
+                "flex items-center gap-2 px-3 py-2 rounded-xl transition-all",
+                isActiveFocus || isMultiUserActive ? "bg-white/10 text-white hover:bg-white/20" : "bg-gray-100 dark:bg-white/5 text-gray-600 hover:bg-gray-200"
+              )}
+            >
+              <FileText className={clsx("w-3.5 h-3.5", shouldHighlightNotes && "text-google-yellow fill-current")} />
+              <span className="text-[10px] font-black uppercase tracking-widest">Notes</span>
+            </button>
 
-            {/* Timer Controls Box */}
-            <div className={clsx(theme.components.pomodoro.container, !isTopTask && "flex-1")}>
-              <div className="relative flex items-center gap-1 min-w-0">
-                <button 
-                  onClick={(e) => { e.stopPropagation(); setShowTimerWidget(!showTimerWidget); }}
-                  title="Set Timer"
-                  className={clsx(
-                    "flex items-center gap-0.5 transition-all hover:bg-black/5 rounded-lg px-0.5 shrink-0",
-                    isYellowState ? "text-gray-900" : "text-white"
-                  )}
-                >
-                  <TomatoIcon className="w-3.5 h-3.5 shrink-0" />
-                  <span className="text-[10px] font-black tabular-nums min-w-[34px] text-center">
-                    {formatTime(task.timerRemaining, task.timerDuration)}
-                  </span>
-                </button>
-
-                <div className="flex items-center gap-0.5 shrink-0">
-                  <button 
-                    onClick={handleResetTimer}
-                    className={clsx(
-                      "px-1 py-0.5 text-[6px] font-black uppercase rounded bg-black/10 hover:bg-black/20 transition-colors",
-                      isYellowState ? "text-gray-900" : "text-white"
-                    )}
-                  >
-                    Reset
-                  </button>
-                  <button 
-                    onClick={handleAdd5Min}
-                    className={clsx(
-                      "px-1 py-0.5 text-[6px] font-black uppercase rounded bg-black/10 hover:bg-black/20 transition-colors",
-                      isYellowState ? "text-gray-900" : "text-white"
-                    )}
-                  >
-                    +5m
-                  </button>
-                </div>
-
-                {showTimerWidget && (
-                  <>
-                    <div className="fixed inset-0 z-[65]" onClick={(e) => { e.stopPropagation(); setShowTimerWidget(false); }} />
-                    <div onClick={(e) => e.stopPropagation()} className="absolute top-full left-0 mt-2 p-3 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-2xl shadow-2xl z-[70] min-w-[140px] animate-in fade-in slide-in-from-top-2 duration-200">
-                      <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-300 mb-2">Set Session Duration</div>
-                      <div className="flex gap-2">
-                        <input type="number" className="w-16 h-8 bg-gray-50 dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-lg px-2 text-sm outline-none font-bold text-gray-800 dark:text-gray-300" value={customMinutes} onChange={(e) => setCustomMinutes(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSetTimer()} />
-                        <div className="flex flex-col gap-1">
-                          <Button size="sm" onClick={handleSetTimer} className="h-7 px-2 font-black text-[10px] py-0">Set</Button>
-                          <Button size="sm" variant="secondary" onClick={handleResetTimer} className="h-7 px-2 font-black text-[10px] py-0">Reset</Button>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Note Icon Group */}
-            <div className="flex items-center gap-1.5 ml-auto">
+            {!isTopTask && (
               <button 
-                onClick={(e) => { e.stopPropagation(); onOpenNotes(task.id, instance.id); }}
-                title="Open Task Info"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleTaskInActionSet(item.projectId, item.instanceId, item.taskId);
+                }}
                 className={clsx(
-                  "w-10 h-10 shrink-0 flex items-center justify-center transition-all hover:scale-110",
-                  isYellowState ? "text-gray-900" : "text-white"
+                  "w-10 h-10 rounded-xl ml-auto flex items-center justify-center transition-all",
+                  isActiveFocus || isMultiUserActive ? "bg-white/10 text-white hover:bg-white/20 hover:text-google-red" : "bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-google-red"
                 )}
+                title="Remove from Session"
               >
-                <StickyNote className={clsx("w-5 h-5", shouldHighlightNotes && "animate-pulse-slow")} />
+                <Trash2 className="w-5 h-5" />
               </button>
+            )}
+          </div>
 
-              {!isTopTask && (
-                <button 
-                  onClick={(e) => { e.stopPropagation(); toggleTaskInActionSet(item.projectId, item.instanceId, item.taskId); }}
-                  title="Remove from Setlist"
-                  className={clsx(
-                    "w-10 h-10 shrink-0 flex items-center justify-center transition-all hover:scale-110 hover:text-google-red",
+          {isTopTask && (
+            <>
+              {/* Pomodoro Timer Slot */}
+              <div className={clsx(
+                "flex items-center gap-2 p-1 rounded-2xl border-2",
+                isYellowState ? "bg-black/10 border-black/10" : "bg-white/10 border-white/10"
+              )}>
+                <div className={clsx(
+                  theme.components.pomodoro.container,
+                  isYellowState && "bg-black/5"
+                )}>
+                  <Clock className={clsx("w-3.5 h-3.5 mr-2", isYellowState ? "text-gray-900" : "text-white/60")} />
+                  <span className={clsx(
+                    "text-sm font-black tabular-nums tracking-tight",
                     isYellowState ? "text-gray-900" : "text-white"
+                  )}>
+                    {formatTime(task.timerRemaining || 0)}
+                  </span>
+                </div>
+                
+                <button 
+                  onClick={handlePlayPause}
+                  className={clsx(
+                    theme.components.pomodoro.button,
+                    isYellowState && theme.components.pomodoro.buttonYellow
                   )}
+                >
+                  {task.timerIsRunning ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
+                </button>
+
+                <button 
+                  onClick={handleAdd5Min}
+                  className={clsx(
+                    theme.components.pomodoro.button,
+                    isYellowState && theme.components.pomodoro.buttonYellow
+                  )}
+                  title="Add 5 Minutes"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+
+                <button 
+                  onClick={handleResetTimer}
+                  className={clsx(
+                    theme.components.pomodoro.button,
+                    isYellowState && theme.components.pomodoro.buttonYellow
+                  )}
+                  title="Reset Timer"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Multi-User Presence Alert */}
+              {isMultiUserActive && (
+                <div className="bg-white/10 rounded-2xl p-3 border border-white/20 animate-pulse">
+                  <div className="flex items-center gap-2 text-white mb-1">
+                    <AlertTriangle className="w-4 h-4 text-google-yellow fill-current" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Concurrent Focus</span>
+                  </div>
+                  <p className="text-[9px] text-white/80 font-bold leading-tight">
+                    {otherClaimants.map(u => u.name).join(', ')} also working here.
+                  </p>
+                </div>
+              )}
+
+              {/* Task Done Button */}
+              <div className="flex gap-2">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleTask(task.id, instance.id);
+                  }}
+                  className={clsx(
+                    theme.components.taskDoneButton.base,
+                    isMultiUserActive 
+                      ? (task.completed ? theme.components.taskDoneButton.multiUserCompleted : theme.components.taskDoneButton.multiUser)
+                      : isYellowState
+                        ? (task.completed ? theme.components.taskDoneButton.yellowStateCompleted : theme.components.taskDoneButton.yellowState)
+                        : (task.completed ? theme.components.taskDoneButton.completed : theme.components.taskDoneButton.active)
+                  )}
+                >
+                  {task.completed ? <CheckCircle2 className="w-5 h-5" /> : <ThumbsUp className="w-5 h-5" />}
+                  {task.completed ? "COMPLETED!" : "TASK DONE?"}
+                </button>
+                
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleTaskInActionSet(item.projectId, item.instanceId, item.taskId);
+                  }}
+                  className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white hover:bg-white/20 hover:text-google-red transition-all border-2 border-white/10"
+                  title="Remove from Session"
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Bottom Zone: Completion & Management (Expanded only) */}
-      {(isActiveFocus || isMultiUserActive) && isTopTask && (
-        <div className={clsx(
-          "p-4 border-t mt-auto animate-in slide-in-from-bottom-2 duration-200",
-          isMultiUserActive ? "border-white/10 bg-white/5" : isYellowState ? "border-black/10 bg-black/5" : "border-white/10 bg-white/5"
-        )}>
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleTask(task.id, item.instanceId);
-              }}
-              className={clsx(
-                theme.components.taskDoneButton.base,
-                isMultiUserActive 
-                  ? (task.completed ? theme.components.taskDoneButton.multiUserCompleted : theme.components.taskDoneButton.multiUser)
-                  : task.completed 
-                    ? (isYellowState ? theme.components.taskDoneButton.yellowStateCompleted : theme.components.taskDoneButton.completed) 
-                    : (isYellowState 
-                        ? theme.components.taskDoneButton.yellowState 
-                        : theme.components.taskDoneButton.active
-                      )
-              )}
-            >
-              {task.completed ? (
-                <>
-                  <ThumbsUp className="w-4 h-4" />
-                  <span>Task Completed</span>
-                </>
-              ) : (
-                <>
-                  <ThumbsUp className="w-4 h-4" />
-                  <span>TASK DONE?</span>
-                </>
-              )}
-            </button>
-
-            <button 
-              onClick={(e) => { e.stopPropagation(); toggleTaskInActionSet(item.projectId, item.instanceId, item.taskId); }}
-              title="Remove from Setlist"
-              className={clsx(
-                "w-12 h-12 rounded-xl flex items-center justify-center transition-all hover:scale-110 hover:text-google-red",
-                isMultiUserActive ? "text-white" : isYellowState ? "text-gray-900" : "text-white"
-              )}
-            >
-              <Trash2 className="w-6 h-6" />
-            </button>
-          </div>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
@@ -734,6 +644,7 @@ function App() {
     adminClearUserFocus, adminClearUserActionSet,
     activeTaskId, setActiveTaskId, updatePresence,
     setLocalExpanded, isLocalExpanded, toggleLocalExpanded, clearActionSet,
+    toggleShowCompletedInSession,
     isDarkMode, toggleDarkMode,
     showPlaylistSidebar, setShowPlaylistSidebar,
     showMainSidebar, setShowMainSidebar
@@ -2412,6 +2323,19 @@ function App() {
               </div>
             </div>
             <div className="flex items-center gap-1">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleShowCompletedInSession();
+                  }}
+                  className={clsx(
+                    "p-2 rounded-lg transition-all duration-500",
+                    currentUser?.showCompletedInSession ? "text-google-yellow bg-white/10 scale-110 shadow-lg shadow-google-yellow/20" : "text-white/50 hover:text-white hover:bg-white/5"
+                  )}
+                  title={currentUser?.showCompletedInSession ? "Hide Winning Ledger" : "Show Winning Ledger"}
+                >
+                  <Trophy className={clsx("w-5 h-5", currentUser?.showCompletedInSession && "animate-pulse")} />
+                </button>
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
@@ -2448,15 +2372,15 @@ function App() {
                     >
                       <div className="space-y-6">
                         {(() => {
-                          const renderItem = (item: any, globalIdx: number) => {
+                          const renderItem = (item: any, globalIdx: number, isLedger?: boolean) => {
                             const compositeKey = item.type === 'note' ? `note-${item.taskId}` : `${item.projectId}-${item.instanceId}-${item.taskId}`;
-                            const isActiveFocus = item.type === 'note'
+                            const isActiveFocus = !isLedger && (item.type === 'note'
                               ? (!currentUser?.activeFocus?.projectId && currentUser?.activeFocus?.taskId === item.taskId)
                               : (currentUser?.activeFocus?.projectId === item.projectId && 
                                  currentUser?.activeFocus?.instanceId === item.instanceId && 
-                                 currentUser?.activeFocus?.taskId === item.taskId);
+                                 currentUser?.activeFocus?.taskId === item.taskId));
                             
-                            const isTopTask = globalIdx === 0;
+                            const isTopTask = !isLedger && globalIdx === 0;
 
                             if (item.type === 'note') {
                               const note = currentUser?.scratchpad?.find(n => n.id === item.taskId);
@@ -2490,12 +2414,34 @@ function App() {
                             );
                           };
 
-                          const nextUpItems = validActionSet.slice(0, 3);
-                          const laterItems = validActionSet.slice(3);
+                          const focusQueue = validActionSet.filter(item => {
+                            if (item.type === 'note') {
+                              const note = currentUser?.scratchpad?.find(n => n.id === item.taskId);
+                              return note && !note.completed;
+                            } else {
+                              const instance = instances.find(i => i.id === item.instanceId);
+                              const task = instance?.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => t.id === item.taskId);
+                              return task && !task.completed;
+                            }
+                          });
+
+                          const winningLedger = validActionSet.filter(item => {
+                            if (item.type === 'note') {
+                              const note = currentUser?.scratchpad?.find(n => n.id === item.taskId);
+                              return note && note.completed;
+                            } else {
+                              const instance = instances.find(i => i.id === item.instanceId);
+                              const task = instance?.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => t.id === item.taskId);
+                              return task && task.completed;
+                            }
+                          });
+
+                          const nextUpItems = focusQueue.slice(0, 3);
+                          const laterItems = focusQueue.slice(3);
 
                           return (
                             <>
-                              {/* NEXT UP / CURRENT TRIO */}
+                              {/* FOCUS QUEUE */}
                               {nextUpItems.length > 0 && (
                                 <div className="space-y-2">
                                   <div className="flex items-center gap-2 px-2">
@@ -2542,6 +2488,22 @@ function App() {
                                       </span>
                                     </button>
                                   )}
+                                </div>
+                              )}
+
+                              {/* WINNING LEDGER */}
+                              {currentUser?.showCompletedInSession && winningLedger.length > 0 && (
+                                <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                  <div className={clsx(theme.components.sidebar.ledgerHeader, "select-none")}>
+                                    <Trophy className={clsx("w-3.5 h-3.5 text-google-yellow transition-transform duration-500", currentUser?.showCompletedInSession && "scale-110 animate-pulse")} />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-google-yellow">Winning Ledger</span>
+                                    <span className="ml-auto text-[10px] font-black text-google-yellow bg-google-yellow/10 px-2 py-0.5 rounded-full">
+                                      {winningLedger.length} Wins
+                                    </span>
+                                  </div>
+                                  <div className="space-y-3 opacity-80 hover:opacity-100 transition-opacity">
+                                    {winningLedger.map((item, idx) => renderItem(item, idx, true))}
+                                  </div>
                                 </div>
                               )}
                             </>
@@ -3178,7 +3140,7 @@ function App() {
 
                     <section className="space-y-3">
                       <h5 className="flex items-center gap-2 text-xs font-black uppercase text-google-blue tracking-[0.2em]">
-                        <Activity className="w-4 h-4" /> 2. Version Parity
+                        <Activity className="w-4 h-4" /> 2. Version Parity & Specification Sync
                       </h5>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
@@ -3191,10 +3153,10 @@ function App() {
                         </div>
                         <div className="flex flex-col gap-1 px-1">
                           <p className="text-[10px] font-bold text-red-500 uppercase">
-                            CRITICAL: If these do not match, sync them immediately before continuing.
+                            CRITICAL: After any logic change, update specification.md and sync versions.
                           </p>
                           <p className="text-[10px] font-black uppercase text-google-blue/60 tracking-widest">
-                            Comment: Maintain a single source of truth for the application version.
+                            Comment: Maintain a single source of truth for application architecture and versioning.
                           </p>
                         </div>
                       </div>
@@ -3245,6 +3207,31 @@ function App() {
                         <div className="pt-2 mt-2 border-t border-google-blue/10">
                           <p className="text-[10px] font-black uppercase text-google-blue/60 tracking-widest">
                             Comment: Prevent synchronization errors and maintain 60fps UI performance.
+                          </p>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section className="space-y-3">
+                      <h5 className="flex items-center gap-2 text-xs font-black uppercase text-google-blue tracking-[0.2em]">
+                        <Zap className="w-4 h-4" /> 5. Workflow & Focus
+                      </h5>
+                      <div className="p-4 bg-gray-50 dark:bg-black/20 rounded-xl border border-gray-200 dark:border-gray-700 space-y-2 relative overflow-hidden">
+                        <div className="flex items-start gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-google-blue mt-1.5 flex-shrink-0" />
+                          <p className="text-xs font-bold text-gray-600 dark:text-gray-400">Strictly follow the <span className="text-google-blue">Top-Driven Playlist Model</span>.</p>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-google-blue mt-1.5 flex-shrink-0" />
+                          <p className="text-xs font-bold text-gray-600 dark:text-gray-400">Active Focus must always be the first uncompleted item in the actionSet.</p>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-google-blue mt-1.5 flex-shrink-0" />
+                          <p className="text-xs font-bold text-gray-600 dark:text-gray-400">Never delete completed tasks from session; move them to the Winning Ledger.</p>
+                        </div>
+                        <div className="pt-2 mt-2 border-t border-google-blue/10">
+                          <p className="text-[10px] font-black uppercase text-google-blue/60 tracking-widest">
+                            Comment: Ensure focus consistency and celebratory progress tracking.
                           </p>
                         </div>
                       </div>

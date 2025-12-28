@@ -1,21 +1,24 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Target, 
   ArrowRight,
   TrendingUp,
   Briefcase,
-  Bell,
-  Calendar,
   Zap,
   ClipboardList,
-  StickyNote,
   ChevronUp,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Trophy,
+  RotateCcw,
+  X,
+  Bell,
+  Calendar,
+  Target,
+  StickyNote
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { ScratchpadWidget } from './ScratchpadWidget';
-import { TasklistInstance, ActionSetItem, Project, ScratchpadItem } from '../../types';
+import { TasklistInstance, Project, ScratchpadItem } from '../../types';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { clsx } from 'clsx';
 import { useNavigate } from 'react-router-dom';
@@ -32,11 +35,40 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
   projects,
   instances
 }) => {
-  const { getTodayAlerts, getValidActionSet, setActionSet, setTaskFocus, toggleNoteInActionSet, currentUser } = useTasklistStore();
+  const { 
+    getValidActionSet, 
+    setTaskFocus, 
+    toggleNoteInActionSet, 
+    currentUser,
+    toggleTask,
+    toggleScratchpadTask,
+    toggleTaskInActionSet
+  } = useTasklistStore();
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
-  const todayAlerts = getTodayAlerts();
+  
   const validActionSet = getValidActionSet();
+
+  // Filter for wins today
+  const winningLedger = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return validActionSet.filter(item => {
+      if (!item.completedAt) return false;
+      const completedDate = new Date(item.completedAt);
+      return completedDate >= today;
+    }).map(item => {
+      if (item.type === 'note') {
+        const note = currentUser?.scratchpad?.find(n => n.id === item.taskId);
+        return { ...item, title: note?.text || 'Note', category: note?.category || 'Personal' };
+      } else {
+        const instance = instances.find(i => i.id === item.instanceId);
+        const task = instance?.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => t.id === item.taskId);
+        return { ...item, title: task?.title || 'Task', category: instance?.title || 'Project' };
+      }
+    });
+  }, [validActionSet, currentUser?.scratchpad, instances]);
 
   const [activeSpotlightId, setActiveSpotlightId] = useState<string | null>(() => {
     return localStorage.getItem('planner_active_spotlight_id');
@@ -198,45 +230,70 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
           </div>
 
           <div className="space-y-3">
-            <h3 className="text-[10px] font-black uppercase text-[var(--planner-section-title)] tracking-[0.2em] flex items-center gap-2">
-              <Bell className="w-3.5 h-3.5 text-[var(--planner-pulse-alert-icon)]" />
-              Today's Alerts
+            <h3 className="text-[10px] font-black uppercase text-[var(--planner-section-title)] tracking-[0.2em] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-3.5 h-3.5 text-google-yellow" />
+                Winning Ledger
+              </div>
+              {winningLedger.length > 0 && (
+                <span className="bg-google-yellow/20 text-google-yellow px-2 py-0.5 rounded-full text-[9px] animate-pulse">
+                  {winningLedger.length} Wins Today
+                </span>
+              )}
             </h3>
             <div className="space-y-2 max-h-[280px] overflow-y-auto custom-scrollbar pr-2">
-              {todayAlerts.length === 0 ? (
-                <p className="text-xs font-medium text-gray-400 italic">No alerts scheduled for today.</p>
+              {winningLedger.length === 0 ? (
+                <div className="p-8 text-center border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-2xl opacity-60">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">No wins recorded today.</p>
+                  <p className="text-[9px] font-bold text-gray-400 mt-1">Complete tasks to see them here!</p>
+                </div>
               ) : (
-                todayAlerts.map((alert, idx) => (
+                winningLedger.map((win, idx) => (
                   <div 
                     key={idx}
-                    className="flex items-center justify-between p-3 bg-[var(--planner-card-bg)] rounded-xl border border-[var(--planner-card-border)] group/alert cursor-pointer hover:border-google-blue transition-all"
-                    onClick={() => {
-                      // Click to stage logic
-                      const newItem: ActionSetItem = {
-                        type: alert.type,
-                        projectId: alert.type === 'task' ? alert.item.projectId : '',
-                        instanceId: alert.type === 'task' ? alert.item.instanceId : '',
-                        taskId: alert.item.id,
-                        addedAt: Date.now()
-                      };
-                      // Prepend to action set
-                      const currentSet = [...validActionSet];
-                      const existsIdx = currentSet.findIndex(i => i.taskId === newItem.taskId);
-                      if (existsIdx !== -1) currentSet.splice(existsIdx, 1);
-                      setActionSet([newItem, ...currentSet]);
-                    }}
+                    className="flex items-center justify-between p-3 bg-white/50 dark:bg-black/20 rounded-xl border border-gray-200 dark:border-gray-800 group/win hover:border-google-yellow/50 transition-all"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-[var(--planner-pulse-alert-icon)]/10 flex items-center justify-center text-[var(--planner-pulse-alert-icon)] shrink-0 group-hover/alert:scale-110 transition-transform">
-                        <Bell className="w-4 h-4" />
+                      <div className="w-8 h-8 rounded-lg bg-google-yellow/10 flex items-center justify-center text-google-yellow shrink-0 group-hover/win:scale-110 transition-transform">
+                        <Trophy className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[11px] font-bold text-[var(--planner-card-text)] break-words line-clamp-2" dangerouslySetInnerHTML={{ __html: alert.title }} />
-                        <p className="text-[9px] font-black uppercase text-gray-400 tracking-wider">{alert.category}</p>
+                        <p className="text-[11px] font-bold text-gray-600 dark:text-gray-300 break-words line-clamp-2 line-through opacity-70" dangerouslySetInnerHTML={{ __html: win.title }} />
+                        <div className="flex items-center gap-2">
+                          <p className="text-[9px] font-black uppercase text-google-yellow/60 tracking-wider italic">Victory at {new Date(win.completedAt!).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                        </div>
                       </div>
                     </div>
-                    <div className="text-[10px] font-black text-[var(--planner-pulse-alert-icon)] bg-[var(--planner-pulse-alert-icon)]/10 px-2 py-1 rounded-lg ml-2 shrink-0">
-                      {new Date(alert.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    
+                    <div className="flex items-center gap-1 opacity-0 group-hover/win:opacity-100 transition-opacity">
+                      <button 
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          if (win.type === 'note') {
+                            await toggleScratchpadTask(win.taskId);
+                          } else {
+                            await toggleTask(win.taskId, win.instanceId || '');
+                          }
+                        }}
+                        className="p-1.5 hover:bg-google-yellow/10 text-google-yellow rounded-lg transition-colors"
+                        title="Revert Task"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                      </button>
+                      <button 
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          if (win.type === 'note') {
+                            await toggleNoteInActionSet(win.taskId);
+                          } else {
+                            await toggleTaskInActionSet(win.projectId || '', win.instanceId || '', win.taskId);
+                          }
+                        }}
+                        className="p-1.5 hover:bg-red-500/10 text-red-500 rounded-lg transition-colors"
+                        title="Clear from Session"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 ))
@@ -291,13 +348,50 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                           "text-[9px] font-black uppercase tracking-wider mb-0.5",
                           isActive ? "text-google-blue" : (item.type === 'note' && item.priority ? "text-red-900/60" : "text-google-blue/60")
                         )}>{item.projectName}</p>
-                        {isActive && (
-                          <span className="text-[8px] font-black uppercase tracking-widest text-google-blue animate-pulse">
-                            Active Now
-                          </span>
+                        
+                        {item.completed ? (
+                          <div className="flex items-center gap-1">
+                            <button 
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                if (item.type === 'note') {
+                                  await toggleScratchpadTask(item.taskId);
+                                } else {
+                                  await toggleTask(item.taskId, item.instanceId || '');
+                                }
+                              }}
+                              className="p-1 hover:bg-google-yellow/10 text-google-yellow rounded-lg transition-colors"
+                              title="Revert Task"
+                            >
+                              <RotateCcw className="w-3 h-3" />
+                            </button>
+                            <button 
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                if (item.type === 'note') {
+                                  await toggleNoteInActionSet(item.taskId);
+                                } else {
+                                  await toggleTaskInActionSet(item.projectId || '', item.instanceId || '', item.taskId);
+                                }
+                              }}
+                              className="p-1 hover:bg-red-500/10 text-red-500 rounded-lg transition-colors"
+                              title="Clear from Session"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ) : (
+                          isActive && (
+                            <span className="text-[8px] font-black uppercase tracking-widest text-google-blue animate-pulse">
+                              Active Now
+                            </span>
+                          )
                         )}
                       </div>
-                      <p className="text-xs font-bold text-gray-900 dark:text-gray-100 break-words line-clamp-2" dangerouslySetInnerHTML={{ 
+                      <p className={clsx(
+                        "text-xs font-bold break-words line-clamp-2",
+                        item.completed ? "text-gray-400 line-through" : "text-gray-900 dark:text-gray-100"
+                      )} dangerouslySetInnerHTML={{ 
                         __html: item.displayTitle
                       }} />
                       <p className="text-[9px] font-black uppercase text-gray-400 tracking-wider">{item.displayCategory}</p>
@@ -335,11 +429,13 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
             )}
           >
             <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-            <div className="flex items-center justify-center gap-3 relative z-10">
-              <TrendingUp className="w-6 h-6" />
-              <span className="text-sm font-black uppercase tracking-wider">Begin Sprint</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </div>
+                <div className="flex items-center justify-center gap-3 relative z-10">
+                  <TrendingUp className="w-6 h-6" />
+                  <span className="text-sm font-black uppercase tracking-wider">
+                    {stagedItems.every(i => i.completed) ? 'Review Wins' : 'Begin Sprint'}
+                  </span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </div>
           </Button>
         </div>
       </div>

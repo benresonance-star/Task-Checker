@@ -336,6 +336,7 @@ export interface ActionSetItem {
   instanceId?: string;
   taskId: string;
   addedAt: number;
+  completedAt?: number; // Timestamp when task was marked done in this session
 }
 
 export interface ScratchpadItem {
@@ -362,5 +363,6 @@ export interface User {
   } | null;
   actionSet?: ActionSetItem[]; // The user's "Work Playlist"
   scratchpad?: ScratchpadItem[]; // Private quick tasks
+  showCompletedInSession?: boolean; // UI Preference for the winning ledger
 }
 

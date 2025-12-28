@@ -164,6 +164,8 @@ export const theme = {
       activeTaskYellow: 'bg-google-yellow border-google-yellow text-gray-900 shadow-lg scale-[1.02] z-10',
       inactiveTask: 'bg-google-blue/5 dark:bg-google-blue/10 border-google-blue dark:border-google-blue hover:border-google-blue min-h-[64px]',
       deactivatedCompleted: 'bg-google-green/10 border-google-green/20 text-google-green dark:text-google-green/80 shadow-sm min-h-[64px]',
+      ledgerItem: 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-gray-800 opacity-60 grayscale scale-[0.98] pointer-events-none',
+      ledgerHeader: 'flex items-center gap-2 px-2 pt-4 border-t border-gray-100 dark:border-gray-800',
     },
     checklist: {
       container: 'flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 py-2 sm:py-2.5 px-3 sm:px-4 rounded-card group transition-all border shadow-sm hover:shadow-md cursor-pointer relative text-text-primary',

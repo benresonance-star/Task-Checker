@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { theme } from '../../styles/theme';
-import { Target, Play, Pause, RotateCcw, ThumbsUp, CheckCircle2, StickyNote, Zap, TrendingUp } from 'lucide-react';
+import { Target, Play, Pause, RotateCcw, ThumbsUp, CheckCircle2, StickyNote, Zap, TrendingUp, Trophy } from 'lucide-react';
 import { clsx } from 'clsx';
 import { formatTime } from '../../utils/time';
 import { useNavigate } from 'react-router-dom';
@@ -44,7 +44,8 @@ export const WorkSessionView: React.FC<WorkSessionViewProps> = ({ onOpenNotes })
     setShowPlaylistSidebar,
     showMainSidebar,
     isDarkMode,
-    getValidActionSet
+    getValidActionSet,
+    setShowCompletedInSession
   } = useTasklistStore();
 
   const validActionSet = getValidActionSet();
@@ -56,14 +57,27 @@ export const WorkSessionView: React.FC<WorkSessionViewProps> = ({ onOpenNotes })
   const [completedTaskId, setCompletedTaskId] = React.useState<string | null>(null);
   const [completedInstanceId, setCompletedInstanceId] = React.useState<string | null>(null);
 
-  // Find the actual task object for the active focus
+  // Find the actual task object for the first uncompleted item in the playlist
   const focusData = React.useMemo(() => {
-    const focus = currentUser?.activeFocus;
-    if (!focus) return null;
+    // Phase 3: The Work Session STRICTLY follows the first uncompleted item in the playlist
+    const firstUncompleted = validActionSet.find(item => {
+      if (item.type === 'note') {
+        const note = currentUser?.scratchpad?.find(n => n.id === item.taskId);
+        return note && !note.completed;
+      } else {
+        const instance = instances.find(i => i.id === item.instanceId);
+        const task = instance?.sections
+          .flatMap(s => s.subsections.flatMap(ss => ss.tasks))
+          .find(t => t.id === item.taskId);
+        return task && !task.completed;
+      }
+    });
+
+    if (!firstUncompleted) return null;
 
     // Handle Personal Note Focus
-    if (!focus.projectId || !focus.instanceId) {
-      const note = currentUser.scratchpad?.find(n => n.id === focus.taskId);
+    if (firstUncompleted.type === 'note') {
+      const note = currentUser?.scratchpad?.find(n => n.id === firstUncompleted.taskId);
       if (note) {
         const mockTask: Task = { 
           id: note.id, 
@@ -101,15 +115,15 @@ export const WorkSessionView: React.FC<WorkSessionViewProps> = ({ onOpenNotes })
       return null;
     }
 
-    const instance = instances.find(i => i.id === focus.instanceId);
+    const instance = instances.find(i => i.id === firstUncompleted.instanceId);
     if (!instance) return null;
 
-    const project = projects.find(p => p.id === focus.projectId);
+    const project = projects.find(p => p.id === firstUncompleted.projectId);
 
     let foundTask = null;
     for (const section of instance.sections) {
       for (const subsection of section.subsections) {
-        const task = subsection.tasks.find(t => t.id === focus.taskId);
+        const task = subsection.tasks.find(t => t.id === firstUncompleted.taskId);
         if (task) {
           foundTask = task;
           break;
@@ -123,17 +137,15 @@ export const WorkSessionView: React.FC<WorkSessionViewProps> = ({ onOpenNotes })
     // Presence & Session logic for matching sidebar colors
     const otherClaimants = users
       .filter(u => u.id !== currentUser?.id && u.actionSet?.some(i => 
-        i.projectId === focus.projectId && 
-        i.instanceId === focus.instanceId && 
+        i.projectId === firstUncompleted.projectId && 
+        i.instanceId === firstUncompleted.instanceId && 
         i.taskId === foundTask.id
       ))
       .map(u => ({ id: u.id, name: u.name }));
 
-    // NEW LOGIC: Trigger danger alert if multiple users have this EXACT task focused in their profiles,
-    // regardless of their current online heartbeat status.
     const concurrentFocusCount = users.filter(u => 
-      u.activeFocus?.projectId === focus.projectId &&
-      u.activeFocus?.instanceId === focus.instanceId &&
+      u.activeFocus?.projectId === firstUncompleted.projectId &&
+      u.activeFocus?.instanceId === firstUncompleted.instanceId &&
       u.activeFocus?.taskId === foundTask.id
     ).length;
 
@@ -144,11 +156,11 @@ export const WorkSessionView: React.FC<WorkSessionViewProps> = ({ onOpenNotes })
       task: foundTask, 
       instance, 
       project,
-      projectId: focus.projectId,
+      projectId: firstUncompleted.projectId || '',
       isMultiUserActive,
       isYellowState
     };
-  }, [currentUser?.activeFocus, instances, projects, users]);
+  }, [validActionSet, currentUser?.scratchpad, currentUser?.id, instances, projects, users]);
 
   const currentStage = focusData?.task.completed ? (currentUser?.activeFocus?.stage || 'executing') : (currentUser?.activeFocus?.stage || 'staged');
   const isExecuting = currentStage === 'executing';
@@ -320,13 +332,16 @@ export const WorkSessionView: React.FC<WorkSessionViewProps> = ({ onOpenNotes })
           {!isExecuting && <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] ml-2">Current Focus</h3>}
           
           {focusData && cardTheme ? (
-            <div className={clsx(
-              "p-8 md:p-10 rounded-focus-card border-4 transition-all duration-700 shadow-2xl relative overflow-hidden group flex flex-col justify-between text-[var(--text-primary)]",
-              isExecuting ? "min-h-[calc(100vh-2rem)] md:min-h-[700px]" : "min-h-[400px]",
-              cardTheme,
-              focusData.task.timerIsRunning && !isIndigo && !isYellow && "ring-8 ring-google-green/20",
-              focusData.task.timerIsRunning && isYellow && "ring-8 ring-google-yellow/20"
-            )}>
+            <div 
+              key={focusData.task.id}
+              className={clsx(
+                "p-8 md:p-10 rounded-focus-card border-4 transition-all duration-700 shadow-2xl relative overflow-hidden group flex flex-col justify-between text-[var(--text-primary)] animate-in fade-in slide-in-from-bottom-4",
+                isExecuting ? "min-h-[calc(100vh-2rem)] md:min-h-[700px]" : "min-h-[400px]",
+                cardTheme,
+                focusData.task.timerIsRunning && !isIndigo && !isYellow && "ring-8 ring-google-green/20",
+                focusData.task.timerIsRunning && isYellow && "ring-8 ring-google-yellow/20"
+              )}
+            >
               {isExecuting && (
                 <ProgressFill 
                   key={`${focusData.task.id}-${focusData.task.timerDuration}`}
@@ -660,22 +675,41 @@ export const WorkSessionView: React.FC<WorkSessionViewProps> = ({ onOpenNotes })
               )}
             </div>
           ) : (
-            <div className="p-12 rounded-focus-card border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center text-center space-y-6 bg-white/30 dark:bg-black/10 min-h-[400px]">
-              <div className="p-6 bg-gray-100 dark:bg-white/5 rounded-full text-[var(--text-primary)]">
-                <Target className="w-16 h-16 text-gray-300 dark:text-gray-700" />
+            <div className="p-12 rounded-focus-card border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center text-center space-y-6 bg-white/30 dark:bg-black/10 min-h-[500px] animate-in fade-in zoom-in duration-700">
+              <div className="relative">
+                <div className="p-8 bg-google-green/10 dark:bg-google-green/20 rounded-full text-google-green animate-bounce-slow">
+                  <Trophy className="w-20 h-20" />
+                </div>
+                <div className="absolute -top-2 -right-2 bg-google-yellow text-white p-2 rounded-full shadow-lg animate-pulse">
+                  <ThumbsUp className="w-6 h-6" />
+                </div>
               </div>
-              <div className="max-w-xs space-y-2">
-                <h3 className="font-black text-xl text-gray-400 uppercase tracking-tight">No Active Focus</h3>
-                <p className="text-gray-500 font-bold leading-relaxed uppercase text-[10px] tracking-widest">
-                  You aren't currently focused on a task. Go to your projects and pick a task to get started!
+              
+              <div className="max-w-md space-y-4">
+                <h3 className="font-black text-3xl md:text-4xl text-gray-900 dark:text-white uppercase tracking-tight">Focus Queue Empty!</h3>
+                <p className="text-gray-500 dark:text-gray-400 font-bold leading-relaxed uppercase text-xs md:text-sm tracking-[0.2em]">
+                  {validActionSet.length > 0 
+                    ? "Congratulations! You've cleared your active playlist for the day. Check your Winning Ledger for the full victory report!"
+                    : "Your session is clear. Ready to plan your next sprint?"}
                 </p>
               </div>
-              <button 
-                onClick={() => navigate('/project')}
-                className="px-8 h-14 bg-google-blue text-white rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-3"
-              >
-                Browse Projects <Target className="w-5 h-5" />
-              </button>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button 
+                  onClick={() => navigate('/home')}
+                  className="px-10 h-16 bg-white dark:bg-white/5 border-2 border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white rounded-2xl font-black uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-white/10 transition-all flex items-center gap-3"
+                >
+                  Return to Planner <Target className="w-5 h-5" />
+                </button>
+                {validActionSet.length > 0 && !currentUser?.showCompletedInSession && (
+                  <button 
+                    onClick={() => setShowCompletedInSession(true)}
+                    className="px-10 h-16 bg-google-yellow text-white rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-yellow-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-3"
+                  >
+                    View Winning Ledger <Trophy className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>

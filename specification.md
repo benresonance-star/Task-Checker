@@ -17,12 +17,13 @@
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It features a dual-interface architectural model:
 1.  **Home: The Planner**: A high-fidelity, single-screen "Command Center" for orientation and planning.
-    - **Today's Horizon (Staging Zone)**: A horizontal staging strip where users curate their "Daily Trio" of tasks.
+    - **Today's Horizon (Staging Zone)**: A three-column top panel containing a real-time Pulse (Clock/Date), a **Winning Ledger** for daily victories (replacing the old alerts list), and a **Session Sprint Staging** area for the "Daily Trio" of tasks.
     - **Project Spotlight Switchboard**: A tactile project switcher focusing the interface on a single project. Features an **Elastic Balanced Trio** model where the container height adapts dynamically to content, ensuring zero wasted space while maintaining a professional minimum footprint.
     - **MY NOTES AND TASKS**: A streamlined general area for rapid entry, personal organization, and viewing all active session tasks.
 2.  **Work: My Work Session**: A specialized deep-work environment for executing project tasks and recording progress.
-
-The application operates on a "Master-Instance" model, where users can define master templates and instantiate them within specific projects. It is built for high reliability, real-time team synchronization, and cross-platform accessibility.
+    - **Top-Driven Focus**: The interface strictly displays the first uncompleted task from the user's session playlist.
+    - **Zen Mode Integration**: Features the **Active Focus Card** and **Knowledge Hub**. Optimized for deep focus by removing non-essential widgets like MY NOTES.
+    - **Victory Protocol**: When the Focus Queue is cleared, the interface displays a celebratory **Empty Inbox** view with quick links back to the Planner or the Winning Ledger.
 
 ## UI Architecture & Layering Strategy (Global HUD)
 To ensure critical tools (Branding Console, Admin Panel) are always accessible, we use a strict z-index hierarchy:
@@ -127,13 +128,17 @@ The system features a robust sync engine:
 - **Time Recording**: Automatically records exact time taken if a timer was used.
 - **Active Focus Tracking**: Selected tasks feature a **high-saturation focus ring (4px)** and a pulsing outline when multiple users are present.
 
-### Progressive Focus Queue (v1.12.10)
+### Progressive Focus Queue (v1.13.44)
 To reduce visual cognitive load, the "My Session" sidebar uses a tiered visibility strategy:
-1.  **IN FOCUS**: Exactly one active task or note being executed.
-2.  **NEXT UP**: The next items in the queue. 
-    - **Standard Mode**: Displays the top 2 items when a task is in focus.
-    - **Planning Mirror Mode**: Automatically expands to show the top **3 items** if NO task is currently active. This mirrors the **Session Sprint Staging** area in the Home Planner for a consistent 1:1 planning experience.
-3.  **LATER QUEUE**: All remaining items in the session, hidden behind a "Reveal More" button to maintain a clean workspace.
+1.  **Top-Driven Focus**: Exactly one active task or note is "In Focus" at the top of the queue. The active focus automatically advances to the next uncompleted task as items are finished.
+2.  **Focus Queue**: The next items in the playlist. 
+    - **Standard Mode**: Displays the next 2 uncompleted items.
+    - **Planning Mirror Mode**: Automatically expands to show the top **3 items** if NO task is currently active. This mirrors the **Session Sprint Staging** area in the Home Planner.
+3.  **Later Queue**: All remaining uncompleted items, hidden behind a "Reveal More" button.
+4.  **Winning Ledger (Victory Protocol)**: A dedicated, ghosted section for completed tasks. 
+    - **Celebratory Styling**: Items feature a strikethrough, lowered opacity, and a **Trophy icon**.
+    - **Persistent Record**: Tasks remain in the ledger with a `completedAt` timestamp, allowing for end-of-day review and reset.
+    - **Management**: Admins/Users can "Revert" (un-complete) or "Clear" (remove from session) tasks directly from the ledger.
 
 ### 7. Branding & Live Style System
 - **Branding Console**: A floating, draggable, and resizable HUD available to admins. It features a **"Draft Mode" workflow** where stylistic changes (colors, radii) are applied locally for real-time exploration but are only persisted to Firestore when explicitly saved via "Save as Workspace Default" or by overwriting an existing snapshot.
@@ -313,8 +318,9 @@ To reduce visual cognitive load, the "My Session" sidebar uses a tiered visibili
 - **Timer Protection**: 
   - **Grace Period**: 3-second local timestamp check in `onSnapshot` to ignore incoming cloud data immediately after a local toggle.
   - **Heartbeat**: 10-second background push to Firestore for any task where `timerIsRunning === true`.
-- **Rank-Aware Sidebar**: The top-most task in the sidebar is the **Executive Task**, featuring full timer controls and a completion footer. Subsequent selected tasks enter **Review Mode**, a streamlined view that removes play/pause and the "TASK DONE?" footer, moving management icons (Trash) into the primary utility row for compactness.
-- **Stable Queue Model**: Sidebar task order is persistent and only modified via manual drag-and-drop. Clicking a task activates the "Focus" state but does not move the task from its position in the queue.
+- **Rank-Aware Sidebar**: The top-most uncompleted task in the sidebar is the **Executive Task**, featuring full timer controls and a completion footer. Subsequent selected tasks enter **Review Mode**, a streamlined view that removes play/pause and the "TASK DONE?" footer, moving management icons (Trash) into the primary utility row for compactness.
+- **Top-Driven Playlist Model**: The `activeFocus` state is automatically synchronized with the first uncompleted item in the `actionSet`. Drag-and-drop reordering is the primary method for changing focus.
+- **Persistent Session Ledger**: Completed tasks remain in the `actionSet` with a `completedAt` timestamp and `completed: true` status. They are displayed in the **Winning Ledger** section with victory-themed styling.
 - **Mirror Staging**: The Home Planner's Staging slots are a stationary 3-item window into the sidebar's top items, visually reflecting the current focus wherever it sits in that trio.
 - **Cloud Sanitization**: Every `updateDoc` call to Firestore MUST wrap the data object in the `sanitize()` helper to remove `undefined` values, preventing silent persistence failures.
 - **Atomic Presence**: Always use Firestore dot-notation (`updateDoc(docRef, { [`activeUsers.${userId}`]: data })`) to update presence without risk of overwriting other users.

@@ -115,6 +115,9 @@ interface TasklistState {
   setActionSet: (newSet: ActionSetItem[]) => Promise<void>;
   getValidActionSet: () => ActionSetItem[];
   clearActionSet: () => Promise<void>;
+  toggleShowCompletedInSession: () => Promise<void>;
+  setShowCompletedInSession: (show: boolean) => Promise<void>;
+  syncFocusToPlaylist: () => Promise<void>;
   
   // Scratchpad
   addScratchpadTask: (text: string, category: string, priority?: boolean, reminder?: ReminderInfo | null, inSession?: boolean) => Promise<void>;
@@ -1220,7 +1223,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     },
 
     toggleNoteInActionSet: async (noteId) => {
-      const { currentUser } = get();
+      const { currentUser, syncFocusToPlaylist } = get();
       if (!currentUser) return;
 
       const userRef = doc(db, 'users', currentUser.id);
@@ -1231,6 +1234,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
         // Remove from playlist
         const newSet = currentSet.filter(i => !(i.type === 'note' && i.taskId === noteId));
         await updateDoc(userRef, sanitize({ actionSet: newSet }));
+        await syncFocusToPlaylist(); // Sync focus after removal
       } else {
         // Add to playlist
         const newItem: ActionSetItem = {
@@ -1239,11 +1243,12 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
           addedAt: Date.now()
         };
         await updateDoc(userRef, sanitize({ actionSet: [...currentSet, newItem] }));
+        await syncFocusToPlaylist(); // Sync focus after addition
       }
     },
 
     injectTaskIntoSession: async (item) => {
-      const { currentUser, toggleTaskFocus } = get();
+      const { currentUser, toggleTaskFocus, syncFocusToPlaylist } = get();
       if (!currentUser) return;
 
       const userRef = doc(db, 'users', currentUser.id);
@@ -1280,6 +1285,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       }
 
       await updateDoc(userRef, sanitize({ actionSet: newSet }));
+      await syncFocusToPlaylist(); // Sync focus after injection
     },
 
     getTodayAlerts: () => {
@@ -1351,15 +1357,76 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     },
 
     setActionSet: async (newSet) => {
-      const { currentUser } = get();
+      const { currentUser, syncFocusToPlaylist } = get();
       if (!currentUser) return;
       await updateDoc(doc(db, 'users', currentUser.id), sanitize({ actionSet: newSet }));
+      await syncFocusToPlaylist(); // Auto-sync focus to new top item
+    },
+
+    toggleShowCompletedInSession: async () => {
+      const { currentUser } = get();
+      if (!currentUser) return;
+      const newVal = !currentUser.showCompletedInSession;
+      set({ currentUser: { ...currentUser, showCompletedInSession: newVal } });
+      await updateDoc(doc(db, 'users', currentUser.id), sanitize({ showCompletedInSession: newVal }));
+    },
+
+    setShowCompletedInSession: async (show) => {
+      const { currentUser } = get();
+      if (!currentUser) return;
+      set({ currentUser: { ...currentUser, showCompletedInSession: show } });
+      await updateDoc(doc(db, 'users', currentUser.id), sanitize({ showCompletedInSession: show }));
+    },
+
+    syncFocusToPlaylist: async () => {
+      const { currentUser, instances, setTaskFocus } = get();
+      if (!currentUser || !currentUser.actionSet) return;
+
+      if (currentUser.actionSet.length === 0) {
+        // Clear focus if playlist is empty
+        const userRef = doc(db, 'users', currentUser.id);
+        set({ currentUser: { ...currentUser, activeFocus: null } });
+        await updateDoc(userRef, sanitize({ activeFocus: null }));
+        return;
+      }
+
+      // Find the first UNCOMPLETED item in the playlist
+      const firstUncompleted = currentUser.actionSet.find(item => {
+        if (item.type === 'note') {
+          const note = currentUser.scratchpad?.find(n => n.id === item.taskId);
+          return note && !note.completed;
+        } else {
+          const instance = instances.find(i => i.id === item.instanceId);
+          const task = instance?.sections
+            .flatMap(s => s.subsections.flatMap(ss => ss.tasks))
+            .find(t => t.id === item.taskId);
+          return task && !task.completed;
+        }
+      });
+
+      if (firstUncompleted) {
+        // If the focus is already on this item, do nothing to avoid loop
+        const isCurrentFocus = currentUser.activeFocus && 
+          currentUser.activeFocus.projectId === (firstUncompleted.projectId || '') &&
+          currentUser.activeFocus.instanceId === (firstUncompleted.instanceId || '') &&
+          currentUser.activeFocus.taskId === firstUncompleted.taskId;
+
+        if (!isCurrentFocus) {
+          await setTaskFocus(firstUncompleted.projectId || '', firstUncompleted.instanceId || '', firstUncompleted.taskId);
+        }
+      } else {
+        // No uncompleted tasks remain in the playlist, clear focus
+        const userRef = doc(db, 'users', currentUser.id);
+        set({ currentUser: { ...currentUser, activeFocus: null } });
+        await updateDoc(userRef, sanitize({ activeFocus: null }));
+      }
     },
 
     getValidActionSet: () => {
       const { currentUser, instances } = get();
       if (!currentUser?.actionSet) return [];
-      return currentUser.actionSet.filter(item => {
+      
+      const validItems = currentUser.actionSet.filter(item => {
         if (item.type === 'note') {
           return currentUser.scratchpad?.some(n => n.id === item.taskId);
         }
@@ -1370,6 +1437,10 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
           .find(t => t.id === item.taskId);
         return !!task;
       });
+
+      // Filter by visibility preference if needed
+      // Actually, we return ALL valid items and let the UI handle the split
+      return validItems;
     },
 
     clearActionSet: async () => {
@@ -1446,7 +1517,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     },
 
     toggleScratchpadTask: async (id) => {
-      const { currentUser } = get();
+      const { currentUser, syncFocusToPlaylist } = get();
       if (!currentUser || !currentUser.scratchpad) return;
 
       const scratchpad = currentUser.scratchpad.map(item => {
@@ -1457,11 +1528,21 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
         return { ...item, completed, reminder };
       });
       
+      // Update actionSet timestamp if it exists
+      const actionSet = currentUser.actionSet?.map(item => {
+        if (item.type === 'note' && item.taskId === id) {
+          const completed = scratchpad.find(n => n.id === id)?.completed;
+          return { ...item, completedAt: completed ? Date.now() : undefined }; // Clear completedAt if reverting
+        }
+        return item;
+      });
+
       // Optimistic Update
-      set({ currentUser: { ...currentUser, scratchpad } });
+      set({ currentUser: { ...currentUser, scratchpad, actionSet } });
       
       try {
-        await updateDoc(doc(db, 'users', currentUser.id), sanitize({ scratchpad }));
+        await updateDoc(doc(db, 'users', currentUser.id), sanitize({ scratchpad, actionSet }));
+        await syncFocusToPlaylist(); // Auto-advance focus
       } catch (error) {
         console.error('Failed to toggle note in Firestore:', error);
         set({ currentUser }); // Revert
@@ -2057,13 +2138,14 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     },
 
     toggleTask: async (taskId, instanceId) => {
-      const { activeInstance, instances } = get();
+      const { activeInstance, instances, currentUser, syncFocusToPlaylist } = get();
       const targetInstance = instanceId 
         ? instances.find(i => i.id === instanceId)
         : activeInstance;
 
       if (!targetInstance) return;
       
+      let isTaskCompleted = false;
       const updated = targetInstance.sections.map(s => ({
         ...s,
         subsections: s.subsections.map(ss => ({
@@ -2071,6 +2153,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
           tasks: ss.tasks.map(t => {
             if (t.id !== taskId) return t;
             const completed = !t.completed;
+            isTaskCompleted = completed;
             const timeTaken = completed && t.timerDuration && t.timerRemaining ? t.timerDuration - t.timerRemaining : (completed ? (t.timeTaken ?? null) : null);
             // Clear reminder if marked as done
             const reminder = (completed && t.reminder) ? undefined : t.reminder;
@@ -2085,7 +2168,20 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
           })
         }))
       }));
+
+      // Update actionSet timestamp if it exists in currentUser
+      if (currentUser && currentUser.actionSet) {
+        const actionSet = currentUser.actionSet.map(item => {
+          if (item.type !== 'note' && item.taskId === taskId && item.instanceId === targetInstance.id) {
+            return { ...item, completedAt: isTaskCompleted ? Date.now() : undefined }; // Clear completedAt if reverting
+          }
+          return item;
+        });
+        await updateDoc(doc(db, 'users', currentUser.id), sanitize({ actionSet }));
+      }
+
       await updateDoc(doc(db, 'instances', targetInstance.id), sanitize({ sections: updated }));
+      await syncFocusToPlaylist(); // Auto-advance focus
     },
 
     updateTaskNotes: async (taskId, notes, containerId, isUserNotes = false, immediate = false) => {
