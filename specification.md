@@ -3,14 +3,16 @@
 > **MANDATORY AGENT PROTOCOL**: 
 > 1. Any AI agent working on this codebase MUST read this entire specification before proposing or implementing changes.
 >    - *Comment: Ensure full context before any code modification.*
-> 2. All changes must be reflected in the **Admin > App Protocol** interface.
+> 2. **Methodical Planning**: Agents MUST provide a high-level plan and seek USER confirmation BEFORE updating the `todo_write` list or implementing changes.
+>    - *Comment: Ensures absolute alignment between agent intent and user requirements before a single task is tracked or executed.*
+> 3. All changes must be reflected in the **Admin > App Protocol** interface.
 >    - *Comment: Keep the internal Admin documentation synchronized with reality.*
-> 3. The version number below MUST match the `version` field in `package.json` and the version text at the bottom of the sidebar.
+> 4. The version number below MUST match the `version` field in `package.json` and the version text at the bottom of the sidebar.
 >    - *Comment: Maintain a single source of truth for the application version.*
 > 4. Failure to adhere to Section 6 (AI Development Rules & SOP) will result in architectural drift and session termination.
 >    - *Comment: Strictly follow technical and deployment SOPs to prevent regressions.*
 
-*Current Version: 1.10.0*
+*Current Version: 1.10.1*
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It operates on a "Master-Instance" model, where users can define master templates and instantiate them within specific projects. The application is built for high reliability, real-time team synchronization, and cross-platform accessibility.

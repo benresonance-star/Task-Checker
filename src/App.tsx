@@ -1406,7 +1406,7 @@ function App() {
         isExecuting && "p-0 md:p-0"
       )}>
         {location.pathname !== '/dashboard' && (
-          <header className={clsx(theme.components.layout.contentHeader, "z-[50] relative bg-white/50 dark:bg-black/20 backdrop-blur-md pt-6 pb-6 border-b border-gray-200 dark:border-gray-800")}>
+          <header className={clsx(theme.components.layout.contentHeader, "z-[100] sticky top-0 bg-white/70 dark:bg-black/40 backdrop-blur-md pt-6 pb-6 border-b border-gray-200 dark:border-gray-800")}>
             <div className="flex flex-col w-full gap-4">
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-1.5 md:gap-3 min-w-0 flex-1">
@@ -2517,15 +2517,25 @@ function App() {
                   <div className="space-y-6 px-2">
                     <section className="space-y-3">
                       <h5 className="flex items-center gap-2 text-xs font-black uppercase text-google-blue tracking-[0.2em]">
-                        <BookOpen className="w-4 h-4" /> 1. The Golden Rule
+                        <BookOpen className="w-4 h-4" /> 1. The Golden Rule & Methodical Planning
                       </h5>
-                      <div className="p-4 bg-gray-50 dark:bg-black/20 rounded-xl border-2 border-gray-100 dark:border-gray-800">
-                        <p className="text-sm font-bold text-gray-700 dark:text-gray-300 leading-relaxed italic">
-                          "Any AI agent working on this codebase MUST read the entire specification.md before proposing or implementing changes. Failure to do so will result in session termination."
-                        </p>
-                        <p className="text-[10px] font-black uppercase text-google-blue/60 mt-2 tracking-widest border-t border-google-blue/10 pt-2">
-                          Comment: Ensure full context before any code modification.
-                        </p>
+                      <div className="space-y-3">
+                        <div className="p-4 bg-gray-50 dark:bg-black/20 rounded-xl border-2 border-gray-100 dark:border-gray-800">
+                          <p className="text-sm font-bold text-gray-700 dark:text-gray-300 leading-relaxed italic">
+                            "Any AI agent working on this codebase MUST read the entire specification.md before proposing or implementing changes. Failure to do so will result in session termination."
+                          </p>
+                          <p className="text-[10px] font-black uppercase text-google-blue/60 mt-2 tracking-widest border-t border-google-blue/10 pt-2">
+                            Comment: Ensure full context before any code modification.
+                          </p>
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-black/20 rounded-xl border-2 border-gray-100 dark:border-gray-800">
+                          <p className="text-sm font-bold text-gray-700 dark:text-gray-300 leading-relaxed italic">
+                            "Agents MUST provide a high-level plan and seek USER confirmation BEFORE updating the todo list or implementing changes."
+                          </p>
+                          <p className="text-[10px] font-black uppercase text-google-blue/60 mt-2 tracking-widest border-t border-google-blue/10 pt-2">
+                            Comment: Ensures absolute alignment between agent intent and user requirements before a single task is tracked or executed.
+                          </p>
+                        </div>
                       </div>
                     </section>
 
