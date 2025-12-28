@@ -724,7 +724,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
         </div>
         
         {isNotesExpanded && (
-          <div className="p-4 md:p-6 bg-[var(--planner-spotlight-bg)] rounded-[2.5rem] border-2 border-[var(--planner-spotlight-border)] shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="px-4 md:px-8 py-4 bg-[var(--planner-spotlight-bg)] rounded-[2.5rem] border-2 border-[var(--planner-spotlight-border)] shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
             <ScratchpadWidget projects={projects} />
           </div>
         )}

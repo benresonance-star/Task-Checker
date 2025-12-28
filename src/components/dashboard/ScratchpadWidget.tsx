@@ -343,21 +343,7 @@ export const ScratchpadWidget: React.FC<{ projects?: Project[] }> = ({ projects:
   };
 
   return (
-    <div className="flex flex-col h-full space-y-4">
-      <div className="flex items-center justify-end px-2">
-        {hasDoneTasks && (
-          <button 
-            onClick={() => setShowDone(!showDone)}
-            className={clsx(
-              "text-[9px] font-black uppercase tracking-widest transition-all",
-              showDone ? "text-google-green" : "text-google-blue hover:underline"
-            )}
-          >
-            {showDone ? "Hide Done" : "Show Done"}
-          </button>
-        )}
-      </div>
-
+    <div className="flex flex-col h-full space-y-3">
       <div className="flex-1 flex flex-col overflow-visible transition-all relative">
         {/* Quick Input & Category Picker */}
         <div className={clsx(
@@ -496,21 +482,10 @@ export const ScratchpadWidget: React.FC<{ projects?: Project[] }> = ({ projects:
           </div>
         </div>
 
-        {/* Floating Plus Button when closed */}
-        {!isEditorOpen && (
-          <button
-            onClick={() => setIsEditorOpen(true)}
-            className="absolute top-4 right-4 w-10 h-10 bg-google-blue text-white rounded-xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition-all group z-[30]"
-            title="Add New Note"
-          >
-            <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
-          </button>
-        )}
-
         {/* Category Filter Custom Dropdown */}
         <div className={clsx(
-          "flex items-center gap-2 px-4 border-b border-gray-200/30 dark:border-gray-800/30 transition-all relative z-[20]",
-          isEditorOpen ? "py-3" : "pt-5 pb-4 pr-16"
+          "flex items-center justify-between gap-2 px-4 border-b border-gray-200/30 dark:border-gray-800/30 transition-all relative z-[20]",
+          isEditorOpen ? "py-3" : "pt-5 pb-4"
         )}>
           <Dropdown 
             label="Filter by:"
@@ -522,6 +497,30 @@ export const ScratchpadWidget: React.FC<{ projects?: Project[] }> = ({ projects:
             width="220px"
             showSearch
           />
+
+          <div className="flex items-center gap-4">
+            {hasDoneTasks && (
+              <button 
+                onClick={() => setShowDone(!showDone)}
+                className={clsx(
+                  "text-[9px] font-black uppercase tracking-widest transition-all",
+                  showDone ? "text-google-green" : "text-google-blue hover:underline"
+                )}
+              >
+                {showDone ? "Hide Done" : "Show Done"}
+              </button>
+            )}
+
+            {!isEditorOpen && (
+              <button
+                onClick={() => setIsEditorOpen(true)}
+                className="w-10 h-10 bg-google-blue text-white rounded-xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition-all group"
+                title="Add New Note"
+              >
+                <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Task List */}
