@@ -434,7 +434,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                           return (
                             <div 
                               key={instance.id}
-                              onClick={() => navigate(`/project/${spotlightData.project.id}/instance/${instance.id}`)}
+                              onClick={() => navigate(`/project/${spotlightData.project.id}/instance/${instance.id}${nextTask ? `?task=${nextTask.id}&scroll=true` : ''}`)}
                               className="bg-gray-50/50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 hover:border-google-blue hover:shadow-lg transition-all cursor-pointer group/pill"
                             >
                               <div className="flex items-center justify-between mb-3">
@@ -450,7 +450,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                               {nextTask && (
                                 <div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 group-hover/pill:text-google-blue transition-colors">
                                   <ChevronRight className="w-3 h-3 shrink-0" />
-                                  <span className="truncate">Next: {nextTask.title}</span>
+                                  <span>Next: {nextTask.title}</span>
                                 </div>
                               )}
                             </div>
