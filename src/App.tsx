@@ -60,13 +60,15 @@ import { formatTime } from './utils/time';
 const SidebarNoteItem = ({ 
   item, 
   note, 
-  isActiveFocus 
+  isActiveFocus,
+  isTopTask
 }: { 
   item: any, 
   note: ScratchpadItem, 
-  isActiveFocus: boolean
+  isActiveFocus: boolean,
+  isTopTask: boolean
 }) => {
-  const { toggleTaskFocus, toggleNoteInActionSet } = useTasklistStore();
+  const { toggleTaskFocus, toggleNoteInActionSet, toggleScratchpadTask } = useTasklistStore();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -147,15 +149,17 @@ const SidebarNoteItem = ({
                 </span>
               )}
             </span>
-            <button 
-              onClick={(e) => { e.stopPropagation(); toggleNoteInActionSet(note.id); }}
-              className={clsx(
-                "p-1 rounded-md opacity-0 group-hover:opacity-100 transition-all",
-                isActiveFocus ? "text-white/50 hover:text-white" : "text-gray-400 hover:text-indigo-600"
-              )}
-            >
-              <X className="w-3 h-3" />
-            </button>
+            {!isActiveFocus && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); toggleNoteInActionSet(note.id); }}
+                className={clsx(
+                  "p-1 rounded-md opacity-0 group-hover:opacity-100 transition-all",
+                  "text-gray-400 hover:text-indigo-600"
+                )}
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
           </div>
           <div 
             className={clsx(
@@ -175,8 +179,43 @@ const SidebarNoteItem = ({
       </div>
       
       {isActiveFocus && (
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-          <div className="h-full bg-white animate-progress" style={{ width: '100%' }} />
+        <div className="px-4 pb-4 animate-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center gap-2">
+            {!isTopTask && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); toggleNoteInActionSet(note.id); }}
+                className="w-10 h-10 rounded-xl bg-white/10 ml-auto flex items-center justify-center text-white hover:bg-white/20 hover:text-google-red transition-all"
+                title="Remove from Session"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+
+          {isTopTask && (
+            <div className="flex items-center gap-2 mt-3">
+              <button 
+                onClick={(e) => { e.stopPropagation(); toggleScratchpadTask(note.id); }}
+                className={clsx(
+                  "flex-1 h-12 rounded-2xl flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest transition-all shadow-xl border-2",
+                  note.completed 
+                    ? "bg-google-green border-white/20 text-white" 
+                    : "bg-white/20 border-white/10 text-white hover:bg-white/30"
+                )}
+              >
+                {note.completed ? <CheckCircle2 className="w-4 h-4" /> : <ThumbsUp className="w-4 h-4" />}
+                {note.completed ? "COMPLETED!" : "TASK DONE?"}
+              </button>
+              
+              <button 
+                onClick={(e) => { e.stopPropagation(); toggleNoteInActionSet(note.id); }}
+                className="w-12 h-12 rounded-2xl bg-white/10 border-2 border-white/10 flex items-center justify-center text-white hover:bg-white/20 hover:text-google-red transition-all"
+                title="Remove from Session"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -187,12 +226,14 @@ const SidebarTaskItem = ({
   task, 
   instance, 
   isActiveFocus, 
+  isTopTask,
   onOpenNotes
 }: { 
   item: any, 
   task: Task, 
   instance: any, 
   isActiveFocus: boolean, 
+  isTopTask: boolean,
   onOpenNotes: (taskId: string, containerId: string, focusFeedback?: boolean) => void
 }) => {
   const { projects, toggleTask, toggleTaskFocus, toggleTaskInActionSet, setTaskTimer, resetTaskTimer, toggleTaskTimer, updateTaskTimer, currentUser, users } = useTasklistStore();
@@ -331,7 +372,7 @@ const SidebarTaskItem = ({
           <GripVertical className="w-4 h-4" />
         </div>
 
-        {!isActiveFocus && !isMultiUserActive && (
+        {!isActiveFocus && !isMultiUserActive && isTopTask && (
           <div className={clsx(
             "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors relative",
             (isActiveFocus || isMultiUserActive || (task.completed && !isDeactivatedCompleted)) ? (isYellowState ? "bg-black/10" : "bg-white/20") : (isDeactivatedCompleted ? "bg-google-green/20" : "bg-gray-100 dark:bg-white/5 text-gray-400")
@@ -446,21 +487,23 @@ const SidebarTaskItem = ({
         <div className="px-4 pb-4 animate-in slide-in-from-top-2 duration-200">
           <div className="flex items-center gap-2">
             {/* Play/Pause Button - Aligned with left edge of card content */}
-            <div className={clsx(
-              theme.components.pomodoro.button,
-              isYellowState && theme.components.pomodoro.buttonYellow
-            )}>
-              <button 
-                onClick={handlePlayPause} 
-                title="Start/Pause Pomodoro Timer"
-                className="w-full h-full flex items-center justify-center hover:scale-110 transition-transform"
-              >
-                {task.timerIsRunning ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
-              </button>
-            </div>
+            {isTopTask && (
+              <div className={clsx(
+                theme.components.pomodoro.button,
+                isYellowState && theme.components.pomodoro.buttonYellow
+              )}>
+                <button 
+                  onClick={handlePlayPause} 
+                  title="Start/Pause Pomodoro Timer"
+                  className="w-full h-full flex items-center justify-center hover:scale-110 transition-transform"
+                >
+                  {task.timerIsRunning ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
+                </button>
+              </div>
+            )}
 
             {/* Timer Controls Box */}
-            <div className={theme.components.pomodoro.container}>
+            <div className={clsx(theme.components.pomodoro.container, !isTopTask && "flex-1")}>
               <div className="relative flex items-center gap-1 min-w-0">
                 <button 
                   onClick={(e) => { e.stopPropagation(); setShowTimerWidget(!showTimerWidget); }}
@@ -515,23 +558,38 @@ const SidebarTaskItem = ({
               </div>
             </div>
 
-            {/* Note Icon - Outside the timer box, same height as play button, aligned with bin icon */}
-            <button 
-              onClick={(e) => { e.stopPropagation(); onOpenNotes(task.id, instance.id); }}
-              title="Open Task Info"
-              className={clsx(
-                "w-12 h-10 shrink-0 flex items-center justify-center transition-all hover:scale-110",
-                isYellowState ? "text-gray-900" : "text-white"
+            {/* Note Icon Group */}
+            <div className="flex items-center gap-1.5 ml-auto">
+              <button 
+                onClick={(e) => { e.stopPropagation(); onOpenNotes(task.id, instance.id); }}
+                title="Open Task Info"
+                className={clsx(
+                  "w-10 h-10 shrink-0 flex items-center justify-center transition-all hover:scale-110",
+                  isYellowState ? "text-gray-900" : "text-white"
+                )}
+              >
+                <StickyNote className={clsx("w-5 h-5", shouldHighlightNotes && "animate-pulse-slow")} />
+              </button>
+
+              {!isTopTask && (
+                <button 
+                  onClick={(e) => { e.stopPropagation(); toggleTaskInActionSet(item.projectId, item.instanceId, item.taskId); }}
+                  title="Remove from Setlist"
+                  className={clsx(
+                    "w-10 h-10 shrink-0 flex items-center justify-center transition-all hover:scale-110 hover:text-google-red",
+                    isYellowState ? "text-gray-900" : "text-white"
+                  )}
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
               )}
-            >
-              <StickyNote className={clsx("w-6 h-6", shouldHighlightNotes && "animate-pulse-slow")} />
-            </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Bottom Zone: Completion & Management (Expanded only) */}
-      {(isActiveFocus || isMultiUserActive) && (
+      {(isActiveFocus || isMultiUserActive) && isTopTask && (
         <div className={clsx(
           "p-4 border-t mt-auto animate-in slide-in-from-bottom-2 duration-200",
           isMultiUserActive ? "border-white/10 bg-white/5" : isYellowState ? "border-black/10 bg-black/5" : "border-white/10 bg-white/5"
@@ -568,10 +626,7 @@ const SidebarTaskItem = ({
             </button>
 
             <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleTaskInActionSet(item.projectId, item.instanceId, item.taskId);
-              }}
+              onClick={(e) => { e.stopPropagation(); toggleTaskInActionSet(item.projectId, item.instanceId, item.taskId); }}
               title="Remove from Setlist"
               className={clsx(
                 "w-12 h-12 rounded-xl flex items-center justify-center transition-all hover:scale-110 hover:text-google-red",
@@ -2393,7 +2448,7 @@ function App() {
                     >
                       <div className="space-y-6">
                         {(() => {
-                          const renderItem = (item: any) => {
+                          const renderItem = (item: any, globalIdx: number) => {
                             const compositeKey = item.type === 'note' ? `note-${item.taskId}` : `${item.projectId}-${item.instanceId}-${item.taskId}`;
                             const isActiveFocus = item.type === 'note'
                               ? (!currentUser?.activeFocus?.projectId && currentUser?.activeFocus?.taskId === item.taskId)
@@ -2401,6 +2456,8 @@ function App() {
                                  currentUser?.activeFocus?.instanceId === item.instanceId && 
                                  currentUser?.activeFocus?.taskId === item.taskId);
                             
+                            const isTopTask = globalIdx === 0;
+
                             if (item.type === 'note') {
                               const note = currentUser?.scratchpad?.find(n => n.id === item.taskId);
                               if (!note) return null;
@@ -2410,6 +2467,7 @@ function App() {
                                   item={item}
                                   note={note}
                                   isActiveFocus={isActiveFocus}
+                                  isTopTask={isTopTask}
                                 />
                               );
                             }
@@ -2426,6 +2484,7 @@ function App() {
                                 task={task}
                                 instance={instance}
                                 isActiveFocus={isActiveFocus}
+                                isTopTask={isTopTask}
                                 onOpenNotes={(taskId, containerId, focusFeedback) => setEditingTaskInfo({ taskId, containerId, focusFeedback })}
                               />
                             );
@@ -2444,7 +2503,7 @@ function App() {
                                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-google-blue/70">Next Up</span>
                                   </div>
                                   <div className="space-y-3">
-                                    {nextUpItems.map(renderItem)}
+                                    {nextUpItems.map((item, idx) => renderItem(item, idx))}
                                   </div>
                                 </div>
                               )}
@@ -2464,7 +2523,7 @@ function App() {
 
                                   {isQueueExpanded ? (
                                     <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                                      {laterItems.map(renderItem)}
+                                      {laterItems.map((item, idx) => renderItem(item, idx + 3))}
                                       <button 
                                         onClick={() => setIsQueueExpanded(false)}
                                         className="w-full py-3 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-800 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-google-blue hover:border-google-blue/30 transition-all"

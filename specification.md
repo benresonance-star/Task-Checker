@@ -12,7 +12,7 @@
 > 5. **Sync Protocol**: All protocol changes must be reflected in the **Admin > App Protocol** interface.
 >    - *Comment: Keep the internal Admin documentation synchronized with reality.*
 
-*Current Version: 1.13.42*
+*Current Version: 1.13.43*
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It features a dual-interface architectural model:
@@ -313,6 +313,7 @@ To reduce visual cognitive load, the "My Session" sidebar uses a tiered visibili
 - **Timer Protection**: 
   - **Grace Period**: 3-second local timestamp check in `onSnapshot` to ignore incoming cloud data immediately after a local toggle.
   - **Heartbeat**: 10-second background push to Firestore for any task where `timerIsRunning === true`.
+- **Rank-Aware Sidebar**: The top-most task in the sidebar is the **Executive Task**, featuring full timer controls and a completion footer. Subsequent selected tasks enter **Review Mode**, a streamlined view that removes play/pause and the "TASK DONE?" footer, moving management icons (Trash) into the primary utility row for compactness.
 - **Stable Queue Model**: Sidebar task order is persistent and only modified via manual drag-and-drop. Clicking a task activates the "Focus" state but does not move the task from its position in the queue.
 - **Mirror Staging**: The Home Planner's Staging slots are a stationary 3-item window into the sidebar's top items, visually reflecting the current focus wherever it sits in that trio.
 - **Cloud Sanitization**: Every `updateDoc` call to Firestore MUST wrap the data object in the `sanitize()` helper to remove `undefined` values, preventing silent persistence failures.
