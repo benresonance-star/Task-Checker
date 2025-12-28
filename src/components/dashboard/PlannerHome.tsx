@@ -309,10 +309,8 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
           <div className="space-y-4">
             {/* The Switchboard Ribbon */}
             <div className="flex items-center gap-3 overflow-x-auto pb-2 px-1 custom-scrollbar no-scrollbar">
-              {activeCommitments.map(({ project, associatedNotes }) => {
+              {activeCommitments.map(({ project }) => {
                 const isActive = activeSpotlightId === project.id;
-                const stagedCount = stagedItems.filter(s => s.projectId === project.id).length;
-                const noteCount = associatedNotes.length;
 
                 return (
                   <button
@@ -332,18 +330,6 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                       <Briefcase className="w-4 h-4" />
                     </div>
                     <span className="text-sm font-black whitespace-nowrap tracking-tight">{project.name}</span>
-                    
-                    {/* Energy Dots */}
-                    {(stagedCount > 0 || noteCount > 0) && (
-                      <div className="flex gap-1 ml-1">
-                        {Array.from({ length: stagedCount }).map((_, i) => (
-                          <div key={`task-${i}`} className={clsx("w-1.5 h-1.5 rounded-full animate-pulse", isActive ? "bg-white" : "bg-google-blue")} />
-                        ))}
-                        {Array.from({ length: noteCount }).map((_, i) => (
-                          <div key={`note-${i}`} className={clsx("w-1.5 h-1.5 rounded-full animate-pulse", isActive ? "bg-white/60" : "bg-indigo-400")} />
-                        ))}
-                      </div>
-                    )}
                   </button>
                 );
               })}
