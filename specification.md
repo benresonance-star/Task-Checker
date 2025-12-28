@@ -12,7 +12,7 @@
 > 4. Failure to adhere to Section 6 (AI Development Rules & SOP) will result in architectural drift and session termination.
 >    - *Comment: Strictly follow technical and deployment SOPs to prevent regressions.*
 
-*Current Version: 1.10.4*
+*Current Version: 1.10.5*
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It operates on a "Master-Instance" model, where users can define master templates and instantiate them within specific projects. The application is built for high reliability, real-time team synchronization, and cross-platform accessibility.
@@ -27,13 +27,17 @@ To ensure critical tools (Branding Console, Admin Panel) are always accessible, 
 - `z-[50]`: Sidebars / Overlays
 - `z-[10]`: Content areas
 
-### Unified Breadcrumb Navigation (v1.10.4)
+### Unified Breadcrumb Navigation (v1.10.5)
 The application uses a 3-level hierarchical navigation system in the header:
 1. **Level 1 (Mode Switcher)**: Toggles between "Projects" and "Templates". Open "Discovery Grid" for global context switching.
 2. **Level 2 (Active Context)**: Displays the name of the active Project or Template. Clicking opens the Project/Template Discovery Grid.
 3. **Level 3 (Checklist Selection)**: In Project mode, displays the active Checklist title. Clicking opens the Checklist Discovery shelf for switching within the project.
 4. **Explicit Editing**: Admins can use the `Pencil` icon next to any title to enter an explicit edit mode.
 5. **Locked Context**: The header is sticky-pinned (`top-0`) using glassmorphism, ensuring global situational awareness during long scrolls.
+6. **Contextual Controls**: 
+    - **Browse Layout**: Toggle between Grid and List views within the Discovery shelves to customize how Projects/Templates are searched.
+    - **Editor Layout**: Toggle between Stacked and Side-by-Side views within the Template Editor to optimize workspace layout.
+    - **Unified Creation**: Primary creation actions are unified within the Discovery Grid.
 6. **Contextual Controls**: View layout toggles (Stacked vs. Side-by-Side) are moved into the Discovery shelves. Primary creation actions ("New Project/Template") are unified within the Discovery Grid to eliminate header redundancy.
 
 ### Discovery Grids & Shelves

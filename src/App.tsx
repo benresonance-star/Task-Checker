@@ -564,6 +564,10 @@ function App() {
     return localStorage.getItem('isTemplatesStacked') === 'true';
   });
 
+  const [discoveryLayout, setDiscoveryLayout] = useState<'grid' | 'list'>(() => {
+    return (localStorage.getItem('discoveryLayout') as 'grid' | 'list') || 'grid';
+  });
+
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
@@ -597,6 +601,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('isTemplatesStacked', isTemplatesStacked.toString());
   }, [isTemplatesStacked]);
+
+  useEffect(() => {
+    localStorage.setItem('discoveryLayout', discoveryLayout);
+  }, [discoveryLayout]);
 
   // Manual URL parsing since useParams() requires nested Routes
   const masterMatch = matchPath('/master/:masterId', location.pathname);
@@ -1581,44 +1589,63 @@ function App() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          onClick={() => setIsTemplatesStacked(!isTemplatesStacked)}
+                          onClick={() => setDiscoveryLayout(discoveryLayout === 'grid' ? 'list' : 'grid')}
                           className="h-10 px-3 border border-gray-200 dark:border-gray-800 rounded-xl flex items-center gap-2 text-gray-500 hover:text-google-blue"
-                          title={isTemplatesStacked ? "Switch to Side-by-Side" : "Switch to Stacked View"}
+                          title={discoveryLayout === 'grid' ? "Switch to List View" : "Switch to Grid View"}
                         >
-                          {isTemplatesStacked ? <LayoutGrid className="w-4 h-4" /> : <ListOrdered className="w-4 h-4" />}
-                          <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Layout</span>
+                          {discoveryLayout === 'grid' ? <ListOrdered className="w-4 h-4" /> : <LayoutGrid className="w-4 h-4" />}
+                          <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Browse Layout</span>
                         </Button>
                         <Button variant="ghost" onClick={() => setShowDiscoveryGrid(false)} className="rounded-full w-10 h-10 p-0 border border-gray-200 dark:border-gray-800"><X className="w-5 h-5" /></Button>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar pb-2">
+                    <div className={clsx(
+                      "max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar pb-2 transition-all duration-300",
+                      discoveryLayout === 'grid' 
+                        ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" 
+                        : "flex flex-col gap-2"
+                    )}>
                       {mode === 'master' ? (
                         masters.filter(m => m.title.toLowerCase().includes(contextSearchQuery.toLowerCase())).map(m => (
                           <button 
                             key={m.id}
                             onClick={() => { navigate(`/master/${m.id}`); setShowDiscoveryGrid(false); }}
                             className={clsx(
-                              "flex flex-col gap-1 p-5 rounded-2xl border-2 transition-all text-left group relative overflow-hidden",
+                              "transition-all text-left group relative overflow-hidden flex",
+                              discoveryLayout === 'grid' 
+                                ? "flex-col gap-1 p-5 rounded-2xl border-2 shadow-sm" 
+                                : "flex-row items-center gap-4 p-3 rounded-xl border-2 hover:translate-x-1",
                               activeMaster?.id === m.id 
                                 ? "bg-google-blue border-google-blue text-white shadow-xl shadow-google-blue/20" 
                                 : "bg-white dark:bg-black/40 border-gray-100 dark:border-gray-800 hover:border-google-blue/50"
                             )}
                           >
-                            <span className="font-black text-lg truncate relative z-10">{m.title}</span>
-                            <span className={clsx(
-                              "text-[10px] font-black uppercase tracking-widest relative z-10",
-                              activeMaster?.id === m.id ? "text-white/70" : "text-gray-400"
+                            <div className={clsx(
+                              "flex items-center justify-center rounded-lg transition-all",
+                              discoveryLayout === 'grid' ? "hidden" : "w-10 h-10 bg-white/10 shrink-0"
                             )}>
-                              {m.sections.length} Sections • {m.sections.reduce((acc, s) => acc + s.subsections.length, 0)} Sub-Groups
-                            </span>
-                            {activeMaster?.id === m.id && <CheckCircle2 className="absolute -right-4 -bottom-4 w-20 h-20 text-white/10 -rotate-12" />}
+                              <CheckCircle2 className="w-5 h-5" />
+                            </div>
+
+                            <div className="flex flex-col min-w-0 flex-1 relative z-10">
+                              <span className={clsx("font-black truncate", discoveryLayout === 'grid' ? "text-lg" : "text-sm")}>{m.title}</span>
+                              <span className={clsx(
+                                "text-[10px] font-black uppercase tracking-widest",
+                                activeMaster?.id === m.id ? "text-white/70" : "text-gray-400"
+                              )}>
+                                {m.sections.length} Sections • {m.sections.reduce((acc, s) => acc + s.subsections.length, 0)} Sub-Groups
+                              </span>
+                            </div>
+
+                            {discoveryLayout === 'grid' && activeMaster?.id === m.id && <CheckCircle2 className="absolute -right-4 -bottom-4 w-20 h-20 text-white/10 -rotate-12" />}
                             
                             {isAdmin && (
                               <button 
                                 onClick={(e) => { e.stopPropagation(); if (confirm('Delete template?')) deleteMaster(m.id); }}
                                 className={clsx(
-                                  "absolute top-4 right-4 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all z-20",
+                                  "p-2 rounded-lg transition-all z-20",
+                                  discoveryLayout === 'grid' ? "absolute top-4 right-4 opacity-0 group-hover:opacity-100" : "opacity-0 group-hover:opacity-100",
                                   activeMaster?.id === m.id ? "hover:bg-white/20 text-white" : "hover:bg-red-50 text-gray-400 hover:text-google-red"
                                 )}
                               >
@@ -1633,32 +1660,50 @@ function App() {
                             key={p.id}
                             onClick={() => { navigate(`/project/${p.id}`); setShowDiscoveryGrid(false); }}
                             className={clsx(
-                              "flex flex-col gap-1 p-5 rounded-2xl border-2 transition-all text-left group relative overflow-hidden",
+                              "transition-all text-left group relative overflow-hidden flex",
+                              discoveryLayout === 'grid' 
+                                ? "flex-col gap-1 p-5 rounded-2xl border-2 shadow-sm" 
+                                : "flex-row items-center gap-4 p-3 rounded-xl border-2 hover:translate-x-1",
                               activeProject?.id === p.id 
                                 ? "bg-google-green border-google-green text-white shadow-xl shadow-google-green/20" 
                                 : "bg-white dark:bg-black/40 border-gray-100 dark:border-gray-800 hover:border-google-green/50"
                             )}
                           >
-                            <span className="font-black text-lg truncate relative z-10">{p.name}</span>
-                            <span className={clsx(
-                              "text-[10px] font-black uppercase tracking-widest relative z-10",
-                              activeProject?.id === p.id ? "text-white/70" : "text-gray-400"
+                            <div className={clsx(
+                              "flex items-center justify-center rounded-lg transition-all",
+                              discoveryLayout === 'grid' ? "hidden" : "w-10 h-10 bg-white/10 shrink-0"
                             )}>
-                              {p.instanceIds.length} Active Checklists
-                            </span>
-                            {activeProject?.id === p.id && <LayoutGrid className="absolute -right-4 -bottom-4 w-20 h-20 text-white/10 -rotate-12" />}
+                              <LayoutGrid className="w-5 h-5" />
+                            </div>
+
+                            <div className="flex flex-col min-w-0 flex-1 relative z-10">
+                              <span className={clsx("font-black truncate", discoveryLayout === 'grid' ? "text-lg" : "text-sm")}>{p.name}</span>
+                              <span className={clsx(
+                                "text-[10px] font-black uppercase tracking-widest",
+                                activeProject?.id === p.id ? "text-white/70" : "text-gray-400"
+                              )}>
+                                {p.instanceIds.length} Active Checklists
+                              </span>
+                            </div>
+
+                            {discoveryLayout === 'grid' && activeProject?.id === p.id && <LayoutGrid className="absolute -right-4 -bottom-4 w-20 h-20 text-white/10 -rotate-12" />}
 
                             {isAdmin && (
-                              <button 
-                                onClick={(e) => { e.stopPropagation(); navigate(`/project/${p.id}`); setShowAdminPanel(true); setActiveAdminTab('projects'); }}
-                                className={clsx(
-                                  "absolute top-4 right-4 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all z-20",
-                                  activeProject?.id === p.id ? "hover:bg-white/20 text-white" : "hover:bg-blue-50 text-gray-400 hover:text-google-blue"
-                                )}
-                                title="Manage Project"
-                              >
-                                <Settings className="w-4 h-4" />
-                              </button>
+                              <div className={clsx(
+                                "flex items-center gap-1",
+                                discoveryLayout === 'grid' ? "absolute top-4 right-4" : ""
+                              )}>
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); navigate(`/project/${p.id}`); setShowAdminPanel(true); setActiveAdminTab('projects'); }}
+                                  className={clsx(
+                                    "p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all z-20",
+                                    activeProject?.id === p.id ? "hover:bg-white/20 text-white" : "hover:bg-blue-50 text-gray-400 hover:text-google-blue"
+                                  )}
+                                  title="Manage Project"
+                                >
+                                  <Settings className="w-4 h-4" />
+                                </button>
+                              </div>
                             )}
                           </button>
                         ))
@@ -1671,9 +1716,14 @@ function App() {
                             else addProject('New Project');
                             setShowDiscoveryGrid(false);
                           }}
-                          className="flex flex-col items-center justify-center gap-2 p-5 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-google-blue hover:bg-blue-50/30 dark:hover:bg-blue-900/10 text-gray-400 hover:text-google-blue transition-all group min-h-[100px]"
+                          className={clsx(
+                            "flex items-center transition-all group",
+                            discoveryLayout === 'grid' 
+                              ? "flex-col justify-center gap-2 p-5 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-google-blue hover:bg-blue-50/30 dark:hover:bg-blue-900/10 text-gray-400 hover:text-google-blue min-h-[100px]" 
+                              : "flex-row gap-4 p-3 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-google-blue hover:bg-blue-50/10 text-gray-400 hover:text-google-blue"
+                          )}
                         >
-                          <Plus className="w-8 h-8 group-hover:scale-110 transition-transform" />
+                          <Plus className={clsx("group-hover:scale-110 transition-transform", discoveryLayout === 'grid' ? "w-8 h-8" : "w-5 h-5 ml-2.5")} />
                           <span className="text-[10px] font-black uppercase tracking-widest">Create New {mode === 'master' ? 'Template' : 'Project'}</span>
                         </button>
                       )}
@@ -1701,18 +1751,23 @@ function App() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          onClick={() => setIsTemplatesStacked(!isTemplatesStacked)}
+                          onClick={() => setDiscoveryLayout(discoveryLayout === 'grid' ? 'list' : 'grid')}
                           className="h-10 px-3 border border-gray-200 dark:border-gray-800 rounded-xl flex items-center gap-2 text-gray-500 hover:text-google-blue"
-                          title={isTemplatesStacked ? "Switch to Side-by-Side" : "Switch to Stacked View"}
+                          title={discoveryLayout === 'grid' ? "Switch to List View" : "Switch to Grid View"}
                         >
-                          {isTemplatesStacked ? <LayoutGrid className="w-4 h-4" /> : <ListOrdered className="w-4 h-4" />}
-                          <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Layout</span>
+                          {discoveryLayout === 'grid' ? <ListOrdered className="w-4 h-4" /> : <LayoutGrid className="w-4 h-4" />}
+                          <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Browse Layout</span>
                         </Button>
                         <Button variant="ghost" onClick={() => setShowChecklistShelf(false)} className="rounded-full w-10 h-10 p-0 border border-gray-200 dark:border-gray-800"><X className="w-5 h-5" /></Button>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar pb-2">
+                    <div className={clsx(
+                      "max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar pb-2 transition-all duration-300",
+                      discoveryLayout === 'grid' 
+                        ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" 
+                        : "flex flex-col gap-2"
+                    )}>
                       {activeProject.instanceIds.map((id: string) => {
                         const instance = instances.find(i => i.id === id);
                         if (!instance) return null;
@@ -1729,34 +1784,60 @@ function App() {
                             key={id}
                             onClick={() => { navigate(`/project/${activeProject.id}/instance/${instance.id}`); setShowChecklistShelf(false); }}
                             className={clsx(
-                              "flex flex-col gap-1 p-5 rounded-2xl border-2 transition-all text-left group relative overflow-hidden",
+                              "transition-all text-left group relative overflow-hidden flex",
+                              discoveryLayout === 'grid' 
+                                ? "flex-col gap-1 p-5 rounded-2xl border-2 shadow-sm" 
+                                : "flex-row items-center gap-4 p-3 rounded-xl border-2 hover:translate-x-1",
                               isActive 
                                 ? "bg-google-blue border-google-blue text-white shadow-xl shadow-google-blue/20" 
                                 : "bg-white dark:bg-black/40 border-gray-100 dark:border-gray-800 hover:border-google-blue/50"
                             )}
                           >
-                            <span className="font-black text-lg truncate relative z-10">{instance.title}</span>
-                            <div className="flex items-center justify-between relative z-10 w-full">
+                            <div className={clsx(
+                              "flex items-center justify-center rounded-lg transition-all",
+                              discoveryLayout === 'grid' ? "hidden" : "w-10 h-10 bg-white/10 shrink-0"
+                            )}>
+                              <ClipboardList className="w-5 h-5" />
+                            </div>
+
+                            <div className="flex flex-col min-w-0 flex-1 relative z-10">
+                              <span className={clsx("font-black truncate", discoveryLayout === 'grid' ? "text-lg" : "text-sm")}>{instance.title}</span>
+                              <div className={clsx(
+                                "flex items-center justify-between relative z-10 w-full mt-1",
+                                discoveryLayout === 'grid' ? "flex" : "hidden"
+                              )}>
+                                <span className={clsx(
+                                  "text-[10px] font-black uppercase tracking-widest",
+                                  isActive ? "text-white/70" : "text-gray-400"
+                                )}>
+                                  {progress}% Complete
+                                </span>
+                                <span className={clsx(
+                                  "text-[10px] font-black uppercase tracking-widest",
+                                  isActive ? "text-white/70" : "text-gray-400"
+                                )}>
+                                  {completedTasks}/{totalTasks} Tasks
+                                </span>
+                              </div>
+                              <div className={clsx(
+                                "w-full h-1 bg-black/10 rounded-full mt-2 relative z-10",
+                                discoveryLayout === 'grid' ? "block" : "hidden"
+                              )}>
+                                <div 
+                                  className={clsx("h-full rounded-full transition-all duration-500", isActive ? "bg-white" : "bg-google-blue")}
+                                  style={{ width: `${progress}%` }}
+                                />
+                              </div>
                               <span className={clsx(
                                 "text-[10px] font-black uppercase tracking-widest",
+                                discoveryLayout === 'grid' ? "hidden" : "inline",
                                 isActive ? "text-white/70" : "text-gray-400"
                               )}>
-                                {progress}% Complete
-                              </span>
-                              <span className={clsx(
-                                "text-[10px] font-black uppercase tracking-widest",
-                                isActive ? "text-white/70" : "text-gray-400"
-                              )}>
-                                {completedTasks}/{totalTasks} Tasks
+                                {progress}% Complete • {completedTasks}/{totalTasks} Tasks
                               </span>
                             </div>
-                            <div className="w-full h-1 bg-black/10 rounded-full mt-2 relative z-10">
-                              <div 
-                                className={clsx("h-full rounded-full transition-all duration-500", isActive ? "bg-white" : "bg-google-blue")}
-                                style={{ width: `${progress}%` }}
-                              />
-                            </div>
-                            {isActive && <ClipboardList className="absolute -right-4 -bottom-4 w-20 h-20 text-white/10 -rotate-12" />}
+
+                            {discoveryLayout === 'grid' && isActive && <ClipboardList className="absolute -right-4 -bottom-4 w-20 h-20 text-white/10 -rotate-12" />}
 
                             {isAdmin && (
                               <button 
@@ -1766,7 +1847,8 @@ function App() {
                                   setShowDeleteChecklistConfirm(true); 
                                 }}
                                 className={clsx(
-                                  "absolute top-4 right-4 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all z-20",
+                                  "p-2 rounded-lg transition-all z-20",
+                                  discoveryLayout === 'grid' ? "absolute top-4 right-4 opacity-0 group-hover:opacity-100" : "opacity-0 group-hover:opacity-100",
                                   isActive ? "hover:bg-white/20 text-white" : "hover:bg-red-50 text-gray-400 hover:text-google-red"
                                 )}
                                 title="Remove Checklist"
@@ -1781,9 +1863,14 @@ function App() {
                       {isAdmin && (
                         <button 
                           onClick={() => { setShowAddChecklistModal(true); setShowChecklistShelf(false); }}
-                          className="flex flex-col items-center justify-center gap-2 p-5 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-google-blue hover:bg-blue-50/30 dark:hover:bg-blue-900/10 text-gray-400 hover:text-google-blue transition-all group min-h-[100px]"
+                          className={clsx(
+                            "flex items-center transition-all group",
+                            discoveryLayout === 'grid' 
+                              ? "flex-col justify-center gap-2 p-5 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-google-blue hover:bg-blue-50/30 dark:hover:bg-blue-900/10 text-gray-400 hover:text-google-blue min-h-[100px]" 
+                              : "flex-row gap-4 p-3 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-google-blue hover:bg-blue-50/10 text-gray-400 hover:text-google-blue"
+                          )}
                         >
-                          <Plus className="w-8 h-8 group-hover:scale-110 transition-transform" />
+                          <Plus className={clsx("group-hover:scale-110 transition-transform", discoveryLayout === 'grid' ? "w-8 h-8" : "w-5 h-5 ml-2.5")} />
                           <span className="text-[10px] font-black uppercase tracking-widest">Add New Checklist</span>
                         </button>
                       )}
@@ -1885,6 +1972,17 @@ function App() {
                   <h3 className="text-xl sm:text-2xl font-black text-[var(--checklist-title)]">Template Structure</h3>
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setIsTemplatesStacked(!isTemplatesStacked)}
+                    className="h-10 px-3 border border-gray-200 dark:border-gray-800 rounded-xl flex items-center gap-2 text-gray-500 hover:text-google-blue"
+                    title={isTemplatesStacked ? "Switch to Side-by-Side" : "Switch to Stacked View"}
+                  >
+                    {isTemplatesStacked ? <LayoutGrid className="w-4 h-4" /> : <ListOrdered className="w-4 h-4" />}
+                    <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">{isTemplatesStacked ? "Side-by-Side" : "Stacked"}</span>
+                  </Button>
+
                   <div className="relative group/tooltip">
                     <Button variant="ghost" size="sm" onClick={() => setShowExportModal(true)} className="rounded-full h-8 w-8 sm:h-9 sm:w-9 p-0 text-google-blue bg-blue-100 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-800">
                       <Download className="w-4 h-4 sm:w-5 sm:h-5" />
