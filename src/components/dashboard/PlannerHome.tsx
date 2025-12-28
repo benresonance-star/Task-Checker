@@ -48,22 +48,25 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
           ...item, 
           displayTitle: note?.text || 'Note', 
           displayCategory: note?.category || 'Personal',
+          projectName: note?.category || 'Personal',
           priority: note?.priority,
           completed: note?.completed 
         };
       } else {
         const instance = instances.find(i => i.id === item.instanceId);
+        const project = projects.find(p => p.id === item.projectId);
         const task = instance?.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => t.id === item.taskId);
         return { 
           ...item, 
           displayTitle: task?.title || 'Task', 
           displayCategory: instance?.title || 'Project',
+          projectName: project?.name || 'Project',
           completed: task?.completed,
           priority: false
         };
       }
     });
-  }, [validActionSet, currentUser?.scratchpad, instances]);
+  }, [validActionSet, currentUser?.scratchpad, instances, projects]);
 
   // DERIVED DATA: Active Projects & Checklists with "Skin in the Game"
   const activeCommitments = useMemo(() => {
@@ -238,6 +241,10 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                   
                   {item ? (
                     <div className="flex-1 min-w-0 animate-fly-in">
+                      <p className={clsx(
+                        "text-[9px] font-black uppercase tracking-wider mb-0.5",
+                        item.type === 'note' && item.priority ? "text-red-900/60" : "text-google-blue/60"
+                      )}>{item.projectName}</p>
                       <p className="text-xs font-bold text-gray-900 dark:text-gray-100 break-words line-clamp-2" dangerouslySetInnerHTML={{ 
                         __html: item.displayTitle
                       }} />
