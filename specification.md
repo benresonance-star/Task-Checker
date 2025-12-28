@@ -5,12 +5,12 @@
 >    - *Comment: Ensure full context before any code modification.*
 > 2. **Methodical Planning**: Agents MUST provide a high-level plan and seek USER confirmation BEFORE updating the `todo_write` list or implementing changes.
 >    - *Comment: Ensures absolute alignment between agent intent and user requirements before a single task is tracked or executed.*
-> 3. All changes must be reflected in the **Admin > App Protocol** interface.
->    - *Comment: Keep the internal Admin documentation synchronized with reality.*
-> 4. The version number below MUST match the `version` field in `package.json` and the version text at the bottom of the sidebar.
+> 3. **Deployment SOP**: Agents MUST NEVER run a deploy command in isolation. They MUST ALWAYS use the chain: `npm run build && npx firebase deploy`.
+>    - *Comment: Ensures the latest code is compiled into the production 'dist' folder before being sent to the server.*
+> 4. **Version Parity**: The version number below MUST match the `version` field in `package.json` and the version text at the bottom of the sidebar.
 >    - *Comment: Maintain a single source of truth for the application version.*
-> 4. Failure to adhere to Section 6 (AI Development Rules & SOP) will result in architectural drift and session termination.
->    - *Comment: Strictly follow technical and deployment SOPs to prevent regressions.*
+> 5. **Sync Protocol**: All protocol changes must be reflected in the **Admin > App Protocol** interface.
+>    - *Comment: Keep the internal Admin documentation synchronized with reality.*
 
 *Current Version: 1.10.5*
 
@@ -309,9 +309,9 @@ The system features a robust sync engine:
 To maintain the integrity and high-speed deployment cycle of checkMATE, all AI agents must adhere to the following operational rules:
 
 1. **Deployment Protocol**: 
-   - **Always push to Firebase** at the end of every successful set of code changes. Use the command: `npm run build; if ($?) { npx firebase-tools deploy }`.
-   - Before ending a turn, the agent must verify the build is successful and the app is live.
-   - *Comment: Automate live updates to ensure the latest version is always accessible.*
+   - **Agents MUST NEVER run a deploy command in isolation.**
+   - They MUST ALWAYS use the chain: `npm run build && npx firebase deploy`.
+   - *Comment: Physically prevents deploying stale code by forcing a compilation immediately prior to upload.*
 
 2. **Proactive Documentation & Version Control**:
    - **Specification Sync**: After any significant codebase changes (new features, structural shifts, schema updates), the agent must update the `specification.md` to reflect these changes.

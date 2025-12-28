@@ -2674,11 +2674,11 @@ function App() {
                       </h5>
                       <div className="grid gap-2">
                         {[
-                          { title: "Run 'npm run build' to verify type safety.", comment: "Automate live updates to ensure the latest version is always accessible." },
-                          { title: "Push to Firebase: 'npx firebase-tools deploy'.", comment: "Ensure latest version availability." },
+                          { title: "MANDATORY: Run 'npm run build' before every deploy.", comment: "Ensures the latest code is compiled into 'dist' and verified for type safety." },
+                          { title: "Chain Command: 'npm run build && npx firebase deploy'.", comment: "Prevents deploying stale code by forcing a compilation immediately prior to upload." },
                           { title: "Sync specification.md with all logic changes.", comment: "Preserve institutional knowledge and maintain a clean git history." },
-                          { title: "Bump version in package.json & specification.", comment: "Maintain a single source of truth." },
-                          { title: "Final commit and push to GitHub repository.", comment: "Preserve clean version control history." }
+                          { title: "Bump version in package.json & specification.", comment: "Maintain a single source of truth for the application version." },
+                          { title: "Verify live site and request USER Hard Refresh.", comment: "Ensure end-users are seeing the latest compiled version of the app." }
                         ].map((step, i) => (
                           <div key={i} className="flex flex-col gap-1 p-3 bg-gray-50 dark:bg-black/20 rounded-lg border border-transparent hover:border-google-blue/30 transition-colors">
                             <div className="flex items-center gap-3">
