@@ -12,7 +12,7 @@
 > 5. **Sync Protocol**: All protocol changes must be reflected in the **Admin > App Protocol** interface.
 >    - *Comment: Keep the internal Admin documentation synchronized with reality.*
 
-*Current Version: 1.11.3*
+*Current Version: 1.11.4*
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It features a dual-interface architectural model:
@@ -31,14 +31,14 @@ To ensure critical tools (Branding Console, Admin Panel) are always accessible, 
 - `z-[50]`: Sidebars / Overlays
 - `z-[10]`: Content areas
 
-### Unified Breadcrumb Navigation (v1.11.3)
+### Unified Breadcrumb Navigation (v1.11.4)
 The application uses a 3-level hierarchical navigation system in the header:
 1.  **Level 1 (Mode Switcher)**: Toggles between "Projects" and "Templates". Open "Discovery Grid" for global context switching.
 2.  **Level 2 (Active Context)**: Displays the name of the active Project or Template. Clicking opens the Project/Template Discovery Grid.
 3.  **Level 3 (Checklist Selection)**: In Project mode, displays the active Checklist title. Clicking opens the Checklist Discovery shelf for switching within the project.
 4.  **Greedy Layout**: The breadcrumb container is "greedy" (`flex-1`), consuming all available space. It supports multi-line wrapping (`flex-wrap`) to ensure long titles remain fully visible without distortion or "..." truncation.
 5.  **Explicit Editing**: Admins can use the `Pencil` icon next to any title to enter an explicit edit mode.
-6.  **Locked Context**: The header is sticky-pinned (`top-0`) using glassmorphism, ensuring global situational awareness during long scrolls.
+6.  **Locked Context**: The header is sticky-pinned (`top-0`) using glassmorphism, ensuring global situational awareness during long scrolls. **The header is persistent across both Home Planner and Project/Template views, providing consistent access to the "My Session" action set.**
 
 **Core Views:**
 - **Home Planner** (`/home`): The landing screen for orientation. Contains the **Project Pulse** grid, a **Quick Access** sidebar, and the **MY NOTES** triage (full-width section) for daily planning.

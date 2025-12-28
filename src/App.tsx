@@ -1567,127 +1567,136 @@ function App() {
         "transition-all duration-700 ease-in-out relative",
         isExecuting && "p-0 md:p-0"
       )}>
-        {!isPlanner && !isSession && (
+        {!isSession && (
           <header className={clsx(theme.components.layout.contentHeader, "z-[100] sticky top-0 bg-white/70 dark:bg-black/40 backdrop-blur-md pt-8 pb-6 border-b border-gray-200 dark:border-gray-800")}>
             <div className="flex flex-col w-full gap-4">
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-1.5 md:gap-3 min-w-0 flex-1 flex-wrap">
-                  {/* Level 1: Mode Switcher */}
-                  <button 
-                    onClick={() => { setShowDiscoveryGrid(!showDiscoveryGrid); setShowChecklistShelf(false); }}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all group shrink-0 border border-transparent hover:border-gray-200 dark:hover:border-gray-800"
-                  >
-                    {mode === 'master' ? (
-                      <CheckCircle2 className="w-5 h-5 text-google-blue group-hover:scale-110 transition-transform" />
-                    ) : (
-                      <LayoutGrid className="w-5 h-5 text-google-blue group-hover:scale-110 transition-transform" />
-                    )}
-                    <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 group-hover:text-google-blue transition-colors hidden sm:inline">
-                      {mode === 'master' ? 'Templates' : 'Projects'}
-                    </span>
-                    <ChevronDown className={clsx("w-3.5 h-3.5 text-gray-400 transition-transform duration-300", showDiscoveryGrid && "rotate-180")} />
-                  </button>
-
-                  <ChevronRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />
-
-                  {/* Level 2: Active Project / Template */}
-                  <div className="flex items-center gap-2 min-w-0 max-w-full">
-                    {isEditingContextTitle ? (
-                      <input 
-                        autoFocus
-                        className="bg-transparent border-b-2 border-google-blue outline-none text-lg md:text-xl font-black min-w-[200px] flex-1 animate-in fade-in duration-200 text-gray-900 dark:text-gray-100"
-                        value={tempContextTitle}
-                        onChange={(e) => setTempContextTitle(e.target.value)}
-                        onBlur={() => {
-                          if (mode === 'master' && activeMaster && tempContextTitle.trim()) renameMaster(activeMaster.id, tempContextTitle);
-                          if (mode === 'project' && activeProject && tempContextTitle.trim()) renameProject(activeProject.id, tempContextTitle);
-                          setIsEditingContextTitle(false);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            if (mode === 'master' && activeMaster && tempContextTitle.trim()) renameMaster(activeMaster.id, tempContextTitle);
-                            if (mode === 'project' && activeProject && tempContextTitle.trim()) renameProject(activeProject.id, tempContextTitle);
-                            setIsEditingContextTitle(false);
-                          }
-                          if (e.key === 'Escape') setIsEditingContextTitle(false);
-                        }}
-                      />
-                    ) : (
-                      <div className="flex items-center gap-1 md:gap-2 min-w-0 group/ctx">
-                        <h2 
-                          className={clsx(
-                            "text-lg md:text-xl font-black transition-colors cursor-pointer break-words",
-                            mode === 'project' ? "text-gray-900 dark:text-gray-100 hover:text-google-blue" : "text-google-blue hover:text-blue-600"
-                          )}
-                          onClick={() => { setShowDiscoveryGrid(!showDiscoveryGrid); setShowChecklistShelf(false); }}
-                        >
-                          {mode === 'master' ? (activeMaster?.title || 'Select Template') : (activeProject?.name || 'Select Project')}
-                        </h2>
-                        {isAdmin && ((mode === 'master' && activeMaster) || (mode === 'project' && activeProject)) && (
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setTempContextTitle(mode === 'master' ? activeMaster?.title || '' : activeProject?.name || '');
-                              setIsEditingContextTitle(true);
-                            }}
-                            className="opacity-0 group-hover/ctx:opacity-100 p-1.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-all text-gray-400 hover:text-google-blue shrink-0"
-                            title="Edit Title"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Level 3: Checklist (Project Mode Only) */}
-                  {mode === 'project' && activeProject && activeInstance && (
+                  {isPlanner ? (
+                    <div className="flex items-center gap-2 px-2 py-1.5 rounded-xl bg-google-blue/5 border border-google-blue/20">
+                      <LayoutGrid className="w-5 h-5 text-google-blue" />
+                      <span className="text-xs font-black uppercase tracking-[0.2em] text-google-blue">Home Planner</span>
+                    </div>
+                  ) : (
                     <>
+                      {/* Level 1: Mode Switcher */}
+                      <button 
+                        onClick={() => { setShowDiscoveryGrid(!showDiscoveryGrid); setShowChecklistShelf(false); }}
+                        className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all group shrink-0 border border-transparent hover:border-gray-200 dark:hover:border-gray-800"
+                      >
+                        {mode === 'master' ? (
+                          <CheckCircle2 className="w-5 h-5 text-google-blue group-hover:scale-110 transition-transform" />
+                        ) : (
+                          <LayoutGrid className="w-5 h-5 text-google-blue group-hover:scale-110 transition-transform" />
+                        )}
+                        <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 group-hover:text-google-blue transition-colors hidden sm:inline">
+                          {mode === 'master' ? 'Templates' : 'Projects'}
+                        </span>
+                        <ChevronDown className={clsx("w-3.5 h-3.5 text-gray-400 transition-transform duration-300", showDiscoveryGrid && "rotate-180")} />
+                      </button>
+
                       <ChevronRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />
+
+                      {/* Level 2: Active Project / Template */}
                       <div className="flex items-center gap-2 min-w-0 max-w-full">
-                        {isEditingChecklistTitle ? (
+                        {isEditingContextTitle ? (
                           <input 
                             autoFocus
-                            className="bg-transparent border-b-2 border-google-blue outline-none text-lg md:text-xl font-black min-w-[200px] flex-1 animate-in fade-in duration-200 text-google-blue"
-                            value={tempChecklistTitle}
-                            onChange={(e) => setTempChecklistTitle(e.target.value)}
+                            className="bg-transparent border-b-2 border-google-blue outline-none text-lg md:text-xl font-black min-w-[200px] flex-1 animate-in fade-in duration-200 text-gray-900 dark:text-gray-100"
+                            value={tempContextTitle}
+                            onChange={(e) => setTempContextTitle(e.target.value)}
                             onBlur={() => {
-                              if (activeInstance && tempChecklistTitle.trim()) renameInstance(activeInstance.id, tempChecklistTitle);
-                              setIsEditingChecklistTitle(false);
+                              if (mode === 'master' && activeMaster && tempContextTitle.trim()) renameMaster(activeMaster.id, tempContextTitle);
+                              if (mode === 'project' && activeProject && tempContextTitle.trim()) renameProject(activeProject.id, tempContextTitle);
+                              setIsEditingContextTitle(false);
                             }}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
-                                if (activeInstance && tempChecklistTitle.trim()) renameInstance(activeInstance.id, tempChecklistTitle);
-                                setIsEditingChecklistTitle(false);
+                                if (mode === 'master' && activeMaster && tempContextTitle.trim()) renameMaster(activeMaster.id, tempContextTitle);
+                                if (mode === 'project' && activeProject && tempContextTitle.trim()) renameProject(activeProject.id, tempContextTitle);
+                                setIsEditingContextTitle(false);
                               }
-                              if (e.key === 'Escape') setIsEditingChecklistTitle(false);
+                              if (e.key === 'Escape') setIsEditingContextTitle(false);
                             }}
                           />
                         ) : (
-                          <div className="flex items-center gap-1 md:gap-2 min-w-0 group/chk">
+                          <div className="flex items-center gap-1 md:gap-2 min-w-0 group/ctx">
                             <h2 
-                              className="text-lg md:text-xl font-black text-google-blue cursor-pointer hover:underline decoration-2 underline-offset-4 break-words"
-                              onClick={() => { setShowChecklistShelf(!showChecklistShelf); setShowDiscoveryGrid(false); }}
+                              className={clsx(
+                                "text-lg md:text-xl font-black transition-colors cursor-pointer break-words",
+                                mode === 'project' ? "text-gray-900 dark:text-gray-100 hover:text-google-blue" : "text-google-blue hover:text-blue-600"
+                              )}
+                              onClick={() => { setShowDiscoveryGrid(!showDiscoveryGrid); setShowChecklistShelf(false); }}
                             >
-                              {activeInstance.title}
+                              {mode === 'master' ? (activeMaster?.title || 'Select Template') : (activeProject?.name || 'Select Project')}
                             </h2>
-                            {isAdmin && (
+                            {isAdmin && ((mode === 'master' && activeMaster) || (mode === 'project' && activeProject)) && (
                               <button 
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setTempChecklistTitle(activeInstance.title);
-                                  setIsEditingChecklistTitle(true);
+                                  setTempContextTitle(mode === 'master' ? activeMaster?.title || '' : activeProject?.name || '');
+                                  setIsEditingContextTitle(true);
                                 }}
-                                className="opacity-0 group-hover/chk:opacity-100 p-1.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-all text-gray-400 hover:text-google-blue shrink-0"
-                                title="Edit Checklist Title"
+                                className="opacity-0 group-hover/ctx:opacity-100 p-1.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-all text-gray-400 hover:text-google-blue shrink-0"
+                                title="Edit Title"
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
                               </button>
                             )}
-                            <ChevronDown className={clsx("w-3.5 h-3.5 text-google-blue transition-transform duration-300 shrink-0", showChecklistShelf && "rotate-180")} />
                           </div>
                         )}
                       </div>
+
+                      {/* Level 3: Checklist (Project Mode Only) */}
+                      {mode === 'project' && activeProject && activeInstance && (
+                        <>
+                          <ChevronRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />
+                          <div className="flex items-center gap-2 min-w-0 max-w-full">
+                            {isEditingChecklistTitle ? (
+                              <input 
+                                autoFocus
+                                className="bg-transparent border-b-2 border-google-blue outline-none text-lg md:text-xl font-black min-w-[200px] flex-1 animate-in fade-in duration-200 text-google-blue"
+                                value={tempChecklistTitle}
+                                onChange={(e) => setTempChecklistTitle(e.target.value)}
+                                onBlur={() => {
+                                  if (activeInstance && tempChecklistTitle.trim()) renameInstance(activeInstance.id, tempChecklistTitle);
+                                  setIsEditingChecklistTitle(false);
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    if (activeInstance && tempChecklistTitle.trim()) renameInstance(activeInstance.id, tempChecklistTitle);
+                                    setIsEditingChecklistTitle(false);
+                                  }
+                                  if (e.key === 'Escape') setIsEditingChecklistTitle(false);
+                                }}
+                              />
+                            ) : (
+                              <div className="flex items-center gap-1 md:gap-2 min-w-0 group/chk">
+                                <h2 
+                                  className="text-lg md:text-xl font-black text-google-blue cursor-pointer hover:underline decoration-2 underline-offset-4 break-words"
+                                  onClick={() => { setShowChecklistShelf(!showChecklistShelf); setShowDiscoveryGrid(false); }}
+                                >
+                                  {activeInstance.title}
+                                </h2>
+                                {isAdmin && (
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setTempChecklistTitle(activeInstance.title);
+                                      setIsEditingChecklistTitle(true);
+                                    }}
+                                    className="opacity-0 group-hover/chk:opacity-100 p-1.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-all text-gray-400 hover:text-google-blue shrink-0"
+                                    title="Edit Checklist Title"
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                                <ChevronDown className={clsx("w-3.5 h-3.5 text-google-blue transition-transform duration-300 shrink-0", showChecklistShelf && "rotate-180")} />
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
                     </>
                   )}
                 </div>
@@ -1697,7 +1706,7 @@ function App() {
                   "flex items-center gap-2 transition-all duration-500 shrink-0",
                   showPlaylistSidebar && "md:justify-end"
                 )}>
-                  {mode === 'project' && (
+                  {(isPlanner || mode === 'project') && (
                     <div className="hidden md:block relative group/playlist">
                       <Button 
                         variant="ghost" 
