@@ -335,14 +335,14 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
               })}
             </div>
 
-            {/* The Spotlight Container (Dynamic Height Balanced Trio) */}
+            {/* The Spotlight Container (Dynamic Elastic Height) */}
             {spotlightData && (
-              <div className="bg-white dark:bg-black/20 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 overflow-hidden shadow-xl animate-fade-in min-h-[320px]">
-                <div className="flex flex-col lg:flex-row min-h-0">
-                  {/* Column 1: Project Identity (20%) */}
-                  <div className="w-full lg:w-[22%] bg-gray-50/50 dark:bg-black/40 border-b lg:border-b-0 lg:border-r border-gray-100 dark:border-gray-800 p-6 flex flex-col gap-6 group shrink-0">
-                    <div>
-                      <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 tracking-tighter leading-tight break-words mb-4">
+              <div className="bg-white dark:bg-black/20 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 overflow-hidden shadow-xl animate-fade-in transition-[height] duration-300">
+                <div className="flex flex-col lg:flex-row h-full">
+                  {/* Column 1: Project Identity (20%) - Defines the Floor Height */}
+                  <div className="w-full lg:w-[22%] bg-gray-50/50 dark:bg-black/40 border-b lg:border-b-0 lg:border-r border-gray-100 dark:border-gray-800 p-6 flex flex-col justify-between gap-6 group shrink-0 min-h-[240px]">
+                    <div className="space-y-6">
+                      <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 tracking-tighter leading-tight break-words">
                         {spotlightData.project.name}
                       </h3>
                       <div className="space-y-3">
@@ -374,7 +374,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                     <Button 
                       variant="ghost" 
                       onClick={() => navigate(`/project/${spotlightData.project.id}`)}
-                      className="h-10 w-full rounded-xl border border-gray-200 dark:border-gray-700 text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-google-green hover:text-white hover:border-google-green transition-all"
+                      className="h-10 w-full rounded-xl border border-gray-200 dark:border-gray-700 text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-google-green hover:text-white hover:border-google-green transition-all mt-auto"
                     >
                       Deep Dive <ArrowRight className="w-4 h-4" />
                     </Button>
@@ -389,7 +389,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                     <div className="flex-1 overflow-y-auto custom-scrollbar no-scrollbar pr-1 max-h-[380px]">
                       <div className="grid grid-cols-1 gap-3">
                         {spotlightData.activeInstances.length === 0 ? (
-                          <div className="py-8 flex items-center justify-center bg-gray-50/50 dark:bg-white/5 rounded-2xl text-[10px] font-bold text-gray-400 italic">
+                          <div className="min-h-[120px] flex items-center justify-center bg-gray-50/50 dark:bg-white/5 rounded-2xl text-[10px] font-bold text-gray-400 italic text-center px-4">
                             No specific checklists staged.
                           </div>
                         ) : (
@@ -442,7 +442,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                     <div className="flex-1 overflow-y-auto custom-scrollbar no-scrollbar pr-1 max-h-[380px]">
                       <div className="grid grid-cols-1 gap-3">
                         {spotlightData.associatedNotes.length === 0 ? (
-                          <div className="py-8 flex items-center justify-center bg-gray-50/50 dark:bg-white/5 rounded-2xl text-[10px] font-bold text-gray-400 italic text-center px-4">
+                          <div className="min-h-[120px] flex items-center justify-center bg-gray-50/50 dark:bg-white/5 rounded-2xl text-[10px] font-bold text-gray-400 italic text-center px-4">
                             No notes tagged for this project.
                           </div>
                         ) : (
