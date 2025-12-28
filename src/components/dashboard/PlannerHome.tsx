@@ -90,7 +90,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
 
     // 2. Find projects from associated notes
     currentUser?.scratchpad?.forEach(note => {
-      if (note.category && note.category !== 'Personal') {
+      if (note.category && note.category !== 'Personal' && !note.completed) {
         const project = projects.find(p => p.name === note.category);
         if (project) {
           if (!projectMap.has(project.id)) {
