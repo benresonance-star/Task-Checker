@@ -54,15 +54,28 @@ const Dropdown: React.FC<{
   showSearch?: boolean;
 }> = ({ value, options, onChange, isOpen, setIsOpen, label, className, width = '200px', align = 'left', showSearch = false }) => {
   const [search, setSearch] = useState('');
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
   
   const filteredOptions = useMemo(() => {
     if (!search) return options;
     return options.filter(opt => opt.toLowerCase().includes(search.toLowerCase()));
   }, [options, search]);
 
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setCoords({ 
+        top: rect.bottom + window.scrollY, 
+        left: align === 'left' ? rect.left : rect.right - parseInt(width)
+      });
+    }
+  }, [isOpen, align, width]);
+
   return (
     <div className={clsx("relative", className)}>
       <button
+        ref={buttonRef}
         onClick={() => { setIsOpen(!isOpen); if (!isOpen) setSearch(''); }}
         className={clsx(
           "flex items-center gap-2 bg-white/50 dark:bg-black/20 border-2 rounded-xl px-2.5 py-1.5 transition-all group shadow-sm",
@@ -79,15 +92,18 @@ const Dropdown: React.FC<{
       {isOpen && (
         <>
           <div 
-            className="fixed inset-0 z-[100]" 
-            onClick={() => setIsOpen(false)} 
+            className="fixed inset-0 z-[8000] bg-black/5" 
+            onClick={(e) => { e.stopPropagation(); setIsOpen(false); }} 
           />
           <div 
             className={clsx(
-              "absolute top-full mt-2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-2 border-blue-200 dark:border-gray-700 rounded-2xl shadow-2xl z-[101] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200",
-              align === 'left' ? "left-0" : "right-0"
+              "fixed bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-2 border-blue-200 dark:border-gray-700 rounded-2xl shadow-2xl z-[8001] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
             )}
-            style={{ width }}
+            style={{ 
+              width,
+              top: coords.top + 8,
+              left: Math.max(10, Math.min(window.innerWidth - parseInt(width) - 10, coords.left))
+            }}
           >
             {showSearch && options.length > 5 && (
               <div className="p-2 border-b border-gray-100 dark:border-gray-800">
@@ -95,15 +111,16 @@ const Dropdown: React.FC<{
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" />
                   <input 
                     autoFocus
-                    className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-gray-700 rounded-lg pl-8 pr-2 py-1.5 text-[10px] font-bold outline-none focus:border-google-blue"
-                    placeholder="Search projects..."
+                    className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-gray-700 rounded-lg pl-8 pr-2 py-1.5 text-[10px] font-bold outline-none focus:border-google-blue text-gray-900 dark:text-gray-100"
+                    placeholder="Search..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
                   />
                 </div>
               </div>
             )}
-            <div className="max-h-[250px] overflow-y-auto custom-scrollbar p-1">
+            <div className="max-h-[300px] overflow-y-auto custom-scrollbar p-1">
               {filteredOptions.length === 0 ? (
                 <div className="px-3 py-4 text-center text-[9px] font-bold text-gray-400 italic uppercase tracking-widest">
                   No matches found
@@ -112,7 +129,8 @@ const Dropdown: React.FC<{
                 filteredOptions.map((opt: string, idx: number) => (
                   <button
                     key={`${opt}-${idx}`}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       onChange(opt);
                       setIsOpen(false);
                     }}
