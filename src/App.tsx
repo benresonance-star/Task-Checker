@@ -1406,7 +1406,7 @@ function App() {
         isExecuting && "p-0 md:p-0"
       )}>
         {location.pathname !== '/dashboard' && (
-          <header className={clsx(theme.components.layout.contentHeader, "z-[100] sticky top-0 bg-white/70 dark:bg-black/40 backdrop-blur-md pt-6 pb-6 border-b border-gray-200 dark:border-gray-800")}>
+          <header className={clsx(theme.components.layout.contentHeader, "z-[100] sticky top-0 bg-white/70 dark:bg-black/40 backdrop-blur-md pt-8 pb-6 border-b border-gray-200 dark:border-gray-800")}>
             <div className="flex flex-col w-full gap-4">
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-1.5 md:gap-3 min-w-0 flex-1">
@@ -1799,9 +1799,11 @@ function App() {
         )}
 
             {location.pathname === '/dashboard' ? (
-              <FocusDashboard onOpenNotes={(taskId, containerId, focusFeedback) => setEditingTaskInfo({ taskId, containerId, focusFeedback })} />
+              <div className="p-4 md:p-8">
+                <FocusDashboard onOpenNotes={(taskId, containerId, focusFeedback) => setEditingTaskInfo({ taskId, containerId, focusFeedback })} />
+              </div>
             ) : (
-          <>
+          <div className="p-4 md:p-8">
             {/* Dynamic View based on selection */}
             {mode === 'project' && activeProject && (
           <div className="w-full px-0 sm:px-2 md:px-4 flex flex-col gap-8 mb-8">
@@ -1916,9 +1918,9 @@ function App() {
             </div>
           </div>
         )}
-      </>
-    )}
-  </main>
+          </div>
+        )}
+      </main>
 
       {/* Playlist Sidebar (The "Now Playing" Tray) */}
       {mode === 'project' && (
