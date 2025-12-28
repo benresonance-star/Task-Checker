@@ -3246,6 +3246,41 @@ function App() {
                         </div>
                       </div>
                     </section>
+
+                    <section className="space-y-3">
+                      <h5 className="flex items-center gap-2 text-xs font-black uppercase text-google-blue tracking-[0.2em]">
+                        <Activity className="w-4 h-4" /> 6. Future Technical Roadmap
+                      </h5>
+                      <div className="space-y-2">
+                        {[
+                          { id: 'A', title: "Milestone A: Component Atomization", comment: "Break down monolithic App.tsx into modular, testable components.", status: "Pending" },
+                          { id: 'B', title: "Milestone B: Store Modularization", comment: "Split useTasklistStore into logic-based slices (Auth, Project, UI).", status: "Pending" },
+                          { id: 'C', title: "Milestone C: Network Efficiency", comment: "Firestore batching and widespread deep optimistic updates.", status: "Partial" },
+                          { id: 'D', title: "Milestone D: Bundle Optimization", comment: "Lazy loading for heavy modules and asset pruning.", status: "Pending" },
+                          { id: 'E', title: "Milestone E: Data Integrity (Steel Layer)", comment: "Full Zod validation for all read/write operations.", status: "Partial" }
+                        ].map((opt) => (
+                          <div key={opt.id} className="flex flex-col gap-1 p-3 bg-gray-50 dark:bg-black/20 rounded-lg border border-transparent hover:border-google-blue/30 transition-colors group/opt">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <span className="w-5 h-5 rounded-full bg-google-blue/10 text-google-blue text-[10px] font-black flex items-center justify-center flex-shrink-0 shadow-sm">{opt.id}</span>
+                                <span className="text-xs font-bold text-gray-600 dark:text-gray-300">{opt.title}</span>
+                              </div>
+                              <span className={clsx(
+                                "text-[8px] font-black uppercase px-1.5 py-0.5 rounded shadow-sm",
+                                opt.status === 'Pending' ? "bg-gray-200 text-gray-500" :
+                                opt.status === 'Partial' ? "bg-orange-500 text-white animate-pulse" :
+                                "bg-google-green text-white"
+                              )}>
+                                {opt.status}
+                              </span>
+                            </div>
+                            <p className="ml-8 text-[9px] font-black uppercase text-google-blue/50 tracking-wider italic">
+                              {opt.comment}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
                   </div>
                 </div>
               )}

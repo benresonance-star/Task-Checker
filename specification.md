@@ -11,8 +11,13 @@
 >    - *Comment: Maintain a single source of truth for the application version.*
 > 5. **Sync Protocol**: All protocol changes must be reflected in the **Admin > App Protocol** interface.
 >    - *Comment: Keep the internal Admin documentation synchronized with reality.*
+|> 6. **Technical Health Check**: Agents MUST review `optimization_roadmap.md` at the start of every session. If structural changes to `App.tsx` or `useTasklistStore.ts` are planned, the agent MUST propose one optimization step from the roadmap.
+|>    - *Comment: Ensure performance and modularity scale alongside features.*
 
 *Current Version: 1.13.44*
+
+## Future Performance & Technical Roadmap
+To maintain the high-performance standard of checkMATE as it grows, developers MUST consult the [Optimization Roadmap](./optimization_roadmap.md) for architectural hardening and performance best practices.
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It features a dual-interface architectural model:
