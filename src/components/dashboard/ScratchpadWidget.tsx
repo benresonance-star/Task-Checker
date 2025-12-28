@@ -516,11 +516,22 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
                 )}
                 dangerouslySetInnerHTML={{ __html: task.text }}
               />
-              {(activeCategory === 'All' || task.category !== activeCategory) && (
-                <span className="text-[8px] font-black uppercase text-google-blue/60 tracking-wider mt-1">
-                  {task.category}
-                </span>
-              )}
+              <div className="flex flex-wrap items-center gap-2 mt-1">
+                {(activeCategory === 'All' || task.category !== activeCategory) && (
+                  <span className="text-[8px] font-black uppercase text-google-blue/60 tracking-wider">
+                    {task.category}
+                  </span>
+                )}
+                {task.reminder && (
+                  <span className={clsx(
+                    "inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest transition-all",
+                    task.completed ? "opacity-30" : "text-orange-600 dark:text-orange-400 animate-pulse"
+                  )}>
+                    <Bell className="w-2.5 h-2.5 fill-current" />
+                    {new Date(task.reminder.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                )}
+              </div>
             </>
           )}
         </div>
