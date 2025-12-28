@@ -12,11 +12,12 @@
 > 5. **Sync Protocol**: All protocol changes must be reflected in the **Admin > App Protocol** interface.
 >    - *Comment: Keep the internal Admin documentation synchronized with reality.*
 
-*Current Version: 1.11.14*
+*Current Version: 1.12.15*
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It features a dual-interface architectural model:
 1.  **Home: The Planner**: A stress-free orientation environment for reviewing projects and triaging personal tasks.
+    - **Today's Horizon (Staging Zone)**: A high-visibility panel featuring a real-time clock, today's alerts, and three "Session Sprint" slots. This zone encourages calm, playful staging of tasks before committing to a work session.
 2.  **Work: My Work Session**: A specialized deep-work environment for executing project tasks and recording progress.
 
 The application operates on a "Master-Instance" model, where users can define master templates and instantiate them within specific projects. It is built for high reliability, real-time team synchronization, and cross-platform accessibility.

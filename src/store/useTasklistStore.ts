@@ -109,6 +109,7 @@ interface TasklistState {
   toggleTaskInActionSet: (projectId: string, instanceId: string, taskId: string) => Promise<void>;
   toggleNoteInActionSet: (noteId: string) => Promise<void>;
   injectTaskIntoSession: (item: ActionSetItem) => Promise<void>;
+  getTodayAlerts: () => { type: 'task' | 'note', item: any, title: string, category: string, time: number }[];
   moveTaskInActionSet: (projectId: string, instanceId: string, taskId: string, direction: 'up' | 'down') => Promise<void>;
   setActionSet: (newSet: ActionSetItem[]) => Promise<void>;
   getValidActionSet: () => ActionSetItem[];
@@ -1193,6 +1194,56 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       }
 
       await updateDoc(userRef, { actionSet: newSet });
+    },
+
+    getTodayAlerts: () => {
+      const { currentUser, instances } = get();
+      if (!currentUser) return [];
+
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayEnd = new Date(todayStart);
+      todayEnd.setDate(todayEnd.getDate() + 1);
+
+      const alerts: { type: 'task' | 'note', item: any, title: string, category: string, time: number }[] = [];
+
+      // Check Notes
+      currentUser.scratchpad?.forEach(note => {
+        if (note.reminder?.dateTime && !note.completed) {
+          if (note.reminder.dateTime >= todayStart.getTime() && note.reminder.dateTime < todayEnd.getTime()) {
+            alerts.push({
+              type: 'note',
+              item: note,
+              title: note.text,
+              category: note.category || 'Personal',
+              time: note.reminder.dateTime
+            });
+          }
+        }
+      });
+
+      // Check Tasks in Instances
+      instances.forEach(instance => {
+        instance.sections.forEach(section => {
+          section.subsections.forEach(subsection => {
+            subsection.tasks.forEach(task => {
+              if (task.reminder?.dateTime && !task.completed) {
+                if (task.reminder.dateTime >= todayStart.getTime() && task.reminder.dateTime < todayEnd.getTime()) {
+                  alerts.push({
+                    type: 'task',
+                    item: task,
+                    title: task.title,
+                    category: instance.title || 'Project',
+                    time: task.reminder.dateTime
+                  });
+                }
+              }
+            });
+          });
+        });
+      });
+
+      return alerts.sort((a, b) => a.time - b.time);
     },
 
     moveTaskInActionSet: async (projectId, instanceId, taskId, direction) => {

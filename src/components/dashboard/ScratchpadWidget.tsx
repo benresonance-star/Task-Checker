@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
-import { Plus, Trash2, CheckCircle2, Circle, Clock, X, Bold, List, ListOrdered, GripVertical, Flag, ChevronDown, Music, Bell } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, Circle, Clock, X, Bold, List, ListOrdered, GripVertical, Flag, ChevronDown, ListPlus, Bell } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -548,7 +548,7 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
               )}
               title={isInActionSet ? "Remove from Session" : "Add to Session"}
             >
-              <Music className={clsx("w-3.5 h-3.5", isInActionSet && "animate-pulse")} />
+              <ListPlus className={clsx("w-3.5 h-3.5", isInActionSet && "animate-pulse")} />
             </button>
             <button
               onClick={() => onTogglePriority(task.id)}

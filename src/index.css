@@ -101,6 +101,15 @@
   50% { opacity: 1; }
 }
 
+@keyframes fly-in {
+  0% { transform: translateY(20px) scale(0.9); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.animate-fly-in {
+  animation: fly-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 @keyframes focus-breathing {
   0%, 100% { opacity: 0; }
   50% { opacity: 0.85; }
