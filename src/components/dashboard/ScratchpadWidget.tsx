@@ -410,7 +410,23 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
 }) => {
   const [isEditCategoryMenuOpen, setIsEditCategoryMenuOpen] = useState(false);
   const [showReminderPicker, setShowReminderPicker] = useState(false);
+  const [tempReminderTime, setTempReminderTime] = useState<string>('');
   const { currentUser, updateScratchpadTask } = useTasklistStore();
+  
+  const handleSaveReminder = () => {
+    const date = new Date(tempReminderTime);
+    if (!isNaN(date.getTime())) {
+      updateScratchpadTask(task.id, { 
+        reminder: { 
+          dateTime: date.getTime(), 
+          status: 'active', 
+          snoozeCount: 0 
+        } 
+      });
+      setShowReminderPicker(false);
+    }
+  };
+
   const {
     attributes,
     listeners,
@@ -535,7 +551,12 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
             </button>
             <div className="relative">
               <button
-                onClick={() => setShowReminderPicker(!showReminderPicker)}
+                onClick={() => {
+                  setShowReminderPicker(!showReminderPicker);
+                  if (!showReminderPicker) {
+                    setTempReminderTime(task.reminder?.dateTime ? new Date(task.reminder.dateTime).toISOString().slice(0, 16) : '');
+                  }
+                }}
                 className={clsx(
                   "p-1 transition-all",
                   task.reminder ? "text-orange-500" : "text-gray-300 hover:text-orange-500"
@@ -545,7 +566,7 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
                 <Bell className={clsx("w-3.5 h-3.5", task.reminder && "fill-current")} />
               </button>
               {showReminderPicker && (
-                <div className="absolute right-full mr-2 bottom-0 bg-white dark:bg-gray-900 border-2 border-orange-200 dark:border-gray-700 rounded-2xl p-3 shadow-2xl z-[50] min-w-[200px] animate-in fade-in slide-in-from-right-2 duration-200">
+                <div className="absolute right-full mr-2 bottom-0 bg-white dark:bg-gray-900 border-2 border-orange-200 dark:border-gray-700 rounded-2xl p-3 shadow-2xl z-[50] min-w-[220px] animate-in fade-in slide-in-from-right-2 duration-200">
                   <div className="text-[8px] font-black uppercase text-gray-400 tracking-widest mb-2 flex items-center justify-between">
                     <span>Set Reminder</span>
                     {task.reminder && (
@@ -559,22 +580,30 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
                   </div>
                   <input 
                     type="datetime-local" 
-                    className="w-full bg-gray-50 dark:bg-black/40 border-2 border-gray-200 dark:border-gray-800 rounded-xl px-2 py-1.5 text-[10px] font-bold outline-none focus:border-orange-500 transition-all mb-2"
-                    defaultValue={task.reminder?.dateTime ? new Date(task.reminder.dateTime).toISOString().slice(0, 16) : ''}
-                    onChange={(e) => {
-                      const date = new Date(e.target.value);
-                      if (!isNaN(date.getTime())) {
-                        updateScratchpadTask(task.id, { 
-                          reminder: { 
-                            dateTime: date.getTime(), 
-                            status: 'active', 
-                            snoozeCount: 0 
-                          } 
-                        });
-                        setShowReminderPicker(false);
-                      }
+                    className="w-full bg-gray-50 dark:bg-black/40 border-2 border-gray-200 dark:border-gray-800 rounded-xl px-2 py-1.5 text-[10px] font-bold outline-none focus:border-orange-500 transition-all mb-3"
+                    value={tempReminderTime}
+                    onChange={(e) => setTempReminderTime(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveReminder();
+                      if (e.key === 'Escape') setShowReminderPicker(false);
                     }}
+                    autoFocus
                   />
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => setShowReminderPicker(false)}
+                      className="flex-1 py-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={handleSaveReminder}
+                      disabled={!tempReminderTime}
+                      className="flex-1 py-2 bg-google-blue text-white hover:bg-blue-600 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:pointer-events-none"
+                    >
+                      Set Alert
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

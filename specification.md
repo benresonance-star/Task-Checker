@@ -12,7 +12,7 @@
 > 5. **Sync Protocol**: All protocol changes must be reflected in the **Admin > App Protocol** interface.
 >    - *Comment: Keep the internal Admin documentation synchronized with reality.*
 
-*Current Version: 1.11.7*
+*Current Version: 1.11.8*
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It features a dual-interface architectural model:
@@ -48,7 +48,7 @@ The application uses a 3-level hierarchical navigation system in the header:
     - **Editor Layout**: Toggle between Stacked and Side-by-Side views within the Template Editor to optimize workspace layout.
     - **Unified Creation**: Primary creation actions are unified within the Discovery Grid.
 
-### Time-Critical Alerts (v1.11.7)
+### Time-Critical Alerts (v1.11.8)
 The application includes a high-priority "Intervention HUD" system for managing time-sensitive tasks:
 1.  **Reminder Engine**: A background process monitors the system clock every 30 seconds, checking for active reminders in both project tasks and personal notes.
 2.  **Intervention HUD**: When a reminder triggers, a full-screen pulsing alert (`z-[5000]`) interrupts the user. This modal provides high-velocity actions:
@@ -56,8 +56,9 @@ The application includes a high-priority "Intervention HUD" system for managing 
     - **Snooze**: Quickly push the alert forward (15m, 1h, 3h, 1 day).
     - **Change Time**: Direct access to the scheduling interface.
     - **Dismiss**: Clears the reminder trigger.
-3.  **Visual Consistency**: All time-critical indicators use the **Bell icon** (`lucide-react/Bell`) to distinguish them from the Pomodoro clock.
-4.  **Situational Awareness**: Pulsing Bell badges appear on project cards in the Planner Home and session items in the sidebar whenever an active reminder is pending.
+3.  **Explicit Confirmation**: Setting a reminder requires an explicit "OK" or "Set Alert" confirmation. The picker popover remains active, isolating temporary state until the user saves or cancels, preventing accidental UI closure during fine-tuning.
+4.  **Visual Consistency**: All time-critical indicators use the **Bell icon** (`lucide-react/Bell`) to distinguish them from the Pomodoro clock.
+5.  **Situational Awareness**: Pulsing Bell badges appear on project cards in the Planner Home and session items in the sidebar whenever an active reminder is pending.
 - **Project/Template Discovery**: A visual grid of all available projects or templates with search, creation, and management controls (Delete/Settings).
 - **Checklist Discovery**: A slide-down shelf within the header showing all checklists in the current project, including completion progress bars.
 
