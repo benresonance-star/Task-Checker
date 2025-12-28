@@ -579,16 +579,19 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
               {showReminderPicker && (
                 <>
                   <div 
-                    className="fixed inset-0 z-[45]" 
+                    className="fixed inset-0 z-[7000] bg-black/10 backdrop-blur-[2px]" 
                     onClick={(e) => { e.stopPropagation(); setShowReminderPicker(false); }} 
                   />
-                  <div className="absolute right-full mr-2 bottom-0 bg-white dark:bg-gray-900 border-2 border-orange-200 dark:border-gray-700 rounded-2xl p-3 shadow-2xl z-[50] min-w-[220px] animate-in fade-in slide-in-from-right-2 duration-200">
-                    <div className="text-[8px] font-black uppercase text-gray-400 tracking-widest mb-2 flex items-center justify-between">
-                      <span>Set Reminder</span>
+                  <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-900 border-2 border-orange-200 dark:border-gray-700 rounded-2xl p-4 shadow-2xl z-[7001] min-w-[280px] animate-in fade-in zoom-in-95 duration-200">
+                    <div className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-4 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Bell className="w-4 h-4 text-orange-500" />
+                        <span>Set Reminder</span>
+                      </div>
                     </div>
                     <input 
                       type="datetime-local" 
-                      className="w-full bg-gray-50 dark:bg-black/40 border-2 border-gray-200 dark:border-gray-800 rounded-xl px-2 py-1.5 text-[10px] font-bold outline-none focus:border-orange-500 transition-all mb-3"
+                      className="w-full bg-gray-50 dark:bg-black/40 border-2 border-gray-200 dark:border-gray-800 rounded-xl px-3 py-2.5 text-xs font-bold outline-none focus:border-orange-500 transition-all mb-4 text-[var(--text-primary)]"
                       value={tempReminderTime}
                       onChange={(e) => setTempReminderTime(e.target.value)}
                       onKeyDown={(e) => {
@@ -601,18 +604,24 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
                       <button 
                         onClick={handleSaveReminder}
                         disabled={!tempReminderTime}
-                        className="w-full py-2 bg-google-blue text-white hover:bg-blue-600 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:pointer-events-none"
+                        className="w-full py-3 bg-google-blue text-white hover:bg-blue-600 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:pointer-events-none"
                       >
                         Set Alert
                       </button>
                       {task.reminder && (
                         <button 
                           onClick={() => { updateScratchpadTask(task.id, { reminder: null }); setShowReminderPicker(false); }}
-                          className="w-full py-2 bg-google-red/10 text-google-red hover:bg-google-red/20 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all"
+                          className="w-full py-3 bg-google-red/10 text-google-red hover:bg-google-red/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
                         >
                           Remove Alert
                         </button>
                       )}
+                      <button 
+                        onClick={() => setShowReminderPicker(false)}
+                        className="w-full py-3 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                      >
+                        Dismiss
+                      </button>
                     </div>
                   </div>
                 </>
