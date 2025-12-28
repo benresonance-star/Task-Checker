@@ -55,7 +55,7 @@ const Dropdown: React.FC<{
 }> = ({ value, options, onChange, isOpen, setIsOpen, label, className, width = '200px', align = 'left', showSearch = false }) => {
   const [search, setSearch] = useState('');
   const buttonRef = React.useRef<HTMLButtonElement>(null);
-  const [coords, setCoords] = useState({ top: 0, left: 0 });
+  const [coords, setCoords] = useState({ top: 0, left: 0, direction: 'down' as 'up' | 'down', maxHeight: 300 });
   
   const filteredOptions = useMemo(() => {
     if (!search) return options;
@@ -65,9 +65,27 @@ const Dropdown: React.FC<{
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const spaceBelow = viewportHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      const preferredHeight = 350; // Total height including search
+      
+      let direction: 'up' | 'down' = 'down';
+      let maxHeight = 300;
+
+      if (spaceBelow < preferredHeight && spaceAbove > spaceBelow) {
+        direction = 'up';
+        maxHeight = Math.min(300, spaceAbove - 40);
+      } else {
+        direction = 'down';
+        maxHeight = Math.min(300, spaceBelow - 40);
+      }
+
       setCoords({ 
-        top: rect.bottom + window.scrollY, 
-        left: align === 'left' ? rect.left : rect.right - parseInt(width)
+        top: direction === 'down' ? rect.bottom + window.scrollY : rect.top + window.scrollY,
+        left: align === 'left' ? rect.left : rect.right - parseInt(width),
+        direction,
+        maxHeight
       });
     }
   }, [isOpen, align, width]);
@@ -97,16 +115,18 @@ const Dropdown: React.FC<{
           />
           <div 
             className={clsx(
-              "fixed bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-2 border-blue-200 dark:border-gray-700 rounded-2xl shadow-2xl z-[8001] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+              "fixed bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-2 border-blue-200 dark:border-gray-700 rounded-2xl shadow-2xl z-[8001] overflow-hidden animate-in fade-in duration-200 flex flex-col",
+              coords.direction === 'down' ? "slide-in-from-top-2" : "slide-in-from-bottom-2"
             )}
             style={{ 
               width,
-              top: coords.top + 8,
+              top: coords.direction === 'down' ? coords.top + 8 : undefined,
+              bottom: coords.direction === 'up' ? (window.innerHeight - (coords.top - 8)) : undefined,
               left: Math.max(10, Math.min(window.innerWidth - parseInt(width) - 10, coords.left))
             }}
           >
             {showSearch && options.length > 5 && (
-              <div className="p-2 border-b border-gray-100 dark:border-gray-800">
+              <div className="p-2 border-b border-gray-100 dark:border-gray-800 flex-shrink-0 bg-inherit">
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" />
                   <input 
@@ -120,7 +140,10 @@ const Dropdown: React.FC<{
                 </div>
               </div>
             )}
-            <div className="max-h-[300px] overflow-y-auto custom-scrollbar p-1">
+            <div 
+              className="overflow-y-auto custom-scrollbar p-1 flex-1"
+              style={{ maxHeight: `${coords.maxHeight}px` }}
+            >
               {filteredOptions.length === 0 ? (
                 <div className="px-3 py-4 text-center text-[9px] font-bold text-gray-400 italic uppercase tracking-widest">
                   No matches found
