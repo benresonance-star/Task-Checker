@@ -21,7 +21,7 @@ import {
 import { 
     CheckCircle2, StickyNote, Trash2, ListOrdered, Music, ListPlus, Play, Pause, X, Menu, LogOut, Mail, Lock, User as UserIcon, Loader2, GripVertical, ThumbsUp, AlertTriangle, Target,
     Plus, LayoutGrid, ClipboardList, Moon, Sun, Download, Upload, UserCircle2, FileText, FileSpreadsheet, File as FileIcon, ChevronUp, ChevronDown, ShieldCheck, Eye, ShieldOff, Eraser, ChevronLeft, ChevronRight, Palette,
-    Terminal, BookOpen, Activity,     GitBranch, Database, Search, Edit2, Settings, TrendingUp, Zap, Clock
+    Terminal, BookOpen, Activity, GitBranch, Database, Search, Edit2, Settings, TrendingUp, Zap, Clock, Bell
   } from 'lucide-react';
 import { StyleConsole } from './components/ui/StyleConsole';
 import {
@@ -140,7 +140,12 @@ const SidebarNoteItem = ({
               "text-[8px] font-black uppercase tracking-[0.2em]",
               isActiveFocus ? "text-white/70" : "text-indigo-600 dark:text-indigo-400"
             )}>
-              Personal Note
+              Personal Note {note.reminder && (
+                <span className="ml-2 inline-flex items-center gap-1 text-orange-500 animate-pulse">
+                  <Bell className="w-2 h-2 fill-current" />
+                  {new Date(note.reminder.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              )}
             </span>
             <button 
               onClick={(e) => { e.stopPropagation(); toggleNoteInActionSet(note.id); }}
@@ -358,10 +363,16 @@ const SidebarTaskItem = ({
         <div className="flex-1 min-w-0">
           {project?.name && (
             <div className={clsx(
-              "text-[10px] font-black uppercase tracking-widest mb-0.5",
+              "text-[10px] font-black uppercase tracking-widest mb-0.5 flex items-center gap-2",
               (isMultiUserActive || (isActiveFocus && !isYellowState) || (task.completed && !isDeactivatedCompleted)) ? "text-white/90" : (isActiveFocus && isYellowState) ? "text-gray-900/90" : isDeactivatedCompleted ? "text-google-green/90" : "text-gray-500 dark:text-gray-400"
             )}>
-              {project.name}
+              <span>{project.name}</span>
+              {task.reminder && (
+                <span className="inline-flex items-center gap-1 text-orange-500 animate-pulse font-black">
+                  <Bell className="w-2.5 h-2.5 fill-current" />
+                  {new Date(task.reminder.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              )}
             </div>
           )}
           <h4 className={clsx(
@@ -778,6 +789,14 @@ function App() {
   const [plainTextContent, setPlainTextContent] = useState('');
   const [importLines, setImportLines] = useState<ImportLine[]>([]);
   const [plainTextPreview, setPlainTextPreview] = useState<MasterTasklist | null>(null);
+  const [triggeredReminder, setTriggeredReminder] = useState<{
+    type: 'task' | 'note';
+    taskId: string;
+    title: string;
+    projectId?: string;
+    instanceId?: string;
+    category?: string;
+  } | null>(null);
   const initialFocusSynced = useRef(false);
 
   const abortPlainTextImport = () => {
@@ -791,8 +810,122 @@ function App() {
   // --- ALL HOOKS MUST BE DECLARED HERE, BEFORE ANY EARLY RETURNS ---
 
   const isActualAdmin = currentUser?.role === 'admin';
-  const { adminSimulationMode, toggleSimulationMode } = useTasklistStore();
+  const { adminSimulationMode, toggleSimulationMode, updateTaskReminder, updateScratchpadTask, injectTaskIntoSession } = useTasklistStore();
   const isAdmin = isActualAdmin && adminSimulationMode === 'admin';
+
+  const [showSnoozeOptions, setShowSnoozeOptions] = useState(false);
+
+  const handleReminderAction = async (action: 'session' | 'snooze' | 'dismiss' | 'adjust', snoozeMins?: number) => {
+    if (!triggeredReminder) return;
+
+    if (action === 'session') {
+      await injectTaskIntoSession({
+        type: triggeredReminder.type,
+        projectId: triggeredReminder.projectId,
+        instanceId: triggeredReminder.instanceId,
+        taskId: triggeredReminder.taskId,
+        addedAt: Date.now()
+      });
+      // Clear the reminder from the task/note
+      if (triggeredReminder.type === 'note') {
+        await updateScratchpadTask(triggeredReminder.taskId, { reminder: null });
+      } else {
+        await updateTaskReminder(triggeredReminder.taskId, null, triggeredReminder.instanceId!);
+      }
+      setTriggeredReminder(null);
+    } else if (action === 'snooze' && snoozeMins) {
+      const newTime = Date.now() + (snoozeMins * 60000);
+      const reminderUpdate = {
+        dateTime: newTime,
+        status: 'active' as const,
+        snoozeCount: 1 // We'll just set it to 1 for now, or increment if we had it
+      };
+      if (triggeredReminder.type === 'note') {
+        await updateScratchpadTask(triggeredReminder.taskId, { reminder: reminderUpdate });
+      } else {
+        await updateTaskReminder(triggeredReminder.taskId, reminderUpdate, triggeredReminder.instanceId!);
+      }
+      setTriggeredReminder(null);
+      setShowSnoozeOptions(false);
+    } else if (action === 'dismiss') {
+      if (triggeredReminder.type === 'note') {
+        await updateScratchpadTask(triggeredReminder.taskId, { reminder: null });
+      } else {
+        await updateTaskReminder(triggeredReminder.taskId, null, triggeredReminder.instanceId!);
+      }
+      setTriggeredReminder(null);
+    } else if (action === 'adjust') {
+      // Logic to open adjustment UI (could be opening the task info modal or a specific date picker)
+      if (triggeredReminder.type === 'note') {
+        // Jump to Home Planner and focus notes?
+        navigate('/home');
+      } else {
+        setEditingTaskInfo({ taskId: triggeredReminder.taskId, containerId: triggeredReminder.instanceId! });
+      }
+      setTriggeredReminder(null);
+    }
+  };
+
+  // Reminder Engine: Check every 30s
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const checkReminders = () => {
+      const now = Date.now();
+      
+      // 1. Check Scratchpad Notes
+      const triggeredNote = currentUser.scratchpad?.find(note => 
+        !note.completed && 
+        note.reminder?.dateTime && 
+        note.reminder.status === 'active' && 
+        now >= note.reminder.dateTime
+      );
+
+      if (triggeredNote) {
+        setTriggeredReminder({
+          type: 'note',
+          taskId: triggeredNote.id,
+          title: triggeredNote.text,
+          category: triggeredNote.category
+        });
+        updateScratchpadTask(triggeredNote.id, { 
+          reminder: { ...triggeredNote.reminder!, status: 'triggered' } 
+        });
+        return; // Only one alert at a time
+      }
+
+      // 2. Check Project Tasks
+      for (const instance of instances) {
+        for (const section of instance.sections) {
+          for (const subsection of section.subsections) {
+            for (const task of subsection.tasks) {
+              if (
+                !task.completed && 
+                task.reminder?.dateTime && 
+                task.reminder.status === 'active' && 
+                now >= task.reminder.dateTime
+              ) {
+                setTriggeredReminder({
+                  type: 'task',
+                  taskId: task.id,
+                  title: task.title,
+                  projectId: instance.projectId,
+                  instanceId: instance.id
+                });
+                updateTaskReminder(task.id, { ...task.reminder, status: 'triggered' }, instance.id);
+                return;
+              }
+            }
+          }
+        }
+      }
+    };
+
+    const interval = setInterval(checkReminders, 30000);
+    checkReminders(); // Initial check
+
+    return () => clearInterval(interval);
+  }, [currentUser, instances, updateTaskReminder, updateScratchpadTask]);
 
   // 1. Initialize Auth listener
   useEffect(() => {
@@ -2057,11 +2190,12 @@ function App() {
 
             {isPlanner ? (
               <div className="p-4 md:p-8">
-                <PlannerHome 
-                  onOpenFocus={() => navigate('/session')}
-                  projects={projects}
-                  masters={masters}
-                />
+                    <PlannerHome 
+                      onOpenFocus={() => navigate('/session')}
+                      projects={projects}
+                      instances={instances}
+                      masters={masters}
+                    />
               </div>
             ) : isSession ? (
               <div className="p-4 md:p-8">
@@ -2393,6 +2527,92 @@ function App() {
       )}
 
       {/* Modals */}
+      {triggeredReminder && (
+        <div className="fixed inset-0 z-[5000] flex items-center justify-center p-4 md:p-8 bg-orange-950/90 backdrop-blur-2xl animate-in fade-in duration-500">
+          <div className="w-full max-w-2xl bg-white dark:bg-black/60 rounded-[3rem] border-4 border-orange-500 shadow-[0_0_100px_rgba(249,115,22,0.4)] overflow-hidden animate-in zoom-in-95 duration-500 relative">
+            <div className="absolute top-0 left-0 right-0 h-2 bg-orange-500 animate-pulse" />
+            
+            <div className="p-8 md:p-12 space-y-8">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="w-24 h-24 bg-orange-500 rounded-full flex items-center justify-center animate-bounce shadow-2xl shadow-orange-500/40">
+                  <Bell className="w-12 h-12 text-white" />
+                </div>
+                <div className="space-y-2">
+                  <span className="text-xs font-black uppercase tracking-[0.3em] text-orange-500">Time Critical Alert</span>
+                  <h2 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white leading-tight">
+                    {triggeredReminder.title.replace(/<[^>]*>?/gm, '')}
+                  </h2>
+                  <div className="flex items-center justify-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                    {triggeredReminder.type === 'note' ? (
+                      <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full border border-indigo-100 dark:border-indigo-800">
+                        {triggeredReminder.category} Note
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 bg-google-blue/5 dark:bg-blue-900/30 text-google-blue dark:text-blue-400 rounded-full border border-blue-100 dark:border-blue-800">
+                        Project Task
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button 
+                  onClick={() => handleReminderAction('session')}
+                  className="group relative h-24 bg-google-blue hover:bg-blue-600 text-white rounded-[2rem] overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl shadow-blue-500/20"
+                >
+                  <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                  <div className="relative z-10 flex flex-col items-center justify-center">
+                    <Music className="w-6 h-6 mb-1" />
+                    <span className="text-sm font-black uppercase tracking-widest">Jump to Session</span>
+                  </div>
+                </button>
+
+                <div className="relative">
+                  <button 
+                    onClick={() => setShowSnoozeOptions(!showSnoozeOptions)}
+                    className="w-full h-24 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-900 dark:text-white rounded-[2rem] border-2 border-gray-200 dark:border-gray-800 transition-all flex flex-col items-center justify-center"
+                  >
+                    <Clock className="w-6 h-6 mb-1" />
+                    <span className="text-sm font-black uppercase tracking-widest">Snooze Alert</span>
+                  </button>
+
+                  {showSnoozeOptions && (
+                    <div className="absolute bottom-full left-0 right-0 mb-4 p-4 bg-white dark:bg-gray-900 rounded-[2rem] border-2 border-gray-200 dark:border-gray-800 shadow-2xl grid grid-cols-2 gap-2 animate-in fade-in slide-in-from-bottom-4 duration-300 z-20">
+                      {[15, 60, 180, 1440].map((mins) => (
+                        <button 
+                          key={mins}
+                          onClick={() => handleReminderAction('snooze', mins)}
+                          className="py-3 px-4 bg-gray-50 dark:bg-black/40 hover:bg-google-blue hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                        >
+                          {mins < 60 ? `${mins}m` : mins === 1440 ? '1 Day' : `${mins / 60}h`}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <button 
+                  onClick={() => handleReminderAction('adjust')}
+                  className="h-20 bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400 rounded-[2rem] border-2 border-gray-200 dark:border-gray-800 transition-all flex items-center justify-center gap-3"
+                >
+                  <Edit2 className="w-5 h-5" />
+                  <span className="text-xs font-black uppercase tracking-widest">Change Time</span>
+                </button>
+
+                <button 
+                  onClick={() => handleReminderAction('dismiss')}
+                  className="h-20 bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20 text-google-red rounded-[2rem] border-2 border-red-100 dark:border-red-900/30 transition-all flex items-center justify-center gap-3"
+                >
+                  <Trash2 className="w-5 h-5" />
+                  <span className="text-xs font-black uppercase tracking-widest">Dismiss</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showClearSessionConfirm && (
         <div className={theme.components.modal.overlay}>
           <div className={clsx(theme.components.modal.container, theme.components.modal.containerBlue)}>

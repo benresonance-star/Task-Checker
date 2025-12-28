@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
-import { Plus, Trash2, CheckCircle2, Circle, Clock, X, Bold, List, ListOrdered, GripVertical, Flag, ChevronDown, Music } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, Circle, Clock, X, Bold, List, ListOrdered, GripVertical, Flag, ChevronDown, Music, Bell } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -409,7 +409,8 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
   inlineEditor
 }) => {
   const [isEditCategoryMenuOpen, setIsEditCategoryMenuOpen] = useState(false);
-  const { currentUser } = useTasklistStore();
+  const [showReminderPicker, setShowReminderPicker] = useState(false);
+  const { currentUser, updateScratchpadTask } = useTasklistStore();
   const {
     attributes,
     listeners,
@@ -532,6 +533,51 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
             >
               <Flag className={clsx("w-3.5 h-3.5", task.priority && "fill-current")} />
             </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowReminderPicker(!showReminderPicker)}
+                className={clsx(
+                  "p-1 transition-all",
+                  task.reminder ? "text-orange-500" : "text-gray-300 hover:text-orange-500"
+                )}
+                title="Set Alert"
+              >
+                <Bell className={clsx("w-3.5 h-3.5", task.reminder && "fill-current")} />
+              </button>
+              {showReminderPicker && (
+                <div className="absolute right-full mr-2 bottom-0 bg-white dark:bg-gray-900 border-2 border-orange-200 dark:border-gray-700 rounded-2xl p-3 shadow-2xl z-[50] min-w-[200px] animate-in fade-in slide-in-from-right-2 duration-200">
+                  <div className="text-[8px] font-black uppercase text-gray-400 tracking-widest mb-2 flex items-center justify-between">
+                    <span>Set Reminder</span>
+                    {task.reminder && (
+                      <button 
+                        onClick={() => { updateScratchpadTask(task.id, { reminder: null }); setShowReminderPicker(false); }}
+                        className="text-google-red hover:underline"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  <input 
+                    type="datetime-local" 
+                    className="w-full bg-gray-50 dark:bg-black/40 border-2 border-gray-200 dark:border-gray-800 rounded-xl px-2 py-1.5 text-[10px] font-bold outline-none focus:border-orange-500 transition-all mb-2"
+                    defaultValue={task.reminder?.dateTime ? new Date(task.reminder.dateTime).toISOString().slice(0, 16) : ''}
+                    onChange={(e) => {
+                      const date = new Date(e.target.value);
+                      if (!isNaN(date.getTime())) {
+                        updateScratchpadTask(task.id, { 
+                          reminder: { 
+                            dateTime: date.getTime(), 
+                            status: 'active', 
+                            snoozeCount: 0 
+                          } 
+                        });
+                        setShowReminderPicker(false);
+                      }
+                    }}
+                  />
+                </div>
+              )}
+            </div>
             <button
               onClick={() => onDelete(task.id)}
               className="p-1 text-gray-300 hover:text-google-red"

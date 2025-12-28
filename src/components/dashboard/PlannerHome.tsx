@@ -7,20 +7,24 @@ import {
   ArrowRight,
   TrendingUp,
   Clock,
-  Briefcase
+  Briefcase,
+  Bell
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { ScratchpadWidget } from './ScratchpadWidget';
+import { TasklistInstance } from '../../types';
 
 interface PlannerHomeProps {
   onOpenFocus: () => void;
   projects: any[];
+  instances: TasklistInstance[];
   masters: any[];
 }
 
 export const PlannerHome: React.FC<PlannerHomeProps> = ({ 
   onOpenFocus, 
   projects,
+  instances
 }) => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
@@ -59,32 +63,50 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
             <Button variant="ghost" size="sm" className="text-xs font-black text-google-blue">View All</Button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {projects.slice(0, 4).map(project => (
-              <div 
-                key={project.id}
-                className="bg-white dark:bg-black/40 p-6 rounded-container border-2 border-gray-100 dark:border-gray-800 hover:border-google-green/50 transition-all cursor-pointer group shadow-sm hover:shadow-lg"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-google-green/60">Project</span>
-                    <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 line-clamp-1">{project.name}</h3>
+            {projects.slice(0, 4).map(project => {
+              const projectInstances = instances.filter(i => i.projectId === project.id);
+              const hasActiveReminder = projectInstances.some(inst => 
+                inst.sections.some(s => 
+                  s.subsections.some(ss => 
+                    ss.tasks.some(t => t.reminder && t.reminder.status === 'active' && !t.completed)
+                  )
+                )
+              );
+
+              return (
+                <div 
+                  key={project.id}
+                  className="bg-white dark:bg-black/40 p-6 rounded-container border-2 border-gray-100 dark:border-gray-800 hover:border-google-green/50 transition-all cursor-pointer group shadow-sm hover:shadow-lg relative"
+                >
+                  {hasActiveReminder && (
+                    <div className="absolute top-4 right-4 text-orange-500 animate-pulse">
+                      <Bell className="w-5 h-5 fill-current" />
+                    </div>
+                  )}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-google-green/60">Project</span>
+                      <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 line-clamp-1">{project.name}</h3>
+                    </div>
+                    {!hasActiveReminder && (
+                      <div className="p-2 bg-google-green/10 rounded-xl text-google-green group-hover:scale-110 transition-transform">
+                        <Briefcase className="w-5 h-5" />
+                      </div>
+                    )}
                   </div>
-                  <div className="p-2 bg-google-green/10 rounded-xl text-google-green group-hover:scale-110 transition-transform">
-                    <Briefcase className="w-5 h-5" />
+                  <div className="flex items-center gap-4 text-xs font-bold text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      {project.instanceIds?.length || 0} Checklists
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5" />
+                      Active Now
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 text-xs font-bold text-gray-500 dark:text-gray-400">
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    {project.instanceIds?.length || 0} Checklists
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5" />
-                    Active Now
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
             {projects.length === 0 && (
               <div className="col-span-full py-12 text-center bg-gray-50 dark:bg-black/10 rounded-container border-2 border-dashed border-gray-200 dark:border-gray-800">
                 <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">No active projects</p>

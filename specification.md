@@ -12,7 +12,7 @@
 > 5. **Sync Protocol**: All protocol changes must be reflected in the **Admin > App Protocol** interface.
 >    - *Comment: Keep the internal Admin documentation synchronized with reality.*
 
-*Current Version: 1.11.6*
+*Current Version: 1.11.7*
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It features a dual-interface architectural model:
@@ -48,12 +48,16 @@ The application uses a 3-level hierarchical navigation system in the header:
     - **Editor Layout**: Toggle between Stacked and Side-by-Side views within the Template Editor to optimize workspace layout.
     - **Unified Creation**: Primary creation actions are unified within the Discovery Grid.
 
-### Progressive Focus Queue (v1.11.5)
-To prevent visual overload, the "My Session" sidebar utilizes a triage-based rendering strategy:
-1.  **IN FOCUS Section**: The currently active task or note is prominently displayed at the top.
-2.  **NEXT UP Section**: Displays the next two items in the queue for immediate visibility.
-3.  **LATER QUEUE Section**: All remaining tasks are hidden by default and accessible via a "Reveal More" control.
-4.  **Sequential Grouping**: This grouping persists even during reordering, ensuring the user always sees their immediate horizon without being overwhelmed by the full session length.
+### Time-Critical Alerts (v1.11.7)
+The application includes a high-priority "Intervention HUD" system for managing time-sensitive tasks:
+1.  **Reminder Engine**: A background process monitors the system clock every 30 seconds, checking for active reminders in both project tasks and personal notes.
+2.  **Intervention HUD**: When a reminder triggers, a full-screen pulsing alert (`z-[5000]`) interrupts the user. This modal provides high-velocity actions:
+    - **Jump to Session**: Injects the task into the user's "Next Up" slot (Index 1) or makes it the active focus if none exists.
+    - **Snooze**: Quickly push the alert forward (15m, 1h, 3h, 1 day).
+    - **Change Time**: Direct access to the scheduling interface.
+    - **Dismiss**: Clears the reminder trigger.
+3.  **Visual Consistency**: All time-critical indicators use the **Bell icon** (`lucide-react/Bell`) to distinguish them from the Pomodoro clock.
+4.  **Situational Awareness**: Pulsing Bell badges appear on project cards in the Planner Home and session items in the sidebar whenever an active reminder is pending.
 - **Project/Template Discovery**: A visual grid of all available projects or templates with search, creation, and management controls (Delete/Settings).
 - **Checklist Discovery**: A slide-down shelf within the header showing all checklists in the current project, including completion progress bars.
 

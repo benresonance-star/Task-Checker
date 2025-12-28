@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { MasterTasklist, TasklistInstance, Section, Subsection, Project, User, TaskFile, ProjectOverride, TaskGuide, ActionSetItem, ThemeSettings, ThemePreset, ScratchpadItem, FocusStage } from '../types';
+import { MasterTasklist, TasklistInstance, Section, Subsection, Project, User, TaskFile, ProjectOverride, TaskGuide, ActionSetItem, ThemeSettings, ThemePreset, ScratchpadItem, FocusStage, ReminderInfo } from '../types';
 import { generateUUID } from '../utils/uuid';
 import { auth, db, storage } from '../lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -67,6 +67,7 @@ interface TasklistState {
   updateTaskNotes: (taskId: string, notes: string, containerId: string, isUserNotes?: boolean, immediate?: boolean) => Promise<void>;
   updateTaskWorkbench: (taskId: string, workbench: string, containerId: string, immediate?: boolean) => Promise<void>;
   updateTaskGuide: (taskId: string, guide: Partial<TaskGuide>, containerId: string, immediate?: boolean) => Promise<void>;
+  updateTaskReminder: (taskId: string, reminder: ReminderInfo | null, containerId: string) => Promise<void>;
   addTaskFile: (taskId: string, file: File, isUserFile?: boolean) => Promise<void>;
   removeTaskFile: (taskId: string, fileId: string, isUserFile?: boolean) => Promise<void>;
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>, taskId: string, containerId: string, isUserFile: boolean) => Promise<void>;
@@ -107,6 +108,7 @@ interface TasklistState {
   toggleTaskPrerequisite: (taskId: string, prereqIndex: number, containerId: string) => Promise<void>;
   toggleTaskInActionSet: (projectId: string, instanceId: string, taskId: string) => Promise<void>;
   toggleNoteInActionSet: (noteId: string) => Promise<void>;
+  injectTaskIntoSession: (item: ActionSetItem) => Promise<void>;
   moveTaskInActionSet: (projectId: string, instanceId: string, taskId: string, direction: 'up' | 'down') => Promise<void>;
   setActionSet: (newSet: ActionSetItem[]) => Promise<void>;
   getValidActionSet: () => ActionSetItem[];
@@ -114,7 +116,7 @@ interface TasklistState {
   
   // Scratchpad
   addScratchpadTask: (text: string, category: string) => Promise<void>;
-  updateScratchpadTask: (id: string, updates: { text?: string; category?: string; priority?: boolean }) => Promise<void>;
+  updateScratchpadTask: (id: string, updates: { text?: string; category?: string; priority?: boolean; reminder?: any }) => Promise<void>;
   toggleScratchpadTask: (id: string) => Promise<void>;
   toggleScratchpadPriority: (id: string) => Promise<void>;
   deleteScratchpadTask: (id: string) => Promise<void>;
@@ -1153,6 +1155,39 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       }
     },
 
+    injectTaskIntoSession: async (item) => {
+      const { currentUser, toggleTaskFocus } = get();
+      if (!currentUser) return;
+
+      const userRef = doc(db, 'users', currentUser.id);
+      const currentSet = currentUser.actionSet || [];
+      
+      // Check if it already exists
+      const existsIdx = currentSet.findIndex(i => 
+        i.type === item.type && 
+        i.projectId === item.projectId && 
+        i.instanceId === item.instanceId && 
+        i.taskId === item.taskId
+      );
+
+      let newSet = [...currentSet];
+      if (existsIdx !== -1) {
+        newSet.splice(existsIdx, 1);
+      }
+
+      // If no active task in session, it becomes the active task (Index 0)
+      // Otherwise, put it at Index 1 (Next Up)
+      if (newSet.length === 0 || !currentUser.activeFocus) {
+        newSet.unshift(item);
+        // Also make it the active focus
+        await toggleTaskFocus(item.projectId || '', item.instanceId || '', item.taskId);
+      } else {
+        newSet.splice(1, 0, item);
+      }
+
+      await updateDoc(userRef, { actionSet: newSet });
+    },
+
     moveTaskInActionSet: async (projectId, instanceId, taskId, direction) => {
       const { currentUser } = get();
       if (!currentUser || !currentUser.actionSet) return;
@@ -2031,6 +2066,44 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
         await performDbUpdate();
       } else {
         debounceUpdate(`master-guide-${targetMaster.id}`, performDbUpdate);
+      }
+    },
+
+    updateTaskReminder: async (taskId, reminder, containerId) => {
+      const { mode, masters, instances } = get();
+      const timestamp = Date.now();
+      
+      // Track local update for protection against snapshot reverts
+      (globalThis as any)[`lastUpdate_${containerId}-${taskId}`] = timestamp;
+
+      const updateSections = (sections: Section[]) => sections.map(s => ({
+        ...s,
+        subsections: s.subsections.map(ss => ({
+          ...ss,
+          tasks: ss.tasks.map(t => t.id === taskId ? { 
+            ...t, 
+            reminder: reminder || deleteField() as any, 
+            lastUpdated: timestamp 
+          } : t)
+        }))
+      }));
+
+      if (mode === 'master') {
+        const targetMaster = masters.find(m => m.id === containerId);
+        if (!targetMaster) return;
+        const updatedMaster = incrementMasterVersion({ ...targetMaster, sections: updateSections(targetMaster.sections) });
+        await updateDoc(doc(db, 'masters', containerId), sanitize({ 
+          sections: updatedMaster.sections, 
+          version: updatedMaster.version, 
+          updatedAt: updatedMaster.updatedAt 
+        }));
+      } else {
+        const targetInstance = instances.find(i => i.id === containerId);
+        if (!targetInstance) return;
+        await updateDoc(doc(db, 'instances', containerId), sanitize({ 
+          sections: updateSections(targetInstance.sections), 
+          updatedAt: timestamp 
+        }));
       }
     },
 

@@ -49,6 +49,7 @@ export interface Task {
   timerLastUpdated?: number; // Timestamp of the last timer state update (for sync safety)
   timeTaken?: number | null; // Recorded time (duration - remaining) upon completion
   completedPrereqs?: number[]; // Indices of checked prerequisite items
+  reminder?: ReminderInfo;  // Time-critical alert info
 }
 
 /**
@@ -95,6 +96,12 @@ export interface PresenceInfo {
 }
 
 export type FocusStage = 'staged' | 'preparing' | 'executing';
+
+export interface ReminderInfo {
+  dateTime: number;      // Target timestamp
+  status: 'active' | 'snoozed' | 'triggered';
+  snoozeCount: number;
+}
 
 /**
  * A project-specific instance of a MasterTasklist.
@@ -315,6 +322,7 @@ export interface ScratchpadItem {
   priority: boolean;
   category: string;
   createdAt: number;
+  reminder?: ReminderInfo;
 }
 
 export interface User {

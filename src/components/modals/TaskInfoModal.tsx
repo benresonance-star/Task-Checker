@@ -6,7 +6,7 @@ import { NoteEditor } from '../editor/NoteEditor';
 import { TaskGuidePanel } from '../editor/TaskGuidePanel';
 import { TaskTimerControls } from './TaskInfoModal/TaskTimerControls';
 import { 
-  Zap, Paperclip, Loader2, ClipboardList, Target
+  Zap, Paperclip, Loader2, ClipboardList, Target, Bell
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -25,6 +25,7 @@ export const TaskInfoModal: React.FC<TaskInfoModalProps> = ({ taskId, containerI
   const updateTaskGuide = useTasklistStore(state => state.updateTaskGuide);
   const handleFileUpload = useTasklistStore(state => state.handleFileUpload);
   const handleFileDownload = useTasklistStore(state => state.handleFileDownload);
+  const updateTaskReminder = useTasklistStore(state => state.updateTaskReminder);
 
   // Selector for the task that stabilizes the object to prevent re-renders on every timer tick
   const task = useTasklistStore(state => {
@@ -100,6 +101,7 @@ export const TaskInfoModal: React.FC<TaskInfoModalProps> = ({ taskId, containerI
 
   const [isHydrated, setIsHydrated] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showReminderPicker, setShowReminderPicker] = useState(false);
   const feedbackRef = React.useRef<HTMLDivElement>(null);
 
   const handleNotesChange = useCallback((n: string, imm?: boolean) => {
@@ -180,7 +182,7 @@ export const TaskInfoModal: React.FC<TaskInfoModalProps> = ({ taskId, containerI
               </Button>
             </div>
             
-            <div className="flex items-center">
+            <div className="flex items-center gap-3">
               {mode === 'master' ? (
                 <select
                   className={clsx(
@@ -214,6 +216,72 @@ export const TaskInfoModal: React.FC<TaskInfoModalProps> = ({ taskId, containerI
                   </div>
                 )
               )}
+
+              {/* Reminder/Alert Control */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowReminderPicker(!showReminderPicker)}
+                  className={clsx(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-modal-input)] border-2 transition-all font-black text-[10px] uppercase tracking-widest shadow-sm",
+                    task.reminder 
+                      ? "bg-orange-500 border-orange-400 text-white shadow-orange-500/20" 
+                      : "bg-[var(--modal-input-bg)] border-[var(--modal-input-border)] text-[var(--text-secondary)] hover:border-orange-500 hover:text-orange-500"
+                  )}
+                >
+                  <Bell className={clsx("w-3.5 h-3.5", task.reminder && "fill-current animate-pulse")} />
+                  {task.reminder ? new Date(task.reminder.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Set Alert"}
+                </button>
+
+                {showReminderPicker && (
+                  <div className="absolute top-full left-0 mt-2 bg-[var(--modal-bg)] border-2 border-orange-200 dark:border-orange-900/50 rounded-2xl p-4 shadow-2xl z-50 min-w-[240px] animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="text-[9px] font-black uppercase text-gray-400 tracking-[0.2em] mb-3 flex items-center justify-between">
+                      <span>Set Time Critical Alert</span>
+                      {task.reminder && (
+                        <button 
+                          onClick={() => { updateTaskReminder(task.id, null, containerId); setShowReminderPicker(false); }}
+                          className="text-google-red hover:underline"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                    <input 
+                      type="datetime-local" 
+                      className="w-full bg-[var(--modal-input-bg)] border-2 border-[var(--modal-input-border)] rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-orange-500 transition-all mb-3 text-[var(--text-primary)]"
+                      defaultValue={task.reminder?.dateTime ? new Date(task.reminder.dateTime).toISOString().slice(0, 16) : ''}
+                      onChange={(e) => {
+                        const date = new Date(e.target.value);
+                        if (!isNaN(date.getTime())) {
+                          updateTaskReminder(task.id, { 
+                            dateTime: date.getTime(), 
+                            status: 'active', 
+                            snoozeCount: 0 
+                          }, containerId);
+                          setShowReminderPicker(false);
+                        }
+                      }}
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      {[15, 60].map(mins => (
+                        <button 
+                          key={mins}
+                          onClick={() => {
+                            updateTaskReminder(task.id, { 
+                              dateTime: Date.now() + (mins * 60000), 
+                              status: 'active', 
+                              snoozeCount: 0 
+                            }, containerId);
+                            setShowReminderPicker(false);
+                          }}
+                          className="py-2 bg-gray-50 dark:bg-white/5 hover:bg-orange-500 hover:text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all"
+                        >
+                          +{mins}m
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
