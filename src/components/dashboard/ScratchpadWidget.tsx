@@ -263,7 +263,7 @@ export const ScratchpadWidget: React.FC<{ projects?: Project[] }> = ({ projects:
     content: '',
     editorProps: {
       attributes: {
-        class: 'prose prose-sm dark:prose-invert focus:outline-none min-h-[80px] h-full text-sm font-bold placeholder:text-gray-400',
+        class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[80px] h-full text-sm font-bold placeholder:text-gray-400',
       },
     },
   });
@@ -274,7 +274,7 @@ export const ScratchpadWidget: React.FC<{ projects?: Project[] }> = ({ projects:
     content: '',
     editorProps: {
       attributes: {
-        class: 'prose prose-sm dark:prose-invert focus:outline-none min-h-[60px] h-full text-xs font-bold',
+        class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[60px] h-full text-xs font-bold',
       },
     },
   });

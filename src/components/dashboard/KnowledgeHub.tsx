@@ -22,7 +22,7 @@ const TaskScratchpadEditor: React.FC<{
     content: task[field] || '',
     editorProps: {
       attributes: {
-        class: `prose prose-sm dark:prose-invert focus:outline-none h-full text-xs font-bold placeholder:text-gray-400`,
+        class: `prose prose-sm dark:prose-invert max-w-none focus:outline-none h-full text-xs font-bold placeholder:text-gray-400`,
         style: `min-height: ${minHeight}`
       },
     },
