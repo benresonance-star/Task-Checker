@@ -57,6 +57,7 @@ interface TasklistState {
   deleteProject: (id: string) => Promise<void>;
   renameProject: (id: string, name: string) => Promise<void>;
   addInstanceToProject: (projectId: string, masterId: string) => Promise<void>;
+  renameInstance: (id: string, title: string) => Promise<void>;
   removeInstanceFromProject: (projectId: string, instanceId: string) => Promise<void>;
   
   // Hierarchy Management
@@ -1737,6 +1738,14 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       await updateDoc(doc(db, 'projects', projectId), {
         instanceIds: [...project.instanceIds, docRef.id]
       });
+    },
+
+    renameInstance: async (id, title) => {
+      const { instances } = get();
+      if (!title.trim()) return;
+      await updateDoc(doc(db, 'instances', id), { title, updatedAt: Date.now() });
+      const updatedInstances = instances.map(i => i.id === id ? { ...i, title, updatedAt: Date.now() } : i);
+      set({ instances: updatedInstances, activeInstance: updatedInstances.find(i => i.id === id) || get().activeInstance });
     },
 
     removeInstanceFromProject: async (projectId, instanceId) => {

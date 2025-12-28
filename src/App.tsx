@@ -18,10 +18,10 @@ import {
   updateProfile
 } from 'firebase/auth';
 import { 
-  CheckCircle2, StickyNote, Trash2, ListOrdered, Music, ListPlus, Play, Pause, X, Menu, LogOut, Mail, Lock, User as UserIcon, Loader2, GripVertical, ThumbsUp, AlertTriangle, Target,
-  Plus, LayoutGrid, ClipboardList, Moon, Sun, Download, Upload, UserCircle2, FileText, FileSpreadsheet, File as FileIcon, ChevronUp, ChevronDown, ShieldCheck, Eye, ShieldOff, Eraser, ChevronLeft, ChevronRight, Palette,
-  Terminal, BookOpen, Activity, GitBranch, Database
-} from 'lucide-react';
+    CheckCircle2, StickyNote, Trash2, ListOrdered, Music, ListPlus, Play, Pause, X, Menu, LogOut, Mail, Lock, User as UserIcon, Loader2, GripVertical, ThumbsUp, AlertTriangle, Target,
+    Plus, LayoutGrid, ClipboardList, Moon, Sun, Download, Upload, UserCircle2, FileText, FileSpreadsheet, File as FileIcon, ChevronUp, ChevronDown, ShieldCheck, Eye, ShieldOff, Eraser, ChevronLeft, ChevronRight, Palette,
+    Terminal, BookOpen, Activity, GitBranch, Database, Search, Edit2, Settings
+  } from 'lucide-react';
 import { StyleConsole } from './components/ui/StyleConsole';
 import {
   DndContext,
@@ -538,14 +538,14 @@ function App() {
   const { 
     mode, setMode, 
     masters, activeMaster, addMaster, setActiveMaster, addSection, renameMaster, deleteMaster,
-    instances, activeInstance, setActiveInstance,
+    instances, activeInstance, setActiveInstance, renameInstance,
     projects, activeProject, setActiveProject, addProject, renameProject, deleteProject, addInstanceToProject, removeInstanceFromProject,
     updateProjectDetails, updatePersonalProjectOverride,
     currentUser, users, initializeAuth, loading,
     importMaster, updateUserRole, deleteUser,
     adminClearUserFocus, adminClearUserActionSet,
     activeTaskId, setActiveTaskId, updatePresence,
-    moveMaster, setLocalExpanded, isLocalExpanded, toggleLocalExpanded, clearActionSet,
+    setLocalExpanded, isLocalExpanded, toggleLocalExpanded, clearActionSet,
     isDarkMode, toggleDarkMode,
     showPlaylistSidebar, setShowPlaylistSidebar,
     showMainSidebar, setShowMainSidebar
@@ -607,26 +607,19 @@ function App() {
   const projectId = projectMatch?.params.projectId || instanceMatch?.params.projectId;
   const instanceId = instanceMatch?.params.instanceId;
 
-  const [localMasterTitle, setLocalMasterTitle] = useState('');
-  useEffect(() => {
-    if (activeMaster?.title) {
-      setLocalMasterTitle(activeMaster.title);
-    }
-  }, [activeMaster?.id, activeMaster?.title]);
-
-  // Auto-resize title textarea
-  const titleTextareaRef = useRef<HTMLTextAreaElement>(null);
-  useEffect(() => {
-    if (titleTextareaRef.current) {
-      titleTextareaRef.current.style.height = 'auto';
-      titleTextareaRef.current.style.height = `${titleTextareaRef.current.scrollHeight}px`;
-    }
-  }, [activeMaster?.title, activeInstance?.title]);
-
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isEditingProjectInfo, setIsEditingProjectInfo] = useState(false);
   const [editingTaskInfo, setEditingTaskInfo] = useState<{ taskId: string, containerId: string, focusFeedback?: boolean } | null>(null);
   const [showAddChecklistModal, setShowAddChecklistModal] = useState(false);
+
+  const [showDiscoveryGrid, setShowDiscoveryGrid] = useState(false);
+  const [showChecklistShelf, setShowChecklistShelf] = useState(false);
+  const [isEditingContextTitle, setIsEditingContextTitle] = useState(false);
+  const [isEditingChecklistTitle, setIsEditingChecklistTitle] = useState(false);
+  const [contextSearchQuery, setContextSearchQuery] = useState('');
+  const [checklistSearchQuery, setChecklistSearchQuery] = useState('');
+  const [tempContextTitle, setTempContextTitle] = useState('');
+  const [tempChecklistTitle, setTempChecklistTitle] = useState('');
 
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [activeAdminTab, setActiveAdminTab] = useState<'users' | 'projects' | 'protocol'>('users');
@@ -1413,86 +1406,392 @@ function App() {
         isExecuting && "p-0 md:p-0"
       )}>
         {location.pathname !== '/dashboard' && (
-          <header className={theme.components.layout.contentHeader}>
-            <div className={clsx(
-              "flex items-center justify-between md:justify-start gap-3 w-full md:w-auto transition-all duration-500",
-              showPlaylistSidebar && "md:flex-shrink-0"
-            )}>
-              <div className="flex items-center gap-3">
-                {mode === 'master' ? (
-                  <CheckCircle2 className="w-8 h-8 text-google-blue" />
-                ) : (
-                  <LayoutGrid className="w-8 h-8 text-google-blue" />
-                )}
-                <div>
-                  <h2 className="text-2xl font-black">{mode === 'master' ? 'Checklist Templates' : 'Projects'}</h2>
-                  {mode === 'master' && (
-                    <p className="text-gray-700 dark:text-gray-300 text-sm font-medium">Manage checklist templates</p>
+          <header className={clsx(theme.components.layout.contentHeader, "z-[50] relative bg-white/50 dark:bg-black/20 backdrop-blur-md pt-6 pb-6 border-b border-gray-200 dark:border-gray-800")}>
+            <div className="flex flex-col w-full gap-4">
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-1.5 md:gap-3 min-w-0 flex-1">
+                  {/* Level 1: Mode Switcher */}
+                  <button 
+                    onClick={() => { setShowDiscoveryGrid(!showDiscoveryGrid); setShowChecklistShelf(false); }}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all group shrink-0 border border-transparent hover:border-gray-200 dark:hover:border-gray-800"
+                  >
+                    {mode === 'master' ? (
+                      <CheckCircle2 className="w-5 h-5 text-google-blue group-hover:scale-110 transition-transform" />
+                    ) : (
+                      <LayoutGrid className="w-5 h-5 text-google-blue group-hover:scale-110 transition-transform" />
+                    )}
+                    <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 group-hover:text-google-blue transition-colors hidden sm:inline">
+                      {mode === 'master' ? 'Templates' : 'Projects'}
+                    </span>
+                    <ChevronDown className={clsx("w-3.5 h-3.5 text-gray-400 transition-transform duration-300", showDiscoveryGrid && "rotate-180")} />
+                  </button>
+
+                  <ChevronRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />
+
+                  {/* Level 2: Active Project / Template */}
+                  <div className="flex items-center gap-2 min-w-0">
+                    {isEditingContextTitle ? (
+                      <input 
+                        autoFocus
+                        className="bg-transparent border-b-2 border-google-blue outline-none text-lg md:text-xl font-black min-w-0 w-48 md:w-64 animate-in fade-in duration-200 text-gray-900 dark:text-gray-100"
+                        value={tempContextTitle}
+                        onChange={(e) => setTempContextTitle(e.target.value)}
+                        onBlur={() => {
+                          if (mode === 'master' && activeMaster && tempContextTitle.trim()) renameMaster(activeMaster.id, tempContextTitle);
+                          if (mode === 'project' && activeProject && tempContextTitle.trim()) renameProject(activeProject.id, tempContextTitle);
+                          setIsEditingContextTitle(false);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            if (mode === 'master' && activeMaster && tempContextTitle.trim()) renameMaster(activeMaster.id, tempContextTitle);
+                            if (mode === 'project' && activeProject && tempContextTitle.trim()) renameProject(activeProject.id, tempContextTitle);
+                            setIsEditingContextTitle(false);
+                          }
+                          if (e.key === 'Escape') setIsEditingContextTitle(false);
+                        }}
+                      />
+                    ) : (
+                      <div className="flex items-center gap-1 md:gap-2 min-w-0 group/ctx">
+                        <h2 
+                          className={clsx(
+                            "text-lg md:text-xl font-black truncate transition-colors cursor-pointer",
+                            mode === 'project' ? "text-gray-900 dark:text-gray-100 hover:text-google-blue" : "text-google-blue hover:text-blue-600"
+                          )}
+                          onClick={() => { setShowDiscoveryGrid(!showDiscoveryGrid); setShowChecklistShelf(false); }}
+                        >
+                          {mode === 'master' ? (activeMaster?.title || 'Select Template') : (activeProject?.name || 'Select Project')}
+                        </h2>
+                        {isAdmin && ((mode === 'master' && activeMaster) || (mode === 'project' && activeProject)) && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setTempContextTitle(mode === 'master' ? activeMaster?.title || '' : activeProject?.name || '');
+                              setIsEditingContextTitle(true);
+                            }}
+                            className="opacity-0 group-hover/ctx:opacity-100 p-1.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-all text-gray-400 hover:text-google-blue"
+                            title="Edit Title"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Level 3: Checklist (Project Mode Only) */}
+                  {mode === 'project' && activeProject && activeInstance && (
+                    <>
+                      <ChevronRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />
+                      <div className="flex items-center gap-2 min-w-0">
+                        {isEditingChecklistTitle ? (
+                          <input 
+                            autoFocus
+                            className="bg-transparent border-b-2 border-google-blue outline-none text-lg md:text-xl font-black min-w-0 w-48 md:w-64 animate-in fade-in duration-200 text-google-blue"
+                            value={tempChecklistTitle}
+                            onChange={(e) => setTempChecklistTitle(e.target.value)}
+                            onBlur={() => {
+                              if (activeInstance && tempChecklistTitle.trim()) renameInstance(activeInstance.id, tempChecklistTitle);
+                              setIsEditingChecklistTitle(false);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                if (activeInstance && tempChecklistTitle.trim()) renameInstance(activeInstance.id, tempChecklistTitle);
+                                setIsEditingChecklistTitle(false);
+                              }
+                              if (e.key === 'Escape') setIsEditingChecklistTitle(false);
+                            }}
+                          />
+                        ) : (
+                          <div className="flex items-center gap-1 md:gap-2 min-w-0 group/chk">
+                            <h2 
+                              className="text-lg md:text-xl font-black truncate text-google-blue cursor-pointer hover:underline decoration-2 underline-offset-4"
+                              onClick={() => { setShowChecklistShelf(!showChecklistShelf); setShowDiscoveryGrid(false); }}
+                            >
+                              {activeInstance.title}
+                            </h2>
+                            {isAdmin && (
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setTempChecklistTitle(activeInstance.title);
+                                  setIsEditingChecklistTitle(true);
+                                }}
+                                className="opacity-0 group-hover/chk:opacity-100 p-1.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-all text-gray-400 hover:text-google-blue"
+                                title="Edit Checklist Title"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                            <ChevronDown className={clsx("w-3.5 h-3.5 text-google-blue transition-transform duration-300", showChecklistShelf && "rotate-180")} />
+                          </div>
+                        )}
+                      </div>
+                    </>
                   )}
                 </div>
-              </div>
 
-              {/* Mobile-only New Project Button */}
-              {isAdmin && (
-                <div className="md:hidden">
-                  <Button 
-                    size="sm"
-                    onClick={() => mode === 'master' ? addMaster('New Template') : addProject('New Project')}
-                    className="h-9 px-3 flex items-center gap-2"
-                  >
-                    <Plus className="w-4 h-4" /> 
-                    <span className="text-xs">New</span>
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            <div className={clsx(
-              "flex items-center gap-2 transition-all duration-500",
-              showPlaylistSidebar && "md:flex-1 md:justify-end"
-            )}>
-              {mode === 'master' && (
+                {/* Right Side Actions */}
+                <div className={clsx(
+                  "flex items-center gap-2 transition-all duration-500 shrink-0",
+                  showPlaylistSidebar && "md:flex-1 md:justify-end"
+                )}>
+                  {mode === 'master' && (
                     <Button 
                       variant="ghost" 
                       size="sm" 
                       onClick={() => setIsTemplatesStacked(!isTemplatesStacked)}
-                      className="h-10 px-3 border border-gray-300 dark:border-gray-700"
+                      className="h-10 px-3 border border-gray-300 dark:border-gray-700 hidden md:flex rounded-xl"
                       title={isTemplatesStacked ? "Switch to Side-by-Side" : "Switch to Stacked View"}
                     >
                       {isTemplatesStacked ? <LayoutGrid className="w-5 h-5" /> : <ListOrdered className="w-5 h-5" />}
                     </Button>
-              )}
-              {/* Desktop-only New Project Button */}
-              {isAdmin && (
-                <div className="hidden md:block">
-                  <Button onClick={() => mode === 'master' ? addMaster('New Template') : addProject('New Project')}>
-                    <Plus className="w-5 h-5" /> New {mode === 'master' ? 'Template' : 'Project'}
-                  </Button>
+                  )}
+                  {isAdmin && (
+                    <Button 
+                      onClick={() => {
+                        if (mode === 'master') {
+                          addMaster('New Template');
+                        } else {
+                          addProject('New Project');
+                        }
+                      }}
+                      className="hidden md:flex items-center gap-2 rounded-xl shadow-lg shadow-google-blue/20"
+                    >
+                      <Plus className="w-5 h-5" /> 
+                      <span className="hidden lg:inline">New {mode === 'master' ? 'Template' : 'Project'}</span>
+                      <span className="lg:hidden">New</span>
+                    </Button>
+                  )}
+                  {mode === 'project' && (
+                    <div className="hidden md:block relative group/playlist">
+                      <Button 
+                        variant="ghost" 
+                        onClick={() => setShowPlaylistSidebar(!showPlaylistSidebar)}
+                        className={clsx(
+                          "h-10 px-4 flex items-center gap-2 border-2 transition-all duration-500 font-bold rounded-xl shadow-sm",
+                          showPlaylistSidebar 
+                            ? "w-0 h-0 p-0 border-0 opacity-0 pointer-events-none overflow-hidden" 
+                            : validActionSet.length > 0
+                              ? "bg-google-blue/10 text-google-blue border-google-blue/30 hover:bg-google-blue hover:text-white"
+                              : "bg-white dark:bg-black/40 text-gray-400 border-gray-300 dark:border-gray-700 hover:border-google-blue hover:text-google-blue"
+                        )}
+                      >
+                        <Music className={clsx("w-4 h-4", validActionSet.length > 0 && "animate-pulse")} />
+                        <span className="hidden lg:inline">My Session</span>
+                        {validActionSet.length > 0 && (
+                          <span className="flex items-center justify-center bg-white dark:bg-google-blue text-google-blue dark:text-gray-300 w-5 h-5 rounded-full text-[10px] font-black ml-1 shadow-sm">
+                            {validActionSet.length}
+                          </span>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Discovery Grid Shelf (Projects/Templates) */}
+              {showDiscoveryGrid && (
+                <div className="w-full bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-[2rem] p-6 shadow-2xl animate-in slide-in-from-top-4 duration-500 overflow-hidden relative z-[60]">
+                  <div className="flex flex-col gap-6">
+                    <div className="flex items-center justify-between">
+                      <div className="relative flex-1 max-w-md">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input 
+                          placeholder={`Search ${mode === 'master' ? 'Templates' : 'Projects'}...`}
+                          className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 rounded-xl pl-11 pr-4 py-3 text-sm font-bold focus:ring-2 focus:ring-google-blue outline-none transition-all"
+                          value={contextSearchQuery}
+                          onChange={(e) => setContextSearchQuery(e.target.value)}
+                          autoFocus
+                        />
+                      </div>
+                      <Button variant="ghost" onClick={() => setShowDiscoveryGrid(false)} className="rounded-full w-10 h-10 p-0 border border-gray-200 dark:border-gray-800"><X className="w-5 h-5" /></Button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar pb-2">
+                      {mode === 'master' ? (
+                        masters.filter(m => m.title.toLowerCase().includes(contextSearchQuery.toLowerCase())).map(m => (
+                          <button 
+                            key={m.id}
+                            onClick={() => { navigate(`/master/${m.id}`); setShowDiscoveryGrid(false); }}
+                            className={clsx(
+                              "flex flex-col gap-1 p-5 rounded-2xl border-2 transition-all text-left group relative overflow-hidden",
+                              activeMaster?.id === m.id 
+                                ? "bg-google-blue border-google-blue text-white shadow-xl shadow-google-blue/20" 
+                                : "bg-white dark:bg-black/40 border-gray-100 dark:border-gray-800 hover:border-google-blue/50"
+                            )}
+                          >
+                            <span className="font-black text-lg truncate relative z-10">{m.title}</span>
+                            <span className={clsx(
+                              "text-[10px] font-black uppercase tracking-widest relative z-10",
+                              activeMaster?.id === m.id ? "text-white/70" : "text-gray-400"
+                            )}>
+                              {m.sections.length} Sections • {m.sections.reduce((acc, s) => acc + s.subsections.length, 0)} Sub-Groups
+                            </span>
+                            {activeMaster?.id === m.id && <CheckCircle2 className="absolute -right-4 -bottom-4 w-20 h-20 text-white/10 -rotate-12" />}
+                            
+                            {isAdmin && (
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); if (confirm('Delete template?')) deleteMaster(m.id); }}
+                                className={clsx(
+                                  "absolute top-4 right-4 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all z-20",
+                                  activeMaster?.id === m.id ? "hover:bg-white/20 text-white" : "hover:bg-red-50 text-gray-400 hover:text-google-red"
+                                )}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </button>
+                        ))
+                      ) : (
+                        projects.filter(p => p.name.toLowerCase().includes(contextSearchQuery.toLowerCase())).map(p => (
+                          <button 
+                            key={p.id}
+                            onClick={() => { navigate(`/project/${p.id}`); setShowDiscoveryGrid(false); }}
+                            className={clsx(
+                              "flex flex-col gap-1 p-5 rounded-2xl border-2 transition-all text-left group relative overflow-hidden",
+                              activeProject?.id === p.id 
+                                ? "bg-google-green border-google-green text-white shadow-xl shadow-google-green/20" 
+                                : "bg-white dark:bg-black/40 border-gray-100 dark:border-gray-800 hover:border-google-green/50"
+                            )}
+                          >
+                            <span className="font-black text-lg truncate relative z-10">{p.name}</span>
+                            <span className={clsx(
+                              "text-[10px] font-black uppercase tracking-widest relative z-10",
+                              activeProject?.id === p.id ? "text-white/70" : "text-gray-400"
+                            )}>
+                              {p.instanceIds.length} Active Checklists
+                            </span>
+                            {activeProject?.id === p.id && <LayoutGrid className="absolute -right-4 -bottom-4 w-20 h-20 text-white/10 -rotate-12" />}
+
+                            {isAdmin && (
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); navigate(`/project/${p.id}`); setShowAdminPanel(true); setActiveAdminTab('projects'); }}
+                                className={clsx(
+                                  "absolute top-4 right-4 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all z-20",
+                                  activeProject?.id === p.id ? "hover:bg-white/20 text-white" : "hover:bg-blue-50 text-gray-400 hover:text-google-blue"
+                                )}
+                                title="Manage Project"
+                              >
+                                <Settings className="w-4 h-4" />
+                              </button>
+                            )}
+                          </button>
+                        ))
+                      )}
+
+                      {isAdmin && (
+                        <button 
+                          onClick={() => {
+                            if (mode === 'master') addMaster('New Template');
+                            else addProject('New Project');
+                            setShowDiscoveryGrid(false);
+                          }}
+                          className="flex flex-col items-center justify-center gap-2 p-5 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-google-blue hover:bg-blue-50/30 dark:hover:bg-blue-900/10 text-gray-400 hover:text-google-blue transition-all group min-h-[100px]"
+                        >
+                          <Plus className="w-8 h-8 group-hover:scale-110 transition-transform" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Create New {mode === 'master' ? 'Template' : 'Project'}</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
-              {/* Desktop-only My Playlist Button */}
-              {mode === 'project' && (
-                <div className="hidden md:block relative group/playlist">
-                  <Button 
-                    variant="ghost" 
-                    onClick={() => setShowPlaylistSidebar(!showPlaylistSidebar)}
-                    className={clsx(
-                      "h-10 px-4 flex items-center gap-2 border-2 transition-all duration-500 font-bold rounded-button shadow-sm",
-                      showPlaylistSidebar 
-                        ? "w-0 h-0 p-0 border-0 opacity-0 pointer-events-none overflow-hidden" 
-                        : validActionSet.length > 0
-                          ? "bg-google-blue/10 text-google-blue border-google-blue/30 hover:bg-google-blue hover:text-white"
-                          : "bg-white dark:bg-black/40 text-gray-400 border-gray-300 dark:border-gray-700 hover:border-google-blue hover:text-google-blue"
-                    )}
-                  >
-                    <Music className={clsx("w-4 h-4", validActionSet.length > 0 && "animate-pulse")} />
-                    <span>My Session</span>
-                    {validActionSet.length > 0 && (
-                      <span className="flex items-center justify-center bg-white dark:bg-google-blue text-google-blue dark:text-gray-300 w-5 h-5 rounded-full text-[10px] font-black ml-1 shadow-sm">
-                        {validActionSet.length}
-                      </span>
-                    )}
-                  </Button>
+
+              {/* Checklist Discovery Shelf (Checklists within active project) */}
+              {showChecklistShelf && mode === 'project' && activeProject && (
+                <div className="w-full bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-[2rem] p-6 shadow-2xl animate-in slide-in-from-top-4 duration-500 overflow-hidden relative z-[60]">
+                  <div className="flex flex-col gap-6">
+                    <div className="flex items-center justify-between">
+                      <div className="relative flex-1 max-w-md">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input 
+                          placeholder="Search Checklists in this Project..."
+                          className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 rounded-xl pl-11 pr-4 py-3 text-sm font-bold focus:ring-2 focus:ring-google-blue outline-none transition-all"
+                          value={checklistSearchQuery}
+                          onChange={(e) => setChecklistSearchQuery(e.target.value)}
+                          autoFocus
+                        />
+                      </div>
+                      <Button variant="ghost" onClick={() => setShowChecklistShelf(false)} className="rounded-full w-10 h-10 p-0 border border-gray-200 dark:border-gray-800"><X className="w-5 h-5" /></Button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar pb-2">
+                      {activeProject.instanceIds.map((id: string) => {
+                        const instance = instances.find(i => i.id === id);
+                        if (!instance) return null;
+                        if (checklistSearchQuery && !instance.title.toLowerCase().includes(checklistSearchQuery.toLowerCase())) return null;
+                        const isActive = activeInstance?.id === id;
+                        
+                        // Calculate completion
+                        const totalTasks = instance.sections.reduce((acc, s) => acc + s.subsections.reduce((a, ss) => a + ss.tasks.length, 0), 0);
+                        const completedTasks = instance.sections.reduce((acc, s) => acc + s.subsections.reduce((a, ss) => a + ss.tasks.filter(t => t.completed).length, 0), 0);
+                        const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+                        return (
+                          <button 
+                            key={id}
+                            onClick={() => { navigate(`/project/${activeProject.id}/instance/${instance.id}`); setShowChecklistShelf(false); }}
+                            className={clsx(
+                              "flex flex-col gap-1 p-5 rounded-2xl border-2 transition-all text-left group relative overflow-hidden",
+                              isActive 
+                                ? "bg-google-blue border-google-blue text-white shadow-xl shadow-google-blue/20" 
+                                : "bg-white dark:bg-black/40 border-gray-100 dark:border-gray-800 hover:border-google-blue/50"
+                            )}
+                          >
+                            <span className="font-black text-lg truncate relative z-10">{instance.title}</span>
+                            <div className="flex items-center justify-between relative z-10 w-full">
+                              <span className={clsx(
+                                "text-[10px] font-black uppercase tracking-widest",
+                                isActive ? "text-white/70" : "text-gray-400"
+                              )}>
+                                {progress}% Complete
+                              </span>
+                              <span className={clsx(
+                                "text-[10px] font-black uppercase tracking-widest",
+                                isActive ? "text-white/70" : "text-gray-400"
+                              )}>
+                                {completedTasks}/{totalTasks} Tasks
+                              </span>
+                            </div>
+                            <div className="w-full h-1 bg-black/10 rounded-full mt-2 relative z-10">
+                              <div 
+                                className={clsx("h-full rounded-full transition-all duration-500", isActive ? "bg-white" : "bg-google-blue")}
+                                style={{ width: `${progress}%` }}
+                              />
+                            </div>
+                            {isActive && <ClipboardList className="absolute -right-4 -bottom-4 w-20 h-20 text-white/10 -rotate-12" />}
+
+                            {isAdmin && (
+                              <button 
+                                onClick={(e) => { 
+                                  e.stopPropagation(); 
+                                  setChecklistToDelete({ projectId: activeProject.id, instanceId: id });
+                                  setShowDeleteChecklistConfirm(true); 
+                                }}
+                                className={clsx(
+                                  "absolute top-4 right-4 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all z-20",
+                                  isActive ? "hover:bg-white/20 text-white" : "hover:bg-red-50 text-gray-400 hover:text-google-red"
+                                )}
+                                title="Remove Checklist"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </button>
+                        );
+                      })}
+
+                      {isAdmin && (
+                        <button 
+                          onClick={() => { setShowAddChecklistModal(true); setShowChecklistShelf(false); }}
+                          className="flex flex-col items-center justify-center gap-2 p-5 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-google-blue hover:bg-blue-50/30 dark:hover:bg-blue-900/10 text-gray-400 hover:text-google-blue transition-all group min-h-[100px]"
+                        >
+                          <Plus className="w-8 h-8 group-hover:scale-110 transition-transform" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Add New Checklist</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -1503,76 +1802,9 @@ function App() {
               <FocusDashboard onOpenNotes={(taskId, containerId, focusFeedback) => setEditingTaskInfo({ taskId, containerId, focusFeedback })} />
             ) : (
           <>
-            {/* Selection Area */}
-            <div className={clsx("flex mb-8", isTemplatesStacked && mode === 'master' ? "flex-col gap-3" : "flex-wrap gap-2")}>
-              {mode === 'master' ? (
-                masters.map((m, idx) => (
-                  <div key={m.id} className={clsx("flex items-center gap-2", isTemplatesStacked ? "w-full max-w-2xl" : "contents")}>
-                    <button 
-                      onClick={() => navigate(`/master/${m.id}`)} 
-                      className={clsx(
-                        theme.components.nav.pill,
-                        isTemplatesStacked ? "flex-1 rounded-2xl py-4 px-6" : "rounded-full",
-                        activeMaster?.id === m.id ? theme.components.nav.pillActiveBlue : theme.components.nav.pillInactive
-                      )}
-                    >
-                      {m.title}
-                    </button>
-                    {isTemplatesStacked && (
-                      <div className="flex flex-col gap-1">
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); moveMaster(m.id, 'up'); }}
-                          disabled={idx === 0}
-                          className="p-1 text-gray-400 hover:text-google-blue disabled:opacity-30 disabled:hover:text-gray-400 transition-colors"
-                        >
-                          <ChevronUp className="w-5 h-5" />
-                        </button>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); moveMaster(m.id, 'down'); }}
-                          disabled={idx === masters.length - 1}
-                          className="p-1 text-gray-400 hover:text-google-blue disabled:opacity-30 disabled:hover:text-gray-400 transition-colors"
-                        >
-                          <ChevronDown className="w-5 h-5" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))
-              ) : (
-                projects.map(p => (
-                  <button 
-                    key={p.id} 
-                    onClick={() => navigate(`/project/${p.id}`)} 
-                    className={clsx(
-                      theme.components.nav.pill,
-                      activeProject?.id === p.id ? theme.components.nav.pillActiveGreen : theme.components.nav.pillInactive
-                    )}
-                  >
-                    {p.name}
-                  </button>
-                ))
-              )}
-            </div>
-
             {/* Dynamic View based on selection */}
             {mode === 'project' && activeProject && (
           <div className="w-full px-0 sm:px-2 md:px-4 flex flex-col gap-8 mb-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <input 
-                  className={clsx(
-                    "text-3xl sm:text-4xl font-black bg-transparent border-none focus:ring-0 w-full rounded-xl transition-all px-2 py-1 -ml-2 text-google-blue", 
-                    isAdmin ? "hover:bg-gray-100 dark:hover:bg-gray-800" : "cursor-default"
-                  )} 
-                  value={activeProject.name} 
-                  onChange={(e) => renameProject(activeProject.id, e.target.value)} 
-                  readOnly={!isAdmin} 
-                  placeholder="Project Name..." 
-                />
-              </div>
-              
-            </div>
-
             <ProjectDashboard 
               project={activeProject}
               currentUser={currentUser}
@@ -1641,73 +1873,6 @@ function App() {
                 )}
               </div>
             )}
-
-            {/* Persistent Checklist Shelf */}
-            <div className={theme.components.dashboard.checklistContainer.replace('p-4 md:p-12', 'p-6')}>
-              <div className="flex items-center justify-between mb-6 px-2">
-                <div className="flex items-center gap-2">
-                  <LayoutGrid className="w-5 h-5 text-google-blue" />
-                  <h4 className="text-sm font-black uppercase text-gray-600 dark:text-gray-300 tracking-widest">Project Checklists</h4>
-                </div>
-                {isAdmin && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setShowAddChecklistModal(true)}
-                    className="text-google-blue hover:bg-blue-50 dark:hover:bg-blue-900/30 font-bold flex items-center gap-2"
-                  >
-                    <Plus className="w-4 h-4" /> Add Checklist
-                  </Button>
-                )}
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {activeProject.instanceIds.map((id: string) => {
-                  const instance = instances.find(i => i.id === id);
-                  if (!instance) return null;
-                  const isActive = activeInstance?.id === id;
-                  return (
-                    <div 
-                      key={id} 
-                      onClick={() => navigate(`/project/${activeProject.id}/instance/${instance.id}`)} 
-                      className={clsx(
-                        "p-5 rounded-container border transition-all cursor-pointer group flex items-center justify-between shadow-sm",
-                        isActive 
-                          ? "bg-google-blue-muted border-google-blue-muted dark:border-gray-400 text-white shadow-md ring-2 ring-google-blue-muted/20" 
-                          : "bg-white/80 dark:bg-black/40 border-blue-200 dark:border-gray-800 hover:border-google-blue"
-                      )}
-                    >
-                      <div className="flex flex-col min-w-0">
-                        <h4 className="font-black text-base break-words">{instance.title}</h4>
-                        <p className={clsx("text-[10px] font-black uppercase tracking-wider", isActive ? "text-white/80" : "text-gray-500")}>v{instance.version}</p>
-                      </div>
-                      {isAdmin && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className={clsx(
-                            "opacity-0 group-hover:opacity-100 transition-opacity",
-                            isActive ? "text-white hover:bg-white/10" : "text-gray-400 hover:text-google-red"
-                          )} 
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            setChecklistToDelete({ projectId: activeProject.id, instanceId: id });
-                            setShowDeleteChecklistConfirm(true); 
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                  );
-                })}
-                {activeProject.instanceIds.length === 0 && (
-                  <div className="col-span-full py-8 text-center border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-container text-gray-400 font-bold uppercase text-[10px] tracking-widest">
-                    No checklists added to this project yet
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         )}
 
@@ -1715,25 +1880,11 @@ function App() {
         {mode === 'master' && activeMaster && (
           <div className="space-y-4 px-0 sm:px-4 md:px-12">
             <div className={theme.components.dashboard.checklistContainer.replace('p-4 md:p-12', 'p-4 sm:pl-6 sm:pr-7 mb-8')}>
-              <div className="flex items-center justify-between gap-2 sm:pl-2.5 sm:pr-6">
-                <textarea
-                  ref={titleTextareaRef}
-                  rows={1}
-                  className="text-2xl sm:text-3xl font-black bg-transparent border-none focus:ring-0 flex-1 min-w-0 py-2 sm:py-3 leading-relaxed overflow-visible resize-none"
-                  value={localMasterTitle}
-                  onChange={(e) => {
-                    const newVal = e.target.value;
-                    setLocalMasterTitle(newVal);
-                    renameMaster(activeMaster.id, newVal);
-                    e.target.style.height = 'auto';
-                    e.target.style.height = `${e.target.scrollHeight}px`;
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.height = 'auto';
-                    e.target.style.height = `${e.target.scrollHeight}px`;
-                  }}
-                  placeholder="Template Title..."
-                />
+              <div className="flex items-center justify-between gap-2 sm:pl-2.5 sm:pr-6 mb-6">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-6 h-6 text-google-blue" />
+                  <h3 className="text-xl sm:text-2xl font-black text-[var(--checklist-title)]">Template Structure</h3>
+                </div>
                 <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                   <div className="relative group/tooltip">
                     <Button variant="ghost" size="sm" onClick={() => setShowExportModal(true)} className="rounded-full h-8 w-8 sm:h-9 sm:w-9 p-0 text-google-blue bg-blue-100 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-800">
@@ -1742,16 +1893,6 @@ function App() {
                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-gray-900 dark:bg-gray-800 text-white text-[10px] font-black uppercase tracking-wider rounded-lg opacity-0 group-hover/tooltip:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-700/50 transform translate-y-1 group-hover/tooltip:translate-y-0">
                       Export Template
                       <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800" />
-                    </div>
-                  </div>
-
-                  <div className="relative group/tooltip">
-                    <Button variant="ghost" size="sm" onClick={() => { if (confirm('Delete template?')) deleteMaster(activeMaster.id); }} className="rounded-full h-8 w-8 sm:h-9 sm:w-9 p-0 text-google-red bg-red-100 dark:bg-red-900/40 border border-red-200 dark:border-red-800">
-                      <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </Button>
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-google-red text-white text-[10px] font-black uppercase tracking-wider rounded-lg opacity-0 group-hover/tooltip:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl transform translate-y-1 group-hover/tooltip:translate-y-0">
-                      Delete Template
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-google-red" />
                     </div>
                   </div>
                 </div>
