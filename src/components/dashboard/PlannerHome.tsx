@@ -424,7 +424,12 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                           const totalTasks = instance.sections.reduce((acc, s) => acc + s.subsections.reduce((a, ss) => a + ss.tasks.length, 0), 0);
                           const completedTasks = instance.sections.reduce((acc, s) => acc + s.subsections.reduce((a, ss) => a + ss.tasks.filter(t => t.completed).length, 0), 0);
                           const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-                          const nextTask = instance.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => !t.completed);
+                          
+                          // Find the first task in validActionSet that belongs to this instance
+                          const sessionItem = validActionSet.find(i => i.type !== 'note' && i.instanceId === instance.id);
+                          const nextTask = sessionItem 
+                            ? instance.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => t.id === sessionItem.taskId)
+                            : instance.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => !t.completed);
 
                           return (
                             <div 
@@ -504,7 +509,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
         <div className="px-2">
           <h2 className="flex items-center gap-3 text-[10px] font-black uppercase text-gray-500 tracking-[0.2em]">
             <StickyNote className="w-5 h-5 text-google-blue" />
-            General Notes & Triage
+            MY NOTES AND TASKS
           </h2>
         </div>
         

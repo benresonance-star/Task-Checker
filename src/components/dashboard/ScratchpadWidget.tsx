@@ -344,8 +344,7 @@ export const ScratchpadWidget: React.FC<{ projects?: Project[] }> = ({ projects:
 
   return (
     <div className="flex flex-col h-full space-y-4">
-      <div className="flex items-center justify-between px-2">
-        <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">My Notes</h3>
+      <div className="flex items-center justify-end px-2">
         {hasDoneTasks && (
           <button 
             onClick={() => setShowDone(!showDone)}
