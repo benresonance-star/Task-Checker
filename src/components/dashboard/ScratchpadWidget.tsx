@@ -1,6 +1,22 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
-import { Plus, Trash2, CheckCircle2, Circle, Clock, X, Bold, List, ListOrdered, GripVertical, Flag, ChevronDown, ListPlus, Bell } from 'lucide-react';
+import { 
+  Plus, 
+  Trash2, 
+  CheckCircle2, 
+  Circle, 
+  Clock, 
+  X, 
+  Bold, 
+  List, 
+  ListOrdered, 
+  GripVertical, 
+  Flag, 
+  ChevronDown, 
+  ListPlus, 
+  Bell,
+  Search
+} from 'lucide-react';
 import { clsx } from 'clsx';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -23,6 +39,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { restrictToVerticalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers';
+import { Project } from '../../types';
 
 const Dropdown: React.FC<{
   value: string;
@@ -34,65 +51,95 @@ const Dropdown: React.FC<{
   className?: string;
   width?: string;
   align?: 'left' | 'right';
-}> = ({ value, options, onChange, isOpen, setIsOpen, label, className, width = '200px', align = 'left' }) => (
-  <div className={clsx("relative", className)}>
-    <button
-      onClick={() => setIsOpen(!isOpen)}
-      className={clsx(
-        "flex items-center gap-2 bg-white/50 dark:bg-black/20 border-2 rounded-xl px-2.5 py-1.5 transition-all group shadow-sm",
-        isOpen ? "border-google-blue ring-4 ring-google-blue/10" : "border-gray-200 dark:border-gray-700 hover:border-google-blue"
-      )}
-    >
-      {label && <span className="text-[8px] font-black uppercase text-gray-400 tracking-tighter shrink-0 group-hover:text-google-blue transition-colors">{label}</span>}
-      <span className="text-[9px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300 truncate max-w-[120px] text-left">
-        {value === 'All' ? 'ALL NOTES' : value}
-      </span>
-      <ChevronDown className={clsx("w-3 h-3 text-gray-400 group-hover:text-google-blue transition-all", isOpen && "rotate-180")} />
-    </button>
+  showSearch?: boolean;
+}> = ({ value, options, onChange, isOpen, setIsOpen, label, className, width = '200px', align = 'left', showSearch = false }) => {
+  const [search, setSearch] = useState('');
+  
+  const filteredOptions = useMemo(() => {
+    if (!search) return options;
+    return options.filter(opt => opt.toLowerCase().includes(search.toLowerCase()));
+  }, [options, search]);
 
-    {isOpen && (
-      <>
-        <div 
-          className="fixed inset-0 z-[100]" 
-          onClick={() => setIsOpen(false)} 
-        />
-        <div 
-          className={clsx(
-            "absolute top-full mt-2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-2 border-blue-200 dark:border-gray-700 rounded-2xl shadow-2xl z-[101] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200",
-            align === 'left' ? "left-0" : "right-0"
-          )}
-          style={{ width }}
-        >
-          <div className="max-h-[250px] overflow-y-auto custom-scrollbar p-1">
-            {options.map(opt => (
-              <button
-                key={opt}
-                onClick={() => {
-                  onChange(opt);
-                  setIsOpen(false);
-                }}
-                className={clsx(
-                  "w-full flex items-center justify-between px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all text-left",
-                  value === opt 
-                    ? "bg-google-blue text-white shadow-md" 
-                    : "text-gray-600 dark:text-gray-300 hover:bg-google-blue/10 hover:text-google-blue"
-                )}
-              >
-                <span className="truncate mr-2">{opt === 'All' ? 'ALL NOTES' : opt}</span>
-                {value === opt && <CheckCircle2 className="w-3 h-3 shrink-0" />}
-              </button>
-            ))}
+  return (
+    <div className={clsx("relative", className)}>
+      <button
+        onClick={() => { setIsOpen(!isOpen); if (!isOpen) setSearch(''); }}
+        className={clsx(
+          "flex items-center gap-2 bg-white/50 dark:bg-black/20 border-2 rounded-xl px-2.5 py-1.5 transition-all group shadow-sm",
+          isOpen ? "border-google-blue ring-4 ring-google-blue/10" : "border-gray-200 dark:border-gray-700 hover:border-google-blue"
+        )}
+      >
+        {label && <span className="text-[8px] font-black uppercase text-gray-400 tracking-tighter shrink-0 group-hover:text-google-blue transition-colors">{label}</span>}
+        <span className="text-[9px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300 truncate max-w-[120px] text-left">
+          {value === 'All' ? 'ALL NOTES' : value}
+        </span>
+        <ChevronDown className={clsx("w-3 h-3 text-gray-400 group-hover:text-google-blue transition-all", isOpen && "rotate-180")} />
+      </button>
+
+      {isOpen && (
+        <>
+          <div 
+            className="fixed inset-0 z-[100]" 
+            onClick={() => setIsOpen(false)} 
+          />
+          <div 
+            className={clsx(
+              "absolute top-full mt-2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-2 border-blue-200 dark:border-gray-700 rounded-2xl shadow-2xl z-[101] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200",
+              align === 'left' ? "left-0" : "right-0"
+            )}
+            style={{ width }}
+          >
+            {showSearch && options.length > 5 && (
+              <div className="p-2 border-b border-gray-100 dark:border-gray-800">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" />
+                  <input 
+                    autoFocus
+                    className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-gray-700 rounded-lg pl-8 pr-2 py-1.5 text-[10px] font-bold outline-none focus:border-google-blue"
+                    placeholder="Search projects..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+            <div className="max-h-[250px] overflow-y-auto custom-scrollbar p-1">
+              {filteredOptions.length === 0 ? (
+                <div className="px-3 py-4 text-center text-[9px] font-bold text-gray-400 italic uppercase tracking-widest">
+                  No matches found
+                </div>
+              ) : (
+                filteredOptions.map((opt: string, idx: number) => (
+                  <button
+                    key={`${opt}-${idx}`}
+                    onClick={() => {
+                      onChange(opt);
+                      setIsOpen(false);
+                    }}
+                    className={clsx(
+                      "w-full flex items-center justify-between px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all text-left",
+                      value === opt 
+                        ? "bg-google-blue text-white shadow-md" 
+                        : "text-gray-600 dark:text-gray-300 hover:bg-google-blue/10 hover:text-google-blue"
+                    )}
+                  >
+                    <span className="truncate mr-2">{opt === 'All' ? 'ALL NOTES' : opt}</span>
+                    {value === opt && <CheckCircle2 className="w-3 h-3 shrink-0" />}
+                  </button>
+                ))
+              )}
+            </div>
           </div>
-        </div>
-      </>
-    )}
-  </div>
-);
+        </>
+      )}
+    </div>
+  );
+};
 
-export const ScratchpadWidget: React.FC = () => {
+export const ScratchpadWidget: React.FC<{ projects?: Project[] }> = ({ projects: propProjects }) => {
   const { 
     currentUser, 
-    projects,
+    projects: storeProjects,
     addScratchpadTask, 
     toggleScratchpadTask, 
     toggleScratchpadPriority,
@@ -101,6 +148,8 @@ export const ScratchpadWidget: React.FC = () => {
     reorderScratchpad,
     toggleNoteInActionSet,
   } = useTasklistStore();
+
+  const projects = propProjects || storeProjects;
 
   const [activeCategory, setActiveCategory] = useState(() => localStorage.getItem('notes_active_category') || 'All');
   const [selectedCategory, setSelectedCategory] = useState(() => localStorage.getItem('notes_selected_category') || 'Personal');
@@ -128,10 +177,10 @@ export const ScratchpadWidget: React.FC = () => {
 
   const scratchpad = currentUser?.scratchpad || [];
   const totalInView = useMemo(() => {
-    return activeCategory === 'All' ? scratchpad : scratchpad.filter(t => t.category === activeCategory);
+    return activeCategory === 'All' ? scratchpad : scratchpad.filter((t: any) => t.category === activeCategory);
   }, [scratchpad, activeCategory]);
 
-  const hasDoneTasks = totalInView.some(t => t.completed);
+  const hasDoneTasks = totalInView.some((t: any) => t.completed);
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -184,22 +233,22 @@ export const ScratchpadWidget: React.FC = () => {
 
   // Derived categories from projects + default "Personal"
   const availableCategories = useMemo(() => {
-    const projectNames = projects.map(p => p.name);
+    const projectNames = projects.map((p: any) => p.name);
     return ['Personal', ...projectNames];
   }, [projects]);
 
   // Combined categories for filtering (only categories that actually have tasks)
   const filterCategories = useMemo(() => {
     const cats = new Set(['All']);
-    scratchpad.forEach(item => cats.add(item.category));
+    scratchpad.forEach((item: any) => cats.add(item.category));
     return Array.from(cats);
   }, [scratchpad]);
 
   // Filter tasks based on active category and visibility of done tasks
   const filteredTasks = useMemo(() => {
-    let tasks = activeCategory === 'All' ? scratchpad : scratchpad.filter(t => t.category === activeCategory);
+    let tasks = activeCategory === 'All' ? scratchpad : scratchpad.filter((t: any) => t.category === activeCategory);
     if (!showDone) {
-      tasks = tasks.filter(t => !t.completed);
+      tasks = tasks.filter((t: any) => !t.completed);
     }
     return tasks;
   }, [scratchpad, activeCategory, showDone]);
@@ -270,7 +319,8 @@ export const ScratchpadWidget: React.FC = () => {
                 onChange={setSelectedCategory}
                 isOpen={isAddCategoryMenuOpen}
                 setIsOpen={setIsAddCategoryMenuOpen}
-                width="180px"
+                width="220px"
+                showSearch
               />
               <div className="flex items-center gap-1">
                 <button onClick={() => addEditor?.chain().focus().toggleBold().run()} className={clsx("p-1.5 rounded hover:bg-gray-200 dark:hover:bg-white/10 transition-colors", addEditor?.isActive('bold') && "bg-gray-200 dark:bg-white/10")}><Bold className="w-3 h-3" /></button>
@@ -326,6 +376,7 @@ export const ScratchpadWidget: React.FC = () => {
             isOpen={isFilterMenuOpen}
             setIsOpen={setIsFilterMenuOpen}
             width="220px"
+            showSearch
           />
         </div>
 

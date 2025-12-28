@@ -440,7 +440,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
         </div>
         
         <div className="p-8 bg-white dark:bg-black/40 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 min-h-[400px] shadow-xl">
-          <ScratchpadWidget />
+          <ScratchpadWidget projects={projects} />
         </div>
       </div>
     </div>
