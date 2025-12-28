@@ -1335,6 +1335,15 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
         });
       }
 
+      // Optimistic Update
+      set({ 
+        currentUser: { 
+          ...currentUser, 
+          scratchpad,
+          actionSet
+        } 
+      });
+
       await updateDoc(userRef, { 
         scratchpad,
         actionSet
