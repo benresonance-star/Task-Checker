@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
-import { Plus, Trash2, CheckCircle2, Circle, Clock, X, Bold, List, ListOrdered, GripVertical, Flag, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, Circle, Clock, X, Bold, List, ListOrdered, GripVertical, Flag, ChevronDown, Music } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -99,6 +99,7 @@ export const ScratchpadWidget: React.FC = () => {
     updateScratchpadTask,
     deleteScratchpadTask, 
     reorderScratchpad,
+    toggleNoteInActionSet,
   } = useTasklistStore();
 
   const [activeCategory, setActiveCategory] = useState(() => localStorage.getItem('notes_active_category') || 'All');
@@ -357,6 +358,7 @@ export const ScratchpadWidget: React.FC = () => {
                     onToggle={toggleScratchpadTask}
                     onTogglePriority={toggleScratchpadPriority}
                     onDelete={deleteScratchpadTask}
+                    onToggleActionSet={toggleNoteInActionSet}
                     onSave={saveEdit}
                     onCancel={cancelEdit}
                     editingCategory={editingCategory}
@@ -382,6 +384,7 @@ interface SortableItemProps {
   onToggle: (id: string) => void;
   onTogglePriority: (id: string) => void;
   onDelete: (id: string) => void;
+  onToggleActionSet: (id: string) => void;
   onSave: () => void;
   onCancel: () => void;
   editingCategory: string;
@@ -398,6 +401,7 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
   onToggle,
   onTogglePriority,
   onDelete,
+  onToggleActionSet,
   onSave,
   onCancel,
   editingCategory,
@@ -405,6 +409,7 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
   inlineEditor
 }) => {
   const [isEditCategoryMenuOpen, setIsEditCategoryMenuOpen] = useState(false);
+  const { currentUser } = useTasklistStore();
   const {
     attributes,
     listeners,
@@ -422,6 +427,7 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
   };
 
   const isEditing = task.id === editingId;
+  const isInActionSet = currentUser?.actionSet?.some((i: any) => i.type === 'note' && i.taskId === task.id);
 
   return (
     <div 
@@ -504,6 +510,18 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
 
         {!isEditing && (
           <div className="flex flex-col gap-1 shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-all">
+            <button
+              onClick={() => onToggleActionSet(task.id)}
+              className={clsx(
+                "p-1 rounded-lg transition-all",
+                isInActionSet 
+                  ? "bg-google-blue text-white shadow-sm" 
+                  : "text-gray-300 hover:text-google-blue hover:bg-google-blue/10"
+              )}
+              title={isInActionSet ? "Remove from Session" : "Add to Session"}
+            >
+              <Music className={clsx("w-3.5 h-3.5", isInActionSet && "animate-pulse")} />
+            </button>
             <button
               onClick={() => onTogglePriority(task.id)}
               className={clsx(

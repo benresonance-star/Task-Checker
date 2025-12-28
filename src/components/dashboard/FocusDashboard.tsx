@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Music } from 'lucide-react';
 import { ScratchpadWidget } from './ScratchpadWidget';
 import { KnowledgeHub } from './KnowledgeHub';
-import { FocusStage } from '../../types';
+import { FocusStage, Task } from '../../types';
 
 import { TomatoIcon } from '../icons/TomatoIcon';
 
@@ -61,6 +61,46 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
   const focusData = React.useMemo(() => {
     const focus = currentUser?.activeFocus;
     if (!focus) return null;
+
+    // Handle Personal Note Focus
+    if (!focus.projectId || !focus.instanceId) {
+      const note = currentUser.scratchpad?.find(n => n.id === focus.taskId);
+      if (note) {
+        const mockTask: Task = { 
+          id: note.id, 
+          title: note.text, 
+          completed: note.completed,
+          notes: '',
+          userNotes: '',
+          workbench: '',
+          lastUpdated: note.createdAt,
+          timerDuration: 20 * 60,
+          timerRemaining: 20 * 60,
+          timerIsRunning: false,
+          completedPrereqs: [],
+          guide: {
+            description: '',
+            complexity: 'Easy',
+            requiredBefore: [],
+            helpfulPrep: [],
+            watchOutFor: [],
+            content: ''
+          }
+        };
+        return {
+          type: 'note' as const,
+          task: mockTask,
+          note,
+          projectId: '',
+          instance: null,
+          project: null,
+          isMultiUserActive: false,
+          isYellowState: false,
+          colorTheme: 'indigo'
+        };
+      }
+      return null;
+    }
 
     const instance = instances.find(i => i.id === focus.instanceId);
     if (!instance) return null;
@@ -140,12 +180,14 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
   // Determine card theme based on focus state
   const cardTheme = React.useMemo(() => {
     if (!focusData) return null;
+    if (focusData.type === 'note') return "bg-indigo-600 border-indigo-500 text-white shadow-xl shadow-indigo-500/20";
     if (focusData.isMultiUserActive) return theme.components.sidebar.activeTaskMulti;
     if (focusData.isYellowState) return theme.components.sidebar.activeTaskYellow;
     return theme.components.sidebar.activeTaskFocus;
   }, [focusData]);
 
-  const isYellow = focusData?.isYellowState && !focusData?.isMultiUserActive;
+  const isIndigo = focusData?.type === 'note';
+  const isYellow = !isIndigo && focusData?.isYellowState && !focusData?.isMultiUserActive;
 
   const shouldHighlightNotes = React.useMemo(() => {
     if (!focusData?.task) return false;
@@ -187,7 +229,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                     // If moving back to staged/preparing manually, and it's marked completed, un-complete it
                     const isMovingBack = (stage.id === 'staged' || stage.id === 'preparing') && currentStage !== stage.id;
                     if (focusData?.task.completed && isMovingBack) {
-                      await toggleTask(focusData.task.id, focusData.instance.id);
+                      await toggleTask(focusData.task.id, focusData.instance?.id || '');
                     }
                     
                     await setFocusStage(stage.id);
@@ -301,32 +343,32 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
               {focusData.task.completed && <CompletionTransition />}
               {isExecuting && !focusData.task.completed && <FocusTransition />}
               <div className="relative z-10 flex flex-col h-full space-y-8">
-                <WorkflowTracker />
+                {focusData.type !== 'note' && <WorkflowTracker />}
                 
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-1 min-w-0">
                     {!isExecuting && (
                       <>
-                        <div className="flex items-center gap-2">
-                          <h4 className={clsx("text-sm md:text-lg font-black uppercase tracking-[0.15em] truncate", isYellow ? "text-gray-900" : "text-white/90")}>
-                            PROJECT: {focusData.project?.name || 'Unknown Project'}
-                          </h4>
-                        </div>
-                        <div className={clsx(
-                          "flex items-center gap-2 transition-colors",
-                          isYellow ? "text-gray-700" : "text-white/70"
-                        )}>
-                          <span className="text-[11px] font-black uppercase tracking-[0.15em] truncate max-w-[250px] md:max-w-md">
-                            CHECKLIST: {focusData.instance.title}
-                          </span>
-                        </div>
+                <div className="flex items-center gap-2">
+                  <h4 className={clsx("text-sm md:text-lg font-black uppercase tracking-[0.15em] truncate", isYellow ? "text-gray-900" : "text-white/90")}>
+                    {focusData.type === 'note' ? 'PERSONAL NOTE' : `PROJECT: ${focusData.project?.name || 'Unknown Project'}`}
+                  </h4>
+                </div>
+                <div className={clsx(
+                  "flex items-center gap-2 transition-colors",
+                  isYellow ? "text-gray-700" : "text-white/70"
+                )}>
+                  <span className="text-[11px] font-black uppercase tracking-[0.15em] truncate max-w-[250px] md:max-w-md">
+                    {focusData.type === 'note' ? focusData.note?.category : `CHECKLIST: ${focusData.instance?.title || 'Unknown'}`}
+                  </span>
+                </div>
                       </>
                     )}
                   </div>
                   
-                  {!isExecuting && (
+                  {!isExecuting && focusData.type !== 'note' && (
                     <button 
-                      onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance.id}?task=${focusData.task.id}&scroll=true`)}
+                      onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance?.id}?task=${focusData.task.id}&scroll=true`)}
                       className={clsx(
                         "hidden md:flex rounded-2xl transition-all border shadow-sm flex-shrink-0 active:scale-95",
                         showPlaylistSidebar ? "p-2" : "p-3",
@@ -340,15 +382,25 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                 </div>
 
                 <div className="flex-1 flex flex-col justify-center py-4">
-                  <h2 className={clsx(
-                    "text-2xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight break-words transition-all duration-700",
-                    isExecuting && "md:text-7xl lg:text-8xl",
-                    isWide && !isExecuting && "lg:text-7xl",
-                    isYellow ? "text-gray-900" : "text-white",
-                    focusData.task.timerIsRunning && "animate-pulse-slow"
-                  )}>
-                    {focusData.task.title}
-                  </h2>
+                  {focusData.type === 'note' ? (
+                    <div 
+                      className={clsx(
+                        "text-2xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight break-words transition-all duration-700 prose prose-invert max-w-none prose-p:my-0 prose-ul:my-1 prose-li:my-0",
+                        isExecuting && "md:text-7xl lg:text-8xl",
+                      )}
+                      dangerouslySetInnerHTML={{ __html: focusData.note?.text || '' }}
+                    />
+                  ) : (
+                    <h2 className={clsx(
+                      "text-2xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight break-words transition-all duration-700",
+                      isExecuting && "md:text-7xl lg:text-8xl",
+                      isWide && !isExecuting && "lg:text-7xl",
+                      isYellow ? "text-gray-900" : "text-white",
+                      focusData.task.timerIsRunning && "animate-pulse-slow"
+                    )}>
+                      {focusData.task.title}
+                    </h2>
+                  )}
                   
                   {focusData.task.guide?.complexity && !isExecuting && (
                     <div className={clsx(
@@ -463,7 +515,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                     {/* Task Info Button */}
                     {!isExecuting && (
                       <button 
-                        onClick={(e) => { e.stopPropagation(); onOpenNotes?.(focusData.task.id, focusData.instance.id); }}
+                        onClick={(e) => { e.stopPropagation(); onOpenNotes?.(focusData.task.id, focusData.instance?.id || ''); }}
                         title="Open Task Info"
                         className={clsx(
                           "w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 shrink-0 flex items-center justify-center transition-all hover:scale-110",
@@ -475,24 +527,30 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                     )}
 
                     {!isExecuting && (
-                      <button 
-                        onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance.id}?task=${focusData.task.id}&scroll=true`)}
-                        className={clsx(
-                          "md:hidden transition-all active:scale-90 flex items-center justify-center w-14 h-14",
-                          isYellow ? "text-gray-900/60 hover:text-gray-900" : "text-white/60 hover:text-white"
-                        )}
-                        title="Open in Full Checklist"
-                      >
-                        <RotateCcw className="w-8 h-8 rotate-180" />
-                      </button>
+                    <button 
+                      onClick={() => navigate(`/project/${focusData.projectId}/instance/${focusData.instance?.id}?task=${focusData.task.id}&scroll=true`)}
+                      className={clsx(
+                        "md:hidden transition-all active:scale-90 flex items-center justify-center w-14 h-14",
+                        isYellow ? "text-gray-900/60 hover:text-gray-900" : "text-white/60 hover:text-white"
+                      )}
+                      title="Open in Full Checklist"
+                    >
+                      <RotateCcw className="w-8 h-8 rotate-180" />
+                    </button>
                     )}
                   </div>
 
                   <button 
                     onClick={async () => {
+                        if (focusData.type === 'note') {
+                          const { toggleScratchpadTask } = useTasklistStore.getState();
+                          await toggleScratchpadTask(focusData.note.id);
+                          return;
+                        }
+
                         if (isExecuting) {
                           const tId = focusData.task.id;
-                          const iId = focusData.instance.id;
+                          const iId = focusData.instance?.id || '';
                           
                           await toggleTask(tId, iId);
                           if (focusData.task.timerIsRunning) await toggleTaskTimer(tId);
@@ -502,9 +560,9 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                           setShowRefinementPrompt(true);
                         } else if (currentStage === 'staged') {
                           // Moving from Established to Preparing: Un-complete if already completed
-                          if (focusData.task.completed) {
-                            await toggleTask(focusData.task.id, focusData.instance.id);
-                          }
+                        if (focusData.task.completed) {
+                          await toggleTask(focusData.task.id, focusData.instance?.id || '');
+                        }
                           await setFocusStage('preparing');
                         } else {
                           await setFocusStage('executing');
@@ -532,12 +590,12 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                           )
                     )}
                   >
-                    {isExecuting ? (
+                    {focusData.type === 'note' ? (
                       <>
-                        <ThumbsUp className="w-8 h-8 md:w-10 md:h-10" />
-                        <span>TASK DONE?</span>
+                        <CheckCircle2 className={clsx(showPlaylistSidebar ? "w-5 h-5" : "w-6 h-6 md:w-8 md:h-8")} />
+                        <span>{focusData.note.completed ? 'Note Completed' : 'Mark Done'}</span>
                       </>
-                    ) : focusData.task.completed ? (
+                    ) : isExecuting ? (
                       <>
                         <CheckCircle2 className={clsx(showPlaylistSidebar ? "w-5 h-5" : "w-6 h-6 md:w-8 md:h-8", focusData.isMultiUserActive ? "text-google-red" : (isYellow ? "text-google-yellow" : "text-google-green"))} />
                         <span className={clsx(focusData.isMultiUserActive ? "text-google-red" : (isYellow ? "text-google-yellow" : "text-google-green"))}>Task Completed</span>
@@ -624,12 +682,14 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
         </div>
 
         {/* Knowledge Hub (Task Intelligence) */}
-        <div className={clsx(
-          "transition-all duration-700",
-          isExecuting && "opacity-0 translate-y-20 pointer-events-none"
-        )}>
-          <KnowledgeHub task={focusData?.task || null} stage={currentStage} />
-        </div>
+        {focusData?.type !== 'note' && (
+          <div className={clsx(
+            "transition-all duration-700",
+            isExecuting && "opacity-0 translate-y-20 pointer-events-none"
+          )}>
+            <KnowledgeHub task={focusData?.task || null} stage={currentStage} />
+          </div>
+        )}
 
         {/* Scratchpad (My Notes) */}
         <div className={clsx(

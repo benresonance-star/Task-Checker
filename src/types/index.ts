@@ -301,8 +301,9 @@ export interface ProjectOverride {
 }
 
 export interface ActionSetItem {
-  projectId: string;
-  instanceId: string;
+  type?: 'task' | 'note';
+  projectId?: string;
+  instanceId?: string;
   taskId: string;
   addedAt: number;
 }

@@ -4,11 +4,12 @@ import pkg from '../package.json';
 import { useTasklistStore } from './store/useTasklistStore';
 import { SectionItem } from './components/checklist/SectionItem';
 import { Button } from './components/ui/Button';
-import { MasterTasklist, Section, Subsection, Task } from './types';
+import { MasterTasklist, Section, Subsection, Task, ScratchpadItem } from './types';
 import { generateUUID } from './utils/uuid';
 import { auth } from './lib/firebase';
 import { ProjectDashboard } from './components/project/ProjectDashboard';
 import { FocusDashboard } from './components/dashboard/FocusDashboard';
+import { PlannerHome } from './components/dashboard/PlannerHome';
 import { TaskInfoModal } from './components/modals/TaskInfoModal';
 import { FeedbackLedger } from './components/admin/FeedbackLedger';
 import { 
@@ -20,7 +21,7 @@ import {
 import { 
     CheckCircle2, StickyNote, Trash2, ListOrdered, Music, ListPlus, Play, Pause, X, Menu, LogOut, Mail, Lock, User as UserIcon, Loader2, GripVertical, ThumbsUp, AlertTriangle, Target,
     Plus, LayoutGrid, ClipboardList, Moon, Sun, Download, Upload, UserCircle2, FileText, FileSpreadsheet, File as FileIcon, ChevronUp, ChevronDown, ShieldCheck, Eye, ShieldOff, Eraser, ChevronLeft, ChevronRight, Palette,
-    Terminal, BookOpen, Activity, GitBranch, Database, Search, Edit2, Settings
+    Terminal, BookOpen, Activity, GitBranch, Database, Search, Edit2, Settings, TrendingUp
   } from 'lucide-react';
 import { StyleConsole } from './components/ui/StyleConsole';
 import {
@@ -56,6 +57,117 @@ import {
 import { TomatoIcon } from './components/icons/TomatoIcon';
 import { formatTime } from './utils/time';
 
+const SidebarNoteItem = ({ 
+  item, 
+  note, 
+  isActiveFocus 
+}: { 
+  item: any, 
+  note: ScratchpadItem, 
+  isActiveFocus: boolean
+}) => {
+  const { toggleTaskFocus, toggleNoteInActionSet } = useTasklistStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: item.type === 'note' ? `note-${item.taskId}` : `${item.projectId}-${item.instanceId}-${item.taskId}` });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition: isDragging ? 'none' : transition,
+    zIndex: isDragging ? 50 : undefined,
+    opacity: isDragging ? 0.8 : undefined,
+  } as React.CSSProperties;
+
+  const isDeactivatedCompleted = !isActiveFocus && note.completed;
+
+  return (
+    <div 
+      ref={setNodeRef}
+      style={style}
+      className={clsx(
+        "group flex flex-col rounded-container border-2 transition-all relative overflow-hidden cursor-pointer",
+        isActiveFocus 
+          ? "bg-indigo-600 border-indigo-500 shadow-lg shadow-indigo-500/20" 
+          : (isDeactivatedCompleted 
+              ? "bg-indigo-50/50 dark:bg-indigo-900/10 border-indigo-200/50 dark:border-indigo-800/50 opacity-60" 
+              : "bg-white dark:bg-black/40 border-gray-200 dark:border-gray-800 hover:border-indigo-400 shadow-sm")
+      )}
+      onClick={() => {
+        const isPlanner = location.pathname === '/' || location.pathname === '/home';
+        const isFocus = location.pathname === '/focus';
+        
+        if (isPlanner || isFocus) {
+          toggleTaskFocus('', '', note.id);
+        } else {
+          navigate('/focus');
+          toggleTaskFocus('', '', note.id);
+        }
+      }}
+    >
+      <div className="flex items-start gap-3 p-4">
+        <div 
+          {...attributes} 
+          {...listeners}
+          className={clsx(
+            "flex flex-col items-center pt-1 transition-opacity cursor-grab active:cursor-grabbing flex-shrink-0 touch-none",
+            isActiveFocus ? "text-white/40" : "text-gray-400 dark:text-gray-600 opacity-40 group-hover:opacity-100"
+          )}
+          style={{ touchAction: 'none' }}
+        >
+          <GripVertical className="w-4 h-4" />
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <span className={clsx(
+              "text-[8px] font-black uppercase tracking-[0.2em]",
+              isActiveFocus ? "text-white/70" : "text-indigo-600 dark:text-indigo-400"
+            )}>
+              Personal Note
+            </span>
+            <button 
+              onClick={(e) => { e.stopPropagation(); toggleNoteInActionSet(note.id); }}
+              className={clsx(
+                "p-1 rounded-md opacity-0 group-hover:opacity-100 transition-all",
+                isActiveFocus ? "text-white/50 hover:text-white" : "text-gray-400 hover:text-indigo-600"
+              )}
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+          <div 
+            className={clsx(
+              "text-xs font-bold truncate transition-all prose prose-sm max-w-none prose-p:my-0",
+              isActiveFocus ? "text-white" : "text-gray-700 dark:text-gray-200",
+              note.completed && "line-through opacity-50"
+            )}
+            dangerouslySetInnerHTML={{ __html: note.text }}
+          />
+          <span className={clsx(
+            "text-[8px] font-bold uppercase mt-1 block",
+            isActiveFocus ? "text-white/50" : "text-gray-400"
+          )}>
+            {note.category}
+          </span>
+        </div>
+      </div>
+      
+      {isActiveFocus && (
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+          <div className="h-full bg-white animate-progress" style={{ width: '100%' }} />
+        </div>
+      )}
+    </div>
+  );
+};
 const SidebarTaskItem = ({ 
   item, 
   task, 
@@ -87,7 +199,7 @@ const SidebarTaskItem = ({
     transform,
     transition,
     isDragging
-  } = useSortable({ id: `${item.projectId}-${item.instanceId}-${item.taskId}` });
+  } = useSortable({ id: item.type === 'note' ? `note-${item.taskId}` : `${item.projectId}-${item.instanceId}-${item.taskId}` });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -162,11 +274,12 @@ const SidebarTaskItem = ({
       )}
       onClick={() => {
         if (instance && project) {
-          const isDashboard = location.pathname === '/' || location.pathname === '/dashboard';
+          const isPlanner = location.pathname === '/' || location.pathname === '/home';
+          const isFocus = location.pathname === '/focus';
           const isProjectView = location.pathname.startsWith('/project/');
           
-          if (isDashboard) {
-            // Stay on Dashboard, just update focus
+          if (isPlanner || isFocus) {
+            // Stay in Planning/Focus view, just update focus
             toggleTaskFocus(project.id, instance.id, task.id);
           } else if (isProjectView) {
             // Check if we are already in THIS project context
@@ -553,6 +666,8 @@ function App() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const isPlanner = location.pathname === '/' || location.pathname === '/home';
+  const isFocus = location.pathname === '/focus';
   const isExecuting = currentUser?.activeFocus?.stage === 'executing';
   const queryParams = new URLSearchParams(location.search);
   const urlTaskId = queryParams.get('task');
@@ -589,12 +704,16 @@ function App() {
     const { active, over } = event;
     if (over && active.id !== over.id) {
       const actionSet = currentUser?.actionSet || [];
-      const oldIndex = actionSet.findIndex((item) => `${item.projectId}-${item.instanceId}-${item.taskId}` === active.id);
-      const newIndex = actionSet.findIndex((item) => `${item.projectId}-${item.instanceId}-${item.taskId}` === over.id);
+      const getCompositeId = (item: any) => item.type === 'note' ? `note-${item.taskId}` : `${item.projectId}-${item.instanceId}-${item.taskId}`;
       
-      const newActionSet = arrayMove(actionSet, oldIndex, newIndex);
-      const { setActionSet } = useTasklistStore.getState();
-      await setActionSet(newActionSet);
+      const oldIndex = actionSet.findIndex((item) => getCompositeId(item) === active.id);
+      const newIndex = actionSet.findIndex((item) => getCompositeId(item) === over.id);
+      
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newActionSet = arrayMove(actionSet, oldIndex, newIndex);
+        const { setActionSet } = useTasklistStore.getState();
+        await setActionSet(newActionSet);
+      }
     }
   };
 
@@ -680,7 +799,7 @@ function App() {
       if (lastPath && lastPath !== '/') {
         navigate(lastPath, { replace: true });
       } else {
-        navigate('/dashboard', { replace: true });
+        navigate('/home', { replace: true });
       }
       return;
     }
@@ -707,7 +826,7 @@ function App() {
     localStorage.setItem('lastActivePath', path);
 
     // Mode sync
-    if (path.startsWith('/dashboard')) {
+    if (path.startsWith('/home') || path.startsWith('/focus')) {
       if (mode !== 'project') setMode('project'); // Keep project mode state for sidebar logic
     } else if (path.startsWith('/master')) {
       if (mode !== 'master') setMode('master');
@@ -801,8 +920,8 @@ function App() {
       initialFocusSynced.current = true;
       const currentPath = location.pathname;
       
-      // If we are on the dashboard or master mode, don't force away
-      if (currentPath === '/dashboard' || currentPath.startsWith('/master')) {
+      // If we are on the planner, focus dashboard or master mode, don't force away
+      if (currentPath === '/home' || currentPath === '/focus' || currentPath === '/' || currentPath.startsWith('/master')) {
         return;
       }
 
@@ -1148,16 +1267,30 @@ function App() {
               <nav className="p-4 flex flex-col gap-2">
                 <button
                   onClick={() => {
-                    navigate('/dashboard');
+                    navigate('/home');
                     setIsMobileMenuOpen(false);
                   }}
                   className={clsx(
                     "flex items-center gap-3 p-3 rounded-lg font-bold text-sm transition-colors",
-                    location.pathname === '/dashboard' ? "bg-google-blue text-white" : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                    (location.pathname === '/' || location.pathname === '/home') ? "bg-google-blue text-white" : "hover:bg-gray-100 dark:hover:bg-gray-800"
                   )}
                 >
                   <LayoutGrid className="w-5 h-5" />
-                  <span>My Dashboard</span>
+                  <span>Home Planner</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    navigate('/focus');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={clsx(
+                    "flex items-center gap-3 p-3 rounded-lg font-bold text-sm transition-colors",
+                    location.pathname === '/focus' ? "bg-google-blue text-white" : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                  )}
+                >
+                  <TrendingUp className="w-5 h-5" />
+                  <span>Focus Dashboard</span>
                 </button>
 
                 <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
@@ -1187,13 +1320,24 @@ function App() {
 
                 <button
                   onClick={() => {
-                    navigate('/dashboard');
+                    navigate('/home');
                     setIsMobileMenuOpen(false);
                   }}
-                  className={`flex items-center justify-between px-4 py-3 rounded-button transition-colors ${location.pathname === '/dashboard' ? "bg-blue-50 text-google-blue dark:bg-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+                  className={`flex items-center justify-between px-4 py-3 rounded-button transition-colors ${(location.pathname === '/' || location.pathname === '/home') ? "bg-blue-50 text-google-blue dark:bg-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
                 >
-                  <div className="flex items-center gap-3"><LayoutGrid className="w-5 h-5" /><span className="font-bold">My Dashboard</span></div>
-                  {location.pathname === '/dashboard' && <div className="w-1.5 h-1.5 rounded-full bg-google-blue" />}
+                  <div className="flex items-center gap-3"><LayoutGrid className="w-5 h-5" /><span className="font-bold">Home Planner</span></div>
+                  {(location.pathname === '/' || location.pathname === '/home') && <div className="w-1.5 h-1.5 rounded-full bg-google-blue" />}
+                </button>
+
+                <button
+                  onClick={() => {
+                    navigate('/focus');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center justify-between px-4 py-3 rounded-button transition-colors ${location.pathname === '/focus' ? "bg-blue-50 text-google-blue dark:bg-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+                >
+                  <div className="flex items-center gap-3"><TrendingUp className="w-5 h-5" /><span className="font-bold">Focus Dashboard</span></div>
+                  {location.pathname === '/focus' && <div className="w-1.5 h-1.5 rounded-full bg-google-blue" />}
                 </button>
 
                 <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
@@ -1204,10 +1348,10 @@ function App() {
                 navigate(lastId ? `/project/${lastId}` : '/project'); 
                 setIsMobileMenuOpen(false); 
               }} 
-              className={`flex items-center justify-between px-4 py-3 rounded-button transition-colors ${mode === 'project' && location.pathname !== '/dashboard' ? "bg-blue-50 text-google-blue dark:bg-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+              className={`flex items-center justify-between px-4 py-3 rounded-button transition-colors ${mode === 'project' && !isPlanner && !isFocus ? "bg-blue-50 text-google-blue dark:bg-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
             >
               <div className="flex items-center gap-3"><Target className="w-5 h-5" /><span className="font-bold">Projects</span></div>
-              {mode === 'project' && location.pathname !== '/dashboard' && <div className="w-1.5 h-1.5 rounded-full bg-google-blue" />}
+              {mode === 'project' && !isPlanner && !isFocus && <div className="w-1.5 h-1.5 rounded-full bg-google-blue" />}
             </button>
             {isAdmin && (
               <button 
@@ -1322,13 +1466,23 @@ function App() {
 
             <nav className="flex flex-col gap-1">
               <button 
-                onClick={() => navigate('/dashboard')} 
+                onClick={() => navigate('/home')} 
                 className={clsx(
                   theme.components.nav.item,
-                  location.pathname === '/dashboard' ? theme.components.nav.itemActive : theme.components.nav.itemInactive
+                  (location.pathname === '/' || location.pathname === '/home') ? theme.components.nav.itemActive : theme.components.nav.itemInactive
                 )}
               >
-                <LayoutGrid className="w-5 h-5" /><span className="font-medium">My Dashboard</span>
+                <LayoutGrid className="w-5 h-5" /><span className="font-medium">Home Planner</span>
+              </button>
+
+              <button 
+                onClick={() => navigate('/focus')} 
+                className={clsx(
+                  theme.components.nav.item,
+                  location.pathname === '/focus' ? theme.components.nav.itemActive : theme.components.nav.itemInactive
+                )}
+              >
+                <TrendingUp className="w-5 h-5" /><span className="font-medium">Focus Dashboard</span>
               </button>
 
               <div className="h-px bg-gray-200 dark:bg-gray-700 my-2 mx-3" />
@@ -1340,7 +1494,7 @@ function App() {
                 }} 
                 className={clsx(
                   theme.components.nav.item,
-                  mode === 'project' && location.pathname !== '/dashboard' ? theme.components.nav.itemActive : theme.components.nav.itemInactive
+                  mode === 'project' && !['/', '/home', '/focus'].includes(location.pathname) ? theme.components.nav.itemActive : theme.components.nav.itemInactive
                 )}
               >
                 <Target className="w-5 h-5" /><span className="font-medium">Projects</span>
@@ -1413,7 +1567,7 @@ function App() {
         "transition-all duration-700 ease-in-out relative",
         isExecuting && "p-0 md:p-0"
       )}>
-        {location.pathname !== '/dashboard' && (
+        {!isPlanner && !isFocus && (
           <header className={clsx(theme.components.layout.contentHeader, "z-[100] sticky top-0 bg-white/70 dark:bg-black/40 backdrop-blur-md pt-8 pb-6 border-b border-gray-200 dark:border-gray-800")}>
             <div className="flex flex-col w-full gap-4">
               <div className="flex items-center justify-between w-full">
@@ -1882,7 +2036,15 @@ function App() {
           </header>
         )}
 
-            {location.pathname === '/dashboard' ? (
+            {isPlanner ? (
+              <div className="p-4 md:p-8">
+                <PlannerHome 
+                  onOpenFocus={() => navigate('/focus')}
+                  projects={projects}
+                  masters={masters}
+                />
+              </div>
+            ) : isFocus ? (
               <div className="p-4 md:p-8">
                 <FocusDashboard onOpenNotes={(taskId, containerId, focusFeedback) => setEditingTaskInfo({ taskId, containerId, focusFeedback })} />
               </div>
@@ -2076,12 +2238,27 @@ function App() {
                     modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
                   >
                     <SortableContext 
-                      items={validActionSet.map(i => `${i.projectId}-${i.instanceId}-${i.taskId}`)}
+                      items={validActionSet.map(i => i.type === 'note' ? `note-${i.taskId}` : `${i.projectId}-${i.instanceId}-${i.taskId}`)}
                       strategy={verticalListSortingStrategy}
                     >
                       <div className="space-y-3">
                         {validActionSet.map((item) => {
-                          const compositeKey = `${item.projectId}-${item.instanceId}-${item.taskId}`;
+                          const compositeKey = item.type === 'note' ? `note-${item.taskId}` : `${item.projectId}-${item.instanceId}-${item.taskId}`;
+                          
+                          if (item.type === 'note') {
+                            const note = currentUser?.scratchpad?.find(n => n.id === item.taskId);
+                            const isActiveFocus = !currentUser?.activeFocus?.projectId && currentUser?.activeFocus?.taskId === item.taskId;
+                            if (!note) return null;
+                            return (
+                              <SidebarNoteItem 
+                                key={compositeKey}
+                                item={item}
+                                note={note}
+                                isActiveFocus={isActiveFocus}
+                              />
+                            );
+                          }
+
                           const instance = instances.find(i => i.id === item.instanceId);
                           const task = instance?.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => t.id === item.taskId);
                           const isActiveFocus = currentUser?.activeFocus?.projectId === item.projectId && 

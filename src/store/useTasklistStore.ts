@@ -106,6 +106,7 @@ interface TasklistState {
   setFocusStage: (stage: FocusStage) => Promise<void>;
   toggleTaskPrerequisite: (taskId: string, prereqIndex: number, containerId: string) => Promise<void>;
   toggleTaskInActionSet: (projectId: string, instanceId: string, taskId: string) => Promise<void>;
+  toggleNoteInActionSet: (noteId: string) => Promise<void>;
   moveTaskInActionSet: (projectId: string, instanceId: string, taskId: string, direction: 'up' | 'down') => Promise<void>;
   setActionSet: (newSet: ActionSetItem[]) => Promise<void>;
   getValidActionSet: () => ActionSetItem[];
@@ -1103,18 +1104,49 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
 
       const userRef = doc(db, 'users', currentUser.id);
       const currentSet = currentUser.actionSet || [];
-      const exists = currentSet.find(i => i.projectId === projectId && i.instanceId === instanceId && i.taskId === taskId);
+      const exists = currentSet.find(i => 
+        (i.type === 'task' || !i.type) && 
+        i.projectId === projectId && 
+        i.instanceId === instanceId && 
+        i.taskId === taskId
+      );
 
       if (exists) {
         // Remove from playlist
-        const newSet = currentSet.filter(i => !(i.projectId === projectId && i.instanceId === instanceId && i.taskId === taskId));
+        const newSet = currentSet.filter(i => 
+          !( (i.type === 'task' || !i.type) && i.projectId === projectId && i.instanceId === instanceId && i.taskId === taskId )
+        );
         await updateDoc(userRef, { actionSet: newSet });
       } else {
         // Add to playlist
-        const newItem = {
+        const newItem: ActionSetItem = {
+          type: 'task',
           projectId,
           instanceId,
           taskId,
+          addedAt: Date.now()
+        };
+        await updateDoc(userRef, { actionSet: [...currentSet, newItem] });
+      }
+    },
+
+    toggleNoteInActionSet: async (noteId) => {
+      const { currentUser } = get();
+      if (!currentUser) return;
+
+      const userRef = doc(db, 'users', currentUser.id);
+      const currentSet = currentUser.actionSet || [];
+      const exists = currentSet.find(i => i.type === 'note' && i.taskId === noteId);
+
+      if (exists) {
+        // Remove from playlist
+        const newSet = currentSet.filter(i => !(i.type === 'note' && i.taskId === noteId));
+        await updateDoc(userRef, { actionSet: newSet });
+      } else {
+        // Add to playlist
+        const newItem: ActionSetItem = {
+          type: 'note',
+          taskId: noteId,
           addedAt: Date.now()
         };
         await updateDoc(userRef, { actionSet: [...currentSet, newItem] });
@@ -1149,6 +1181,9 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       const { currentUser, instances } = get();
       if (!currentUser?.actionSet) return [];
       return currentUser.actionSet.filter(item => {
+        if (item.type === 'note') {
+          return currentUser.scratchpad?.some(n => n.id === item.taskId);
+        }
         const instance = instances.find(i => i.id === item.instanceId);
         if (!instance) return false;
         const task = instance.sections
