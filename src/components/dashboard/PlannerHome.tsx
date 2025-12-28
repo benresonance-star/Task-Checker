@@ -1,27 +1,28 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  LayoutGrid, 
   Target, 
-  Search,
-  CheckCircle2,
   ArrowRight,
   TrendingUp,
-  Clock,
   Briefcase,
   Bell,
   Calendar,
   Zap,
-  X
+  X,
+  ClipboardList,
+  StickyNote,
+  ChevronRight,
+  Plus
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { ScratchpadWidget } from './ScratchpadWidget';
-import { TasklistInstance, ActionSetItem } from '../../types';
+import { TasklistInstance, ActionSetItem, Project, ScratchpadItem } from '../../types';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { clsx } from 'clsx';
+import { useNavigate } from 'react-router-dom';
 
 interface PlannerHomeProps {
   onOpenFocus: () => void;
-  projects: any[];
+  projects: Project[];
   instances: TasklistInstance[];
   masters: any[];
 }
@@ -31,7 +32,8 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
   projects,
   instances
 }) => {
-  const { getTodayAlerts, getValidActionSet, setActionSet, setTaskFocus, toggleTaskInActionSet, currentUser } = useTasklistStore();
+  const { getTodayAlerts, getValidActionSet, setActionSet, setTaskFocus, toggleNoteInActionSet, currentUser } = useTasklistStore();
+  const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const todayAlerts = getTodayAlerts();
   const validActionSet = getValidActionSet();
@@ -62,6 +64,61 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
     });
   }, [validActionSet, currentUser?.scratchpad, instances]);
 
+  // DERIVED DATA: Active Projects & Checklists with "Skin in the Game"
+  const activeCommitments = useMemo(() => {
+    const projectMap = new Map<string, { 
+      project: Project, 
+      activeInstances: TasklistInstance[], 
+      associatedNotes: ScratchpadItem[] 
+    }>();
+
+    // 1. Find projects and instances from the current session (actionSet)
+    validActionSet.forEach(item => {
+      if (item.type !== 'note' && item.projectId) {
+        const project = projects.find(p => p.id === item.projectId);
+        const instance = instances.find(i => i.id === item.instanceId);
+        if (project) {
+          if (!projectMap.has(project.id)) {
+            projectMap.set(project.id, { project, activeInstances: [], associatedNotes: [] });
+          }
+          const entry = projectMap.get(project.id)!;
+          if (instance && !entry.activeInstances.find(i => i.id === instance.id)) {
+            entry.activeInstances.push(instance);
+          }
+        }
+      }
+    });
+
+    // 2. Find projects from associated notes
+    currentUser?.scratchpad?.forEach(note => {
+      if (note.category && note.category !== 'Personal') {
+        const project = projects.find(p => p.name === note.category);
+        if (project) {
+          if (!projectMap.has(project.id)) {
+            projectMap.set(project.id, { project, activeInstances: [], associatedNotes: [] });
+          }
+          const entry = projectMap.get(project.id)!;
+          if (!entry.associatedNotes.find(n => n.id === note.id)) {
+            entry.associatedNotes.push(note);
+          }
+        }
+      }
+    });
+
+    return Array.from(projectMap.values());
+  }, [validActionSet, projects, instances, currentUser?.scratchpad]);
+
+  // General Notes (Personal category or not associated with an active project)
+  const personalNotes = useMemo(() => {
+    return currentUser?.scratchpad?.filter(note => {
+      if (note.category === 'Personal') return true;
+      const project = projects.find(p => p.name === note.category);
+      // If it has a project category but that project isn't "active" in the session,
+      // it still lives in the general/personal bucket for easy triage.
+      return !project || !activeCommitments.find(c => c.project.id === project.id);
+    }) || [];
+  }, [currentUser?.scratchpad, projects, activeCommitments]);
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
@@ -76,7 +133,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-12">
+    <div className="space-y-12 animate-in fade-in duration-500 pb-24">
       {/* Today's Horizon Panel */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 bg-white dark:bg-black/20 p-8 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 shadow-xl relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-96 h-96 bg-google-blue/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl transition-transform group-hover:scale-110 duration-1000" />
@@ -233,114 +290,183 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Project Pulse Widget */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <h2 className="flex items-center gap-3 text-sm font-black uppercase text-gray-500 tracking-[0.2em]">
-              <Target className="w-5 h-5 text-google-green" />
-              Project Pulse
-            </h2>
-            <Button variant="ghost" size="sm" className="text-xs font-black text-google-blue">View All</Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {projects.slice(0, 4).map(project => {
-              const projectInstances = instances.filter(i => i.projectId === project.id);
-              const hasActiveReminder = projectInstances.some(inst => 
-                inst.sections.some(s => 
-                  s.subsections.some(ss => 
-                    ss.tasks.some(t => t.reminder && t.reminder.status === 'active' && !t.completed)
-                  )
-                )
-              );
+      {/* Main Commitment Section */}
+      <div className="space-y-12">
+        <div className="flex items-center justify-between px-2">
+          <h2 className="flex items-center gap-3 text-[10px] font-black uppercase text-gray-500 tracking-[0.2em]">
+            <Target className="w-5 h-5 text-google-green" />
+            My Projects & Checklists
+          </h2>
+          <Button variant="ghost" size="sm" className="text-[10px] font-black text-google-blue uppercase tracking-widest">Explore All</Button>
+        </div>
+
+        <div className="space-y-6">
+          {activeCommitments.length === 0 ? (
+            <div className="py-20 text-center bg-gray-50 dark:bg-black/10 rounded-[2.5rem] border-2 border-dashed border-gray-200 dark:border-gray-800">
+              <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">No active commitments found.</p>
+              <p className="text-xs text-gray-500 mt-2">Stage a task or add a note to see your projects here.</p>
+            </div>
+          ) : (
+            activeCommitments.map(({ project, activeInstances, associatedNotes }) => {
+              const taskCount = validActionSet.filter(i => i.projectId === project.id).length;
+              const noteCount = associatedNotes.length;
 
               return (
                 <div 
                   key={project.id}
-                  className="bg-white dark:bg-black/40 p-6 rounded-container border-2 border-gray-100 dark:border-gray-800 hover:border-google-green/50 transition-all cursor-pointer group shadow-sm hover:shadow-lg relative"
+                  className="bg-white dark:bg-black/20 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-xl transition-all group"
                 >
-                  {hasActiveReminder && (
-                    <div className="absolute top-4 right-4 text-orange-500 animate-pulse">
-                      <Bell className="w-5 h-5 fill-current" />
-                    </div>
-                  )}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-google-green/60">Project</span>
-                      <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 line-clamp-1">{project.name}</h3>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="opacity-0 group-hover:opacity-100 h-8 px-3 rounded-lg text-[9px] font-black uppercase tracking-widest border-2 border-google-green/30 text-google-green hover:bg-google-green/10"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // Find first pending task across all instances of this project
-                          const firstPending = projectInstances
-                            .flatMap(inst => inst.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)))
-                            .find(t => !t.completed);
-                          
-                          if (firstPending) {
-                            const instance = projectInstances.find(inst => 
-                              inst.sections.some(s => s.subsections.some(ss => ss.tasks.some(t => t.id === firstPending.id)))
-                            );
-                            if (instance) {
-                              toggleTaskInActionSet(project.id, instance.id, firstPending.id);
-                            }
-                          }
-                        }}
-                      >
-                        Stage Next
-                      </Button>
-                      {!hasActiveReminder && (
-                        <div className="p-2 bg-google-green/10 rounded-xl text-google-green group-hover:scale-110 transition-transform">
-                          <Briefcase className="w-5 h-5" />
+                  {/* Project Header */}
+                  <div className="p-6 border-b border-gray-50 dark:border-gray-800/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-google-green/10 rounded-2xl text-google-green group-hover:scale-110 transition-transform">
+                        <Briefcase className="w-6 h-6" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 tracking-tight">{project.name}</h3>
+                        <div className="flex items-center gap-3">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-google-blue">
+                            {taskCount} {taskCount === 1 ? 'TASK' : 'TASKS'} IN SESSION
+                          </span>
+                          <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
+                          <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">
+                            {noteCount} {noteCount === 1 ? 'NOTE' : 'NOTES'} ASSOCIATED
+                          </span>
                         </div>
-                      )}
+                      </div>
                     </div>
+                    <Button 
+                      variant="ghost" 
+                      onClick={() => navigate(`/project/${project.id}`)}
+                      className="h-10 px-4 rounded-xl border border-gray-100 dark:border-gray-800 text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-google-green/5 hover:text-google-green hover:border-google-green/30"
+                    >
+                      Enter Project Dashboard <ChevronRight className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <div className="flex items-center gap-4 text-xs font-bold text-gray-500 dark:text-gray-400">
-                    <div className="flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      {project.instanceIds?.length || 0} Checklists
+
+                  {/* Activity Islands (Ribbons) */}
+                  <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Zone A: Live Checklists */}
+                    <div className="space-y-4">
+                      <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.1em] flex items-center gap-2">
+                        <ClipboardList className="w-4 h-4 text-google-blue" />
+                        Live Checklists
+                      </h4>
+                      <div className="flex flex-nowrap overflow-x-auto pb-4 gap-3 custom-scrollbar snap-x">
+                        {activeInstances.length === 0 ? (
+                          <div className="h-[60px] flex items-center px-4 bg-gray-50 dark:bg-white/5 rounded-xl text-[10px] font-bold text-gray-400 italic">
+                            No specific checklists staged.
+                          </div>
+                        ) : (
+                          activeInstances.map(instance => {
+                            // Calculate completion for the instance
+                            const totalTasks = instance.sections.reduce((acc, s) => acc + s.subsections.reduce((a, ss) => a + ss.tasks.length, 0), 0);
+                            const completedTasks = instance.sections.reduce((acc, s) => acc + s.subsections.reduce((a, ss) => a + ss.tasks.filter(t => t.completed).length, 0), 0);
+                            const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                            const nextTask = instance.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => !t.completed);
+
+                            return (
+                              <div 
+                                key={instance.id}
+                                onClick={() => navigate(`/project/${project.id}/instance/${instance.id}`)}
+                                className="snap-start flex-shrink-0 w-[240px] bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 hover:border-google-blue transition-all cursor-pointer group/pill"
+                              >
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-xs font-black text-gray-900 dark:text-gray-100 truncate flex-1 pr-2">{instance.title}</span>
+                                  <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
+                                    <svg className="w-8 h-8 -rotate-90">
+                                      <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="3" className="text-gray-200 dark:text-gray-800" />
+                                      <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray={88} strokeDashoffset={88 - (88 * progress) / 100} className="text-google-blue transition-all duration-1000" />
+                                    </svg>
+                                    <span className="absolute text-[8px] font-black">{progress}%</span>
+                                  </div>
+                                </div>
+                                {nextTask && (
+                                  <div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 group-hover/pill:text-google-blue transition-colors">
+                                    <ChevronRight className="w-3 h-3 shrink-0" />
+                                    <span className="truncate">Next: {nextTask.title}</span>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5" />
-                      Active Now
+
+                    {/* Zone B: Associated Notes */}
+                    <div className="space-y-4">
+                      <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.1em] flex items-center gap-2">
+                        <StickyNote className="w-4 h-4 text-indigo-500" />
+                        Project Notes
+                      </h4>
+                      <div className="flex flex-nowrap overflow-x-auto pb-4 gap-3 custom-scrollbar snap-x">
+                        {associatedNotes.length === 0 ? (
+                          <div className="h-[60px] flex items-center px-4 bg-gray-50 dark:bg-white/5 rounded-xl text-[10px] font-bold text-gray-400 italic">
+                            No notes tagged for this project.
+                          </div>
+                        ) : (
+                          associatedNotes.map(note => (
+                            <div 
+                              key={note.id}
+                              style={{ backgroundColor: note.priority ? 'var(--note-priority-bg)' : 'var(--note-project-bg)' }}
+                              className={clsx(
+                                "snap-start flex-shrink-0 w-[180px] border rounded-2xl p-4 transition-all cursor-pointer group/note shadow-sm hover:shadow-md h-[100px] flex flex-col",
+                                note.priority ? "border-red-200 dark:border-red-900/30" : "border-transparent"
+                              )}
+                              onClick={() => {
+                                // Find where this note is being rendered and focus it, or stage it
+                                toggleNoteInActionSet(note.id);
+                              }}
+                            >
+                              <div 
+                                className="text-[11px] font-bold text-gray-800 dark:text-gray-200 line-clamp-3 prose prose-sm dark:prose-invert max-w-none"
+                                dangerouslySetInnerHTML={{ __html: note.text }}
+                              />
+                              {note.reminder && (
+                                <div className="mt-auto flex items-center gap-1 text-[8px] font-black text-orange-600 animate-pulse">
+                                  <Bell className="w-2.5 h-2.5 fill-current" />
+                                  {new Date(note.reminder.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
               );
-            })}
-            {projects.length === 0 && (
-              <div className="col-span-full py-12 text-center bg-gray-50 dark:bg-black/10 rounded-container border-2 border-dashed border-gray-200 dark:border-gray-800">
-                <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">No active projects</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Quick Access Sidebar */}
-        <div className="space-y-6">
-          <div className="bg-google-blue/5 dark:bg-blue-900/10 p-6 rounded-container border-2 border-google-blue/10 space-y-6">
-            <h2 className="text-sm font-black uppercase text-google-blue tracking-[0.2em]">Quick Access</h2>
-            <div className="space-y-3">
-              <Button variant="ghost" className="w-full justify-start gap-3 h-12 bg-white dark:bg-black/40 border-2 border-gray-200 dark:border-gray-800">
-                <Search className="w-4 h-4" /> Search Global Logic
-              </Button>
-              <Button variant="ghost" className="w-full justify-start gap-3 h-12 bg-white dark:bg-black/40 border-2 border-gray-200 dark:border-gray-800">
-                <LayoutGrid className="w-4 h-4" /> Browse Templates
-              </Button>
-            </div>
-          </div>
+            })
+          )}
         </div>
       </div>
 
-      {/* Full Width My Notes */}
-      <div className="space-y-4">
-        <div className="p-8 bg-white dark:bg-black/40 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 min-h-[500px] shadow-xl">
-          <ScratchpadWidget />
+      {/* General Notes Section (Triage) */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between px-2">
+          <h2 className="flex items-center gap-3 text-[10px] font-black uppercase text-gray-500 tracking-[0.2em]">
+            <StickyNote className="w-5 h-5 text-google-blue" />
+            General Triage & Personal Notes
+          </h2>
+          <Button variant="ghost" size="sm" className="text-[10px] font-black text-google-blue uppercase tracking-widest gap-2">
+            <Plus className="w-4 h-4" /> New Note
+          </Button>
+        </div>
+        
+        <div className="p-8 bg-white dark:bg-black/40 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 min-h-[400px] shadow-xl">
+          <div className="space-y-6">
+            <div className="flex flex-wrap gap-4">
+              {personalNotes.length === 0 ? (
+                <div className="w-full py-20 text-center opacity-40">
+                  <StickyNote className="w-12 h-12 mx-auto mb-3" />
+                  <p className="text-[10px] font-black uppercase tracking-widest">No general notes in triage.</p>
+                </div>
+              ) : (
+                <ScratchpadWidget />
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
