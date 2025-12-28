@@ -42,7 +42,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
     presets: true,
     atmosphere: false,
     planner: false,
-    dashboard: true,
+    dashboard: false,
     projects: false,
     checklist: false,
     modal: false,

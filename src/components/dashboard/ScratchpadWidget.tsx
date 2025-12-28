@@ -358,7 +358,7 @@ export const ScratchpadWidget: React.FC<{ projects?: Project[] }> = ({ projects:
         )}
       </div>
 
-      <div className="flex-1 bg-[var(--notes-bg)] rounded-widget border-2 border-[var(--notes-border)] flex flex-col overflow-visible transition-all relative">
+      <div className="flex-1 flex flex-col overflow-visible transition-all relative">
         {/* Quick Input & Category Picker */}
         <div className={clsx(
           "overflow-hidden transition-all duration-300 ease-in-out",
