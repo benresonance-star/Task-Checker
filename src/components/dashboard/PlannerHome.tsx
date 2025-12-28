@@ -335,35 +335,35 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
               })}
             </div>
 
-            {/* The Spotlight Container (Single Screen Focus) */}
+            {/* The Spotlight Container (Dynamic Height Balanced Trio) */}
             {spotlightData && (
-              <div className="bg-white dark:bg-black/20 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 overflow-hidden shadow-xl animate-fade-in">
-                <div className="flex flex-col xl:flex-row h-auto xl:h-[500px]">
-                  {/* Column 1: Project Identity (Slim) */}
-                  <div className="w-full xl:w-64 bg-gray-50/50 dark:bg-black/40 border-b xl:border-b-0 xl:border-r border-gray-100 dark:border-gray-800 p-8 flex flex-col justify-between group">
+              <div className="bg-white dark:bg-black/20 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 overflow-hidden shadow-xl animate-fade-in min-h-[320px]">
+                <div className="flex flex-col lg:flex-row min-h-0">
+                  {/* Column 1: Project Identity (20%) */}
+                  <div className="w-full lg:w-[22%] bg-gray-50/50 dark:bg-black/40 border-b lg:border-b-0 lg:border-r border-gray-100 dark:border-gray-800 p-6 flex flex-col gap-6 group shrink-0">
                     <div>
-                      <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tighter leading-tight break-words mb-4">
+                      <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 tracking-tighter leading-tight break-words mb-4">
                         {spotlightData.project.name}
                       </h3>
                       <div className="space-y-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-xl bg-google-blue/10 flex items-center justify-center text-google-blue">
-                            <Zap className="w-4 h-4" />
+                          <div className="w-7 h-7 rounded-lg bg-google-blue/10 flex items-center justify-center text-google-blue shrink-0">
+                            <Zap className="w-3.5 h-3.5" />
                           </div>
-                          <div className="flex flex-col">
-                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Active Tasks</span>
-                            <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest truncate">Active Tasks</span>
+                            <span className="text-xs font-bold text-gray-900 dark:text-gray-100">
                               {validActionSet.filter(i => i.projectId === spotlightData.project.id).length} in session
                             </span>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
-                            <StickyNote className="w-4 h-4" />
+                          <div className="w-7 h-7 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500 shrink-0">
+                            <StickyNote className="w-3.5 h-3.5" />
                           </div>
-                          <div className="flex flex-col">
-                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Knowledge</span>
-                            <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest truncate">Knowledge</span>
+                            <span className="text-xs font-bold text-gray-900 dark:text-gray-100">
                               {spotlightData.associatedNotes.length} linked notes
                             </span>
                           </div>
@@ -374,23 +374,22 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                     <Button 
                       variant="ghost" 
                       onClick={() => navigate(`/project/${spotlightData.project.id}`)}
-                      className="mt-8 h-12 w-full rounded-2xl border border-gray-200 dark:border-gray-700 text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-google-green hover:text-white hover:border-google-green transition-all"
+                      className="h-10 w-full rounded-xl border border-gray-200 dark:border-gray-700 text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-google-green hover:text-white hover:border-google-green transition-all"
                     >
                       Deep Dive <ArrowRight className="w-4 h-4" />
                     </Button>
                   </div>
 
-                  {/* Right Content Area: Stacked Checklists and Notes */}
-                  <div className="flex-1 flex flex-col min-w-0 min-h-0">
-                    {/* Zone A: Live Checklists (Full Width, Vertical Stack) */}
-                    <div className="flex-1 p-8 space-y-4 border-b border-gray-100 dark:border-gray-800 overflow-y-auto custom-scrollbar">
-                      <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] flex items-center gap-2 mb-2">
-                        <ClipboardList className="w-4 h-4 text-google-blue" />
-                        Live Checklists
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Column 2: Live Checklists (43%) */}
+                  <div className="flex-[43] p-6 space-y-4 border-b lg:border-b-0 lg:border-r border-gray-100 dark:border-gray-800 flex flex-col min-w-0">
+                    <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] flex items-center gap-2 mb-1 shrink-0">
+                      <ClipboardList className="w-4 h-4 text-google-blue" />
+                      Live Checklists
+                    </h4>
+                    <div className="flex-1 overflow-y-auto custom-scrollbar no-scrollbar pr-1 max-h-[380px]">
+                      <div className="grid grid-cols-1 gap-3">
                         {spotlightData.activeInstances.length === 0 ? (
-                          <div className="col-span-full py-8 flex items-center justify-center bg-gray-50/50 dark:bg-white/5 rounded-2xl text-[10px] font-bold text-gray-400 italic">
+                          <div className="py-8 flex items-center justify-center bg-gray-50/50 dark:bg-white/5 rounded-2xl text-[10px] font-bold text-gray-400 italic">
                             No specific checklists staged.
                           </div>
                         ) : (
@@ -399,7 +398,6 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                             const completedTasks = instance.sections.reduce((acc, s) => acc + s.subsections.reduce((a, ss) => a + ss.tasks.filter(t => t.completed).length, 0), 0);
                             const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
                             
-                            // Find the first task in validActionSet that belongs to this instance
                             const sessionItem = validActionSet.find(i => i.type !== 'note' && i.instanceId === instance.id);
                             const nextTask = sessionItem 
                               ? instance.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => t.id === sessionItem.taskId)
@@ -409,7 +407,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                               <div 
                                 key={instance.id}
                                 onClick={() => navigate(`/project/${spotlightData.project.id}/instance/${instance.id}${nextTask ? `?task=${nextTask.id}&scroll=true` : ''}`)}
-                                className="bg-gray-50/50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 hover:border-google-blue hover:shadow-lg transition-all cursor-pointer group/pill"
+                                className="bg-gray-50/50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 hover:border-google-blue hover:shadow-lg transition-all cursor-pointer group/pill min-h-[100px]"
                               >
                                 <div className="flex items-center justify-between mb-3">
                                   <span className="text-xs font-black text-gray-900 dark:text-gray-100 truncate flex-1 pr-2">{instance.title}</span>
@@ -433,16 +431,18 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                         )}
                       </div>
                     </div>
+                  </div>
 
-                    {/* Zone B: Project Notes (Full Width, Vertical Stack) */}
-                    <div className="flex-1 p-8 space-y-4 bg-gray-50/30 dark:bg-black/20 overflow-y-auto custom-scrollbar">
-                      <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] flex items-center gap-2 mb-2">
-                        <StickyNote className="w-4 h-4 text-indigo-500" />
-                        Associated Notes
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Column 3: Associated Notes (35%) */}
+                  <div className="flex-[35] p-6 space-y-4 bg-gray-50/30 dark:bg-black/20 flex flex-col min-w-0">
+                    <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] flex items-center gap-2 mb-1 shrink-0">
+                      <StickyNote className="w-4 h-4 text-indigo-500" />
+                      Associated Notes
+                    </h4>
+                    <div className="flex-1 overflow-y-auto custom-scrollbar no-scrollbar pr-1 max-h-[380px]">
+                      <div className="grid grid-cols-1 gap-3">
                         {spotlightData.associatedNotes.length === 0 ? (
-                          <div className="col-span-full py-8 flex items-center justify-center bg-gray-50/50 dark:bg-white/5 rounded-2xl text-[10px] font-bold text-gray-400 italic text-center px-4">
+                          <div className="py-8 flex items-center justify-center bg-gray-50/50 dark:bg-white/5 rounded-2xl text-[10px] font-bold text-gray-400 italic text-center px-4">
                             No notes tagged for this project.
                           </div>
                         ) : (
