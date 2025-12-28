@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Circle, CheckCircle2, StickyNote, Trash2, ChevronUp, ChevronDown, Play, Pause, AlertTriangle, ListPlus, ListMinus } from 'lucide-react';
+import { Circle, CheckCircle2, StickyNote, Trash2, ChevronUp, ChevronDown, Play, Pause, AlertTriangle, ListPlus, ListMinus, Bell } from 'lucide-react';
 import { clsx } from 'clsx';
 import { theme } from '../../styles/theme';
 import { Task } from '../../types';
@@ -222,8 +222,8 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
                   {task.title}
                 </span>
                 
-                {/* Other User Claim Badges */}
-                {otherClaimants.length > 0 && (
+                {/* Other User Claim Badges & Reminders */}
+                {(otherClaimants.length > 0 || task.reminder) && (
                   <div className="flex flex-wrap gap-1 mt-1 ml-1">
                     {otherClaimants.map(u => (
                       <span 
@@ -238,6 +238,17 @@ export const TaskItem = ({ task, subsectionId, onOpenNotes }: TaskItemProps) => 
                         [{u.name.charAt(0).toUpperCase()}{u.name.charAt(1).toUpperCase()}] GATHERED
                       </span>
                     ))}
+                    {task.reminder && (
+                      <span className={clsx(
+                        "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest transition-all",
+                        isActive 
+                          ? "bg-white/20 text-white animate-pulse" 
+                          : "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-800/30 animate-pulse"
+                      )}>
+                        <Bell className="w-2.5 h-2.5 fill-current" />
+                        {new Date(task.reminder.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
