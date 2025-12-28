@@ -21,7 +21,7 @@ import {
 import { 
     CheckCircle2, StickyNote, Trash2, ListOrdered, Music, ListPlus, Play, Pause, X, Menu, LogOut, Mail, Lock, User as UserIcon, Loader2, GripVertical, ThumbsUp, AlertTriangle, Target,
     Plus, LayoutGrid, ClipboardList, Moon, Sun, Download, Upload, UserCircle2, FileText, FileSpreadsheet, File as FileIcon, ChevronUp, ChevronDown, ShieldCheck, Eye, ShieldOff, Eraser, ChevronLeft, ChevronRight, Palette,
-    Terminal, BookOpen, Activity, GitBranch, Database, Search, Edit2, Settings, TrendingUp
+    Terminal, BookOpen, Activity,     GitBranch, Database, Search, Edit2, Settings, TrendingUp, Zap, Clock
   } from 'lucide-react';
 import { StyleConsole } from './components/ui/StyleConsole';
 import {
@@ -741,6 +741,7 @@ function App() {
 
   const [showDiscoveryGrid, setShowDiscoveryGrid] = useState(false);
   const [showChecklistShelf, setShowChecklistShelf] = useState(false);
+  const [isQueueExpanded, setIsQueueExpanded] = useState(false);
   const [isEditingContextTitle, setIsEditingContextTitle] = useState(false);
   const [isEditingChecklistTitle, setIsEditingChecklistTitle] = useState(false);
   const [contextSearchQuery, setContextSearchQuery] = useState('');
@@ -2250,43 +2251,128 @@ function App() {
                       items={validActionSet.map(i => i.type === 'note' ? `note-${i.taskId}` : `${i.projectId}-${i.instanceId}-${i.taskId}`)}
                       strategy={verticalListSortingStrategy}
                     >
-                      <div className="space-y-3">
-                        {validActionSet.map((item) => {
-                          const compositeKey = item.type === 'note' ? `note-${item.taskId}` : `${item.projectId}-${item.instanceId}-${item.taskId}`;
-                          
-                          if (item.type === 'note') {
-                            const note = currentUser?.scratchpad?.find(n => n.id === item.taskId);
-                            const isActiveFocus = !currentUser?.activeFocus?.projectId && currentUser?.activeFocus?.taskId === item.taskId;
-                            if (!note) return null;
+                      <div className="space-y-6">
+                        {(() => {
+                          // Find active focus in the action set
+                          const activeFocusIdx = validActionSet.findIndex(item => {
+                            if (item.type === 'note') {
+                              return !currentUser?.activeFocus?.projectId && currentUser?.activeFocus?.taskId === item.taskId;
+                            }
+                            return currentUser?.activeFocus?.projectId === item.projectId && 
+                                   currentUser?.activeFocus?.instanceId === item.instanceId && 
+                                   currentUser?.activeFocus?.taskId === item.taskId;
+                          });
+
+                          const inFocusItem = activeFocusIdx !== -1 ? validActionSet[activeFocusIdx] : null;
+                          const otherItems = activeFocusIdx !== -1 
+                            ? [...validActionSet.slice(0, activeFocusIdx), ...validActionSet.slice(activeFocusIdx + 1)]
+                            : validActionSet;
+
+                          const nextUpItems = otherItems.slice(0, 2);
+                          const laterItems = otherItems.slice(2);
+
+                          const renderItem = (item: any) => {
+                            const compositeKey = item.type === 'note' ? `note-${item.taskId}` : `${item.projectId}-${item.instanceId}-${item.taskId}`;
+                            
+                            if (item.type === 'note') {
+                              const note = currentUser?.scratchpad?.find(n => n.id === item.taskId);
+                              const isActiveFocus = !currentUser?.activeFocus?.projectId && currentUser?.activeFocus?.taskId === item.taskId;
+                              if (!note) return null;
+                              return (
+                                <SidebarNoteItem 
+                                  key={compositeKey}
+                                  item={item}
+                                  note={note}
+                                  isActiveFocus={isActiveFocus}
+                                />
+                              );
+                            }
+
+                            const instance = instances.find(i => i.id === item.instanceId);
+                            const task = instance?.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => t.id === item.taskId);
+                            const isActiveFocus = currentUser?.activeFocus?.projectId === item.projectId && 
+                                                 currentUser?.activeFocus?.instanceId === item.instanceId && 
+                                                 currentUser?.activeFocus?.taskId === item.taskId;
+
+                            if (!task || !instance) return null;
+
                             return (
-                              <SidebarNoteItem 
+                              <SidebarTaskItem 
                                 key={compositeKey}
-                                item={item}
-                                note={note}
-                                isActiveFocus={isActiveFocus}
-                              />
+                                  item={item}
+                                  task={task}
+                                  instance={instance}
+                                  isActiveFocus={isActiveFocus}
+                                  onOpenNotes={(taskId, containerId, focusFeedback) => setEditingTaskInfo({ taskId, containerId, focusFeedback })}
+                                />
+                              );
+                            };
+
+                            return (
+                              <>
+                                {/* IN FOCUS */}
+                                {inFocusItem && (
+                                  <div className="space-y-2">
+                                    <div className="flex items-center gap-2 px-2">
+                                      <Zap className="w-3.5 h-3.5 text-orange-500" />
+                                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500/70">In Focus</span>
+                                    </div>
+                                    {renderItem(inFocusItem)}
+                                  </div>
+                                )}
+
+                                {/* NEXT UP */}
+                                {nextUpItems.length > 0 && (
+                                  <div className="space-y-2">
+                                    <div className="flex items-center gap-2 px-2">
+                                      <TrendingUp className="w-3.5 h-3.5 text-google-blue" />
+                                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-google-blue/70">Next Up</span>
+                                    </div>
+                                    <div className="space-y-3">
+                                      {nextUpItems.map(renderItem)}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* LATER QUEUE */}
+                                {laterItems.length > 0 && (
+                                  <div className="space-y-3">
+                                    <div className="flex items-center justify-between px-2">
+                                      <div className="flex items-center gap-2">
+                                        <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400/70">Later Queue</span>
+                                      </div>
+                                      <span className="text-[10px] font-black text-gray-400 bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded-full">
+                                        {laterItems.length} tasks
+                                      </span>
+                                    </div>
+
+                                    {isQueueExpanded ? (
+                                      <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                                        {laterItems.map(renderItem)}
+                                        <button 
+                                          onClick={() => setIsQueueExpanded(false)}
+                                          className="w-full py-3 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-800 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-google-blue hover:border-google-blue/30 transition-all"
+                                        >
+                                          Collapse Queue
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <button 
+                                        onClick={() => setIsQueueExpanded(true)}
+                                        className="w-full py-4 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center gap-1 group hover:border-google-blue/30 transition-all"
+                                      >
+                                        <ChevronDown className="w-4 h-4 text-gray-300 group-hover:text-google-blue transition-colors" />
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 group-hover:text-google-blue transition-colors">
+                                          Reveal {laterItems.length} More
+                                        </span>
+                                      </button>
+                                    )}
+                                  </div>
+                                )}
+                              </>
                             );
-                          }
-
-                          const instance = instances.find(i => i.id === item.instanceId);
-                          const task = instance?.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => t.id === item.taskId);
-                          const isActiveFocus = currentUser?.activeFocus?.projectId === item.projectId && 
-                                               currentUser?.activeFocus?.instanceId === item.instanceId && 
-                                               currentUser?.activeFocus?.taskId === item.taskId;
-
-                          if (!task || !instance) return null;
-
-                          return (
-                            <SidebarTaskItem 
-                              key={compositeKey}
-                              item={item}
-                              task={task}
-                              instance={instance}
-                              isActiveFocus={isActiveFocus}
-                              onOpenNotes={(taskId, containerId, focusFeedback) => setEditingTaskInfo({ taskId, containerId, focusFeedback })}
-                            />
-                          );
-                        })}
+                          })()}
                       </div>
                     </SortableContext>
                   </DndContext>

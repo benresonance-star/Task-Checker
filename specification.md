@@ -12,7 +12,7 @@
 > 5. **Sync Protocol**: All protocol changes must be reflected in the **Admin > App Protocol** interface.
 >    - *Comment: Keep the internal Admin documentation synchronized with reality.*
 
-*Current Version: 1.11.4*
+*Current Version: 1.11.5*
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It features a dual-interface architectural model:
@@ -48,7 +48,12 @@ The application uses a 3-level hierarchical navigation system in the header:
     - **Editor Layout**: Toggle between Stacked and Side-by-Side views within the Template Editor to optimize workspace layout.
     - **Unified Creation**: Primary creation actions are unified within the Discovery Grid.
 
-### Discovery Grids & Shelves
+### Progressive Focus Queue (v1.11.5)
+To prevent visual overload, the "My Session" sidebar utilizes a triage-based rendering strategy:
+1.  **IN FOCUS Section**: The currently active task or note is prominently displayed at the top.
+2.  **NEXT UP Section**: Displays the next two items in the queue for immediate visibility.
+3.  **LATER QUEUE Section**: All remaining tasks are hidden by default and accessible via a "Reveal More" control.
+4.  **Sequential Grouping**: This grouping persists even during reordering, ensuring the user always sees their immediate horizon without being overwhelmed by the full session length.
 - **Project/Template Discovery**: A visual grid of all available projects or templates with search, creation, and management controls (Delete/Settings).
 - **Checklist Discovery**: A slide-down shelf within the header showing all checklists in the current project, including completion progress bars.
 
