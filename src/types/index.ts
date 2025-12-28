@@ -253,6 +253,11 @@ export interface ThemeSettings {
   colorAppBg: string;
   colorSidebarBg: string;
   colorConsoleBg: string;
+  colorHeaderBg: string;
+  colorHeaderBorder: string;
+  headerBlur: number;
+  headerPaddingTop: number;
+  headerPaddingBottom: number;
   colorTextPrimary: string;
   colorTextSecondary: string;
   colorTextHeading: string;

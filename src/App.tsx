@@ -1674,7 +1674,17 @@ function App() {
         isExecuting && "p-0 md:p-0"
       )}>
         {!isSession && (
-          <header className={clsx(theme.components.layout.contentHeader, "z-[100] sticky top-0 bg-white/70 dark:bg-black/40 backdrop-blur-md pt-8 pb-6 border-b border-gray-200 dark:border-gray-800")}>
+          <header 
+            className={clsx(theme.components.layout.contentHeader, "z-[100] sticky top-0 border-b transition-all")}
+            style={{ 
+              backgroundColor: 'var(--header-bg)', 
+              borderColor: 'var(--header-border)',
+              backdropFilter: 'blur(var(--header-blur))',
+              WebkitBackdropFilter: 'blur(var(--header-blur))',
+              paddingTop: 'var(--header-pt)',
+              paddingBottom: 'var(--header-pb)'
+            }}
+          >
             <div className="flex flex-col w-full gap-4">
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-1.5 md:gap-3 min-w-0 flex-1 flex-wrap">

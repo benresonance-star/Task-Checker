@@ -258,6 +258,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--app-bg', settings.colorAppBg);
     root.style.setProperty('--sidebar-bg', settings.colorSidebarBg);
     root.style.setProperty('--console-bg', settings.colorConsoleBg);
+    root.style.setProperty('--header-bg', settings.colorHeaderBg);
+    root.style.setProperty('--header-border', settings.colorHeaderBorder);
+    root.style.setProperty('--header-blur', `${settings.headerBlur}px`);
+    root.style.setProperty('--header-pt', `${settings.headerPaddingTop}px`);
+    root.style.setProperty('--header-pb', `${settings.headerPaddingBottom}px`);
 
     // Typography
     root.style.setProperty('--text-primary', settings.colorTextPrimary);
@@ -404,6 +409,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorAppBg: oldSettings.colorAppBg || (oldSettings.mode === 'dark' ? '#121212' : '#FFFFFF'),
       colorSidebarBg: oldSettings.colorSidebarBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.6)' : '#F9FAFB'),
       colorConsoleBg: oldSettings.colorConsoleBg || (oldSettings.mode === 'dark' ? '#1E1E1E' : '#FFFFFF'),
+      colorHeaderBg: oldSettings.colorHeaderBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.7)'),
+      colorHeaderBorder: oldSettings.colorHeaderBorder || (oldSettings.mode === 'dark' ? '#1e293b' : '#e5e7eb'),
+      headerBlur: oldSettings.headerBlur !== undefined ? oldSettings.headerBlur : 12,
+      headerPaddingTop: oldSettings.headerPaddingTop !== undefined ? oldSettings.headerPaddingTop : 32,
+      headerPaddingBottom: oldSettings.headerPaddingBottom !== undefined ? oldSettings.headerPaddingBottom : 24,
       colorTextPrimary: oldSettings.colorTextPrimary || (oldSettings.mode === 'dark' ? '#D1D5DB' : '#4B5563'),
       colorTextSecondary: oldSettings.colorTextSecondary || (oldSettings.mode === 'dark' ? '#9CA3AF' : '#6B7280'),
       colorTextHeading: oldSettings.colorTextHeading || (oldSettings.mode === 'dark' ? '#FFFFFF' : '#111827'),
@@ -530,6 +540,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorAppBg: isDark ? '#121212' : '#FFFFFF',
     colorSidebarBg: isDark ? 'rgba(0, 0, 0, 0.6)' : '#F9FAFB',
     colorConsoleBg: isDark ? '#1E1E1E' : '#FFFFFF',
+    colorHeaderBg: isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.7)',
+    colorHeaderBorder: isDark ? '#1e293b' : '#e5e7eb',
+    headerBlur: 12,
+    headerPaddingTop: 32,
+    headerPaddingBottom: 24,
     colorTextPrimary: isDark ? '#D1D5DB' : '#4B5563',
     colorTextSecondary: isDark ? '#9CA3AF' : '#6B7280',
     colorTextHeading: isDark ? '#FFFFFF' : '#111827',

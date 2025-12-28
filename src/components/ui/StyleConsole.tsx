@@ -306,6 +306,8 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                   <ColorControl label="Main App Bg" value={themeSettings.colorAppBg} onChange={(v) => handleChange('colorAppBg', v)} />
                   <ColorControl label="Sidebar Bg" value={themeSettings.colorSidebarBg} onChange={(v) => handleChange('colorSidebarBg', v)} />
                   <ColorControl label="Console Bg" value={themeSettings.colorConsoleBg} onChange={(v) => handleChange('colorConsoleBg', v)} />
+                  <ColorControl label="Header Bg" value={themeSettings.colorHeaderBg} onChange={(v) => handleChange('colorHeaderBg', v)} />
+                  <ColorControl label="Header Border" value={themeSettings.colorHeaderBorder} onChange={(v) => handleChange('colorHeaderBorder', v)} />
                   <ColorControl label="Alert: Danger" value={themeSettings.colorDestructive} onChange={(v) => handleChange('colorDestructive', v)} />
                   <ColorControl label="Alert: Warning" value={themeSettings.colorPresenceNotice} onChange={(v) => handleChange('colorPresenceNotice', v)} />
                 </div>
@@ -317,6 +319,16 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                     <ColorControl label="Heading Color" value={themeSettings.colorTextHeading} onChange={(v) => handleChange('colorTextHeading', v)} />
                   </div>
                   <SliderControl label="Global Text Scale" value={themeSettings.fontSizeBase} min={10} max={24} onChange={(v) => handleChange('fontSizeBase', v)} />
+                  
+                  <div className="space-y-4 py-2 border-y border-gray-100 dark:border-gray-800">
+                    <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest\">Sticky Header Geometry</h4>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                      <SliderControl label="Header Blur" value={themeSettings.headerBlur} min={0} max={40} onChange={(v) => handleChange('headerBlur', v)} />
+                      <SliderControl label="Header Padding Top" value={themeSettings.headerPaddingTop} min={0} max={64} onChange={(v) => handleChange('headerPaddingTop', v)} />
+                      <SliderControl label="Header Padding Bottom" value={themeSettings.headerPaddingBottom} min={0} max={64} onChange={(v) => handleChange('headerPaddingBottom', v)} />
+                    </div>
+                  </div>
+
                   <SliderControl label="Line Spacing" value={themeSettings.lineHeightBase} min={1} max={2} step={0.1} onChange={(v) => handleChange('lineHeightBase', v)} />
                   <div className="grid grid-cols-2 gap-3">
                     <SliderControl label="Heading Kerning" value={themeSettings.letterSpacingHeading} min={-0.1} max={0.5} step={0.01} onChange={(v) => handleChange('letterSpacingHeading', v)} />
