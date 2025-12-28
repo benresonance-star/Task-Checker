@@ -31,17 +31,18 @@ To ensure critical tools (Branding Console, Admin Panel) are always accessible, 
 - `z-[50]`: Sidebars / Overlays
 - `z-[10]`: Content areas
 
-### Unified Breadcrumb Navigation (v1.11.1)
+### Unified Breadcrumb Navigation (v1.11.2)
 The application uses a 3-level hierarchical navigation system in the header:
 1.  **Level 1 (Mode Switcher)**: Toggles between "Projects" and "Templates". Open "Discovery Grid" for global context switching.
 2.  **Level 2 (Active Context)**: Displays the name of the active Project or Template. Clicking opens the Project/Template Discovery Grid.
 3.  **Level 3 (Checklist Selection)**: In Project mode, displays the active Checklist title. Clicking opens the Checklist Discovery shelf for switching within the project.
+4.  **Greedy Layout**: The breadcrumb container is "greedy" (`flex-1`), consuming all available space. It supports multi-line wrapping (`flex-wrap`) to ensure long titles remain fully visible without distortion or "..." truncation.
+5.  **Explicit Editing**: Admins can use the `Pencil` icon next to any title to enter an explicit edit mode.
+6.  **Locked Context**: The header is sticky-pinned (`top-0`) using glassmorphism, ensuring global situational awareness during long scrolls.
 
 **Core Views:**
 - **Home Planner** (`/home`): The landing screen for orientation. Contains the **Project Pulse** grid and the **Master Triage** (My Notes) for daily planning.
 - **My Work Session** (`/session`): The execution engine. Displays the **Active Focus Card** (Task or Note) and the **Knowledge Hub**.
-4. **Explicit Editing**: Admins can use the `Pencil` icon next to any title to enter an explicit edit mode.
-5. **Locked Context**: The header is sticky-pinned (`top-0`) using glassmorphism, ensuring global situational awareness during long scrolls.
 6. **Contextual Controls**: 
     - **Browse Layout**: Toggle between Grid and List views within the Discovery shelves to customize how Projects/Templates are searched.
     - **Editor Layout**: Toggle between Stacked and Side-by-Side views within the Template Editor to optimize workspace layout.

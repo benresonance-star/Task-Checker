@@ -1571,7 +1571,7 @@ function App() {
           <header className={clsx(theme.components.layout.contentHeader, "z-[100] sticky top-0 bg-white/70 dark:bg-black/40 backdrop-blur-md pt-8 pb-6 border-b border-gray-200 dark:border-gray-800")}>
             <div className="flex flex-col w-full gap-4">
               <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-1.5 md:gap-3 min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 md:gap-3 min-w-0 flex-1 flex-wrap">
                   {/* Level 1: Mode Switcher */}
                   <button 
                     onClick={() => { setShowDiscoveryGrid(!showDiscoveryGrid); setShowChecklistShelf(false); }}
@@ -1591,11 +1591,11 @@ function App() {
                   <ChevronRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />
 
                   {/* Level 2: Active Project / Template */}
-                  <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex items-center gap-2 min-w-0 max-w-full">
                     {isEditingContextTitle ? (
                       <input 
                         autoFocus
-                        className="bg-transparent border-b-2 border-google-blue outline-none text-lg md:text-xl font-black min-w-0 w-48 md:w-64 animate-in fade-in duration-200 text-gray-900 dark:text-gray-100"
+                        className="bg-transparent border-b-2 border-google-blue outline-none text-lg md:text-xl font-black min-w-[200px] flex-1 animate-in fade-in duration-200 text-gray-900 dark:text-gray-100"
                         value={tempContextTitle}
                         onChange={(e) => setTempContextTitle(e.target.value)}
                         onBlur={() => {
@@ -1616,7 +1616,7 @@ function App() {
                       <div className="flex items-center gap-1 md:gap-2 min-w-0 group/ctx">
                         <h2 
                           className={clsx(
-                            "text-lg md:text-xl font-black truncate transition-colors cursor-pointer",
+                            "text-lg md:text-xl font-black transition-colors cursor-pointer break-words",
                             mode === 'project' ? "text-gray-900 dark:text-gray-100 hover:text-google-blue" : "text-google-blue hover:text-blue-600"
                           )}
                           onClick={() => { setShowDiscoveryGrid(!showDiscoveryGrid); setShowChecklistShelf(false); }}
@@ -1630,7 +1630,7 @@ function App() {
                               setTempContextTitle(mode === 'master' ? activeMaster?.title || '' : activeProject?.name || '');
                               setIsEditingContextTitle(true);
                             }}
-                            className="opacity-0 group-hover/ctx:opacity-100 p-1.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-all text-gray-400 hover:text-google-blue"
+                            className="opacity-0 group-hover/ctx:opacity-100 p-1.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-all text-gray-400 hover:text-google-blue shrink-0"
                             title="Edit Title"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
@@ -1644,11 +1644,11 @@ function App() {
                   {mode === 'project' && activeProject && activeInstance && (
                     <>
                       <ChevronRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />
-                      <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex items-center gap-2 min-w-0 max-w-full">
                         {isEditingChecklistTitle ? (
                           <input 
                             autoFocus
-                            className="bg-transparent border-b-2 border-google-blue outline-none text-lg md:text-xl font-black min-w-0 w-48 md:w-64 animate-in fade-in duration-200 text-google-blue"
+                            className="bg-transparent border-b-2 border-google-blue outline-none text-lg md:text-xl font-black min-w-[200px] flex-1 animate-in fade-in duration-200 text-google-blue"
                             value={tempChecklistTitle}
                             onChange={(e) => setTempChecklistTitle(e.target.value)}
                             onBlur={() => {
@@ -1666,7 +1666,7 @@ function App() {
                         ) : (
                           <div className="flex items-center gap-1 md:gap-2 min-w-0 group/chk">
                             <h2 
-                              className="text-lg md:text-xl font-black truncate text-google-blue cursor-pointer hover:underline decoration-2 underline-offset-4"
+                              className="text-lg md:text-xl font-black text-google-blue cursor-pointer hover:underline decoration-2 underline-offset-4 break-words"
                               onClick={() => { setShowChecklistShelf(!showChecklistShelf); setShowDiscoveryGrid(false); }}
                             >
                               {activeInstance.title}
@@ -1678,13 +1678,13 @@ function App() {
                                   setTempChecklistTitle(activeInstance.title);
                                   setIsEditingChecklistTitle(true);
                                 }}
-                                className="opacity-0 group-hover/chk:opacity-100 p-1.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-all text-gray-400 hover:text-google-blue"
+                                className="opacity-0 group-hover/chk:opacity-100 p-1.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-all text-gray-400 hover:text-google-blue shrink-0"
                                 title="Edit Checklist Title"
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
                               </button>
                             )}
-                            <ChevronDown className={clsx("w-3.5 h-3.5 text-google-blue transition-transform duration-300", showChecklistShelf && "rotate-180")} />
+                            <ChevronDown className={clsx("w-3.5 h-3.5 text-google-blue transition-transform duration-300 shrink-0", showChecklistShelf && "rotate-180")} />
                           </div>
                         )}
                       </div>
@@ -1695,7 +1695,7 @@ function App() {
                 {/* Right Side Actions */}
                 <div className={clsx(
                   "flex items-center gap-2 transition-all duration-500 shrink-0",
-                  showPlaylistSidebar && "md:flex-1 md:justify-end"
+                  showPlaylistSidebar && "md:justify-end"
                 )}>
                   {mode === 'project' && (
                     <div className="hidden md:block relative group/playlist">
