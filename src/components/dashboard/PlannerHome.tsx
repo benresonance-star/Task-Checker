@@ -304,14 +304,6 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
             <Target className="w-5 h-5 text-google-green" />
             Project Activity Spotlight
           </h2>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-[10px] font-black text-google-blue uppercase tracking-widest hover:bg-google-blue/5"
-            onClick={() => navigate('/projects')} // Assuming there's a projects route
-          >
-            Explore All
-          </Button>
         </div>
 
         {activeCommitments.length === 0 ? (
@@ -366,7 +358,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
             {/* The Spotlight Container (Single Screen Focus) */}
             {spotlightData && (
               <div className="bg-white dark:bg-black/20 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 overflow-hidden shadow-xl animate-fade-in">
-                <div className="flex flex-col xl:flex-row min-h-[300px]">
+                <div className="flex flex-col xl:flex-row h-auto xl:h-[500px]">
                   {/* Column 1: Project Identity (Slim) */}
                   <div className="w-full xl:w-64 bg-gray-50/50 dark:bg-black/40 border-b xl:border-b-0 xl:border-r border-gray-100 dark:border-gray-800 p-8 flex flex-col justify-between group">
                     <div>
@@ -408,93 +400,96 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                     </Button>
                   </div>
 
-                  {/* Column 2: Live Checklists (Wide) */}
-                  <div className="flex-1 p-8 space-y-4 border-b xl:border-b-0 xl:border-r border-gray-100 dark:border-gray-800">
-                    <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] flex items-center gap-2 mb-2">
-                      <ClipboardList className="w-4 h-4 text-google-blue" />
-                      Live Checklists
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {spotlightData.activeInstances.length === 0 ? (
-                        <div className="col-span-full py-8 flex items-center justify-center bg-gray-50/50 dark:bg-white/5 rounded-2xl text-[10px] font-bold text-gray-400 italic">
-                          No specific checklists staged.
-                        </div>
-                      ) : (
-                        spotlightData.activeInstances.map(instance => {
-                          const totalTasks = instance.sections.reduce((acc, s) => acc + s.subsections.reduce((a, ss) => a + ss.tasks.length, 0), 0);
-                          const completedTasks = instance.sections.reduce((acc, s) => acc + s.subsections.reduce((a, ss) => a + ss.tasks.filter(t => t.completed).length, 0), 0);
-                          const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-                          
-                          // Find the first task in validActionSet that belongs to this instance
-                          const sessionItem = validActionSet.find(i => i.type !== 'note' && i.instanceId === instance.id);
-                          const nextTask = sessionItem 
-                            ? instance.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => t.id === sessionItem.taskId)
-                            : instance.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => !t.completed);
+                  {/* Right Content Area: Stacked Checklists and Notes */}
+                  <div className="flex-1 flex flex-col min-w-0 min-h-0">
+                    {/* Zone A: Live Checklists (Full Width, Vertical Stack) */}
+                    <div className="flex-1 p-8 space-y-4 border-b border-gray-100 dark:border-gray-800 overflow-y-auto custom-scrollbar">
+                      <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] flex items-center gap-2 mb-2">
+                        <ClipboardList className="w-4 h-4 text-google-blue" />
+                        Live Checklists
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {spotlightData.activeInstances.length === 0 ? (
+                          <div className="col-span-full py-8 flex items-center justify-center bg-gray-50/50 dark:bg-white/5 rounded-2xl text-[10px] font-bold text-gray-400 italic">
+                            No specific checklists staged.
+                          </div>
+                        ) : (
+                          spotlightData.activeInstances.map(instance => {
+                            const totalTasks = instance.sections.reduce((acc, s) => acc + s.subsections.reduce((a, ss) => a + ss.tasks.length, 0), 0);
+                            const completedTasks = instance.sections.reduce((acc, s) => acc + s.subsections.reduce((a, ss) => a + ss.tasks.filter(t => t.completed).length, 0), 0);
+                            const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                            
+                            // Find the first task in validActionSet that belongs to this instance
+                            const sessionItem = validActionSet.find(i => i.type !== 'note' && i.instanceId === instance.id);
+                            const nextTask = sessionItem 
+                              ? instance.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => t.id === sessionItem.taskId)
+                              : instance.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => !t.completed);
 
-                          return (
-                            <div 
-                              key={instance.id}
-                              onClick={() => navigate(`/project/${spotlightData.project.id}/instance/${instance.id}${nextTask ? `?task=${nextTask.id}&scroll=true` : ''}`)}
-                              className="bg-gray-50/50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 hover:border-google-blue hover:shadow-lg transition-all cursor-pointer group/pill"
-                            >
-                              <div className="flex items-center justify-between mb-3">
-                                <span className="text-xs font-black text-gray-900 dark:text-gray-100 truncate flex-1 pr-2">{instance.title}</span>
-                                <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
-                                  <svg className="w-8 h-8 -rotate-90">
-                                    <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="3" className="text-gray-200 dark:text-gray-800" />
-                                    <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray={88} strokeDashoffset={88 - (88 * progress) / 100} className="text-google-blue transition-all duration-1000" />
-                                  </svg>
-                                  <span className="absolute text-[8px] font-black">{progress}%</span>
+                            return (
+                              <div 
+                                key={instance.id}
+                                onClick={() => navigate(`/project/${spotlightData.project.id}/instance/${instance.id}${nextTask ? `?task=${nextTask.id}&scroll=true` : ''}`)}
+                                className="bg-gray-50/50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 hover:border-google-blue hover:shadow-lg transition-all cursor-pointer group/pill"
+                              >
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-xs font-black text-gray-900 dark:text-gray-100 truncate flex-1 pr-2">{instance.title}</span>
+                                  <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
+                                    <svg className="w-8 h-8 -rotate-90">
+                                      <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="3" className="text-gray-200 dark:text-gray-800" />
+                                      <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray={88} strokeDashoffset={88 - (88 * progress) / 100} className="text-google-blue transition-all duration-1000" />
+                                    </svg>
+                                    <span className="absolute text-[8px] font-black">{progress}%</span>
+                                  </div>
                                 </div>
+                                {nextTask && (
+                                  <div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 group-hover/pill:text-google-blue transition-colors">
+                                    <ChevronRight className="w-3 h-3 shrink-0" />
+                                    <span>Next: {nextTask.title}</span>
+                                  </div>
+                                )}
                               </div>
-                              {nextTask && (
-                                <div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 group-hover/pill:text-google-blue transition-colors">
-                                  <ChevronRight className="w-3 h-3 shrink-0" />
-                                  <span>Next: {nextTask.title}</span>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Zone B: Project Notes (Full Width, Vertical Stack) */}
+                    <div className="flex-1 p-8 space-y-4 bg-gray-50/30 dark:bg-black/20 overflow-y-auto custom-scrollbar">
+                      <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] flex items-center gap-2 mb-2">
+                        <StickyNote className="w-4 h-4 text-indigo-500" />
+                        Associated Notes
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {spotlightData.associatedNotes.length === 0 ? (
+                          <div className="col-span-full py-8 flex items-center justify-center bg-gray-50/50 dark:bg-white/5 rounded-2xl text-[10px] font-bold text-gray-400 italic text-center px-4">
+                            No notes tagged for this project.
+                          </div>
+                        ) : (
+                          spotlightData.associatedNotes.map(note => (
+                            <div 
+                              key={note.id}
+                              style={{ backgroundColor: note.priority ? 'var(--note-priority-bg)' : 'var(--note-project-bg)' }}
+                              className={clsx(
+                                "border rounded-2xl p-4 transition-all cursor-pointer group/note shadow-sm hover:shadow-md flex flex-col gap-2 min-h-[100px]",
+                                note.priority ? "border-red-200 dark:border-red-900/30 shadow-red-100/50" : "border-gray-100 dark:border-gray-800"
+                              )}
+                              onClick={() => toggleNoteInActionSet(note.id)}
+                            >
+                              <div 
+                                className="text-[11px] font-bold text-gray-800 dark:text-gray-200 line-clamp-4 prose prose-sm dark:prose-invert max-w-none"
+                                dangerouslySetInnerHTML={{ __html: note.text }}
+                              />
+                              {note.reminder && (
+                                <div className="mt-auto flex items-center gap-1 text-[8px] font-black text-orange-600 animate-pulse">
+                                  <Bell className="w-2.5 h-2.5 fill-current" />
+                                  {new Date(note.reminder.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </div>
                               )}
                             </div>
-                          );
-                        })
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Column 3: Project Notes (Medium) */}
-                  <div className="w-full xl:w-80 p-8 space-y-4 bg-gray-50/30 dark:bg-black/20">
-                    <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] flex items-center gap-2 mb-2">
-                      <StickyNote className="w-4 h-4 text-indigo-500" />
-                      Associated Notes
-                    </h4>
-                    <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
-                      {spotlightData.associatedNotes.length === 0 ? (
-                        <div className="py-8 flex items-center justify-center bg-gray-50/50 dark:bg-white/5 rounded-2xl text-[10px] font-bold text-gray-400 italic text-center px-4">
-                          No notes tagged for this project.
-                        </div>
-                      ) : (
-                        spotlightData.associatedNotes.map(note => (
-                          <div 
-                            key={note.id}
-                            style={{ backgroundColor: note.priority ? 'var(--note-priority-bg)' : 'var(--note-project-bg)' }}
-                            className={clsx(
-                              "border rounded-2xl p-4 transition-all cursor-pointer group/note shadow-sm hover:shadow-md flex flex-col gap-2",
-                              note.priority ? "border-red-200 dark:border-red-900/30 shadow-red-100/50" : "border-gray-100 dark:border-gray-800"
-                            )}
-                            onClick={() => toggleNoteInActionSet(note.id)}
-                          >
-                            <div 
-                              className="text-[11px] font-bold text-gray-800 dark:text-gray-200 line-clamp-3 prose prose-sm dark:prose-invert max-w-none"
-                              dangerouslySetInnerHTML={{ __html: note.text }}
-                            />
-                            {note.reminder && (
-                              <div className="flex items-center gap-1 text-[8px] font-black text-orange-600 animate-pulse">
-                                <Bell className="w-2.5 h-2.5 fill-current" />
-                                {new Date(note.reminder.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </div>
-                            )}
-                          </div>
-                        ))
-                      )}
+                          ))
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
