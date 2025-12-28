@@ -36,13 +36,15 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
   instances
 }) => {
   const { 
+    getTodayAlerts,
     getValidActionSet, 
     setTaskFocus, 
     toggleNoteInActionSet, 
     currentUser,
     toggleTask,
     toggleScratchpadTask,
-    toggleTaskInActionSet
+    toggleTaskInActionSet,
+    injectTaskIntoSession
   } = useTasklistStore();
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -134,6 +136,8 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
       }
     });
   }, [validActionSet, currentUser?.scratchpad, currentUser?.activeFocus, instances, projects]);
+
+  const todayAlerts = getTodayAlerts();
 
   // DERIVED DATA: Active Projects & Checklists with "Skin in the Game"
   const activeCommitments = useMemo(() => {
@@ -439,6 +443,64 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
           </Button>
         </div>
       </div>
+
+      {/* Today's Critical Alerts Panel (Conditional) */}
+      {todayAlerts.length > 0 && (
+        <div className="space-y-4 animate-in slide-in-from-top-4 duration-500">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="flex items-center gap-3 text-[10px] font-black uppercase text-red-500 tracking-[0.2em]">
+              <div className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+              Time-Critical Alerts: Today
+            </h2>
+            <span className="text-[10px] font-black text-red-500 bg-red-500/10 px-2 py-0.5 rounded-full">
+              {todayAlerts.length} Pending
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {todayAlerts.map((alert, idx) => (
+              <div 
+                key={idx}
+                onClick={async () => {
+                  if (alert.type === 'note') {
+                    await injectTaskIntoSession({ type: 'note', taskId: alert.item.id, addedAt: Date.now() });
+                  } else {
+                    // Find the project ID for the task
+                    const instance = instances.find(i => i.sections.some(s => s.subsections.some(ss => ss.tasks.some(t => t.id === alert.item.id))));
+                    const project = projects.find(p => p.instanceIds.includes(instance?.id || ''));
+                    if (project && instance) {
+                      await injectTaskIntoSession({ type: 'task', projectId: project.id, instanceId: instance.id, taskId: alert.item.id, addedAt: Date.now() });
+                    }
+                  }
+                  navigate('/session');
+                }}
+                className="group flex items-center gap-4 p-4 bg-white dark:bg-black/40 border-2 border-red-100 dark:border-red-900/20 rounded-2xl hover:border-red-500 hover:shadow-lg hover:shadow-red-500/10 transition-all cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 shrink-0 group-hover:bg-red-500 group-hover:text-white transition-all">
+                  <Bell className="w-5 h-5 animate-pulse" />
+                </div>
+                
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <span className="text-[9px] font-black uppercase tracking-wider text-red-500/70 truncate">
+                      {alert.category}
+                    </span>
+                    <span className="text-[10px] font-black text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-md">
+                      {new Date(alert.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <h4 
+                    className="text-sm font-bold text-gray-900 dark:text-gray-100 break-words group-hover:text-red-500 transition-colors"
+                    dangerouslySetInnerHTML={{ __html: alert.title }}
+                  />
+                </div>
+                
+                <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-red-500 group-hover:translate-x-1 transition-all" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Project Spotlight Switchboard */}
       <div className="space-y-6">

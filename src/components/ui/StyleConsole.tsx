@@ -393,9 +393,9 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
             )}
           </section>
 
-          {/* 2. My Dashboard (Focus & Workflow) */}
+          {/* 2. My Work Session (Focus & Workflow) */}
           <section className="space-y-3">
-            <SectionHeader id="dashboard" label="My Dashboard (Focus)" icon={LayoutGrid} />
+            <SectionHeader id="dashboard" label="My Work Session" icon={LayoutGrid} />
             {expandedSections.dashboard && (
               <div className="space-y-6 animate-in fade-in slide-in-from-top-1 duration-200 px-1">
                 <div className="grid grid-cols-2 gap-3">

@@ -594,7 +594,7 @@ const SimulationToggle = ({ isActualAdmin, mode, onToggle }: { isActualAdmin: bo
         onToggle();
       }}
       className={clsx(
-        "w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all font-black text-[10px] uppercase tracking-widest mb-4",
+        "w-auto mx-3 flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all font-black text-[10px] uppercase tracking-widest mb-4",
         isSimulating 
           ? "bg-amber-500/10 border-amber-500 text-amber-600 shadow-[0_0_15px_rgba(245,158,11,0.2)] animate-pulse" 
           : "bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-500 hover:border-google-blue hover:text-google-blue"
@@ -1543,22 +1543,22 @@ function App() {
               </div>
 
               {/* Desktop Profile Card */}
-              <div className={theme.components.profile.card}>
-                <div className={theme.components.profile.avatar}><UserCircle2 className="w-6 h-6" /></div>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-xs font-bold truncate">{currentUser?.name}</span>
-                  <div className="flex items-center gap-2">
-                    <span className={clsx("text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md", isAdmin ? "bg-google-blue text-white shadow-sm" : "bg-google-green text-white shadow-sm")}>
+              <div className={clsx(theme.components.profile.card, "justify-between mx-3")}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={theme.components.profile.avatar}><UserCircle2 className="w-6 h-6" /></div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-xs font-bold truncate">{currentUser?.name}</span>
+                    <span className={clsx("text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md w-fit", isAdmin ? "bg-google-blue text-white shadow-sm" : "bg-google-green text-white shadow-sm")}>
                       {currentUser?.role === 'admin' ? (adminSimulationMode === 'admin' ? 'Administrator' : 'Viewer (Simulated)') : 'Project Team'}
                     </span>
-                    <button 
-                      onClick={() => signOut(auth)}
-                      className="text-[8px] font-black uppercase text-google-red hover:underline"
-                    >
-                      Sign Out
-                    </button>
                   </div>
                 </div>
+                <button 
+                  onClick={() => signOut(auth)}
+                  className="text-[8px] font-black uppercase text-google-red hover:underline shrink-0"
+                >
+                  Sign Out
+                </button>
               </div>
 
               {isActualAdmin && (
@@ -1570,7 +1570,7 @@ function App() {
               )}
             </div>
 
-            <nav className="flex flex-col gap-1">
+            <nav className="flex flex-col gap-1 mx-3">
               <button 
                 onClick={() => navigate('/home')} 
                 className={clsx(
@@ -1591,7 +1591,7 @@ function App() {
                 <TrendingUp className="w-5 h-5" /><span className="font-medium">My Work Session</span>
               </button>
 
-              <div className="h-px bg-gray-200 dark:bg-gray-700 my-2 mx-3" />
+              <div className="h-px bg-gray-200 dark:bg-gray-700 my-2" />
 
               <button 
                 onClick={() => {
@@ -1626,7 +1626,7 @@ function App() {
               )}
             </nav>
 
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 mx-3">
               <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
               {isAdmin && (
                 <>
@@ -1655,7 +1655,7 @@ function App() {
                   </button>
                 </>
               )}
-              <Button variant="ghost" size="sm" className="justify-start h-9 px-3" onClick={() => toggleDarkMode()}>
+              <Button variant="ghost" size="sm" className="justify-start h-9 px-3 w-full" onClick={() => toggleDarkMode()}>
                 {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}<span className="text-xs">Toggle Mode</span>
               </Button>
               <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
