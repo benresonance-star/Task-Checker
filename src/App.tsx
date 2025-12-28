@@ -1535,22 +1535,6 @@ function App() {
                   "flex items-center gap-2 transition-all duration-500 shrink-0",
                   showPlaylistSidebar && "md:flex-1 md:justify-end"
                 )}>
-                  {isAdmin && (
-                    <Button 
-                      onClick={() => {
-                        if (mode === 'master') {
-                          addMaster('New Template');
-                        } else {
-                          addProject('New Project');
-                        }
-                      }}
-                      className="hidden md:flex items-center gap-2 rounded-xl shadow-lg shadow-google-blue/20"
-                    >
-                      <Plus className="w-5 h-5" /> 
-                      <span className="hidden lg:inline">New {mode === 'master' ? 'Template' : 'Project'}</span>
-                      <span className="lg:hidden">New</span>
-                    </Button>
-                  )}
                   {mode === 'project' && (
                     <div className="hidden md:block relative group/playlist">
                       <Button 
@@ -1913,16 +1897,24 @@ function App() {
                 </div>
               </div>
 
-              <div className="space-y-6">
+              <div className={clsx(
+                "transition-all duration-500",
+                isTemplatesStacked 
+                  ? "space-y-6" 
+                  : "grid grid-cols-1 xl:grid-cols-2 gap-8 items-start"
+              )}>
                 {activeMaster.sections.map(s => (
-                  <div key={s.id} className="px-0 sm:px-1 md:px-2">
+                  <div key={s.id} className="px-0 sm:px-1 md:px-2 h-full">
                     <SectionItem 
                       section={s} 
                       onOpenNotes={(taskId, containerId, focusFeedback) => setEditingTaskInfo({ taskId, containerId, focusFeedback })} 
                     />
                   </div>
                 ))}
-                <div className="px-0 sm:px-1 md:px-2">
+                <div className={clsx(
+                  "px-0 sm:px-1 md:px-2",
+                  !isTemplatesStacked && "xl:col-span-2"
+                )}>
                   <Button onClick={handleAddSection} className="w-full py-10 border-dashed border-2 bg-white/50 dark:bg-black/20 text-gray-500 border-gray-300 dark:border-gray-700 hover:border-google-blue hover:text-google-blue hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all rounded-container font-black">
                     <Plus className="w-6 h-6" /> Add Section
                   </Button>
