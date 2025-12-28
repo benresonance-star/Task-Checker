@@ -8,7 +8,7 @@ import { MasterTasklist, Section, Subsection, Task, ScratchpadItem } from './typ
 import { generateUUID } from './utils/uuid';
 import { auth } from './lib/firebase';
 import { ProjectDashboard } from './components/project/ProjectDashboard';
-import { FocusDashboard } from './components/dashboard/FocusDashboard';
+import { WorkSessionView } from './components/dashboard/WorkSessionView';
 import { PlannerHome } from './components/dashboard/PlannerHome';
 import { TaskInfoModal } from './components/modals/TaskInfoModal';
 import { FeedbackLedger } from './components/admin/FeedbackLedger';
@@ -102,12 +102,12 @@ const SidebarNoteItem = ({
       )}
       onClick={() => {
         const isPlanner = location.pathname === '/' || location.pathname === '/home';
-        const isFocus = location.pathname === '/focus';
+        const isSession = location.pathname === '/session';
         
-        if (isPlanner || isFocus) {
+        if (isPlanner || isSession) {
           toggleTaskFocus('', '', note.id);
         } else {
-          navigate('/focus');
+          navigate('/session');
           toggleTaskFocus('', '', note.id);
         }
       }}
@@ -275,11 +275,11 @@ const SidebarTaskItem = ({
       onClick={() => {
         if (instance && project) {
           const isPlanner = location.pathname === '/' || location.pathname === '/home';
-          const isFocus = location.pathname === '/focus';
+          const isSession = location.pathname === '/session';
           const isProjectView = location.pathname.startsWith('/project/');
           
-          if (isPlanner || isFocus) {
-            // Stay in Planning/Focus view, just update focus
+          if (isPlanner || isSession) {
+            // Stay in Planning/Session view, just update focus
             toggleTaskFocus(project.id, instance.id, task.id);
           } else if (isProjectView) {
             // Check if we are already in THIS project context
@@ -667,7 +667,7 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const isPlanner = location.pathname === '/' || location.pathname === '/home';
-  const isFocus = location.pathname === '/focus';
+  const isSession = location.pathname === '/session';
   const isExecuting = currentUser?.activeFocus?.stage === 'executing';
   const queryParams = new URLSearchParams(location.search);
   const urlTaskId = queryParams.get('task');
@@ -826,7 +826,7 @@ function App() {
     localStorage.setItem('lastActivePath', path);
 
     // Mode sync
-    if (path.startsWith('/home') || path.startsWith('/focus')) {
+    if (path.startsWith('/home') || path.startsWith('/session')) {
       if (mode !== 'project') setMode('project'); // Keep project mode state for sidebar logic
     } else if (path.startsWith('/master')) {
       if (mode !== 'master') setMode('master');
@@ -920,8 +920,8 @@ function App() {
       initialFocusSynced.current = true;
       const currentPath = location.pathname;
       
-      // If we are on the planner, focus dashboard or master mode, don't force away
-      if (currentPath === '/home' || currentPath === '/focus' || currentPath === '/' || currentPath.startsWith('/master')) {
+      // If we are on the planner, work session or master mode, don't force away
+      if (currentPath === '/home' || currentPath === '/session' || currentPath === '/' || currentPath.startsWith('/master')) {
         return;
       }
 
@@ -1281,16 +1281,16 @@ function App() {
 
                 <button
                   onClick={() => {
-                    navigate('/focus');
+                    navigate('/session');
                     setIsMobileMenuOpen(false);
                   }}
                   className={clsx(
                     "flex items-center gap-3 p-3 rounded-lg font-bold text-sm transition-colors",
-                    location.pathname === '/focus' ? "bg-google-blue text-white" : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                    location.pathname === '/session' ? "bg-google-blue text-white" : "hover:bg-gray-100 dark:hover:bg-gray-800"
                   )}
                 >
                   <TrendingUp className="w-5 h-5" />
-                  <span>Focus Dashboard</span>
+                  <span>My Work Session</span>
                 </button>
 
                 <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
@@ -1331,13 +1331,13 @@ function App() {
 
                 <button
                   onClick={() => {
-                    navigate('/focus');
+                    navigate('/session');
                     setIsMobileMenuOpen(false);
                   }}
-                  className={`flex items-center justify-between px-4 py-3 rounded-button transition-colors ${location.pathname === '/focus' ? "bg-blue-50 text-google-blue dark:bg-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+                  className={`flex items-center justify-between px-4 py-3 rounded-button transition-colors ${location.pathname === '/session' ? "bg-blue-50 text-google-blue dark:bg-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
                 >
-                  <div className="flex items-center gap-3"><TrendingUp className="w-5 h-5" /><span className="font-bold">Focus Dashboard</span></div>
-                  {location.pathname === '/focus' && <div className="w-1.5 h-1.5 rounded-full bg-google-blue" />}
+                  <div className="flex items-center gap-3"><TrendingUp className="w-5 h-5" /><span className="font-bold">My Work Session</span></div>
+                  {location.pathname === '/session' && <div className="w-1.5 h-1.5 rounded-full bg-google-blue" />}
                 </button>
 
                 <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
@@ -1348,10 +1348,10 @@ function App() {
                 navigate(lastId ? `/project/${lastId}` : '/project'); 
                 setIsMobileMenuOpen(false); 
               }} 
-              className={`flex items-center justify-between px-4 py-3 rounded-button transition-colors ${mode === 'project' && !isPlanner && !isFocus ? "bg-blue-50 text-google-blue dark:bg-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+              className={`flex items-center justify-between px-4 py-3 rounded-button transition-colors ${mode === 'project' && !isPlanner && !isSession ? "bg-blue-50 text-google-blue dark:bg-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
             >
               <div className="flex items-center gap-3"><Target className="w-5 h-5" /><span className="font-bold">Projects</span></div>
-              {mode === 'project' && !isPlanner && !isFocus && <div className="w-1.5 h-1.5 rounded-full bg-google-blue" />}
+              {mode === 'project' && !isPlanner && !isSession && <div className="w-1.5 h-1.5 rounded-full bg-google-blue" />}
             </button>
             {isAdmin && (
               <button 
@@ -1476,13 +1476,13 @@ function App() {
               </button>
 
               <button 
-                onClick={() => navigate('/focus')} 
+                onClick={() => navigate('/session')} 
                 className={clsx(
                   theme.components.nav.item,
-                  location.pathname === '/focus' ? theme.components.nav.itemActive : theme.components.nav.itemInactive
+                  location.pathname === '/session' ? theme.components.nav.itemActive : theme.components.nav.itemInactive
                 )}
               >
-                <TrendingUp className="w-5 h-5" /><span className="font-medium">Focus Dashboard</span>
+                <TrendingUp className="w-5 h-5" /><span className="font-medium">My Work Session</span>
               </button>
 
               <div className="h-px bg-gray-200 dark:bg-gray-700 my-2 mx-3" />
@@ -1494,7 +1494,7 @@ function App() {
                 }} 
                 className={clsx(
                   theme.components.nav.item,
-                  mode === 'project' && !['/', '/home', '/focus'].includes(location.pathname) ? theme.components.nav.itemActive : theme.components.nav.itemInactive
+                  mode === 'project' && !['/', '/home', '/session'].includes(location.pathname) ? theme.components.nav.itemActive : theme.components.nav.itemInactive
                 )}
               >
                 <Target className="w-5 h-5" /><span className="font-medium">Projects</span>
@@ -1567,7 +1567,7 @@ function App() {
         "transition-all duration-700 ease-in-out relative",
         isExecuting && "p-0 md:p-0"
       )}>
-        {!isPlanner && !isFocus && (
+        {!isPlanner && !isSession && (
           <header className={clsx(theme.components.layout.contentHeader, "z-[100] sticky top-0 bg-white/70 dark:bg-black/40 backdrop-blur-md pt-8 pb-6 border-b border-gray-200 dark:border-gray-800")}>
             <div className="flex flex-col w-full gap-4">
               <div className="flex items-center justify-between w-full">
@@ -2039,14 +2039,14 @@ function App() {
             {isPlanner ? (
               <div className="p-4 md:p-8">
                 <PlannerHome 
-                  onOpenFocus={() => navigate('/focus')}
+                  onOpenFocus={() => navigate('/session')}
                   projects={projects}
                   masters={masters}
                 />
               </div>
-            ) : isFocus ? (
+            ) : isSession ? (
               <div className="p-4 md:p-8">
-                <FocusDashboard onOpenNotes={(taskId, containerId, focusFeedback) => setEditingTaskInfo({ taskId, containerId, focusFeedback })} />
+                <WorkSessionView onOpenNotes={(taskId, containerId, focusFeedback) => setEditingTaskInfo({ taskId, containerId, focusFeedback })} />
               </div>
             ) : (
           <div className="p-4 md:p-8">

@@ -12,12 +12,12 @@
 > 5. **Sync Protocol**: All protocol changes must be reflected in the **Admin > App Protocol** interface.
 >    - *Comment: Keep the internal Admin documentation synchronized with reality.*
 
-*Current Version: 1.11.0*
+*Current Version: 1.11.1*
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It features a dual-interface architectural model:
 1.  **Home: The Planner**: A stress-free orientation environment for reviewing projects and triaging personal tasks.
-2.  **Work: Focus Mode**: A specialized deep-work environment for executing project tasks and recording progress.
+2.  **Work: My Work Session**: A specialized deep-work environment for executing project tasks and recording progress.
 
 The application operates on a "Master-Instance" model, where users can define master templates and instantiate them within specific projects. It is built for high reliability, real-time team synchronization, and cross-platform accessibility.
 
@@ -31,7 +31,7 @@ To ensure critical tools (Branding Console, Admin Panel) are always accessible, 
 - `z-[50]`: Sidebars / Overlays
 - `z-[10]`: Content areas
 
-### Unified Breadcrumb Navigation (v1.11.0)
+### Unified Breadcrumb Navigation (v1.11.1)
 The application uses a 3-level hierarchical navigation system in the header:
 1.  **Level 1 (Mode Switcher)**: Toggles between "Projects" and "Templates". Open "Discovery Grid" for global context switching.
 2.  **Level 2 (Active Context)**: Displays the name of the active Project or Template. Clicking opens the Project/Template Discovery Grid.
@@ -39,7 +39,7 @@ The application uses a 3-level hierarchical navigation system in the header:
 
 **Core Views:**
 - **Home Planner** (`/home`): The landing screen for orientation. Contains the **Project Pulse** grid and the **Master Triage** (My Notes) for daily planning.
-- **Focus Dashboard** (`/focus`): The execution engine. Displays the **Active Focus Card** (Task or Note) and the **Knowledge Hub**.
+- **My Work Session** (`/session`): The execution engine. Displays the **Active Focus Card** (Task or Note) and the **Knowledge Hub**.
 4. **Explicit Editing**: Admins can use the `Pencil` icon next to any title to enter an explicit edit mode.
 5. **Locked Context**: The header is sticky-pinned (`top-0`) using glassmorphism, ensuring global situational awareness during long scrolls.
 6. **Contextual Controls**: 

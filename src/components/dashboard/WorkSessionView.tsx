@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { theme } from '../../styles/theme';
-import { LayoutGrid, Target, Play, Pause, RotateCcw, ThumbsUp, CheckCircle2, StickyNote, Zap } from 'lucide-react';
+import { Target, Play, Pause, RotateCcw, ThumbsUp, CheckCircle2, StickyNote, Zap, TrendingUp } from 'lucide-react';
 import { clsx } from 'clsx';
 import { formatTime } from '../../utils/time';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +12,7 @@ import { FocusStage, Task } from '../../types';
 
 import { TomatoIcon } from '../icons/TomatoIcon';
 
-interface FocusDashboardProps {
+interface WorkSessionViewProps {
   onOpenNotes?: (taskId: string, containerId: string, focusFeedback?: boolean) => void;
 }
 
@@ -28,7 +28,7 @@ const FocusTransition = () => (
   </div>
 );
 
-export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) => {
+export const WorkSessionView: React.FC<WorkSessionViewProps> = ({ onOpenNotes }) => {
   const navigate = useNavigate();
   const { 
     currentUser, 
@@ -279,8 +279,8 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
                   )}>
                     <div className="flex flex-col gap-1">
                       <h1 className="text-2xl md:text-4xl font-black tracking-tight flex items-center gap-3 text-[var(--text-heading)]">
-                        <LayoutGrid className="w-8 h-8 md:w-10 md:h-10 text-google-blue" />
-                        <span>My Dashboard</span>
+                        <TrendingUp className="w-8 h-8 md:w-10 md:h-10 text-google-blue" />
+                        <span>My Work Session</span>
                       </h1>
                       <p className="text-sm md:text-base font-bold text-[var(--text-secondary)] uppercase tracking-widest ml-11 md:ml-13 opacity-60">
                         Welcome back, {currentUser?.name?.split(' ')[0] || 'User'}
@@ -325,7 +325,7 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
               "p-8 md:p-10 rounded-focus-card border-4 transition-all duration-700 shadow-2xl relative overflow-hidden group flex flex-col justify-between text-[var(--text-primary)]",
               isExecuting ? "min-h-[calc(100vh-2rem)] md:min-h-[700px]" : "min-h-[400px]",
               cardTheme,
-              focusData.task.timerIsRunning && !isYellow && "ring-8 ring-google-green/20",
+              focusData.task.timerIsRunning && !isIndigo && !isYellow && "ring-8 ring-google-green/20",
               focusData.task.timerIsRunning && isYellow && "ring-8 ring-google-yellow/20"
             )}>
               {isExecuting && (
@@ -702,3 +702,4 @@ export const FocusDashboard: React.FC<FocusDashboardProps> = ({ onOpenNotes }) =
     </div>
   );
 };
+
