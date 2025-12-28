@@ -313,6 +313,7 @@ To reduce visual cognitive load, the "My Session" sidebar uses a tiered visibili
 - **Timer Protection**: 
   - **Grace Period**: 3-second local timestamp check in `onSnapshot` to ignore incoming cloud data immediately after a local toggle.
   - **Heartbeat**: 10-second background push to Firestore for any task where `timerIsRunning === true`.
+- **Cloud Sanitization**: Every `updateDoc` call to Firestore MUST wrap the data object in the `sanitize()` helper to remove `undefined` values, preventing silent persistence failures.
 - **Atomic Presence**: Always use Firestore dot-notation (`updateDoc(docRef, { [`activeUsers.${userId}`]: data })`) to update presence without risk of overwriting other users.
 
 ### 4. Component Responsibility Map

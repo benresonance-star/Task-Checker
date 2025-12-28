@@ -761,7 +761,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
               name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Unknown User',
               role: 'viewer'
             };
-            await setDoc(userDocRef, userData);
+            await setDoc(userDocRef, sanitize(userData));
           }
           set({ currentUser: userData });
 
@@ -1136,7 +1136,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
         const newSet = currentSet.filter(i => 
           !( (i.type === 'task' || !i.type) && i.projectId === projectId && i.instanceId === instanceId && i.taskId === taskId )
         );
-        await updateDoc(userRef, { actionSet: newSet });
+        await updateDoc(userRef, sanitize({ actionSet: newSet }));
       } else {
         // Add to playlist
         const newItem: ActionSetItem = {
@@ -1146,7 +1146,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
           taskId,
           addedAt: Date.now()
         };
-        await updateDoc(userRef, { actionSet: [...currentSet, newItem] });
+        await updateDoc(userRef, sanitize({ actionSet: [...currentSet, newItem] }));
       }
     },
 
@@ -1161,7 +1161,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       if (exists) {
         // Remove from playlist
         const newSet = currentSet.filter(i => !(i.type === 'note' && i.taskId === noteId));
-        await updateDoc(userRef, { actionSet: newSet });
+        await updateDoc(userRef, sanitize({ actionSet: newSet }));
       } else {
         // Add to playlist
         const newItem: ActionSetItem = {
@@ -1169,7 +1169,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
           taskId: noteId,
           addedAt: Date.now()
         };
-        await updateDoc(userRef, { actionSet: [...currentSet, newItem] });
+        await updateDoc(userRef, sanitize({ actionSet: [...currentSet, newItem] }));
       }
     },
 
@@ -1210,7 +1210,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
         newSet.splice(1, 0, itemToInject);
       }
 
-      await updateDoc(userRef, { actionSet: newSet });
+      await updateDoc(userRef, sanitize({ actionSet: newSet }));
     },
 
     getTodayAlerts: () => {
@@ -1284,7 +1284,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     setActionSet: async (newSet) => {
       const { currentUser } = get();
       if (!currentUser) return;
-      await updateDoc(doc(db, 'users', currentUser.id), { actionSet: newSet });
+      await updateDoc(doc(db, 'users', currentUser.id), sanitize({ actionSet: newSet }));
     },
 
     getValidActionSet: () => {
@@ -1306,11 +1306,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     clearActionSet: async () => {
       const { currentUser } = get();
       if (!currentUser) return;
-      await updateDoc(doc(db, 'users', currentUser.id), { actionSet: [] });
+      await updateDoc(doc(db, 'users', currentUser.id), sanitize({ actionSet: [] }));
     },
 
     addScratchpadTask: async (text, category, priority = false, reminder = null, inSession = false) => {
-      const { currentUser } = get();
+      const { currentUser, notify } = get();
       if (!currentUser) return;
       
       const userRef = doc(db, 'users', currentUser.id);
@@ -1344,10 +1344,17 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
         } 
       });
 
-      await updateDoc(userRef, { 
-        scratchpad,
-        actionSet
-      });
+      try {
+        await updateDoc(userRef, sanitize({ 
+          scratchpad,
+          actionSet
+        }));
+      } catch (error) {
+        console.error('Failed to add note to Firestore:', error);
+        notify('Failed to save note. Please check your connection.', 'error');
+        // Revert local state if save failed
+        set({ currentUser }); 
+      }
     },
 
     updateScratchpadTask: async (id, updates) => {
@@ -1361,7 +1368,12 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       // Optimistic Update
       set({ currentUser: { ...currentUser, scratchpad } });
       
-      await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
+      try {
+        await updateDoc(doc(db, 'users', currentUser.id), sanitize({ scratchpad }));
+      } catch (error) {
+        console.error('Failed to update note in Firestore:', error);
+        set({ currentUser }); // Revert
+      }
     },
 
     toggleScratchpadTask: async (id) => {
@@ -1379,7 +1391,12 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       // Optimistic Update
       set({ currentUser: { ...currentUser, scratchpad } });
       
-      await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
+      try {
+        await updateDoc(doc(db, 'users', currentUser.id), sanitize({ scratchpad }));
+      } catch (error) {
+        console.error('Failed to toggle note in Firestore:', error);
+        set({ currentUser }); // Revert
+      }
     },
 
     toggleScratchpadPriority: async (id) => {
@@ -1393,7 +1410,12 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       // Optimistic Update
       set({ currentUser: { ...currentUser, scratchpad } });
       
-      await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
+      try {
+        await updateDoc(doc(db, 'users', currentUser.id), sanitize({ scratchpad }));
+      } catch (error) {
+        console.error('Failed to update priority in Firestore:', error);
+        set({ currentUser }); // Revert
+      }
     },
 
     deleteScratchpadTask: async (id) => {
@@ -1405,7 +1427,12 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       // Optimistic Update
       set({ currentUser: { ...currentUser, scratchpad } });
       
-      await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
+      try {
+        await updateDoc(doc(db, 'users', currentUser.id), sanitize({ scratchpad }));
+      } catch (error) {
+        console.error('Failed to delete note in Firestore:', error);
+        set({ currentUser }); // Revert
+      }
     },
 
     reorderScratchpad: async (newScratchpad) => {
@@ -1415,7 +1442,12 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       // Optimistic Update
       set({ currentUser: { ...currentUser, scratchpad: newScratchpad } });
       
-      await updateDoc(doc(db, 'users', currentUser.id), { scratchpad: newScratchpad });
+      try {
+        await updateDoc(doc(db, 'users', currentUser.id), sanitize({ scratchpad: newScratchpad }));
+      } catch (error) {
+        console.error('Failed to reorder scratchpad in Firestore:', error);
+        set({ currentUser }); // Revert
+      }
     },
 
     clearCompletedScratchpad: async (category) => {
@@ -1425,11 +1457,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       const scratchpad = currentUser.scratchpad.filter(item => 
         !(item.category === category && item.completed)
       );
-      await updateDoc(doc(db, 'users', currentUser.id), { scratchpad });
+      await updateDoc(doc(db, 'users', currentUser.id), sanitize({ scratchpad }));
     },
 
     updateUserRole: async (userId, role) => {
-      await updateDoc(doc(db, 'users', userId), { role });
+      await updateDoc(doc(db, 'users', userId), sanitize({ role }));
     },
 
     updatePersonalProjectOverride: async (projectId, override) => {
@@ -1444,9 +1476,9 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
           [`projectOverrides.${projectId}`]: deleteField()
         });
       } else {
-        await updateDoc(userRef, {
+        await updateDoc(userRef, sanitize({
           [`projectOverrides.${projectId}`]: override
-        });
+        }));
       }
     },
 
@@ -1457,11 +1489,11 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     },
 
     adminClearUserFocus: async (userId) => {
-      await updateDoc(doc(db, 'users', userId), { activeFocus: null });
+      await updateDoc(doc(db, 'users', userId), sanitize({ activeFocus: null }));
     },
 
     adminClearUserActionSet: async (userId) => {
-      await updateDoc(doc(db, 'users', userId), { actionSet: [] });
+      await updateDoc(doc(db, 'users', userId), sanitize({ actionSet: [] }));
     },
 
     setTaskTimer: async (taskId, duration) => {
