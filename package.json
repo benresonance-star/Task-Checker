@@ -1,6 +1,6 @@
 {
   "name": "task-checker",
-  "version": "1.13.41",
+  "version": "1.13.42",
   "private": true,
   "type": "module",
   "dependencies": {

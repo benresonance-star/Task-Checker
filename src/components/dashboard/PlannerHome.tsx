@@ -69,6 +69,12 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
   // Get the top 3 staged items from the action set with full data
   const stagedItems = useMemo(() => {
     return validActionSet.slice(0, 3).map(item => {
+      const isActive = item.type === 'note'
+        ? (!currentUser?.activeFocus?.projectId && currentUser?.activeFocus?.taskId === item.taskId)
+        : (currentUser?.activeFocus?.projectId === item.projectId && 
+           currentUser?.activeFocus?.instanceId === item.instanceId && 
+           currentUser?.activeFocus?.taskId === item.taskId);
+
       if (item.type === 'note') {
         const note = currentUser?.scratchpad?.find(n => n.id === item.taskId);
         return { 
@@ -77,7 +83,8 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
           displayCategory: note?.category || 'Personal',
           projectName: note?.category || 'Personal',
           priority: note?.priority,
-          completed: note?.completed 
+          completed: note?.completed,
+          isActive
         };
       } else {
         const instance = instances.find(i => i.id === item.instanceId);
@@ -89,11 +96,12 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
           displayCategory: instance?.title || 'Project',
           projectName: project?.name || 'Project',
           completed: task?.completed,
-          priority: false
+          priority: false,
+          isActive
         };
       }
     });
-  }, [validActionSet, currentUser?.scratchpad, instances, projects]);
+  }, [validActionSet, currentUser?.scratchpad, currentUser?.activeFocus, instances, projects]);
 
   // DERIVED DATA: Active Projects & Checklists with "Skin in the Game"
   const activeCommitments = useMemo(() => {
@@ -246,34 +254,49 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
           <div className="flex-1 grid grid-cols-1 gap-2">
             {[0, 1, 2].map(idx => {
               const item = stagedItems[idx];
+              const isActive = item?.isActive;
               return (
                 <div 
                   key={idx}
+                  onClick={() => {
+                    if (item) {
+                      setTaskFocus(item.projectId || '', item.instanceId || '', item.taskId);
+                    }
+                  }}
                   style={{
                     backgroundColor: item 
                       ? (item.completed ? undefined : (item.type === 'note' ? (item.priority ? 'var(--note-priority-bg)' : (item.displayCategory === 'Personal' ? 'var(--note-personal-bg)' : 'var(--note-project-bg)')) : 'var(--note-project-bg)'))
                       : undefined
                   }}
                   className={clsx(
-                    "relative flex items-center gap-3 p-3 rounded-2xl border-2 transition-all group/slot min-h-[60px]",
-                    item 
-                      ? (item.type === 'note' && item.priority ? "border-red-200 dark:border-red-900/30 shadow-md" : "border-google-blue shadow-md")
-                      : "bg-gray-50/50 dark:bg-black/20 border-dashed border-gray-200 dark:border-gray-800"
+                    "relative flex items-center gap-3 p-3 rounded-2xl border-2 transition-all group/slot min-h-[60px] cursor-pointer",
+                    isActive
+                      ? "border-google-blue bg-blue-50/10 shadow-[0_0_15px_rgba(66,133,244,0.3)] animate-pulse-slow"
+                      : item 
+                        ? (item.type === 'note' && item.priority ? "border-red-200 dark:border-red-900/30 shadow-md hover:border-google-blue/50" : "border-google-blue shadow-md hover:border-google-blue/50")
+                        : "bg-gray-50/50 dark:bg-black/20 border-dashed border-gray-200 dark:border-gray-800"
                   )}
                 >
                   <div className={clsx(
-                    "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0",
-                    item ? "bg-google-blue text-white" : "bg-gray-200 dark:bg-gray-800 text-gray-400"
+                    "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 transition-all",
+                    isActive ? "bg-google-blue text-white scale-110 shadow-lg" : (item ? "bg-google-blue/20 text-google-blue" : "bg-gray-200 dark:bg-gray-800 text-gray-400")
                   )}>
-                    {idx + 1}
+                    {isActive ? <Zap className="w-3 h-3 fill-current" /> : idx + 1}
                   </div>
                   
                   {item ? (
                     <div className="flex-1 min-w-0 animate-fly-in">
-                      <p className={clsx(
-                        "text-[9px] font-black uppercase tracking-wider mb-0.5",
-                        item.type === 'note' && item.priority ? "text-red-900/60" : "text-google-blue/60"
-                      )}>{item.projectName}</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className={clsx(
+                          "text-[9px] font-black uppercase tracking-wider mb-0.5",
+                          isActive ? "text-google-blue" : (item.type === 'note' && item.priority ? "text-red-900/60" : "text-google-blue/60")
+                        )}>{item.projectName}</p>
+                        {isActive && (
+                          <span className="text-[8px] font-black uppercase tracking-widest text-google-blue animate-pulse">
+                            Active Now
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs font-bold text-gray-900 dark:text-gray-100 break-words line-clamp-2" dangerouslySetInnerHTML={{ 
                         __html: item.displayTitle
                       }} />
