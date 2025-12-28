@@ -6,7 +6,6 @@ import { clsx } from 'clsx';
 import { formatTime } from '../../utils/time';
 import { useNavigate } from 'react-router-dom';
 import { Music } from 'lucide-react';
-import { ScratchpadWidget } from './ScratchpadWidget';
 import { KnowledgeHub } from './KnowledgeHub';
 import { FocusStage, Task } from '../../types';
 
@@ -690,14 +689,6 @@ export const WorkSessionView: React.FC<WorkSessionViewProps> = ({ onOpenNotes })
             <KnowledgeHub task={focusData?.task || null} stage={currentStage} />
           </div>
         )}
-
-        {/* Scratchpad (My Notes) */}
-        <div className={clsx(
-          "space-y-4 transition-all duration-1000",
-          isExecuting && "opacity-0 translate-y-40 pointer-events-none"
-        )}>
-          <ScratchpadWidget />
-        </div>
       </div>
     </div>
   );

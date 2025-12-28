@@ -93,7 +93,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
           </div>
         </div>
 
-        {/* Global Stats / Quick Actions Sidebar */}
+        {/* Quick Access Sidebar */}
         <div className="space-y-6">
           <div className="bg-google-blue/5 dark:bg-blue-900/10 p-6 rounded-container border-2 border-google-blue/10 space-y-6">
             <h2 className="text-sm font-black uppercase text-google-blue tracking-[0.2em]">Quick Access</h2>
@@ -106,10 +106,13 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
               </Button>
             </div>
           </div>
+        </div>
+      </div>
 
-          <div className="p-6 bg-white dark:bg-black/40 rounded-container border-2 border-gray-100 dark:border-gray-800 h-[600px] overflow-hidden">
-            <ScratchpadWidget />
-          </div>
+      {/* Full Width My Notes */}
+      <div className="space-y-4">
+        <div className="p-8 bg-white dark:bg-black/40 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 min-h-[500px] shadow-xl">
+          <ScratchpadWidget />
         </div>
       </div>
     </div>

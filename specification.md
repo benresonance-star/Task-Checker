@@ -12,7 +12,7 @@
 > 5. **Sync Protocol**: All protocol changes must be reflected in the **Admin > App Protocol** interface.
 >    - *Comment: Keep the internal Admin documentation synchronized with reality.*
 
-*Current Version: 1.11.1*
+*Current Version: 1.11.3*
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It features a dual-interface architectural model:
@@ -31,7 +31,7 @@ To ensure critical tools (Branding Console, Admin Panel) are always accessible, 
 - `z-[50]`: Sidebars / Overlays
 - `z-[10]`: Content areas
 
-### Unified Breadcrumb Navigation (v1.11.2)
+### Unified Breadcrumb Navigation (v1.11.3)
 The application uses a 3-level hierarchical navigation system in the header:
 1.  **Level 1 (Mode Switcher)**: Toggles between "Projects" and "Templates". Open "Discovery Grid" for global context switching.
 2.  **Level 2 (Active Context)**: Displays the name of the active Project or Template. Clicking opens the Project/Template Discovery Grid.
@@ -41,13 +41,12 @@ The application uses a 3-level hierarchical navigation system in the header:
 6.  **Locked Context**: The header is sticky-pinned (`top-0`) using glassmorphism, ensuring global situational awareness during long scrolls.
 
 **Core Views:**
-- **Home Planner** (`/home`): The landing screen for orientation. Contains the **Project Pulse** grid and the **Master Triage** (My Notes) for daily planning.
-- **My Work Session** (`/session`): The execution engine. Displays the **Active Focus Card** (Task or Note) and the **Knowledge Hub**.
+- **Home Planner** (`/home`): The landing screen for orientation. Contains the **Project Pulse** grid, a **Quick Access** sidebar, and the **MY NOTES** triage (full-width section) for daily planning.
+- **My Work Session** (`/session`): The execution engine. Displays the **Active Focus Card** (Task or Note) and the **Knowledge Hub**. Optimized for deep focus by removing non-essential widgets like MY NOTES.
 6. **Contextual Controls**: 
     - **Browse Layout**: Toggle between Grid and List views within the Discovery shelves to customize how Projects/Templates are searched.
     - **Editor Layout**: Toggle between Stacked and Side-by-Side views within the Template Editor to optimize workspace layout.
     - **Unified Creation**: Primary creation actions are unified within the Discovery Grid.
-6. **Contextual Controls**: View layout toggles (Stacked vs. Side-by-Side) are moved into the Discovery shelves. Primary creation actions ("New Project/Template") are unified within the Discovery Grid to eliminate header redundancy.
 
 ### Discovery Grids & Shelves
 - **Project/Template Discovery**: A visual grid of all available projects or templates with search, creation, and management controls (Delete/Settings).
