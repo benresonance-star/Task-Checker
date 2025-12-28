@@ -91,14 +91,23 @@ const SidebarNoteItem = ({
   return (
     <div 
       ref={setNodeRef}
-      style={style}
+      style={{
+        ...style,
+        backgroundColor: isActiveFocus 
+          ? undefined 
+          : (note.completed 
+              ? undefined 
+              : (note.priority ? 'var(--note-priority-bg)' : undefined))
+      }}
       className={clsx(
         "group flex flex-col rounded-container border-2 transition-all relative overflow-hidden cursor-pointer",
         isActiveFocus 
           ? "bg-indigo-600 border-indigo-500 shadow-lg shadow-indigo-500/20" 
           : (isDeactivatedCompleted 
               ? "bg-indigo-50/50 dark:bg-indigo-900/10 border-indigo-200/50 dark:border-indigo-800/50 opacity-60" 
-              : "bg-white dark:bg-black/40 border-gray-200 dark:border-gray-800 hover:border-indigo-400 shadow-sm")
+              : (note.priority 
+                  ? "border-red-200 dark:border-red-900/30 shadow-md" 
+                  : "bg-white dark:bg-black/40 border-gray-200 dark:border-gray-800 hover:border-indigo-400 shadow-sm"))
       )}
       onClick={() => {
         const isPlanner = location.pathname === '/' || location.pathname === '/home';
@@ -145,7 +154,7 @@ const SidebarNoteItem = ({
           </div>
           <div 
             className={clsx(
-              "text-xs font-bold truncate transition-all prose prose-sm max-w-none prose-p:my-0",
+              "text-xs font-bold break-words transition-all prose prose-sm max-w-none prose-p:my-0",
               isActiveFocus ? "text-white" : "text-gray-700 dark:text-gray-200",
               note.completed && "line-through opacity-50"
             )}
