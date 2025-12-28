@@ -322,6 +322,14 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--planner-next-task-text', settings.colorPlannerNextTaskText);
     root.style.setProperty('--planner-progress-ring-base', settings.colorPlannerProgressRingBase);
     root.style.setProperty('--planner-progress-ring-fill', settings.colorPlannerProgressRingFill);
+    root.style.setProperty('--planner-alert-bg', settings.colorPlannerAlertBg);
+    root.style.setProperty('--planner-alert-border', settings.colorPlannerAlertBorder);
+    root.style.setProperty('--planner-alert-icon', settings.colorPlannerAlertIcon);
+    root.style.setProperty('--planner-alert-icon-bg', settings.colorPlannerAlertIconBg);
+    root.style.setProperty('--planner-alert-title', settings.colorPlannerAlertTitle);
+    root.style.setProperty('--planner-alert-category', settings.colorPlannerAlertCategory);
+    root.style.setProperty('--planner-alert-time-bg', settings.colorPlannerAlertTimeBg);
+    root.style.setProperty('--planner-alert-time-text', settings.colorPlannerAlertTimeText);
   };
 
   /**
@@ -458,6 +466,14 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorPlannerNextTaskText: oldSettings.colorPlannerNextTaskText || (oldSettings.mode === 'dark' ? '#9CA3AF' : '#6B7280'),
       colorPlannerProgressRingBase: oldSettings.colorPlannerProgressRingBase || (oldSettings.mode === 'dark' ? '#1e293b' : '#e5e7eb'),
       colorPlannerProgressRingFill: oldSettings.colorPlannerProgressRingFill || '#4285F4',
+      colorPlannerAlertBg: oldSettings.colorPlannerAlertBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.4)' : '#FFFFFF'),
+      colorPlannerAlertBorder: oldSettings.colorPlannerAlertBorder || (oldSettings.mode === 'dark' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(239, 68, 68, 0.1)'),
+      colorPlannerAlertIcon: oldSettings.colorPlannerAlertIcon || '#EF4444',
+      colorPlannerAlertIconBg: oldSettings.colorPlannerAlertIconBg || 'rgba(239, 68, 68, 0.1)',
+      colorPlannerAlertTitle: oldSettings.colorPlannerAlertTitle || (oldSettings.mode === 'dark' ? '#FFFFFF' : '#111827'),
+      colorPlannerAlertCategory: oldSettings.colorPlannerAlertCategory || 'rgba(239, 68, 68, 0.7)',
+      colorPlannerAlertTimeBg: oldSettings.colorPlannerAlertTimeBg || 'rgba(239, 68, 68, 0.1)',
+      colorPlannerAlertTimeText: oldSettings.colorPlannerAlertTimeText || '#EF4444',
     };
   };
 
@@ -573,6 +589,14 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorPlannerNextTaskText: isDark ? '#9CA3AF' : '#6B7280',
     colorPlannerProgressRingBase: isDark ? '#1e293b' : '#e5e7eb',
     colorPlannerProgressRingFill: '#4285F4',
+    colorPlannerAlertBg: isDark ? 'rgba(0, 0, 0, 0.4)' : '#ffffff',
+    colorPlannerAlertBorder: isDark ? 'rgba(239, 68, 68, 0.2)' : 'rgba(239, 68, 68, 0.1)',
+    colorPlannerAlertIcon: '#EF4444',
+    colorPlannerAlertIconBg: 'rgba(239, 68, 68, 0.1)',
+    colorPlannerAlertTitle: isDark ? '#ffffff' : '#111827',
+    colorPlannerAlertCategory: 'rgba(239, 68, 68, 0.7)',
+    colorPlannerAlertTimeBg: 'rgba(239, 68, 68, 0.1)',
+    colorPlannerAlertTimeText: '#EF4444',
   });
 
   /**

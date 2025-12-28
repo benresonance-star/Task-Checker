@@ -389,6 +389,20 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                     <ColorControl label="Ring Fill" value={themeSettings.colorPlannerProgressRingFill} onChange={(v) => handleChange('colorPlannerProgressRingFill', v)} />
                   </div>
                 </div>
+
+                <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                  <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest\">Time-Critical Alerts</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Alert Card Bg" value={themeSettings.colorPlannerAlertBg} onChange={(v) => handleChange('colorPlannerAlertBg', v)} />
+                    <ColorControl label="Alert Card Border" value={themeSettings.colorPlannerAlertBorder} onChange={(v) => handleChange('colorPlannerAlertBorder', v)} />
+                    <ColorControl label="Alert Icon" value={themeSettings.colorPlannerAlertIcon} onChange={(v) => handleChange('colorPlannerAlertIcon', v)} />
+                    <ColorControl label="Alert Icon Bg" value={themeSettings.colorPlannerAlertIconBg} onChange={(v) => handleChange('colorPlannerAlertIconBg', v)} />
+                    <ColorControl label="Alert Title" value={themeSettings.colorPlannerAlertTitle} onChange={(v) => handleChange('colorPlannerAlertTitle', v)} />
+                    <ColorControl label="Alert Category" value={themeSettings.colorPlannerAlertCategory} onChange={(v) => handleChange('colorPlannerAlertCategory', v)} />
+                    <ColorControl label="Alert Time Bg" value={themeSettings.colorPlannerAlertTimeBg} onChange={(v) => handleChange('colorPlannerAlertTimeBg', v)} />
+                    <ColorControl label="Alert Time Text" value={themeSettings.colorPlannerAlertTimeText} onChange={(v) => handleChange('colorPlannerAlertTimeText', v)} />
+                  </div>
+                </div>
               </div>
             )}
           </section>

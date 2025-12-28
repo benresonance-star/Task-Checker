@@ -312,6 +312,14 @@ export interface ThemeSettings {
   colorPlannerNextTaskText: string;
   colorPlannerProgressRingBase: string;
   colorPlannerProgressRingFill: string;
+  colorPlannerAlertBg: string;
+  colorPlannerAlertBorder: string;
+  colorPlannerAlertIcon: string;
+  colorPlannerAlertIconBg: string;
+  colorPlannerAlertTitle: string;
+  colorPlannerAlertCategory: string;
+  colorPlannerAlertTimeBg: string;
+  colorPlannerAlertTimeText: string;
 }
 
 export interface ThemePreset {
