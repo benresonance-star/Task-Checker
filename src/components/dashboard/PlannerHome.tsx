@@ -41,11 +41,23 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
     return validActionSet.slice(0, 3).map(item => {
       if (item.type === 'note') {
         const note = currentUser?.scratchpad?.find(n => n.id === item.taskId);
-        return { ...item, displayTitle: note?.text || 'Note', displayCategory: note?.category || 'Personal' };
+        return { 
+          ...item, 
+          displayTitle: note?.text || 'Note', 
+          displayCategory: note?.category || 'Personal',
+          priority: note?.priority,
+          completed: note?.completed 
+        };
       } else {
         const instance = instances.find(i => i.id === item.instanceId);
         const task = instance?.sections.flatMap(s => s.subsections.flatMap(ss => ss.tasks)).find(t => t.id === item.taskId);
-        return { ...item, displayTitle: task?.title || 'Task', displayCategory: instance?.title || 'Project' };
+        return { 
+          ...item, 
+          displayTitle: task?.title || 'Task', 
+          displayCategory: instance?.title || 'Project',
+          completed: task?.completed,
+          priority: false
+        };
       }
     });
   }, [validActionSet, currentUser?.scratchpad, instances]);
@@ -78,7 +90,6 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
             </div>
             <div className="text-5xl font-black text-gray-900 dark:text-gray-100 tabular-nums tracking-tighter">
               {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              <span className="text-xl ml-1 opacity-40">{currentTime.toLocaleTimeString([], { second: '2-digit' })}</span>
             </div>
           </div>
 
@@ -142,10 +153,15 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
               return (
                 <div 
                   key={idx}
+                  style={{
+                    backgroundColor: item 
+                      ? (item.completed ? undefined : (item.type === 'note' ? (item.priority ? 'var(--note-priority-bg)' : (item.displayCategory === 'Personal' ? 'var(--note-personal-bg)' : 'var(--note-project-bg)')) : 'var(--note-project-bg)'))
+                      : undefined
+                  }}
                   className={clsx(
                     "relative flex items-center gap-3 p-3 rounded-2xl border-2 transition-all group/slot min-h-[60px]",
                     item 
-                      ? "bg-white dark:bg-white/5 border-google-blue shadow-md" 
+                      ? (item.type === 'note' && item.priority ? "border-red-200 dark:border-red-900/30 shadow-md" : "border-google-blue shadow-md")
                       : "bg-gray-50/50 dark:bg-black/20 border-dashed border-gray-200 dark:border-gray-800"
                   )}
                 >

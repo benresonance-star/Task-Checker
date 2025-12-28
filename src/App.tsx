@@ -1713,7 +1713,7 @@ function App() {
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-1.5 md:gap-3 min-w-0 flex-1 flex-wrap">
                   {isPlanner ? (
-                    <div className="flex items-center gap-2 px-2 py-1.5 rounded-xl bg-google-blue/5 border border-google-blue/20">
+                    <div className="flex items-center gap-2 px-2 py-1.5 rounded-xl bg-google-blue/5">
                       <LayoutGrid className="w-5 h-5 text-google-blue" />
                       <span className="text-xs font-black uppercase tracking-[0.2em] text-google-blue">Home Planner</span>
                     </div>
