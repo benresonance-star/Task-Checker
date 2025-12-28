@@ -10,8 +10,7 @@ import {
   X,
   ClipboardList,
   StickyNote,
-  ChevronRight,
-  Plus
+  ChevronRight
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { ScratchpadWidget } from './ScratchpadWidget';
@@ -107,17 +106,6 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
 
     return Array.from(projectMap.values());
   }, [validActionSet, projects, instances, currentUser?.scratchpad]);
-
-  // General Notes (Personal category or not associated with an active project)
-  const personalNotes = useMemo(() => {
-    return currentUser?.scratchpad?.filter(note => {
-      if (note.category === 'Personal') return true;
-      const project = projects.find(p => p.name === note.category);
-      // If it has a project category but that project isn't "active" in the session,
-      // it still lives in the general/personal bucket for easy triage.
-      return !project || !activeCommitments.find(c => c.project.id === project.id);
-    }) || [];
-  }, [currentUser?.scratchpad, projects, activeCommitments]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -442,31 +430,17 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
         </div>
       </div>
 
-      {/* General Notes Section (Triage) */}
+      {/* MY NOTES (Full Width) */}
       <div className="space-y-6">
-        <div className="flex items-center justify-between px-2">
+        <div className="px-2">
           <h2 className="flex items-center gap-3 text-[10px] font-black uppercase text-gray-500 tracking-[0.2em]">
             <StickyNote className="w-5 h-5 text-google-blue" />
-            General Triage & Personal Notes
+            My Notes
           </h2>
-          <Button variant="ghost" size="sm" className="text-[10px] font-black text-google-blue uppercase tracking-widest gap-2">
-            <Plus className="w-4 h-4" /> New Note
-          </Button>
         </div>
         
         <div className="p-8 bg-white dark:bg-black/40 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 min-h-[400px] shadow-xl">
-          <div className="space-y-6">
-            <div className="flex flex-wrap gap-4">
-              {personalNotes.length === 0 ? (
-                <div className="w-full py-20 text-center opacity-40">
-                  <StickyNote className="w-12 h-12 mx-auto mb-3" />
-                  <p className="text-[10px] font-black uppercase tracking-widest">No general notes in triage.</p>
-                </div>
-              ) : (
-                <ScratchpadWidget />
-              )}
-            </div>
-          </div>
+          <ScratchpadWidget />
         </div>
       </div>
     </div>
