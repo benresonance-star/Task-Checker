@@ -577,45 +577,45 @@ const SortableScratchpadItem: React.FC<SortableItemProps> = ({
                 <Bell className={clsx("w-3.5 h-3.5", task.reminder && "fill-current")} />
               </button>
               {showReminderPicker && (
-                <div className="absolute right-full mr-2 bottom-0 bg-white dark:bg-gray-900 border-2 border-orange-200 dark:border-gray-700 rounded-2xl p-3 shadow-2xl z-[50] min-w-[220px] animate-in fade-in slide-in-from-right-2 duration-200">
-                  <div className="text-[8px] font-black uppercase text-gray-400 tracking-widest mb-2 flex items-center justify-between">
-                    <span>Set Reminder</span>
-                    {task.reminder && (
-                      <button 
-                        onClick={() => { updateScratchpadTask(task.id, { reminder: null }); setShowReminderPicker(false); }}
-                        className="text-google-red hover:underline"
-                      >
-                        Clear
-                      </button>
-                    )}
-                  </div>
-                  <input 
-                    type="datetime-local" 
-                    className="w-full bg-gray-50 dark:bg-black/40 border-2 border-gray-200 dark:border-gray-800 rounded-xl px-2 py-1.5 text-[10px] font-bold outline-none focus:border-orange-500 transition-all mb-3"
-                    value={tempReminderTime}
-                    onChange={(e) => setTempReminderTime(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleSaveReminder();
-                      if (e.key === 'Escape') setShowReminderPicker(false);
-                    }}
-                    autoFocus
+                <>
+                  <div 
+                    className="fixed inset-0 z-[45]" 
+                    onClick={(e) => { e.stopPropagation(); setShowReminderPicker(false); }} 
                   />
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => setShowReminderPicker(false)}
-                      className="flex-1 py-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all"
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      onClick={handleSaveReminder}
-                      disabled={!tempReminderTime}
-                      className="flex-1 py-2 bg-google-blue text-white hover:bg-blue-600 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:pointer-events-none"
-                    >
-                      Set Alert
-                    </button>
+                  <div className="absolute right-full mr-2 bottom-0 bg-white dark:bg-gray-900 border-2 border-orange-200 dark:border-gray-700 rounded-2xl p-3 shadow-2xl z-[50] min-w-[220px] animate-in fade-in slide-in-from-right-2 duration-200">
+                    <div className="text-[8px] font-black uppercase text-gray-400 tracking-widest mb-2 flex items-center justify-between">
+                      <span>Set Reminder</span>
+                    </div>
+                    <input 
+                      type="datetime-local" 
+                      className="w-full bg-gray-50 dark:bg-black/40 border-2 border-gray-200 dark:border-gray-800 rounded-xl px-2 py-1.5 text-[10px] font-bold outline-none focus:border-orange-500 transition-all mb-3"
+                      value={tempReminderTime}
+                      onChange={(e) => setTempReminderTime(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveReminder();
+                        if (e.key === 'Escape') setShowReminderPicker(false);
+                      }}
+                      autoFocus
+                    />
+                    <div className="flex flex-col gap-2">
+                      <button 
+                        onClick={handleSaveReminder}
+                        disabled={!tempReminderTime}
+                        className="w-full py-2 bg-google-blue text-white hover:bg-blue-600 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:pointer-events-none"
+                      >
+                        Set Alert
+                      </button>
+                      {task.reminder && (
+                        <button 
+                          onClick={() => { updateScratchpadTask(task.id, { reminder: null }); setShowReminderPicker(false); }}
+                          className="w-full py-2 bg-google-red/10 text-google-red hover:bg-google-red/20 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all"
+                        >
+                          Remove Alert
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
+                </>
               )}
             </div>
             <button

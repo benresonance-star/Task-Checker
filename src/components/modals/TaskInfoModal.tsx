@@ -251,58 +251,58 @@ export const TaskInfoModal: React.FC<TaskInfoModalProps> = ({ taskId, containerI
                 </button>
 
                 {showReminderPicker && (
-                  <div className="absolute top-full left-0 mt-2 bg-[var(--modal-bg)] border-2 border-orange-200 dark:border-orange-900/50 rounded-2xl p-4 shadow-2xl z-50 min-w-[260px] animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div className="text-[9px] font-black uppercase text-gray-400 tracking-[0.2em] mb-3 flex items-center justify-between">
-                      <span>Set Time Critical Alert</span>
-                      {task.reminder && (
-                        <button 
-                          onClick={() => { updateTaskReminder(task.id, null, containerId); setShowReminderPicker(false); }}
-                          className="text-google-red hover:underline"
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
-                    <input 
-                      type="datetime-local" 
-                      className="w-full bg-[var(--modal-input-bg)] border-2 border-[var(--modal-input-border)] rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-orange-500 transition-all mb-3 text-[var(--text-primary)]"
-                      value={tempReminderTime}
-                      onChange={(e) => setTempReminderTime(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSaveReminder();
-                        if (e.key === 'Escape') setShowReminderPicker(false);
-                      }}
-                      autoFocus
+                  <>
+                    <div 
+                      className="fixed inset-0 z-[45]" 
+                      onClick={(e) => { e.stopPropagation(); setShowReminderPicker(false); }} 
                     />
-                    <div className="grid grid-cols-2 gap-2 mb-3">
-                      {[15, 60].map(mins => (
+                    <div className="absolute top-full left-0 mt-2 bg-[var(--modal-bg)] border-2 border-orange-200 dark:border-orange-900/50 rounded-2xl p-4 shadow-2xl z-50 min-w-[260px] animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="text-[9px] font-black uppercase text-gray-400 tracking-[0.2em] mb-3 flex items-center justify-between">
+                        <span>Set Time Critical Alert</span>
+                      </div>
+                      <input 
+                        type="datetime-local" 
+                        className="w-full bg-[var(--modal-input-bg)] border-2 border-[var(--modal-input-border)] rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-orange-500 transition-all mb-3 text-[var(--text-primary)]"
+                        value={tempReminderTime}
+                        onChange={(e) => setTempReminderTime(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSaveReminder();
+                          if (e.key === 'Escape') setShowReminderPicker(false);
+                        }}
+                        autoFocus
+                      />
+                      <div className="grid grid-cols-2 gap-2 mb-3">
+                        {[15, 60].map(mins => (
+                          <button 
+                            key={mins}
+                            onClick={() => {
+                              setTempReminderTime(new Date(Date.now() + (mins * 60000)).toISOString().slice(0, 16));
+                            }}
+                            className="py-2 bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 border border-gray-200 dark:border-gray-800 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all"
+                          >
+                            +{mins}m
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex flex-col gap-2">
                         <button 
-                          key={mins}
-                          onClick={() => {
-                            setTempReminderTime(new Date(Date.now() + (mins * 60000)).toISOString().slice(0, 16));
-                          }}
-                          className="py-2 bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 border border-gray-200 dark:border-gray-800 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all"
+                          onClick={handleSaveReminder}
+                          disabled={!tempReminderTime}
+                          className="w-full py-2 bg-google-blue text-white hover:bg-blue-600 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:pointer-events-none"
                         >
-                          +{mins}m
+                          Set Alert
                         </button>
-                      ))}
+                        {task.reminder && (
+                          <button 
+                            onClick={() => { updateTaskReminder(task.id, null, containerId); setShowReminderPicker(false); }}
+                            className="w-full py-2 bg-google-red/10 text-google-red hover:bg-google-red/20 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all"
+                          >
+                            Remove Alert
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={() => setShowReminderPicker(false)}
-                        className="flex-1 py-2 bg-gray-100 dark:bg-[var(--modal-btn-secondary-bg)] hover:opacity-80 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border border-[var(--modal-section-border)]"
-                      >
-                        Cancel
-                      </button>
-                      <button 
-                        onClick={handleSaveReminder}
-                        disabled={!tempReminderTime}
-                        className="flex-1 py-2 bg-google-blue text-white hover:bg-blue-600 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:pointer-events-none"
-                      >
-                        Set Alert
-                      </button>
-                    </div>
-                  </div>
+                  </>
                 )}
               </div>
             </div>
