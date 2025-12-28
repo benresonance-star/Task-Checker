@@ -31,7 +31,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
   projects,
   instances
 }) => {
-  const { getTodayAlerts, getValidActionSet, setActionSet, toggleTaskFocus, toggleTaskInActionSet, currentUser } = useTasklistStore();
+  const { getTodayAlerts, getValidActionSet, setActionSet, setTaskFocus, toggleTaskInActionSet, currentUser } = useTasklistStore();
   const [currentTime, setCurrentTime] = useState(new Date());
   const todayAlerts = getTodayAlerts();
   const validActionSet = getValidActionSet();
@@ -58,7 +58,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
   const handleLaunchSession = async () => {
     if (stagedItems.length > 0) {
       const first = stagedItems[0];
-      await toggleTaskFocus(first.projectId || '', first.instanceId || '', first.taskId);
+      await setTaskFocus(first.projectId || '', first.instanceId || '', first.taskId);
     }
     onOpenFocus();
   };

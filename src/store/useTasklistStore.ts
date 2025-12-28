@@ -105,6 +105,7 @@ interface TasklistState {
   updatePresence: (taskId: string | null) => Promise<void>;
   toggleTaskFocus: (projectId: string, instanceId: string, taskId: string) => Promise<void>;
   setFocusStage: (stage: FocusStage) => Promise<void>;
+  setTaskFocus: (projectId: string, instanceId: string, taskId: string) => Promise<void>;
   toggleTaskPrerequisite: (taskId: string, prereqIndex: number, containerId: string) => Promise<void>;
   toggleTaskInActionSet: (projectId: string, instanceId: string, taskId: string) => Promise<void>;
   toggleNoteInActionSet: (noteId: string) => Promise<void>;
@@ -1052,6 +1053,22 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
         await updateDoc(userRef, { activeFocus: newFocus });
         get().pauseOtherTimers(taskId);
       }
+    },
+
+    setTaskFocus: async (projectId, instanceId, taskId) => {
+      const { currentUser } = get();
+      if (!currentUser) return;
+
+      const userRef = doc(db, 'users', currentUser.id);
+      const newFocus = {
+        projectId,
+        instanceId,
+        taskId,
+        timestamp: Date.now(),
+        stage: 'staged' as FocusStage
+      };
+      await updateDoc(userRef, { activeFocus: newFocus });
+      get().pauseOtherTimers(taskId);
     },
 
     setFocusStage: async (stage) => {
