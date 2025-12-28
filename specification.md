@@ -12,7 +12,7 @@
 > 4. Failure to adhere to Section 6 (AI Development Rules & SOP) will result in architectural drift and session termination.
 >    - *Comment: Strictly follow technical and deployment SOPs to prevent regressions.*
 
-*Current Version: 1.10.2*
+*Current Version: 1.10.3*
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It operates on a "Master-Instance" model, where users can define master templates and instantiate them within specific projects. The application is built for high reliability, real-time team synchronization, and cross-platform accessibility.
@@ -27,13 +27,14 @@ To ensure critical tools (Branding Console, Admin Panel) are always accessible, 
 - `z-[50]`: Sidebars / Overlays
 - `z-[10]`: Content areas
 
-### Unified Breadcrumb Navigation (v1.10.2)
+### Unified Breadcrumb Navigation (v1.10.3)
 The application uses a 3-level hierarchical navigation system in the header:
 1. **Level 1 (Mode Switcher)**: Toggles between "Projects" and "Templates". Open "Discovery Grid" for global context switching.
 2. **Level 2 (Active Context)**: Displays the name of the active Project or Template. Clicking opens the Project/Template Discovery Grid.
 3. **Level 3 (Checklist Selection)**: In Project mode, displays the active Checklist title. Clicking opens the Checklist Discovery shelf for switching within the project.
 4. **Explicit Editing**: Admins can use the `Pencil` icon next to any title to enter an explicit edit mode.
 5. **Locked Context**: The header is sticky-pinned (`top-0`) using glassmorphism, ensuring global situational awareness during long scrolls.
+6. **Contextual Controls**: View layout toggles (Stacked vs. Side-by-Side) are moved into the Discovery shelves to maintain a clean primary header.
 
 ### Discovery Grids & Shelves
 - **Project/Template Discovery**: A visual grid of all available projects or templates with search, creation, and management controls (Delete/Settings).

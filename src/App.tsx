@@ -1535,17 +1535,6 @@ function App() {
                   "flex items-center gap-2 transition-all duration-500 shrink-0",
                   showPlaylistSidebar && "md:flex-1 md:justify-end"
                 )}>
-                  {mode === 'master' && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => setIsTemplatesStacked(!isTemplatesStacked)}
-                      className="h-10 px-3 border border-gray-300 dark:border-gray-700 hidden md:flex rounded-xl"
-                      title={isTemplatesStacked ? "Switch to Side-by-Side" : "Switch to Stacked View"}
-                    >
-                      {isTemplatesStacked ? <LayoutGrid className="w-5 h-5" /> : <ListOrdered className="w-5 h-5" />}
-                    </Button>
-                  )}
                   {isAdmin && (
                     <Button 
                       onClick={() => {
@@ -1593,7 +1582,7 @@ function App() {
               {showDiscoveryGrid && (
                 <div className="w-full bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-[2rem] p-6 shadow-2xl animate-in slide-in-from-top-4 duration-500 overflow-hidden relative z-[60]">
                   <div className="flex flex-col gap-6">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-4">
                       <div className="relative flex-1 max-w-md">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input 
@@ -1604,7 +1593,19 @@ function App() {
                           autoFocus
                         />
                       </div>
-                      <Button variant="ghost" onClick={() => setShowDiscoveryGrid(false)} className="rounded-full w-10 h-10 p-0 border border-gray-200 dark:border-gray-800"><X className="w-5 h-5" /></Button>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => setIsTemplatesStacked(!isTemplatesStacked)}
+                          className="h-10 px-3 border border-gray-200 dark:border-gray-800 rounded-xl flex items-center gap-2 text-gray-500 hover:text-google-blue"
+                          title={isTemplatesStacked ? "Switch to Side-by-Side" : "Switch to Stacked View"}
+                        >
+                          {isTemplatesStacked ? <LayoutGrid className="w-4 h-4" /> : <ListOrdered className="w-4 h-4" />}
+                          <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Layout</span>
+                        </Button>
+                        <Button variant="ghost" onClick={() => setShowDiscoveryGrid(false)} className="rounded-full w-10 h-10 p-0 border border-gray-200 dark:border-gray-800"><X className="w-5 h-5" /></Button>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar pb-2">
@@ -1701,7 +1702,7 @@ function App() {
               {showChecklistShelf && mode === 'project' && activeProject && (
                 <div className="w-full bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-[2rem] p-6 shadow-2xl animate-in slide-in-from-top-4 duration-500 overflow-hidden relative z-[60]">
                   <div className="flex flex-col gap-6">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-4">
                       <div className="relative flex-1 max-w-md">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input 
@@ -1712,7 +1713,19 @@ function App() {
                           autoFocus
                         />
                       </div>
-                      <Button variant="ghost" onClick={() => setShowChecklistShelf(false)} className="rounded-full w-10 h-10 p-0 border border-gray-200 dark:border-gray-800"><X className="w-5 h-5" /></Button>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => setIsTemplatesStacked(!isTemplatesStacked)}
+                          className="h-10 px-3 border border-gray-200 dark:border-gray-800 rounded-xl flex items-center gap-2 text-gray-500 hover:text-google-blue"
+                          title={isTemplatesStacked ? "Switch to Side-by-Side" : "Switch to Stacked View"}
+                        >
+                          {isTemplatesStacked ? <LayoutGrid className="w-4 h-4" /> : <ListOrdered className="w-4 h-4" />}
+                          <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Layout</span>
+                        </Button>
+                        <Button variant="ghost" onClick={() => setShowChecklistShelf(false)} className="rounded-full w-10 h-10 p-0 border border-gray-200 dark:border-gray-800"><X className="w-5 h-5" /></Button>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar pb-2">
