@@ -38,7 +38,9 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
   const todayAlerts = getTodayAlerts();
   const validActionSet = getValidActionSet();
 
-  const [activeSpotlightId, setActiveSpotlightId] = useState<string | null>(null);
+  const [activeSpotlightId, setActiveSpotlightId] = useState<string | null>(() => {
+    return localStorage.getItem('planner_active_spotlight_id');
+  });
 
   const [isSpotlightExpanded, setIsSpotlightExpanded] = useState(() => {
     const saved = localStorage.getItem('planner_spotlight_expanded');
@@ -57,6 +59,12 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
   useEffect(() => {
     localStorage.setItem('planner_notes_expanded', isNotesExpanded.toString());
   }, [isNotesExpanded]);
+
+  useEffect(() => {
+    if (activeSpotlightId) {
+      localStorage.setItem('planner_active_spotlight_id', activeSpotlightId);
+    }
+  }, [activeSpotlightId]);
 
   // Get the top 3 staged items from the action set with full data
   const stagedItems = useMemo(() => {
@@ -131,9 +139,11 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
     return Array.from(projectMap.values());
   }, [validActionSet, projects, instances, currentUser?.scratchpad]);
 
-  // Set initial spotlight focus to the project with the most staged items or the first project
+  // Set initial spotlight focus or fix stale selection
   useEffect(() => {
-    if (!activeSpotlightId && activeCommitments.length > 0) {
+    const isCurrentValid = activeCommitments.some(c => c.project.id === activeSpotlightId);
+    
+    if ((!activeSpotlightId || !isCurrentValid) && activeCommitments.length > 0) {
       // Find project with most staged items
       const projectCounts = activeCommitments.map(c => ({
         id: c.project.id,
