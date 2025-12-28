@@ -12,7 +12,7 @@
 > 5. **Sync Protocol**: All protocol changes must be reflected in the **Admin > App Protocol** interface.
 >    - *Comment: Keep the internal Admin documentation synchronized with reality.*
 
-*Current Version: 1.13.34*
+*Current Version: 1.13.35*
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It features a dual-interface architectural model:
@@ -127,9 +127,13 @@ The system features a robust sync engine:
 - **Time Recording**: Automatically records exact time taken if a timer was used.
 - **Active Focus Tracking**: Selected tasks feature a **high-saturation focus ring (4px)** and a pulsing outline when multiple users are present.
 
-### 6. Checklist Deletion Safety
-- **In-App Confirmation**: Removing a checklist instance from a project utilizes a custom, high-visibility red modal instead of a system `confirm()` dialog.
-- **Data Loss Warning**: The modal explicitly warns: *"If you delete this checklist any work done on it will also be lost,"* preventing accidental removal of progress.
+### Progressive Focus Queue (v1.12.10)
+To reduce visual cognitive load, the "My Session" sidebar uses a tiered visibility strategy:
+1.  **IN FOCUS**: Exactly one active task or note being executed.
+2.  **NEXT UP**: The next items in the queue. 
+    - **Standard Mode**: Displays the top 2 items when a task is in focus.
+    - **Planning Mirror Mode**: Automatically expands to show the top **3 items** if NO task is currently active. This mirrors the **Session Sprint Staging** area in the Home Planner for a consistent 1:1 planning experience.
+3.  **LATER QUEUE**: All remaining items in the session, hidden behind a "Reveal More" button to maintain a clean workspace.
 
 ### 7. Branding & Live Style System
 - **Branding Console**: A floating, draggable, and resizable HUD available to admins. It features a **"Draft Mode" workflow** where stylistic changes (colors, radii) are applied locally for real-time exploration but are only persisted to Firestore when explicitly saved via "Save as Workspace Default" or by overwriting an existing snapshot.

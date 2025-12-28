@@ -2408,8 +2408,8 @@ function App() {
                             ? [...validActionSet.slice(0, activeFocusIdx), ...validActionSet.slice(activeFocusIdx + 1)]
                             : validActionSet;
 
-                          const nextUpItems = otherItems.slice(0, 2);
-                          const laterItems = otherItems.slice(2);
+                          const nextUpItems = otherItems.slice(0, inFocusItem ? 2 : 3);
+                          const laterItems = otherItems.slice(inFocusItem ? 2 : 3);
 
                           const renderItem = (item: any) => {
                             const compositeKey = item.type === 'note' ? `note-${item.taskId}` : `${item.projectId}-${item.instanceId}-${item.taskId}`;

@@ -7,7 +7,6 @@ import {
   Bell,
   Calendar,
   Zap,
-  X,
   ClipboardList,
   StickyNote,
   ChevronRight
@@ -254,18 +253,6 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                     <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                       Empty Slot
                     </div>
-                  )}
-
-                  {item && (
-                    <button 
-                      onClick={() => {
-                        const newSet = validActionSet.filter((_, i) => i !== idx);
-                        setActionSet(newSet);
-                      }}
-                      className="opacity-0 group-hover/slot:opacity-100 p-1 text-gray-400 hover:text-google-red transition-all"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
                   )}
                 </div>
               );
