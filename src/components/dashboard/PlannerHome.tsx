@@ -87,14 +87,14 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
               <Bell className="w-3.5 h-3.5 text-orange-500" />
               Today's Alerts
             </h3>
-            <div className="space-y-2 max-h-[120px] overflow-y-auto custom-scrollbar pr-2">
+            <div className="space-y-2 max-h-[280px] overflow-y-auto custom-scrollbar pr-2">
               {todayAlerts.length === 0 ? (
                 <p className="text-xs font-medium text-gray-400 italic">No alerts scheduled for today.</p>
               ) : (
                 todayAlerts.map((alert, idx) => (
                   <div 
                     key={idx}
-                    className="flex items-center justify-between p-2 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-gray-800 group/alert cursor-pointer hover:border-google-blue transition-all"
+                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-gray-800 group/alert cursor-pointer hover:border-google-blue transition-all"
                     onClick={() => {
                       // Click to stage logic
                       const newItem: ActionSetItem = {
@@ -116,11 +116,11 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                         <Bell className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[11px] font-bold text-gray-900 dark:text-gray-100 truncate line-clamp-1" dangerouslySetInnerHTML={{ __html: alert.title }} />
+                        <p className="text-[11px] font-bold text-gray-900 dark:text-gray-100 break-words line-clamp-2" dangerouslySetInnerHTML={{ __html: alert.title }} />
                         <p className="text-[9px] font-black uppercase text-gray-400 tracking-wider">{alert.category}</p>
                       </div>
                     </div>
-                    <div className="text-[10px] font-black text-orange-600 bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded-lg">
+                    <div className="text-[10px] font-black text-orange-600 bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded-lg ml-2 shrink-0">
                       {new Date(alert.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
@@ -143,14 +143,14 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                 <div 
                   key={idx}
                   className={clsx(
-                    "relative flex items-center gap-3 p-3 rounded-2xl border-2 transition-all group/slot h-[60px]",
+                    "relative flex items-center gap-3 p-3 rounded-2xl border-2 transition-all group/slot min-h-[60px]",
                     item 
                       ? "bg-white dark:bg-white/5 border-google-blue shadow-md" 
                       : "bg-gray-50/50 dark:bg-black/20 border-dashed border-gray-200 dark:border-gray-800"
                   )}
                 >
                   <div className={clsx(
-                    "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black",
+                    "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0",
                     item ? "bg-google-blue text-white" : "bg-gray-200 dark:bg-gray-800 text-gray-400"
                   )}>
                     {idx + 1}
@@ -158,7 +158,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                   
                   {item ? (
                     <div className="flex-1 min-w-0 animate-fly-in">
-                      <p className="text-xs font-bold text-gray-900 dark:text-gray-100 truncate" dangerouslySetInnerHTML={{ 
+                      <p className="text-xs font-bold text-gray-900 dark:text-gray-100 break-words line-clamp-2" dangerouslySetInnerHTML={{ 
                         __html: item.displayTitle
                       }} />
                       <p className="text-[9px] font-black uppercase text-gray-400 tracking-wider">{item.displayCategory}</p>
