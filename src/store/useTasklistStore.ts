@@ -1276,9 +1276,13 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       const { currentUser } = get();
       if (!currentUser || !currentUser.scratchpad) return;
 
-      const scratchpad = currentUser.scratchpad.map(item => 
-        item.id === id ? { ...item, completed: !item.completed } : item
-      );
+      const scratchpad = currentUser.scratchpad.map(item => {
+        if (item.id !== id) return item;
+        const completed = !item.completed;
+        // Clear reminder if marked as done
+        const reminder = (completed && item.reminder) ? undefined : item.reminder;
+        return { ...item, completed, reminder };
+      });
       
       // Optimistic Update
       set({ currentUser: { ...currentUser, scratchpad } });
@@ -1875,7 +1879,16 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
             if (t.id !== taskId) return t;
             const completed = !t.completed;
             const timeTaken = completed && t.timerDuration && t.timerRemaining ? t.timerDuration - t.timerRemaining : (completed ? (t.timeTaken ?? null) : null);
-            return { ...t, completed, timeTaken, timerIsRunning: completed ? false : (t.timerIsRunning ?? false), lastUpdated: Date.now() };
+            // Clear reminder if marked as done
+            const reminder = (completed && t.reminder) ? undefined : t.reminder;
+            return { 
+              ...t, 
+              completed, 
+              timeTaken, 
+              reminder,
+              timerIsRunning: completed ? false : (t.timerIsRunning ?? false), 
+              lastUpdated: Date.now() 
+            };
           })
         }))
       }));

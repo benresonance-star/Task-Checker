@@ -12,7 +12,7 @@
 > 5. **Sync Protocol**: All protocol changes must be reflected in the **Admin > App Protocol** interface.
 >    - *Comment: Keep the internal Admin documentation synchronized with reality.*
 
-*Current Version: 1.11.9*
+*Current Version: 1.11.10*
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It features a dual-interface architectural model:
@@ -59,6 +59,7 @@ The application includes a high-priority "Intervention HUD" system for managing 
 3.  **Explicit Confirmation**: Setting a reminder requires an explicit "OK" or "Set Alert" confirmation. The picker popover remains active, isolating temporary state until the user saves or cancels, preventing accidental UI closure during fine-tuning.
 4.  **Visual Consistency**: All time-critical indicators use the **Bell icon** (`lucide-react/Bell`) to distinguish them from the Pomodoro clock.
 5.  **Situational Awareness**: Pulsing Bell badges appear on project cards in the Planner Home and session items in the sidebar whenever an active reminder is pending.
+6.  **Auto-Cleanup**: If a task or note is marked as "Done" prior to its reminder triggering, the system automatically deletes the reminder to prevent background alerts for completed work.
 - **Project/Template Discovery**: A visual grid of all available projects or templates with search, creation, and management controls (Delete/Settings).
 - **Checklist Discovery**: A slide-down shelf within the header showing all checklists in the current project, including completion progress bars.
 
