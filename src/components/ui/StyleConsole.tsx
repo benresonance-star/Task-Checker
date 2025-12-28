@@ -41,6 +41,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     presets: true,
     atmosphere: false,
+    planner: false,
     dashboard: true,
     projects: false,
     checklist: false,
@@ -334,6 +335,58 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                         <option value="900">Black</option>
                       </select>
                     </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* 1b. Home Planner (Today & Spotlight) */}
+          <section className="space-y-3">
+            <SectionHeader id="planner" label="Home Planner (Today)" icon={LayoutGrid} />
+            {expandedSections.planner && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-top-1 duration-200 px-1">
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest\">Today's Horizon</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Pulse Panel Bg" value={themeSettings.colorPlannerPulseBg} onChange={(v) => handleChange('colorPlannerPulseBg', v)} />
+                    <ColorControl label="Pulse Border" value={themeSettings.colorPlannerPulseBorder} onChange={(v) => handleChange('colorPlannerPulseBorder', v)} />
+                    <ColorControl label="Time/Date Text" value={themeSettings.colorPlannerPulseText} onChange={(v) => handleChange('colorPlannerPulseText', v)} />
+                    <ColorControl label="Alert Bell" value={themeSettings.colorPlannerPulseAlertIcon} onChange={(v) => handleChange('colorPlannerPulseAlertIcon', v)} />
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                  <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest\">Project Spotlight</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Spotlight Bg" value={themeSettings.colorPlannerSpotlightBg} onChange={(v) => handleChange('colorPlannerSpotlightBg', v)} />
+                    <ColorControl label="Spotlight Border" value={themeSettings.colorPlannerSpotlightBorder} onChange={(v) => handleChange('colorPlannerSpotlightBorder', v)} />
+                    <ColorControl label="Identity Col Bg" value={themeSettings.colorPlannerSpotlightIdentityBg} onChange={(v) => handleChange('colorPlannerSpotlightIdentityBg', v)} />
+                    <ColorControl label="Col Separator" value={themeSettings.colorPlannerSpotlightSeparator} onChange={(v) => handleChange('colorPlannerSpotlightSeparator', v)} />
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                  <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest\">Activity Tokens</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Active Token Bg" value={themeSettings.colorPlannerTokenActiveBg} onChange={(v) => handleChange('colorPlannerTokenActiveBg', v)} />
+                    <ColorControl label="Active Token Text" value={themeSettings.colorPlannerTokenActiveText} onChange={(v) => handleChange('colorPlannerTokenActiveText', v)} />
+                    <ColorControl label="Inactive Token Bg" value={themeSettings.colorPlannerTokenInactiveBg} onChange={(v) => handleChange('colorPlannerTokenInactiveBg', v)} />
+                    <ColorControl label="Inactive Border" value={themeSettings.colorPlannerTokenInactiveBorder} onChange={(v) => handleChange('colorPlannerTokenInactiveBorder', v)} />
+                    <ColorControl label="Inactive Text" value={themeSettings.colorPlannerTokenInactiveText} onChange={(v) => handleChange('colorPlannerTokenInactiveText', v)} />
+                    <ColorControl label="Token Icon" value={themeSettings.colorPlannerTokenIcon} onChange={(v) => handleChange('colorPlannerTokenIcon', v)} />
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                  <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest\">Content Cards</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Card Background" value={themeSettings.colorPlannerCardBg} onChange={(v) => handleChange('colorPlannerCardBg', v)} />
+                    <ColorControl label="Card Border" value={themeSettings.colorPlannerCardBorder} onChange={(v) => handleChange('colorPlannerCardBorder', v)} />
+                    <ColorControl label="Card Text" value={themeSettings.colorPlannerCardText} onChange={(v) => handleChange('colorPlannerCardText', v)} />
+                    <ColorControl label="Next Task Muted" value={themeSettings.colorPlannerNextTaskText} onChange={(v) => handleChange('colorPlannerNextTaskText', v)} />
+                    <ColorControl label="Ring Base" value={themeSettings.colorPlannerProgressRingBase} onChange={(v) => handleChange('colorPlannerProgressRingBase', v)} />
+                    <ColorControl label="Ring Fill" value={themeSettings.colorPlannerProgressRingFill} onChange={(v) => handleChange('colorPlannerProgressRingFill', v)} />
                   </div>
                 </div>
               </div>

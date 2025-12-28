@@ -296,6 +296,29 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--modal-close-btn', settings.colorModalCloseButton);
     root.style.setProperty('--radius-modal-section', `${settings.radiusModalSection}px`);
     root.style.setProperty('--radius-modal-input', `${settings.radiusModalInput}px`);
+
+    // Planner Settings
+    root.style.setProperty('--planner-pulse-bg', settings.colorPlannerPulseBg);
+    root.style.setProperty('--planner-pulse-border', settings.colorPlannerPulseBorder);
+    root.style.setProperty('--planner-pulse-text', settings.colorPlannerPulseText);
+    root.style.setProperty('--planner-pulse-alert-icon', settings.colorPlannerPulseAlertIcon);
+    root.style.setProperty('--planner-section-title', settings.colorPlannerSectionTitle);
+    root.style.setProperty('--planner-token-active-bg', settings.colorPlannerTokenActiveBg);
+    root.style.setProperty('--planner-token-active-text', settings.colorPlannerTokenActiveText);
+    root.style.setProperty('--planner-token-inactive-bg', settings.colorPlannerTokenInactiveBg);
+    root.style.setProperty('--planner-token-inactive-border', settings.colorPlannerTokenInactiveBorder);
+    root.style.setProperty('--planner-token-inactive-text', settings.colorPlannerTokenInactiveText);
+    root.style.setProperty('--planner-token-icon', settings.colorPlannerTokenIcon);
+    root.style.setProperty('--planner-spotlight-bg', settings.colorPlannerSpotlightBg);
+    root.style.setProperty('--planner-spotlight-border', settings.colorPlannerSpotlightBorder);
+    root.style.setProperty('--planner-spotlight-identity-bg', settings.colorPlannerSpotlightIdentityBg);
+    root.style.setProperty('--planner-spotlight-separator', settings.colorPlannerSpotlightSeparator);
+    root.style.setProperty('--planner-card-bg', settings.colorPlannerCardBg);
+    root.style.setProperty('--planner-card-border', settings.colorPlannerCardBorder);
+    root.style.setProperty('--planner-card-text', settings.colorPlannerCardText);
+    root.style.setProperty('--planner-next-task-text', settings.colorPlannerNextTaskText);
+    root.style.setProperty('--planner-progress-ring-base', settings.colorPlannerProgressRingBase);
+    root.style.setProperty('--planner-progress-ring-fill', settings.colorPlannerProgressRingFill);
   };
 
   /**
@@ -409,6 +432,29 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorModalCloseButton: oldSettings.colorModalCloseButton || (oldSettings.mode === 'dark' ? '#475569' : '#94a3b8'),
       radiusModalSection: oldSettings.radiusModalSection || 16,
       radiusModalInput: oldSettings.radiusModalInput || 8,
+
+      // Planner Defaults
+      colorPlannerPulseBg: oldSettings.colorPlannerPulseBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : '#ffffff'),
+      colorPlannerPulseBorder: oldSettings.colorPlannerPulseBorder || (oldSettings.mode === 'dark' ? '#1e293b' : '#f3f4f6'),
+      colorPlannerPulseText: oldSettings.colorPlannerPulseText || (oldSettings.mode === 'dark' ? '#ffffff' : '#111827'),
+      colorPlannerPulseAlertIcon: oldSettings.colorPlannerPulseAlertIcon || '#F97316',
+      colorPlannerSectionTitle: oldSettings.colorPlannerSectionTitle || (oldSettings.mode === 'dark' ? '#9CA3AF' : '#6B7280'),
+      colorPlannerTokenActiveBg: oldSettings.colorPlannerTokenActiveBg || '#34A853',
+      colorPlannerTokenActiveText: oldSettings.colorPlannerTokenActiveText || '#ffffff',
+      colorPlannerTokenInactiveBg: oldSettings.colorPlannerTokenInactiveBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : '#ffffff'),
+      colorPlannerTokenInactiveBorder: oldSettings.colorPlannerTokenInactiveBorder || (oldSettings.mode === 'dark' ? '#1e293b' : '#f3f4f6'),
+      colorPlannerTokenInactiveText: oldSettings.colorPlannerTokenInactiveText || (oldSettings.mode === 'dark' ? '#9CA3AF' : '#6B7280'),
+      colorPlannerTokenIcon: oldSettings.colorPlannerTokenIcon || '#34A853',
+      colorPlannerSpotlightBg: oldSettings.colorPlannerSpotlightBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : '#ffffff'),
+      colorPlannerSpotlightBorder: oldSettings.colorPlannerSpotlightBorder || (oldSettings.mode === 'dark' ? '#1e293b' : '#f3f4f6'),
+      colorPlannerSpotlightIdentityBg: oldSettings.colorPlannerSpotlightIdentityBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.4)' : '#f9fafb'),
+      colorPlannerSpotlightSeparator: oldSettings.colorPlannerSpotlightSeparator || (oldSettings.mode === 'dark' ? '#1e293b' : '#f3f4f6'),
+      colorPlannerCardBg: oldSettings.colorPlannerCardBg || (oldSettings.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#f9fafb'),
+      colorPlannerCardBorder: oldSettings.colorPlannerCardBorder || (oldSettings.mode === 'dark' ? '#1e293b' : '#f3f4f6'),
+      colorPlannerCardText: oldSettings.colorPlannerCardText || (oldSettings.mode === 'dark' ? '#ffffff' : '#111827'),
+      colorPlannerNextTaskText: oldSettings.colorPlannerNextTaskText || (oldSettings.mode === 'dark' ? '#9CA3AF' : '#6B7280'),
+      colorPlannerProgressRingBase: oldSettings.colorPlannerProgressRingBase || (oldSettings.mode === 'dark' ? '#1e293b' : '#e5e7eb'),
+      colorPlannerProgressRingFill: oldSettings.colorPlannerProgressRingFill || '#4285F4',
     };
   };
 
@@ -501,6 +547,29 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorModalCloseButton: isDark ? '#475569' : '#94a3b8',
     radiusModalSection: 16,
     radiusModalInput: 8,
+
+    // Home Planner Defaults
+    colorPlannerPulseBg: isDark ? 'rgba(0, 0, 0, 0.2)' : '#ffffff',
+    colorPlannerPulseBorder: isDark ? '#1e293b' : '#f3f4f6',
+    colorPlannerPulseText: isDark ? '#ffffff' : '#111827',
+    colorPlannerPulseAlertIcon: '#F97316',
+    colorPlannerSectionTitle: isDark ? '#9CA3AF' : '#6B7280',
+    colorPlannerTokenActiveBg: '#34A853',
+    colorPlannerTokenActiveText: '#ffffff',
+    colorPlannerTokenInactiveBg: isDark ? 'rgba(0, 0, 0, 0.2)' : '#ffffff',
+    colorPlannerTokenInactiveBorder: isDark ? '#1e293b' : '#f3f4f6',
+    colorPlannerTokenInactiveText: isDark ? '#9CA3AF' : '#6B7280',
+    colorPlannerTokenIcon: '#34A853',
+    colorPlannerSpotlightBg: isDark ? 'rgba(0, 0, 0, 0.2)' : '#ffffff',
+    colorPlannerSpotlightBorder: isDark ? '#1e293b' : '#f3f4f6',
+    colorPlannerSpotlightIdentityBg: isDark ? 'rgba(0, 0, 0, 0.4)' : '#f9fafb',
+    colorPlannerSpotlightSeparator: isDark ? '#1e293b' : '#f3f4f6',
+    colorPlannerCardBg: isDark ? 'rgba(255, 255, 255, 0.05)' : '#f9fafb',
+    colorPlannerCardBorder: isDark ? '#1e293b' : '#f3f4f6',
+    colorPlannerCardText: isDark ? '#ffffff' : '#111827',
+    colorPlannerNextTaskText: isDark ? '#9CA3AF' : '#6B7280',
+    colorPlannerProgressRingBase: isDark ? '#1e293b' : '#e5e7eb',
+    colorPlannerProgressRingFill: '#4285F4',
   });
 
   /**

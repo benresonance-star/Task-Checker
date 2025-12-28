@@ -289,6 +289,29 @@ export interface ThemeSettings {
   colorModalCloseButton: string;
   radiusModalSection: number;
   radiusModalInput: number;
+
+  // Home Planner Settings
+  colorPlannerPulseBg: string;
+  colorPlannerPulseBorder: string;
+  colorPlannerPulseText: string;
+  colorPlannerPulseAlertIcon: string;
+  colorPlannerSectionTitle: string;
+  colorPlannerTokenActiveBg: string;
+  colorPlannerTokenActiveText: string;
+  colorPlannerTokenInactiveBg: string;
+  colorPlannerTokenInactiveBorder: string;
+  colorPlannerTokenInactiveText: string;
+  colorPlannerTokenIcon: string;
+  colorPlannerSpotlightBg: string;
+  colorPlannerSpotlightBorder: string;
+  colorPlannerSpotlightIdentityBg: string;
+  colorPlannerSpotlightSeparator: string;
+  colorPlannerCardBg: string;
+  colorPlannerCardBorder: string;
+  colorPlannerCardText: string;
+  colorPlannerNextTaskText: string;
+  colorPlannerProgressRingBase: string;
+  colorPlannerProgressRingFill: string;
 }
 
 export interface ThemePreset {

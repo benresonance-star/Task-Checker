@@ -182,7 +182,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
   return (
     <div className="space-y-12 animate-in fade-in duration-500 pb-24">
       {/* Today's Horizon Panel */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 bg-white dark:bg-black/20 p-8 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 shadow-xl relative overflow-hidden group">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 bg-[var(--planner-pulse-bg)] p-8 rounded-[2.5rem] border-2 border-[var(--planner-pulse-border)] shadow-xl relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-96 h-96 bg-google-blue/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl transition-transform group-hover:scale-110 duration-1000" />
         
         {/* Column 1: The Pulse (Time & Alerts) */}
@@ -192,14 +192,14 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
               <Calendar className="w-4 h-4" />
               {currentTime.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
             </div>
-            <div className="text-5xl font-black text-gray-900 dark:text-gray-100 tabular-nums tracking-tighter">
+            <div className="text-5xl font-black text-[var(--planner-pulse-text)] tabular-nums tracking-tighter">
               {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
           </div>
 
           <div className="space-y-3">
-            <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] flex items-center gap-2">
-              <Bell className="w-3.5 h-3.5 text-orange-500" />
+            <h3 className="text-[10px] font-black uppercase text-[var(--planner-section-title)] tracking-[0.2em] flex items-center gap-2">
+              <Bell className="w-3.5 h-3.5 text-[var(--planner-pulse-alert-icon)]" />
               Today's Alerts
             </h3>
             <div className="space-y-2 max-h-[280px] overflow-y-auto custom-scrollbar pr-2">
@@ -209,7 +209,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                 todayAlerts.map((alert, idx) => (
                   <div 
                     key={idx}
-                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-gray-800 group/alert cursor-pointer hover:border-google-blue transition-all"
+                    className="flex items-center justify-between p-3 bg-[var(--planner-card-bg)] rounded-xl border border-[var(--planner-card-border)] group/alert cursor-pointer hover:border-google-blue transition-all"
                     onClick={() => {
                       // Click to stage logic
                       const newItem: ActionSetItem = {
@@ -227,15 +227,15 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                     }}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-600 shrink-0 group-hover/alert:scale-110 transition-transform">
+                      <div className="w-8 h-8 rounded-lg bg-[var(--planner-pulse-alert-icon)]/10 flex items-center justify-center text-[var(--planner-pulse-alert-icon)] shrink-0 group-hover/alert:scale-110 transition-transform">
                         <Bell className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[11px] font-bold text-gray-900 dark:text-gray-100 break-words line-clamp-2" dangerouslySetInnerHTML={{ __html: alert.title }} />
+                        <p className="text-[11px] font-bold text-[var(--planner-card-text)] break-words line-clamp-2" dangerouslySetInnerHTML={{ __html: alert.title }} />
                         <p className="text-[9px] font-black uppercase text-gray-400 tracking-wider">{alert.category}</p>
                       </div>
                     </div>
-                    <div className="text-[10px] font-black text-orange-600 bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded-lg ml-2 shrink-0">
+                    <div className="text-[10px] font-black text-[var(--planner-pulse-alert-icon)] bg-[var(--planner-pulse-alert-icon)]/10 px-2 py-1 rounded-lg ml-2 shrink-0">
                       {new Date(alert.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
@@ -246,8 +246,8 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
         </div>
 
         {/* Column 2: The Staging Zone (The Daily Trio) */}
-        <div className="xl:col-span-5 flex flex-col gap-4 relative z-10 border-l border-r border-gray-100 dark:border-gray-800 px-6">
-          <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] flex items-center gap-2">
+        <div className="xl:col-span-5 flex flex-col gap-4 relative z-10 border-l border-r border-[var(--planner-pulse-border)] px-6">
+          <h3 className="text-[10px] font-black uppercase text-[var(--planner-section-title)] tracking-[0.2em] flex items-center gap-2">
             <Zap className="w-3.5 h-3.5 text-google-yellow" />
             Session Sprint Staging
           </h3>
@@ -350,10 +350,10 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
           className="flex items-center justify-between px-2 cursor-pointer group/header"
           onClick={() => setIsSpotlightExpanded(!isSpotlightExpanded)}
         >
-          <h2 className="flex items-center gap-3 text-[10px] font-black uppercase text-gray-500 tracking-[0.2em]">
+          <h2 className="flex items-center gap-3 text-[10px] font-black uppercase text-[var(--planner-section-title)] tracking-[0.2em]">
             <Target className="w-5 h-5 text-google-green" />
             Project Activity Spotlight
-            <div className="ml-1 p-1 rounded-full bg-gray-100 dark:bg-gray-800 transition-colors group-hover/header:bg-gray-200 dark:group-hover/header:bg-gray-700">
+            <div className="ml-1 p-1 rounded-full bg-[var(--planner-pulse-bg)] border border-[var(--planner-pulse-border)] transition-colors group-hover/header:bg-google-green/10">
               {isSpotlightExpanded ? (
                 <ChevronUp className="w-3 h-3 text-gray-500" />
               ) : (
@@ -366,7 +366,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
         {isSpotlightExpanded && (
           <>
             {activeCommitments.length === 0 ? (
-              <div className="py-12 text-center bg-gray-50 dark:bg-black/10 rounded-[2.5rem] border-2 border-dashed border-gray-200 dark:border-gray-800">
+              <div className="py-12 text-center bg-[var(--planner-spotlight-bg)] rounded-[2.5rem] border-2 border-dashed border-[var(--planner-spotlight-border)]">
                 <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">No active commitments found.</p>
                 <p className="text-xs text-gray-500 mt-2">Stage a task or add a note to see your projects here.</p>
               </div>
@@ -384,13 +384,13 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                         className={clsx(
                           "flex-shrink-0 flex items-center gap-3 px-5 py-3 rounded-2xl border-2 transition-all relative group",
                           isActive 
-                            ? "bg-google-green border-google-green text-white shadow-lg shadow-google-green/20 scale-105 z-10" 
-                            : "bg-white dark:bg-black/20 border-gray-100 dark:border-gray-800 text-gray-500 hover:border-google-green/50"
+                            ? "bg-[var(--planner-token-active-bg)] border-[var(--planner-token-active-bg)] text-[var(--planner-token-active-text)] shadow-lg scale-105 z-10" 
+                            : "bg-[var(--planner-token-inactive-bg)] border-[var(--planner-token-inactive-border)] text-[var(--planner-token-inactive-text)] hover:border-google-green/50"
                         )}
                       >
                         <div className={clsx(
                           "p-1.5 rounded-lg transition-colors",
-                          isActive ? "bg-white/20 text-white" : "bg-google-green/10 text-google-green group-hover:bg-google-green/20"
+                          isActive ? "bg-white/20 text-white" : "text-[var(--planner-token-icon)] bg-[var(--planner-token-icon)]/10 group-hover:bg-[var(--planner-token-icon)]/20"
                         )}>
                           <Briefcase className="w-4 h-4" />
                         </div>
@@ -402,12 +402,12 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
 
                 {/* The Spotlight Container (Dynamic Elastic Height) */}
                 {spotlightData && (
-                  <div className="bg-white dark:bg-black/20 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 overflow-hidden shadow-xl animate-fade-in transition-[height] duration-300">
+                  <div className="bg-[var(--planner-spotlight-bg)] rounded-[2.5rem] border-2 border-[var(--planner-spotlight-border)] overflow-hidden shadow-xl animate-fade-in transition-[height] duration-300">
                     <div className="flex flex-col lg:flex-row h-full">
-                      {/* Column 1: Project Identity (20%) - Defines the Floor Height */}
-                      <div className="w-full lg:w-[22%] bg-gray-50/50 dark:bg-black/40 border-b lg:border-b-0 lg:border-r border-gray-100 dark:border-gray-800 p-6 flex flex-col justify-between gap-6 group shrink-0 min-h-[240px]">
+                      {/* Column 1: Project Identity (22%) - Defines the Floor Height */}
+                      <div className="w-full lg:w-[22%] bg-[var(--planner-spotlight-identity-bg)] border-b lg:border-b-0 lg:border-r border-[var(--planner-spotlight-separator)] p-6 flex flex-col justify-between gap-6 group shrink-0 min-h-[240px]">
                         <div className="space-y-6">
-                          <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 tracking-tighter leading-tight break-words">
+                          <h3 className="text-xl font-black text-[var(--planner-pulse-text)] tracking-tighter leading-tight break-words">
                             {spotlightData.project.name}
                           </h3>
                           <div className="space-y-3">
@@ -417,7 +417,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                               </div>
                               <div className="flex flex-col min-w-0">
                                 <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest truncate">Active Tasks</span>
-                                <span className="text-xs font-bold text-gray-900 dark:text-gray-100">
+                                <span className="text-xs font-bold text-[var(--planner-pulse-text)]">
                                   {validActionSet.filter(i => i.projectId === spotlightData.project.id).length} in session
                                 </span>
                               </div>
@@ -428,7 +428,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                               </div>
                               <div className="flex flex-col min-w-0">
                                 <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest truncate">Knowledge</span>
-                                <span className="text-xs font-bold text-gray-900 dark:text-gray-100">
+                                <span className="text-xs font-bold text-[var(--planner-pulse-text)]">
                                   {spotlightData.associatedNotes.length} linked notes
                                 </span>
                               </div>
@@ -446,7 +446,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                       </div>
 
                       {/* Column 2: Live Checklists (43%) */}
-                      <div className="flex-[43] p-6 space-y-4 border-b lg:border-b-0 lg:border-r border-gray-100 dark:border-gray-800 flex flex-col min-w-0">
+                      <div className="flex-[43] p-6 space-y-4 border-b lg:border-b-0 lg:border-r border-[var(--planner-spotlight-separator)] flex flex-col min-w-0">
                         <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] flex items-center gap-2 mb-1 shrink-0">
                           <ClipboardList className="w-4 h-4 text-google-blue" />
                           Live Checklists
@@ -454,7 +454,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                         <div className="flex-1 overflow-y-auto custom-scrollbar no-scrollbar pr-1 max-h-[380px]">
                           <div className="grid grid-cols-1 gap-3">
                             {spotlightData.activeInstances.length === 0 ? (
-                              <div className="min-h-[120px] flex items-center justify-center bg-gray-50/50 dark:bg-white/5 rounded-2xl text-[10px] font-bold text-gray-400 italic text-center px-4">
+                              <div className="min-h-[120px] flex items-center justify-center bg-[var(--planner-card-bg)] rounded-2xl text-[10px] font-bold text-gray-400 italic text-center px-4">
                                 No specific checklists staged.
                               </div>
                             ) : (
@@ -472,20 +472,20 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                                   <div 
                                     key={instance.id}
                                     onClick={() => navigate(`/project/${spotlightData.project.id}/instance/${instance.id}${nextTask ? `?task=${nextTask.id}&scroll=true` : ''}`)}
-                                    className="bg-gray-50/50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 hover:border-google-blue hover:shadow-lg transition-all cursor-pointer group/pill min-h-[100px]"
+                                    className="bg-[var(--planner-card-bg)] border border-[var(--planner-card-border)] rounded-2xl p-4 hover:border-google-blue hover:shadow-lg transition-all cursor-pointer group/pill min-h-[100px]"
                                   >
                                     <div className="flex items-center justify-between mb-3">
-                                      <span className="text-xs font-black text-gray-900 dark:text-gray-100 truncate flex-1 pr-2">{instance.title}</span>
+                                      <span className="text-xs font-black text-[var(--planner-card-text)] truncate flex-1 pr-2">{instance.title}</span>
                                       <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
                                         <svg className="w-8 h-8 -rotate-90">
-                                          <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="3" className="text-gray-200 dark:text-gray-800" />
-                                          <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray={88} strokeDashoffset={88 - (88 * progress) / 100} className="text-google-blue transition-all duration-1000" />
+                                          <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="3" className="text-[var(--planner-progress-ring-base)]" />
+                                          <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray={88} strokeDashoffset={88 - (88 * progress) / 100} className="text-[var(--planner-progress-ring-fill)] transition-all duration-1000" />
                                         </svg>
-                                        <span className="absolute text-[8px] font-black">{progress}%</span>
+                                        <span className="absolute text-[8px] font-black text-[var(--planner-card-text)]">{progress}%</span>
                                       </div>
                                     </div>
                                     {nextTask && (
-                                      <div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 group-hover/pill:text-google-blue transition-colors">
+                                      <div className="flex items-center gap-2 text-[10px] font-bold text-[var(--planner-next-task-text)] group-hover/pill:text-google-blue transition-colors">
                                         <ChevronRight className="w-3 h-3 shrink-0" />
                                         <span>Next: {nextTask.title}</span>
                                       </div>
@@ -499,7 +499,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                       </div>
 
                       {/* Column 3: Associated Notes (35%) */}
-                      <div className="flex-[35] p-6 space-y-4 bg-gray-50/30 dark:bg-black/20 flex flex-col min-w-0">
+                      <div className="flex-[35] p-6 space-y-4 bg-[var(--planner-spotlight-bg)] flex flex-col min-w-0">
                         <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] flex items-center gap-2 mb-1 shrink-0">
                           <StickyNote className="w-4 h-4 text-indigo-500" />
                           Associated Notes
@@ -507,7 +507,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                         <div className="flex-1 overflow-y-auto custom-scrollbar no-scrollbar pr-1 max-h-[380px]">
                           <div className="grid grid-cols-1 gap-3">
                             {spotlightData.associatedNotes.length === 0 ? (
-                              <div className="min-h-[120px] flex items-center justify-center bg-gray-50/50 dark:bg-white/5 rounded-2xl text-[10px] font-bold text-gray-400 italic text-center px-4">
+                              <div className="min-h-[120px] flex items-center justify-center bg-[var(--planner-card-bg)] rounded-2xl text-[10px] font-bold text-gray-400 italic text-center px-4">
                                 No notes tagged for this project.
                               </div>
                             ) : (
@@ -522,7 +522,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                                   onClick={() => toggleNoteInActionSet(note.id)}
                                 >
                                   <div 
-                                    className="text-[11px] font-bold text-gray-800 dark:text-gray-200 line-clamp-4 prose prose-sm dark:prose-invert max-w-none"
+                                    className="text-[11px] font-bold text-[var(--planner-card-text)] line-clamp-4 prose prose-sm dark:prose-invert max-w-none"
                                     dangerouslySetInnerHTML={{ __html: note.text }}
                                   />
                                   {note.reminder && (
@@ -552,10 +552,10 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
           className="flex items-center justify-between px-2 cursor-pointer group/header"
           onClick={() => setIsNotesExpanded(!isNotesExpanded)}
         >
-          <h2 className="flex items-center gap-3 text-[10px] font-black uppercase text-gray-500 tracking-[0.2em]">
+          <h2 className="flex items-center gap-3 text-[10px] font-black uppercase text-[var(--planner-section-title)] tracking-[0.2em]">
             <StickyNote className="w-5 h-5 text-google-blue" />
             MY NOTES AND TASKS
-            <div className="ml-1 p-1 rounded-full bg-gray-100 dark:bg-gray-800 transition-colors group-hover/header:bg-gray-200 dark:group-hover/header:bg-gray-700">
+            <div className="ml-1 p-1 rounded-full bg-[var(--planner-pulse-bg)] border border-[var(--planner-pulse-border)] transition-colors group-hover/header:bg-google-blue/10">
               {isNotesExpanded ? (
                 <ChevronUp className="w-3 h-3 text-gray-500" />
               ) : (
@@ -566,7 +566,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
         </div>
         
         {isNotesExpanded && (
-          <div className="p-4 md:p-6 bg-white dark:bg-black/40 rounded-[2.5rem] border-2 border-gray-100 dark:border-gray-800 shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="p-4 md:p-6 bg-[var(--planner-spotlight-bg)] rounded-[2.5rem] border-2 border-[var(--planner-spotlight-border)] shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
             <ScratchpadWidget projects={projects} />
           </div>
         )}
