@@ -22,8 +22,8 @@ export const theme = {
   components: {
     layout: {
       screen: 'h-screen flex flex-col md:flex-row bg-app-bg text-text-primary overflow-hidden',
-      header: 'md:hidden flex items-center justify-between p-4 border-b border-gray-300 dark:border-gray-700 bg-app-bg sticky top-0 z-40',
-      mobileMenu: 'md:hidden fixed inset-x-0 top-[65px] bg-app-bg border-b border-gray-300 dark:border-gray-700 shadow-xl z-30 animate-in slide-in-from-top duration-200 overflow-y-auto max-h-[calc(100vh-65px)]',
+      header: 'md:hidden flex items-center justify-between p-4 border-b border-gray-300 dark:border-gray-700 bg-app-bg sticky top-0 z-[150]',
+      mobileMenu: 'md:hidden fixed inset-x-0 top-[65px] bg-app-bg border-b border-gray-300 dark:border-gray-700 shadow-xl z-[160] animate-in slide-in-from-top duration-200 overflow-y-auto max-h-[calc(100vh-65px)]',
       desktopSidebar: 'hidden md:flex w-64 border-r border-gray-300 dark:border-gray-700 p-4 md:pt-8 md:px-4 md:pb-4 flex flex-col gap-6 bg-sidebar-bg shrink-0',
       mainContent: 'flex-1 overflow-y-auto flex flex-col',
       contentHeader: 'w-full px-4 sm:px-8 md:px-16 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 shrink-0',
