@@ -60,7 +60,7 @@ The application uses a 3-level hierarchical navigation system in the header:
     - **Editor Layout**: Toggle between Stacked and Side-by-Side views within the Template Editor to optimize workspace layout.
     - **Unified Creation**: Primary creation actions are unified within the Discovery Grid.
 
-### Time-Critical Alerts (v1.11.8)
+### Mission Control Alerts (v1.13.44)
 The application includes a high-priority "Intervention HUD" system for managing time-sensitive tasks:
 1.  **Reminder Engine**: A background process monitors the system clock every 30 seconds, checking for active reminders in both project tasks and personal notes.
 2.  **Intervention HUD**: When a reminder triggers, a full-screen pulsing alert (`z-[5000]`) interrupts the user. This modal provides high-velocity actions:
@@ -68,10 +68,11 @@ The application includes a high-priority "Intervention HUD" system for managing 
     - **Snooze**: Quickly push the alert forward (15m, 1h, 3h, 1 day).
     - **Change Time**: Direct access to the scheduling interface.
     - **Dismiss**: Clears the reminder trigger.
-3.  **Explicit Confirmation**: Setting a reminder requires an explicit "OK" or "Set Alert" confirmation. The picker popover remains active, isolating temporary state until the user saves or cancels, preventing accidental UI closure during fine-tuning.
-4.  **Visual Consistency**: All time-critical indicators use the **Bell icon** (`lucide-react/Bell`) to distinguish them from the Pomodoro clock.
-5.  **Situational Awareness**: Pulsing Bell badges appear on project cards in MISSION CONTROL and session items in the sidebar whenever an active reminder is pending.
-6.  **Auto-Cleanup**: If a task or note is marked as "Done" prior to its reminder triggering, the system automatically deletes the reminder to prevent background alerts for completed work.
+3.  **MISSION CONTROL Integration**: A dedicated "Time-Critical Alerts: MISSION CONTROL" panel appears in the Mission Control interface whenever reminders are active for the current day, providing high-visibility jump-links to the workspace.
+4.  **Explicit Confirmation**: Setting a reminder requires an explicit "OK" or "Set Alert" confirmation. The picker popover remains active, isolating temporary state until the user saves or cancels, preventing accidental UI closure during fine-tuning.
+5.  **Visual Consistency**: All time-critical indicators use the **Bell icon** (`lucide-react/Bell`) to distinguish them from the Pomodoro clock.
+6.  **Situational Awareness**: Pulsing Bell badges appear on project cards in MISSION CONTROL and session items in the sidebar whenever an active reminder is pending.
+7.  **Auto-Cleanup**: If a task or note is marked as "Done" prior to its reminder triggering, the system automatically deletes the reminder to prevent background alerts for completed work.
 - **Project/Template Discovery**: A visual grid of all available projects or templates with search, creation, and management controls (Delete/Settings).
 - **Checklist Discovery**: A slide-down shelf within the header showing all checklists in the current project, including completion progress bars.
 
@@ -164,7 +165,12 @@ To reduce visual cognitive load and maintain workflow continuity, the "My Sessio
   - **Checklist & Templates**: Task list hierarchy, connector lines, and highly granular controls for **Section/Subsection backgrounds, borders, radii, and font colors**, as well as **Task and Checklist title colors**, **Task backgrounds (Idle/Active)**, and a specific **Inactive Text** color for receded tasks.
   - **Task Info Window**: Overlay, window backgrounds, section styling (including specialized **"Can I Proceed?" background/outline**), input/button themes, and custom radii.
   - **System Corner Radii**: Global management of all corner radii from checklist components to major modals, sidebars, and metadata cards.
-- **Style Snapshots (Theme Library)**: Admins can capture the current brand styling and save it as a named snapshot (e.g., "Happy Mode"). Presets support **Active Style Tracking**, highlighting the currently applied theme and allowing for **Incremental Updates** (overwriting an existing snapshot with new tweaks) via a dedicated save icon.
+- **Style Snapshots (Theme Library)**: Admins can capture the current brand styling and save it as a named snapshot (e.g., "Happy Mode"). Presets support:
+    - **Active Style Tracking**: Highlights the currently applied theme in the console list.
+    - **Incremental Updates**: Overwriting an existing snapshot with new tweaks via a dedicated save icon.
+    - **Style Duplication**: A "Duplicate" button that clones an existing preset and prompts for a unique name via a dedicated modal.
+    - **Inline Renaming**: A "Pencil" icon enables direct name editing with real-time uniqueness validation and a stable approval mechanism (`onMouseDown` handler to prevent blur-race conditions).
+    - **Deletion Safety**: A "Confirm Delete" modal prevents accidental removal. The system enforces a **Minimum Style Policy**, ensuring at least one light and one dark style always exist.
 - **Smooth Interaction Engine**: Utilizes hardware-accelerated `translate3d` and `requestAnimationFrame` for buttery-smooth window movement and resizing. Transitions are dynamically disabled during active interactions to eliminate "input lag."
 - **Semantic Theme Engine**: Uses CSS Variables linked to descriptive, role-based technical keys (e.g., `colorAppIdentity` instead of `brandBlue`). This ensures the codebase remains logical even when colors are dramatically altered.
 - **Global Style Persistence**: Theme settings are stored in Firestore (`settings/theme`) and synchronized in real-time across all team members' sessions. Every teammate sees the new brand colors the moment the admin saves a change.
@@ -433,11 +439,11 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > - **Checklist Removal Safety**: In-app confirmation modal for removing checklists from projects, warning about potential work loss.
 > - Multi-format Import/Export (JSON, ZIP, CSV). **Hide Export on mobile.**
 > - Intelligent Plain Text parser for hierarchical lists.
-> - **Branding Console**: Floating, resizable HUD for live-adjusting brand colors and corner radii with real-time sync and iterative snapshot updates.
+> - **Branding Console**: Floating, resizable HUD for live-adjusting brand colors and corner radii with real-time sync, iterative snapshot updates, **style duplication**, **inline renaming with uniqueness validation**, and **deletion safety modals** (enforcing a minimum of one light and one dark style).
 > - **Main Sidebar Toggle**: A smooth, animated toggle to collapse the primary navigation sidebar in Desktop Mode, enabling an immersive, wide-screen view. State is persisted in `localStorage`.
 > - **Dynamic Versioning**: Link the UI version display directly to the `version` field in `package.json`.
 > - Personalized UI Folding: Store section expand/collapse states in localStore for individual workspace control.
-> - **Persistent Dashboard**: Implement a project-view layout with a collapsible metadata dashboard organized into Identification, Planning, and Building sections. **Optimize mobile layout with bordered Edit buttons and stacked controls.** The Active Focus card must use **font-black** and **large-scale typography (up to 6xl)** for the primary task title.
+> - **Persistent Dashboard (MISSION CONTROL)**: Implement a project-view layout with a collapsible metadata dashboard organized into Identification, Planning, and Building sections. **Optimize mobile layout with bordered Edit buttons and stacked controls.** The Active Focus card must use **font-black** and **large-scale typography (up to 6xl)** for the primary task title.
 > - **Add Logic Workflow**: Provide an "+ Add Checklist" modal to select and assign master templates to projects.
 > - **Online Documents**: Implement a project-specific file explorer with Firebase Storage integration, global search, and a recursive "Deep List" view mode. Grid view features "shapes only" icons (amber folders, blue files) for a modern feel.
 > - **Structured Task Guide**: Implement a collapsible guidance panel with 'What this Task Achieves', orange-themed 'Can I Proceed?' requirements, 'Helpful (Optional)' links/notes, and color-coded Complexity (located under title). **Ensure a responsive modal header with stacked controls for mobile and horizontal alignment for desktop.**
@@ -477,7 +483,7 @@ As the application scales, the centralized state store should be split into doma
 - **`useAuthStore`**: Dedicated to user identity, roles, and RBAC permissions.
 - **`useHierarchyStore`**: Focused on Master templates, Sections, Subsections, and Tasks.
 - **`useProjectStore`**: Managing project metadata and document explorer state.
-- **`useBrandingStore`**: Isolating the 68+ theme properties and CSS variable injection logic.
+- **`useBrandingStore`**: Isolating the 110+ theme properties and CSS variable injection logic.
 
 ### 2. Service Layer Extraction
 Move complex business logic out of the state containers and into a dedicated `src/services/` layer. This includes:
