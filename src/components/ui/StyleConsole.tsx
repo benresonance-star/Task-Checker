@@ -316,7 +316,8 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                           <div className={clsx("flex items-center gap-1 shrink-0", (isActive || isEditing) ? "opacity-100" : "opacity-0 group-hover:opacity-100")}>
                             {isEditing ? (
                               <button 
-                                onClick={(e) => {
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
                                   e.stopPropagation();
                                   if (editingPresetName.trim()) {
                                     renameThemePreset(preset.id, editingPresetName);
