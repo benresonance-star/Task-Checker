@@ -393,7 +393,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                         )}
                       </div>
                       <p className={clsx(
-                        "text-xs font-bold break-words line-clamp-2",
+                        "text-xs font-bold break-words",
                         item.completed ? "text-gray-400 line-through" : "text-gray-900 dark:text-gray-100"
                       )} dangerouslySetInnerHTML={{ 
                         __html: item.displayTitle
