@@ -1445,7 +1445,7 @@ function App() {
                   )}
                 >
                   <LayoutGrid className="w-5 h-5" />
-                  <span>MISSION CONTROL</span>
+                  <span>Mission Control</span>
                 </button>
 
                 <button
@@ -1494,7 +1494,7 @@ function App() {
                   }}
                   className={`flex items-center justify-between px-4 py-3 rounded-button transition-colors ${(location.pathname === '/' || location.pathname === '/home') ? "bg-blue-50 text-google-blue dark:bg-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
                 >
-                  <div className="flex items-center gap-3"><LayoutGrid className="w-5 h-5" /><span className="font-bold">MISSION CONTROL</span></div>
+                  <div className="flex items-center gap-3"><LayoutGrid className="w-5 h-5" /><span className="font-bold">Mission Control</span></div>
                   {(location.pathname === '/' || location.pathname === '/home') && <div className="w-1.5 h-1.5 rounded-full bg-google-blue" />}
                 </button>
 
@@ -1641,7 +1641,7 @@ function App() {
                   (location.pathname === '/' || location.pathname === '/home') ? theme.components.nav.itemActive : theme.components.nav.itemInactive
                 )}
               >
-                <LayoutGrid className="w-5 h-5" /><span className="font-medium">MISSION CONTROL</span>
+                <LayoutGrid className="w-5 h-5" /><span className="font-medium">Mission Control</span>
               </button>
 
               <button 
@@ -1754,7 +1754,7 @@ function App() {
                   {isMissionControl ? (
                     <div className="flex items-center gap-2 px-2 py-1.5 rounded-xl bg-google-blue/5">
                       <LayoutGrid className="w-5 h-5 text-google-blue" />
-                      <span className="text-xs font-black uppercase tracking-[0.2em] text-google-blue">MISSION CONTROL</span>
+                      <span className="text-xs font-black tracking-[0.2em] text-google-blue">Mission Control</span>
                     </div>
                   ) : (
                     <>
