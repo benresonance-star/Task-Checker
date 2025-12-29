@@ -22,7 +22,7 @@ To maintain the high-performance standard of checkMATE as it grows, developers M
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It features a dual-interface architectural model:
 1.  **Home: The Planner**: A high-fidelity, single-screen "Command Center" for orientation and planning.
-    - **Today's Horizon (Staging Zone)**: A three-column top panel containing a real-time Pulse (Clock/Date), a **Winning Ledger** for daily victories (replacing the old alerts list), and a **Session Sprint Staging** area for the "Daily Trio" of tasks.
+    - **Session Sprint Staging (Staging Zone)**: A three-column top panel containing a real-time Pulse (Clock/Date), a **Winning Ledger** for daily victories (replacing the old alerts list), and a **Session Sprint Staging** area for the "Daily Trio" of tasks. **Task titles support full multi-line wrapping without truncation to ensure absolute clarity.**
     - **Project Spotlight Switchboard**: A tactile project switcher focusing the interface on a single project. Features an **Elastic Balanced Trio** model where the container height adapts dynamically to content, ensuring zero wasted space while maintaining a professional minimum footprint.
     - **MY NOTES AND TASKS**: A streamlined general area for rapid entry, personal organization, and viewing all active session tasks.
 2.  **Work: My Work Session**: A specialized deep-work environment for executing project tasks and recording progress.
@@ -32,11 +32,14 @@ checkMATE is a high-precision hierarchical checklist management application desi
 
 ## UI Architecture & Layering Strategy (Global HUD)
 To ensure critical tools (Branding Console, Admin Panel) are always accessible, we use a strict z-index hierarchy:
+- `z-[5000]`: **Intervention HUD** (Time-Critical Alerts modal)
 - `z-[4000]`: Notifications/Toasts (Must be on top of everything)
 - `z-[3000]`: Branding Console (StyleConsole) - Stays active during design sessions.
 - `z-[2000]`: Major Workspace Modals (TaskInfoModal, Admin Console, Discovery Grid)
-- `z-[100]`: **Locked Context Header** (Sticky pinned to viewport top)
 - `z-[1000]`: Standard Modals/Overlays
+- `z-[160]`: **Global Mobile Dropdown Menu** (z-index higher than header to overlay shadow)
+- `z-[150]`: **Global Mobile Header** (Ensures persistent controls on small screens)
+- `z-[100]`: **Main Content Header** (Sticky pinned context header)
 - `z-[50]`: Sidebars / Overlays
 - `z-[10]`: Content areas
 
@@ -207,7 +210,7 @@ To reduce visual cognitive load, the "My Session" sidebar uses a tiered visibili
       - **Spotlight System**: Highlights the active step and dims inactive ones to guide the user's attention. Auto-advances from Step 2 to Step 3 only if prerequisites exist and are completed; if no prerequisites are defined, the user must manually select Step 3. **The currently active step is persisted per user in `localStorage`, ensuring the workflow state remains consistent across refreshes and interface switches.**
       - **Interactive Prerequisites**: Step 2 features high-contrast, round checkboxes that persist their completion state in Firestore.
       - **Workbench (Gather & Log)**: A dedicated, full-width personal scratchpad positioned below the 3-step briefing grid. Unlike task feedback, the workbench is intended for the user's private project notes and persistent working data.
-- **Personal Scratchpad (My Notes)**: A modular widget on the dashboard for personal and project-linked tasks. Supports rich text editing, category assignments, and **Priority flagging**. Features a **"Clean Entry" workflow** with an absolute-positioned floating plus button and a taller header for better balance. When editing, the interface features a high-visibility **white X on a red background** for closing, matching the action button's geometry. **Category filtering is handled via a streamlined dropdown interface.**
+- **Personal Scratchpad (My Notes)**: A modular widget on the dashboard for personal and project-linked tasks. Supports rich text editing, category assignments, and **Priority flagging**. Features a **"Clean Entry" workflow** with an absolute-positioned floating plus button and a taller header for better balance. The text entry area uses the **full width of the container** to maximize writing space. When editing, the interface features a high-visibility **white X on a red background** for closing, matching the action button's geometry. **Category filtering is handled via a streamlined dropdown interface.**
 - **Completed Task Feedback**: 
   - **Active State**: Pulsing green card (`animate-pulse`) with a **thumbs up** icon on the completion button.
   - **Deactivated State**: Retains a **softer, lighter green background** to distinguish from pending tasks while maintaining visual hierarchy.
@@ -275,7 +278,9 @@ To reduce visual cognitive load, the "My Session" sidebar uses a tiered visibili
   - **60fps Scrolling**: To maintain fluid performance with 100+ tasks, all complex derived data must be wrapped in `useMemo`. 
   - **Re-render Optimization**: Components like `TaskItem` and `TaskInfoModal` must minimize internal state changes. High-frequency updates (like the 1s timer tick) are isolated into specialized leaf components to prevent global re-render cycles of heavy parent containers.
 - **Stable Interaction Policy**: All modal interactions are subject to a 20ms mount-stabilization delay before complex child components (like Tiptap) are permitted to mount, preventing thread-locking on low-powered mobile processors.
-- **Mobile Optimization**: Portrait-first responsive layout with compressed headers, reduced padding, and intelligently repositioned primary action buttons. **The "+ New Project/Template" button is positioned to the right of the section title on mobile for immediate access.** Export Checklist features are hidden on mobile to optimize screen real estate.
+- **Mobile Optimization**: Portrait-first responsive layout with compressed headers, reduced padding, and intelligently repositioned primary action buttons.
+  - **Navigation State**: The mobile hamburger menu icon displays a **large color-matched down-arrow indicator** when open, providing clear visual feedback of the active state.
+  - **Z-Index Resilience**: The global mobile header (`z-[150]`) and dropdown (`z-[160]`) remain persistently on top of all page-specific content headers during scroll.
   - **GPU Safety**: Resource-intensive CSS filters like `backdrop-blur` are automatically disabled on mobile modal surfaces to prevent GPU-induced browser tab crashes.
   - **Auto-Zoom Prevention**: Forces a `16px` font-size on all active inputs, textareas, and rich-text editors for mobile devices (`max-width: 768px`). This prevents iOS Safari from automatically zooming in during text entry, maintaining the application's intended framing.
   - **Hydration Orchestration**: Heavy rich-text editors utilize a platform-aware 400ms-500ms staggered hydration delay on mobile, ensuring animations remain smooth before the editor engine initializes.
