@@ -89,8 +89,8 @@ const SidebarNoteItem = ({
     opacity: isDragging ? 0.8 : undefined,
   } as React.CSSProperties;
 
-    const isActuallyCompleted = note.completed;
-    const isExpanded = isActiveFocus || isSelected;
+  const isActuallyCompleted = note.completed;
+  const isExpanded = isActiveFocus || isSelected;
 
   return (
     <div 
@@ -105,24 +105,24 @@ const SidebarNoteItem = ({
         ...style,
         color: isActuallyCompleted
           ? 'var(--session-ledger-text)'
-          : isSelected
-            ? 'var(--session-task-selected-text)'
-            : isActiveFocus
-              ? 'var(--session-task-active-text)'
+          : isActiveFocus
+            ? 'var(--session-task-active-text)'
+            : isSelected
+              ? 'var(--session-task-selected-text)'
               : 'var(--session-task-inactive-text)',
         backgroundColor: isActuallyCompleted
           ? 'var(--session-ledger-bg)'
-          : isSelected
-            ? 'var(--session-task-selected-bg)'
-            : isActiveFocus
-              ? 'var(--session-task-active-bg)'
+          : isActiveFocus
+            ? 'var(--session-task-active-bg)'
+            : isSelected
+              ? 'var(--session-task-selected-bg)'
               : 'var(--session-task-inactive-bg)',
         borderColor: isActuallyCompleted
           ? 'transparent'
-          : isSelected
-            ? 'var(--session-task-selected-border)'
-            : isActiveFocus
-              ? 'var(--session-task-active-border)'
+          : isActiveFocus
+            ? 'var(--session-task-active-border)'
+            : isSelected
+              ? 'var(--session-task-selected-border)'
               : 'var(--session-task-inactive-border)',
       }}
       onClick={onSelect}
@@ -345,17 +345,17 @@ const SidebarTaskItem = ({
         theme.components.sidebar.activeTask,
         isActuallyCompleted
           ? theme.components.sidebar.ledgerItem
-          : isSelected
-            ? "transition-all duration-300"
-            : isMultiUserActive 
-              ? theme.components.sidebar.activeTaskMulti
-              : isActiveFocus 
-                ? (isYellowState 
-                    ? theme.components.sidebar.activeTaskYellow
-                    : clsx(
-                        theme.components.sidebar.activeTaskFocus,
-                        task.completed && "animate-pulse"
-                      ))
+          : isActiveFocus
+            ? (isYellowState 
+                ? theme.components.sidebar.activeTaskYellow
+                : clsx(
+                    theme.components.sidebar.activeTaskFocus,
+                    task.completed && "animate-pulse"
+                  ))
+            : isSelected
+              ? "transition-all duration-300"
+              : isMultiUserActive 
+                ? theme.components.sidebar.activeTaskMulti
                 : isDeactivatedCompleted
                   ? theme.components.sidebar.deactivatedCompleted
                   : "transition-all duration-300"
@@ -364,24 +364,24 @@ const SidebarTaskItem = ({
         ...style,
         color: isActuallyCompleted
           ? 'var(--session-ledger-text)'
-          : isSelected
-            ? 'var(--session-task-selected-text)'
-            : isActiveFocus
-              ? 'var(--session-task-active-text)'
+          : isActiveFocus
+            ? 'var(--session-task-active-text)'
+            : isSelected
+              ? 'var(--session-task-selected-text)'
               : 'var(--session-task-inactive-text)',
         backgroundColor: isActuallyCompleted
           ? 'var(--session-ledger-bg)'
-          : isSelected
-            ? 'var(--session-task-selected-bg)'
-            : isActiveFocus
-              ? 'var(--session-task-active-bg)'
+          : isActiveFocus
+            ? 'var(--session-task-active-bg)'
+            : isSelected
+              ? 'var(--session-task-selected-bg)'
               : 'var(--session-task-inactive-bg)',
         borderColor: isActuallyCompleted
           ? 'transparent'
-          : isSelected
-            ? 'var(--session-task-selected-border)'
-            : isActiveFocus
-              ? 'var(--session-task-active-border)'
+          : isActiveFocus
+            ? 'var(--session-task-active-border)'
+            : isSelected
+              ? 'var(--session-task-selected-border)'
               : 'var(--session-task-inactive-border)',
       }}
       onClick={onSelect}
