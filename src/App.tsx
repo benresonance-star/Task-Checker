@@ -257,6 +257,29 @@ const SidebarTaskItem = ({
   onOpenNotes: (taskId: string, containerId: string, focusFeedback?: boolean) => void
 }) => {
   const { projects, toggleTask, toggleTaskInActionSet, toggleTaskTimer, updateTaskTimer, currentUser, users } = useTasklistStore();
+  const [localDuration, setLocalDuration] = useState<string>(Math.floor((task.timerDuration || 1200) / 60).toString());
+
+  useEffect(() => {
+    if (task.timerDuration) {
+      setLocalDuration(Math.floor(task.timerDuration / 60).toString());
+    }
+  }, [task.timerDuration]);
+
+  const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    const val = e.target.value.replace(/[^0-9]/g, '');
+    setLocalDuration(val);
+  };
+
+  const handleDurationSubmit = async () => {
+    const mins = parseInt(localDuration);
+    if (!isNaN(mins) && mins > 0) {
+      const seconds = mins * 60;
+      await updateTaskTimer(task.id, seconds, true); // Added 'isReset' flag to update both remaining and duration
+    } else {
+      setLocalDuration(Math.floor((task.timerDuration || 1200) / 60).toString());
+    }
+  };
 
   const {
     attributes,
@@ -445,50 +468,74 @@ const SidebarTaskItem = ({
                 isActiveFocus || isSelected || isMultiUserActive ? "bg-white/10 text-white hover:bg-white/20" : "bg-gray-100 dark:bg-white/5 text-gray-600 hover:bg-gray-200"
               )}
             >
-              <FileText className={clsx("w-3.5 h-3.5", shouldHighlightNotes && "text-google-yellow fill-current")} />
+              <FileText className={clsx(
+                "w-3.5 h-3.5",
+                shouldHighlightNotes ? "text-google-yellow fill-white stroke-[3]" : "fill-current"
+              )} />
               <span className="text-[10px] font-black uppercase tracking-widest">Notes</span>
             </button>
 
             {/* Preparatory / Compact Pomodoro Timer (Visible when Selected or Active) */}
-            <div className={clsx(
-              "flex items-center gap-1.5 p-1 rounded-xl border-2 transition-all",
-              isActiveFocus || isSelected ? "bg-black/10 border-white/10" : "bg-gray-100/50 border-gray-200"
-            )}>
-              <div className="flex items-center px-2 py-1 bg-black/20 rounded-lg">
-                <Clock className={clsx("w-3 h-3 mr-1.5", (isActiveFocus || isSelected) ? "text-white/60" : "text-gray-400")} />
-                <span className={clsx(
-                  "text-[10px] font-black tabular-nums tracking-tight",
-                  (isActiveFocus || isSelected) ? "text-white" : "text-gray-600"
-                )}>
-                  {formatTime(task.timerRemaining || 0)}
-                </span>
-              </div>
-              
-              <div className="flex items-center gap-1">
-                <button 
-                  onClick={handlePlayPause}
-                  className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-white/80 hover:text-white"
-                >
-                  {task.timerIsRunning ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
-                </button>
+            {isTopTask ? (
+              <div className={clsx(
+                "flex items-center gap-1.5 p-1 rounded-xl border-2 transition-all",
+                isActiveFocus || isSelected ? "bg-black/10 border-white/10" : "bg-gray-100/50 border-gray-200"
+              )}>
+                <div className="flex items-center px-2 py-1 bg-black/20 rounded-lg">
+                  <Clock className={clsx("w-3 h-3 mr-1.5", (isActiveFocus || isSelected) ? "text-white/60" : "text-gray-400")} />
+                  <span className={clsx(
+                    "text-[10px] font-black tabular-nums tracking-tight",
+                    (isActiveFocus || isSelected) ? "text-white" : "text-gray-600"
+                  )}>
+                    {formatTime(task.timerRemaining || 0)}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-1">
+                  <button 
+                    onClick={handlePlayPause}
+                    className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-white/80 hover:text-white"
+                  >
+                    {task.timerIsRunning ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+                  </button>
 
-                <button 
-                  onClick={handleAdd5Min}
-                  className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-white/80 hover:text-white"
-                  title="Add 5 Minutes"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
+                  <button 
+                    onClick={handleAdd5Min}
+                    className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-white/80 hover:text-white"
+                    title="Add 5 Minutes"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
 
-                <button 
-                  onClick={handleResetTimer}
-                  className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-white/80 hover:text-white"
-                  title="Reset Timer"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                </button>
+                  <button 
+                    onClick={handleResetTimer}
+                    className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-white/80 hover:text-white"
+                    title="Reset Timer"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div 
+                className="flex items-center gap-2 px-3 py-2"
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <Clock className="w-3.5 h-3.5 text-white/40" />
+                <div className="flex items-center gap-1">
+                  <input
+                    type="text"
+                    value={localDuration}
+                    onChange={handleDurationChange}
+                    onBlur={handleDurationSubmit}
+                    onKeyDown={(e) => e.key === 'Enter' && handleDurationSubmit()}
+                    className="w-8 bg-transparent border-none text-center p-0 text-[10px] font-black focus:ring-0 text-white placeholder:text-white/20"
+                  />
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-tighter">min</span>
+                </div>
+              </div>
+            )}
 
             {!isTopTask && (
               <button 

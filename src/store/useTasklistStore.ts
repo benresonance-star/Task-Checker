@@ -47,7 +47,7 @@ interface TasklistState {
   setTaskTimer: (taskId: string, duration: number) => Promise<void>;
   resetTaskTimer: (taskId: string) => Promise<void>;
   toggleTaskTimer: (taskId: string) => Promise<void>;
-  updateTaskTimer: (taskId: string, remaining: number) => Promise<void>;
+  updateTaskTimer: (taskId: string, remaining: number, isReset?: boolean) => Promise<void>;
   pauseOtherTimers: (exceptTaskId: string | null) => Promise<void>;
   tickTimers: (taskIds: Set<string>) => Promise<void>;
   
@@ -1911,7 +1911,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       }
     },
 
-    updateTaskTimer: async (taskId, remaining) => {
+    updateTaskTimer: async (taskId, remaining, isReset = false) => {
       const { instances, activeInstance } = get();
       let targetInstanceId: string | null = null;
       
@@ -1928,7 +1928,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
                 (globalThis as any)[`lastToggle_${inst.id}-${t.id}`] = Date.now();
                 // If remaining time is increased beyond current duration (e.g. +5m extension),
                 // we update duration as well to keep the water level proportional.
-                const newDuration = Math.max(t.timerDuration || 0, remaining);
+                const newDuration = isReset ? remaining : Math.max(t.timerDuration || 0, remaining);
                 return { 
                   ...t, 
                   timerRemaining: remaining, 
