@@ -341,10 +341,13 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--session-sidebar-header-title', settings.colorSessionSidebarHeaderTitle);
     root.style.setProperty('--session-task-active-bg', settings.colorSessionTaskActiveBg);
     root.style.setProperty('--session-task-active-border', settings.colorSessionTaskActiveBorder);
+    root.style.setProperty('--session-task-active-text', settings.colorSessionTaskActiveText);
     root.style.setProperty('--session-task-selected-bg', settings.colorSessionTaskSelectedBg);
     root.style.setProperty('--session-task-selected-border', settings.colorSessionTaskSelectedBorder);
+    root.style.setProperty('--session-task-selected-text', settings.colorSessionTaskSelectedText);
     root.style.setProperty('--session-task-inactive-bg', settings.colorSessionTaskInactiveBg);
     root.style.setProperty('--session-task-inactive-border', settings.colorSessionTaskInactiveBorder);
+    root.style.setProperty('--session-task-inactive-text', settings.colorSessionTaskInactiveText);
     root.style.setProperty('--session-queue-title', settings.colorSessionQueueTitle);
     root.style.setProperty('--session-ledger-bg', settings.colorSessionLedgerBg);
     root.style.setProperty('--session-ledger-text', settings.colorSessionLedgerText);
@@ -503,10 +506,13 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorSessionSidebarHeaderTitle: oldSettings.colorSessionSidebarHeaderTitle || (oldSettings.mode === 'dark' ? '#FFFFFF' : '#FFFFFF'),
       colorSessionTaskActiveBg: oldSettings.colorSessionTaskActiveBg || (oldSettings.mode === 'dark' ? '#34A853' : '#34A853'),
       colorSessionTaskActiveBorder: oldSettings.colorSessionTaskActiveBorder || (oldSettings.mode === 'dark' ? '#34A853' : '#34A853'),
+      colorSessionTaskActiveText: oldSettings.colorSessionTaskActiveText || (oldSettings.mode === 'dark' ? '#FFFFFF' : '#FFFFFF'),
       colorSessionTaskSelectedBg: oldSettings.colorSessionTaskSelectedBg || (oldSettings.mode === 'dark' ? '#4285F4' : '#4285F4'),
       colorSessionTaskSelectedBorder: oldSettings.colorSessionTaskSelectedBorder || (oldSettings.mode === 'dark' ? '#FFFFFF' : '#FFFFFF'),
+      colorSessionTaskSelectedText: oldSettings.colorSessionTaskSelectedText || (oldSettings.mode === 'dark' ? '#FFFFFF' : '#FFFFFF'),
       colorSessionTaskInactiveBg: oldSettings.colorSessionTaskInactiveBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.4)' : '#FFFFFF'),
       colorSessionTaskInactiveBorder: oldSettings.colorSessionTaskInactiveBorder || (oldSettings.mode === 'dark' ? '#1e293b' : '#E5E7EB'),
+      colorSessionTaskInactiveText: oldSettings.colorSessionTaskInactiveText || (oldSettings.mode === 'dark' ? '#FFFFFF' : '#111827'),
       colorSessionQueueTitle: oldSettings.colorSessionQueueTitle || (oldSettings.mode === 'dark' ? '#9CA3AF' : '#6B7280'),
       colorSessionLedgerBg: oldSettings.colorSessionLedgerBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.4)' : 'rgba(251, 188, 5, 0.05)'),
       colorSessionLedgerText: oldSettings.colorSessionLedgerText || (oldSettings.mode === 'dark' ? '#FBBC05' : '#FBBC05'),
@@ -644,10 +650,13 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorSessionSidebarHeaderTitle: '#FFFFFF',
     colorSessionTaskActiveBg: '#34A853',
     colorSessionTaskActiveBorder: '#34A853',
+    colorSessionTaskActiveText: '#FFFFFF',
     colorSessionTaskSelectedBg: '#4285F4',
     colorSessionTaskSelectedBorder: '#FFFFFF',
+    colorSessionTaskSelectedText: '#FFFFFF',
     colorSessionTaskInactiveBg: isDark ? 'rgba(0, 0, 0, 0.4)' : '#FFFFFF',
     colorSessionTaskInactiveBorder: isDark ? '#1e293b' : '#E5E7EB',
+    colorSessionTaskInactiveText: isDark ? '#FFFFFF' : '#111827',
     colorSessionQueueTitle: isDark ? '#9CA3AF' : '#6B7280',
     colorSessionLedgerBg: isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(251, 188, 5, 0.05)',
     colorSessionLedgerText: '#FBBC05',

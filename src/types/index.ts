@@ -331,10 +331,13 @@ export interface ThemeSettings {
   colorSessionSidebarHeaderTitle: string;
   colorSessionTaskActiveBg: string;
   colorSessionTaskActiveBorder: string;
+  colorSessionTaskActiveText: string;
   colorSessionTaskSelectedBg: string;
   colorSessionTaskSelectedBorder: string;
+  colorSessionTaskSelectedText: string;
   colorSessionTaskInactiveBg: string;
   colorSessionTaskInactiveBorder: string;
+  colorSessionTaskInactiveText: string;
   colorSessionQueueTitle: string;
   colorSessionLedgerBg: string;
   colorSessionLedgerText: string;

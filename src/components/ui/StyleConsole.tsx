@@ -595,10 +595,15 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                   <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest\">Task States</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <ColorControl label="Active Bg" value={themeSettings.colorSessionTaskActiveBg} onChange={(v) => handleChange('colorSessionTaskActiveBg', v)} />
+                    <ColorControl label="Active Text" value={themeSettings.colorSessionTaskActiveText} onChange={(v) => handleChange('colorSessionTaskActiveText', v)} />
                     <ColorControl label="Active Border" value={themeSettings.colorSessionTaskActiveBorder} onChange={(v) => handleChange('colorSessionTaskActiveBorder', v)} />
+                    <div className="hidden" />
                     <ColorControl label="Selected Bg" value={themeSettings.colorSessionTaskSelectedBg} onChange={(v) => handleChange('colorSessionTaskSelectedBg', v)} />
+                    <ColorControl label="Selected Text" value={themeSettings.colorSessionTaskSelectedText} onChange={(v) => handleChange('colorSessionTaskSelectedText', v)} />
                     <ColorControl label="Selected Border" value={themeSettings.colorSessionTaskSelectedBorder} onChange={(v) => handleChange('colorSessionTaskSelectedBorder', v)} />
+                    <div className="hidden" />
                     <ColorControl label="Inactive Bg" value={themeSettings.colorSessionTaskInactiveBg} onChange={(v) => handleChange('colorSessionTaskInactiveBg', v)} />
+                    <ColorControl label="Inactive Text" value={themeSettings.colorSessionTaskInactiveText} onChange={(v) => handleChange('colorSessionTaskInactiveText', v)} />
                     <ColorControl label="Inactive Border" value={themeSettings.colorSessionTaskInactiveBorder} onChange={(v) => handleChange('colorSessionTaskInactiveBorder', v)} />
                   </div>
                 </div>

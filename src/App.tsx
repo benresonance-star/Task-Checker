@@ -60,12 +60,14 @@ const SidebarNoteItem = ({
   item, 
   note, 
   isActiveFocus,
+  isTopTask,
   isSelected,
   onSelect
 }: { 
   item: any, 
   note: ScratchpadItem, 
   isActiveFocus: boolean,
+  isTopTask: boolean,
   isSelected: boolean,
   onSelect: () => void
 }) => {
@@ -101,6 +103,13 @@ const SidebarNoteItem = ({
       )}
       style={{
         ...style,
+        color: isActuallyCompleted
+          ? 'var(--session-ledger-text)'
+          : isSelected
+            ? 'var(--session-task-selected-text)'
+            : isActiveFocus
+              ? 'var(--session-task-active-text)'
+              : 'var(--session-task-inactive-text)',
         backgroundColor: isActuallyCompleted
           ? 'var(--session-ledger-bg)'
           : isSelected
@@ -124,7 +133,7 @@ const SidebarNoteItem = ({
           {...listeners}
           className={clsx(
             "flex flex-col items-center pt-1 transition-opacity cursor-grab active:cursor-grabbing flex-shrink-0 touch-none",
-            isActuallyCompleted ? "text-gray-400" : (isActiveFocus ? "text-white/40" : "text-gray-400 dark:text-gray-600 opacity-40 group-hover:opacity-100")
+            isActuallyCompleted ? "opacity-40" : (isActiveFocus || isSelected ? "opacity-60" : "opacity-40 group-hover:opacity-100")
           )}
           style={{ touchAction: 'none' }}
         >
@@ -135,7 +144,7 @@ const SidebarNoteItem = ({
           <div className="flex items-center justify-between gap-2 mb-1">
             <span className={clsx(
               "text-[8px] font-black uppercase tracking-[0.2em]",
-              isActuallyCompleted ? "text-gray-400" : (isActiveFocus ? "text-white/70" : "text-indigo-600 dark:text-indigo-400")
+              isActuallyCompleted ? "opacity-40" : (isActiveFocus || isSelected ? "opacity-70" : "opacity-60")
             )}>
               Personal Note {note.reminder && !isActuallyCompleted && (
                 <span className="ml-2 inline-flex items-center gap-1 text-orange-500 animate-pulse">
@@ -153,7 +162,7 @@ const SidebarNoteItem = ({
                     e.stopPropagation();
                     toggleScratchpadTask(note.id);
                   }}
-                  className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors text-gray-400 hover:text-google-blue"
+                  className="p-1 hover:bg-white/10 rounded transition-colors"
                   title="Revert Note"
                 >
                   <RotateCcw className="w-3 h-3" />
@@ -163,7 +172,7 @@ const SidebarNoteItem = ({
                     e.stopPropagation();
                     toggleNoteInActionSet(note.id);
                   }}
-                  className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors text-gray-400 hover:text-google-red"
+                  className="p-1 hover:bg-white/10 rounded transition-colors"
                   title="Clear from Session"
                 >
                   <X className="w-3 h-3" />
@@ -174,19 +183,20 @@ const SidebarNoteItem = ({
           <div 
             className={clsx(
               "text-xs font-bold break-words transition-all prose prose-sm max-w-none prose-p:my-0",
-              isActuallyCompleted ? "text-gray-400 line-through" : (isActiveFocus ? "text-white" : "text-gray-700 dark:text-gray-200")
+              isActuallyCompleted ? "opacity-40 line-through" : "opacity-100"
             )}
+            style={{ color: 'inherit' }}
             dangerouslySetInnerHTML={{ __html: note.text }}
           />
           <span className={clsx(
             "text-[8px] font-bold uppercase mt-1 block",
-            isActiveFocus && !isActuallyCompleted ? "text-white/50" : "text-gray-400"
+            isActuallyCompleted ? "opacity-40" : "opacity-50"
           )}>
             {note.category}
           </span>
           
           {isActuallyCompleted && item.completedAt && (
-            <p className="text-[8px] font-black uppercase text-google-blue/60 mt-1">
+            <p className="text-[8px] font-black uppercase opacity-60 mt-1">
               Victory at {new Date(item.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </p>
           )}
@@ -196,22 +206,27 @@ const SidebarNoteItem = ({
       {isExpanded && !isActuallyCompleted && (
         <div className="px-4 pb-4 animate-in slide-in-from-top-2 duration-300">
           <div className="flex items-center gap-2 mt-3">
-              <button 
-                onClick={(e) => { e.stopPropagation(); toggleScratchpadTask(note.id); }}
-                className={clsx(
-                  "flex-1 h-12 rounded-2xl flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest transition-all shadow-xl border-2",
-                  note.completed 
-                    ? "bg-google-green border-white/20 text-white" 
-                    : "bg-white/20 border-white/10 text-white hover:bg-white/30"
-                )}
-              >
-                {note.completed ? <CheckCircle2 className="w-4 h-4" /> : <ThumbsUp className="w-4 h-4" />}
-                {note.completed ? "COMPLETED!" : "TASK DONE?"}
-              </button>
+              {isTopTask && (
+                <button 
+                  onClick={(e) => { e.stopPropagation(); toggleScratchpadTask(note.id); }}
+                  className={clsx(
+                    "flex-1 h-12 rounded-2xl flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest transition-all shadow-xl border-2",
+                    note.completed 
+                      ? "bg-google-green border-white/20 text-white" 
+                      : "bg-white/20 border-white/10 text-white hover:bg-white/30"
+                  )}
+                >
+                  {note.completed ? <CheckCircle2 className="w-4 h-4" /> : <ThumbsUp className="w-4 h-4" />}
+                  {note.completed ? "COMPLETED!" : "TASK DONE?"}
+                </button>
+              )}
               
               <button 
                 onClick={(e) => { e.stopPropagation(); toggleNoteInActionSet(note.id); }}
-                className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white hover:bg-white/20 hover:text-google-red transition-all border-2 border-white/10"
+                className={clsx(
+                  "w-12 h-12 rounded-2xl flex items-center justify-center text-white transition-all border-2",
+                  isActiveFocus || isSelected ? "bg-white/10 border-white/10 hover:bg-white/20 hover:text-google-red" : "bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-gray-800 text-gray-400 hover:text-google-red"
+                )}
                 title="Remove from Session"
               >
                 <Trash2 className="w-5 h-5" />
@@ -324,6 +339,13 @@ const SidebarTaskItem = ({
       )}
       style={{
         ...style,
+        color: isActuallyCompleted
+          ? 'var(--session-ledger-text)'
+          : isSelected
+            ? 'var(--session-task-selected-text)'
+            : isActiveFocus
+              ? 'var(--session-task-active-text)'
+              : 'var(--session-task-inactive-text)',
         backgroundColor: isActuallyCompleted
           ? 'var(--session-ledger-bg)'
           : isSelected
@@ -342,13 +364,13 @@ const SidebarTaskItem = ({
       onClick={onSelect}
     >
       {/* Top Zone: Identification & Drag Handle */}
-      <div className={clsx("flex items-start gap-3 p-4", !isActiveFocus && !isMultiUserActive && !isActuallyCompleted && "pb-3")}>
+      <div className={clsx("flex items-start gap-3 p-4", !isActiveFocus && !isSelected && !isMultiUserActive && !isActuallyCompleted && "pb-3")}>
         <div 
           {...attributes} 
           {...listeners}
           className={clsx(
             "flex flex-col items-center pt-1 transition-opacity cursor-grab active:cursor-grabbing flex-shrink-0 touch-none",
-            isActuallyCompleted ? "text-gray-400" : (isActiveFocus || isMultiUserActive || (task.completed && !isDeactivatedCompleted)) ? "text-white/40" : (isDeactivatedCompleted ? "text-google-green/40" : "text-gray-400 dark:text-gray-600 opacity-40 group-hover:opacity-100")
+            isActuallyCompleted ? "opacity-40" : (isActiveFocus || isSelected || isMultiUserActive || (task.completed && !isDeactivatedCompleted)) ? "opacity-60" : (isDeactivatedCompleted ? "opacity-40" : "opacity-40 dark:opacity-60 group-hover:opacity-100")
           )}
           style={{ touchAction: 'none' }}
         >
@@ -359,7 +381,7 @@ const SidebarTaskItem = ({
           <div className="flex items-center justify-between gap-2 mb-1">
             <p className={clsx(
               "text-[9px] font-black uppercase tracking-wider truncate",
-              isActuallyCompleted ? "text-gray-400" : (isActiveFocus || isMultiUserActive ? "text-white/60" : "text-google-blue/60")
+              isActuallyCompleted ? "opacity-40" : (isActiveFocus || isSelected || isMultiUserActive ? "opacity-70" : "opacity-60")
             )}>{project?.name || 'Project'}</p>
             
             {/* Action Row for Ledger */}
@@ -370,7 +392,7 @@ const SidebarTaskItem = ({
                     e.stopPropagation();
                     toggleTask(task.id, instance.id);
                   }}
-                  className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors text-gray-400 hover:text-google-blue"
+                  className="p-1 hover:bg-white/10 rounded transition-colors text-white/60 hover:text-white"
                   title="Revert Task"
                 >
                   <RotateCcw className="w-3 h-3" />
@@ -380,7 +402,7 @@ const SidebarTaskItem = ({
                     e.stopPropagation();
                     toggleTaskInActionSet(item.projectId, item.instanceId, item.taskId);
                   }}
-                  className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors text-gray-400 hover:text-google-red"
+                  className="p-1 hover:bg-white/10 rounded transition-colors text-white/60 hover:text-white"
                   title="Clear from Session"
                 >
                   <X className="w-3 h-3" />
@@ -390,19 +412,19 @@ const SidebarTaskItem = ({
           </div>
           <h4 className={clsx(
             "text-xs font-bold leading-snug break-words",
-            isActuallyCompleted ? "text-gray-400 line-through" : (isActiveFocus || isMultiUserActive ? "text-white" : "text-gray-900 dark:text-gray-100")
+            isActuallyCompleted ? "opacity-40 line-through" : "opacity-100"
           )}>
             {task.title}
           </h4>
           {!isActuallyCompleted && (
             <p className={clsx(
               "text-[9px] font-black uppercase mt-1 tracking-wider",
-              isActiveFocus || isMultiUserActive ? "text-white/50" : "text-gray-400"
+              isActiveFocus || isSelected || isMultiUserActive ? "opacity-60" : "opacity-40"
             )}>{instance.title}</p>
           )}
           
           {isActuallyCompleted && item.completedAt && (
-            <p className="text-[8px] font-black uppercase text-google-blue/60 mt-1">
+            <p className="text-[8px] font-black uppercase opacity-60 mt-1">
               Victory at {new Date(item.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </p>
           )}
@@ -2402,6 +2424,7 @@ function App() {
                                   item={item}
                                   note={note}
                                   isActiveFocus={isActiveFocus}
+                                  isTopTask={isTopTask}
                                   isSelected={isSelected}
                                   onSelect={() => setSidebarSelectedId(isSelected ? null : compositeKey)}
                                 />
