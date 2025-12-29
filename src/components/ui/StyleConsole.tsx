@@ -285,15 +285,16 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                         "flex flex-col p-2 rounded-lg border transition-all group",
                         isActive ? "bg-google-blue/10 border-google-blue shadow-sm" : "bg-gray-50 dark:bg-black/40 border-gray-100 dark:border-gray-800 hover:border-google-blue/30"
                       )}>
-                        <div className="flex items-center justify-between w-full">
-                          <div className="flex flex-col min-w-0 flex-1 cursor-pointer" onClick={() => !isEditing && applyThemePreset(preset.id)}>
-                            <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-between w-full gap-2">
+                          <div className="flex-1 min-w-0" onClick={() => !isEditing && applyThemePreset(preset.id)}>
+                            <div className="flex items-center">
                               {isEditing ? (
                                 <input
                                   autoFocus
                                   type="text"
                                   value={editingPresetName}
                                   onChange={(e) => setEditingPresetName(e.target.value)}
+                                  onClick={(e) => e.stopPropagation()}
                                   onKeyDown={(e) => {
                                     if (e.key === 'Enter' && editingPresetName.trim()) {
                                       renameThemePreset(preset.id, editingPresetName);
@@ -302,17 +303,17 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                                     if (e.key === 'Escape') setEditingPresetId(null);
                                   }}
                                   onBlur={() => setEditingPresetId(null)}
-                                  className="w-full bg-white dark:bg-black/40 border border-google-blue rounded px-1 py-0.5 text-sm font-bold"
+                                  className="w-full bg-white dark:bg-black/40 border border-google-blue rounded px-2 py-1 text-sm font-bold focus:ring-1 focus:ring-google-blue outline-none"
                                 />
                               ) : (
-                                <>
+                                <div className="flex items-center gap-2 min-w-0 cursor-pointer">
                                   <span className="text-sm font-black truncate">{preset.name}</span>
-                                  {isActive && <div className="w-1 h-1 rounded-full bg-google-blue animate-pulse" />}
-                                </>
+                                  {isActive && <div className="w-1 h-1 rounded-full bg-google-blue animate-pulse shrink-0" />}
+                                </div>
                               )}
                             </div>
                           </div>
-                          <div className={clsx("flex items-center gap-1", (isActive || isEditing) ? "opacity-100" : "opacity-0 group-hover:opacity-100")}>
+                          <div className={clsx("flex items-center gap-1 shrink-0", (isActive || isEditing) ? "opacity-100" : "opacity-0 group-hover:opacity-100")}>
                             {isEditing ? (
                               <button 
                                 onClick={(e) => {
