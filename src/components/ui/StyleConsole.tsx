@@ -150,13 +150,13 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
   const SectionHeader: React.FC<{ id: string; label: string; icon: any }> = ({ id, label, icon: Icon }) => (
     <button 
       onClick={() => toggleSection(id)}
-      className="w-full flex items-center justify-between py-2 px-1 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors rounded-lg group"
+      className="w-full flex items-start justify-between py-2 px-1 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors rounded-lg group"
     >
-      <div className="flex items-center gap-2">
-        <Icon className="w-3.5 h-3.5 text-google-blue" />
-        <span className="text-sm font-black uppercase text-gray-500 tracking-widest group-hover:text-google-blue transition-colors">{label}</span>
+      <div className="flex items-start gap-2 text-left">
+        <Icon className="w-3.5 h-3.5 text-google-blue mt-0.5 shrink-0" />
+        <span className="text-sm font-black uppercase text-gray-500 tracking-widest group-hover:text-google-blue transition-colors leading-tight">{label}</span>
       </div>
-      {expandedSections[id] ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" /> : <ChevronRight className="w-3.5 h-3.5 text-gray-400" />}
+      {expandedSections[id] ? <ChevronDown className="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" />}
     </button>
   );
 
