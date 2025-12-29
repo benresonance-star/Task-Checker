@@ -326,14 +326,15 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                   style={{
                     backgroundColor: item 
                       ? (item.completed ? undefined : (item.type === 'note' ? (item.priority ? 'var(--note-priority-bg)' : (item.displayCategory === 'Personal' ? 'var(--note-personal-bg)' : 'var(--note-project-bg)')) : 'var(--note-project-bg)'))
-                      : undefined
+                      : undefined,
+                    borderColor: (item && !item.completed) ? 'var(--planner-staged-border)' : undefined
                   }}
                   className={clsx(
                     "relative flex items-center gap-3 p-3 rounded-2xl border-2 transition-all group/slot min-h-[60px] cursor-pointer",
                     isActive
-                      ? "border-google-blue bg-blue-50/10 shadow-[0_0_15px_rgba(66,133,244,0.3)] animate-pulse-slow"
+                      ? "bg-blue-50/10 shadow-[0_0_15px_rgba(66,133,244,0.3)] animate-pulse-slow"
                       : item 
-                        ? (item.type === 'note' && item.priority ? "border-red-200 dark:border-red-900/30 shadow-md hover:border-google-blue/50" : "border-google-blue shadow-md hover:border-google-blue/50")
+                        ? (item.type === 'note' && item.priority ? "border-red-200 dark:border-red-900/30 shadow-md hover:border-google-blue/50" : "shadow-md hover:border-google-blue/50")
                         : "bg-gray-50/50 dark:bg-black/20 border-dashed border-gray-200 dark:border-gray-800"
                   )}
                 >
@@ -391,12 +392,16 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                           )
                         )}
                       </div>
-                      <p className={clsx(
-                        "text-xs font-bold break-words",
-                        item.completed ? "text-gray-400 line-through" : "text-gray-900 dark:text-gray-100"
-                      )} dangerouslySetInnerHTML={{ 
-                        __html: item.displayTitle
-                      }} />
+                      <p 
+                        className={clsx(
+                          "text-xs font-bold break-words",
+                          item.completed ? "text-gray-400 line-through" : ""
+                        )} 
+                        style={{ color: !item.completed ? 'var(--planner-staged-text)' : undefined }}
+                        dangerouslySetInnerHTML={{ 
+                          __html: item.displayTitle
+                        }} 
+                      />
                       <p className="text-[9px] font-black uppercase text-gray-400 tracking-wider">{item.displayCategory}</p>
                     </div>
                   ) : (
@@ -425,19 +430,23 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
             onClick={handleLaunchSession}
             disabled={stagedItems.length === 0}
             className={clsx(
-              "relative h-16 w-full rounded-2xl text-white shadow-2xl transition-all group overflow-hidden",
+              "relative h-16 w-full rounded-2xl shadow-2xl transition-all group overflow-hidden",
               stagedItems.length > 0 
-                ? "bg-google-blue shadow-google-blue/20 hover:scale-105" 
+                ? "shadow-google-blue/20 hover:scale-105" 
                 : "bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
             )}
+            style={{ 
+              backgroundColor: stagedItems.length > 0 ? 'var(--planner-sprint-bg)' : undefined,
+              color: stagedItems.length > 0 ? 'var(--planner-sprint-text)' : undefined
+            }}
           >
             <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
                 <div className="flex items-center justify-center gap-3 relative z-10">
-                  <TrendingUp className="w-6 h-6" />
+                  <TrendingUp className="w-6 h-6" style={{ color: stagedItems.length > 0 ? 'var(--planner-sprint-text)' : undefined }} />
                   <span className="text-sm font-black uppercase tracking-wider">
                     {stagedItems.every(i => i.completed) ? 'Review Wins' : 'Begin Sprint'}
                   </span>
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" style={{ color: stagedItems.length > 0 ? 'var(--planner-sprint-text)' : undefined }} />
                 </div>
           </Button>
         </div>

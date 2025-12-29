@@ -337,6 +337,10 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--planner-alert-category', settings.colorPlannerAlertCategory);
     root.style.setProperty('--planner-alert-time-bg', settings.colorPlannerAlertTimeBg);
     root.style.setProperty('--planner-alert-time-text', settings.colorPlannerAlertTimeText);
+    root.style.setProperty('--planner-staged-border', settings.colorPlannerStagedTaskBorder);
+    root.style.setProperty('--planner-staged-text', settings.colorPlannerStagedTaskText);
+    root.style.setProperty('--planner-sprint-bg', settings.colorPlannerBeginSprintBg);
+    root.style.setProperty('--planner-sprint-text', settings.colorPlannerBeginSprintText);
 
     // My Session Sidebar
     root.style.setProperty('--session-sidebar-header-bg', settings.colorSessionSidebarHeaderBg);
@@ -502,6 +506,10 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorPlannerAlertCategory: oldSettings.colorPlannerAlertCategory || 'rgba(239, 68, 68, 0.7)',
       colorPlannerAlertTimeBg: oldSettings.colorPlannerAlertTimeBg || 'rgba(239, 68, 68, 0.1)',
       colorPlannerAlertTimeText: oldSettings.colorPlannerAlertTimeText || '#EF4444',
+      colorPlannerStagedTaskBorder: oldSettings.colorPlannerStagedTaskBorder || '#4285F4',
+      colorPlannerStagedTaskText: oldSettings.colorPlannerStagedTaskText || (oldSettings.mode === 'dark' ? '#FFFFFF' : '#111827'),
+      colorPlannerBeginSprintBg: oldSettings.colorPlannerBeginSprintBg || '#4285F4',
+      colorPlannerBeginSprintText: oldSettings.colorPlannerBeginSprintText || '#FFFFFF',
 
       // My Session Sidebar
       colorSessionSidebarHeaderBg: oldSettings.colorSessionSidebarHeaderBg || (oldSettings.mode === 'dark' ? '#4285F4' : '#4285F4'),
@@ -646,6 +654,10 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorPlannerAlertCategory: 'rgba(239, 68, 68, 0.7)',
     colorPlannerAlertTimeBg: 'rgba(239, 68, 68, 0.1)',
     colorPlannerAlertTimeText: '#EF4444',
+    colorPlannerStagedTaskBorder: '#4285F4',
+    colorPlannerStagedTaskText: isDark ? '#FFFFFF' : '#111827',
+    colorPlannerBeginSprintBg: '#4285F4',
+    colorPlannerBeginSprintText: '#FFFFFF',
 
     // My Session Sidebar Defaults
     colorSessionSidebarHeaderBg: '#4285F4',

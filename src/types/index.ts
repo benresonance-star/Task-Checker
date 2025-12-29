@@ -325,6 +325,10 @@ export interface ThemeSettings {
   colorPlannerAlertCategory: string;
   colorPlannerAlertTimeBg: string;
   colorPlannerAlertTimeText: string;
+  colorPlannerStagedTaskBorder: string;
+  colorPlannerStagedTaskText: string;
+  colorPlannerBeginSprintBg: string;
+  colorPlannerBeginSprintText: string;
   
   // My Session Sidebar Settings
   colorSessionSidebarHeaderBg: string;

@@ -495,6 +495,16 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                     <ColorControl label="Alert Time Text" value={themeSettings.colorPlannerAlertTimeText} onChange={(v) => handleChange('colorPlannerAlertTimeText', v)} />
                   </div>
                 </div>
+
+                <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                  <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest\">Mission Control: Staging</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Staged Border" value={themeSettings.colorPlannerStagedTaskBorder} onChange={(v) => handleChange('colorPlannerStagedTaskBorder', v)} />
+                    <ColorControl label="Staged Text" value={themeSettings.colorPlannerStagedTaskText} onChange={(v) => handleChange('colorPlannerStagedTaskText', v)} />
+                    <ColorControl label="Sprint Btn Bg" value={themeSettings.colorPlannerBeginSprintBg} onChange={(v) => handleChange('colorPlannerBeginSprintBg', v)} />
+                    <ColorControl label="Sprint Btn Text" value={themeSettings.colorPlannerBeginSprintText} onChange={(v) => handleChange('colorPlannerBeginSprintText', v)} />
+                  </div>
+                </div>
               </div>
             )}
           </section>
