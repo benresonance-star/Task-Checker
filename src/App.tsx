@@ -1361,8 +1361,11 @@ function App() {
             </button>
           )}
 
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors relative flex items-center justify-center">
             <Menu className="w-6 h-6" />
+            {isMobileMenuOpen && (
+              <ChevronDown className="absolute w-3 h-3 text-google-blue stroke-[4] mt-1" />
+            )}
           </button>
         </div>
       </header>
