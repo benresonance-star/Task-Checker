@@ -3145,6 +3145,10 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
         return;
       }
 
+      // Optimistic Update
+      const oldPresets = get().themePresets;
+      set({ themePresets: oldPresets.map(p => p.id === presetId ? { ...p, name: newName.trim() } : p) });
+
       try {
         await updateDoc(doc(db, 'themePresets', presetId), { 
           name: newName.trim(),
@@ -3153,6 +3157,7 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
         get().notify(`Renamed to "${newName}"!`, 'success');
       } catch (error) {
         console.error('Rename preset failed:', error);
+        set({ themePresets: oldPresets }); // Revert on failure
         get().notify('Failed to rename theme preset.', 'error');
       }
     },

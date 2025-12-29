@@ -46,6 +46,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
   const [editingPresetName, setEditingPresetName] = useState('');
   const [duplicatingPresetId, setDuplicatingPresetId] = useState<string | null>(null);
   const [duplicateName, setDuplicateName] = useState('');
+  const [deletingPresetId, setDeletingPresetId] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     presets: true,
     atmosphere: false,
@@ -274,9 +275,10 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 </div>
 
                 <div className="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
-                  {themePresets.filter(p => p.mode === (isDarkMode ? 'dark' : 'light')).map(preset => {
+                  {themePresets.filter(p => p.mode === (isDarkMode ? 'dark' : 'light')).map((preset, _, currentModePresets) => {
                     const isActive = activePresetId === preset.id;
                     const isEditing = editingPresetId === preset.id;
+                    const canDelete = currentModePresets.length > 1;
 
                     return (
                       <div key={preset.id} className={clsx(
@@ -354,7 +356,14 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                                 {!isActive && (
                                   <button onClick={() => applyThemePreset(preset.id)} className="p-1.5 hover:bg-google-blue/10 text-google-blue rounded-md" title="Apply Snapshot"><Check className="w-3.5 h-3.5" /></button>
                                 )}
-                                <button onClick={() => deleteThemePreset(preset.id)} className="p-1.5 hover:bg-google-red/10 text-google-red rounded-md" title="Delete Snapshot"><Trash2 className="w-3.5 h-3.5" /></button>
+                                <button 
+                                  disabled={!canDelete}
+                                  onClick={() => setDeletingPresetId(preset.id)} 
+                                  className="p-1.5 hover:bg-google-red/10 text-google-red rounded-md disabled:opacity-30 disabled:cursor-not-allowed" 
+                                  title={canDelete ? "Delete Snapshot" : "At least one style required"}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
                               </>
                             )}
                           </div>
@@ -781,6 +790,42 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 className="flex-1 h-12 rounded-xl bg-google-blue text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all disabled:opacity-50"
               >
                 Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingPresetId && (
+        <div className="fixed inset-0 z-[4000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-[2rem] border-2 border-google-red shadow-2xl p-6 space-y-4 animate-in zoom-in-95 duration-300">
+            <div className="space-y-1 text-center">
+              <h3 className="text-lg font-black uppercase text-gray-900 dark:text-white tracking-tight">Delete Style?</h3>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">This action cannot be undone.</p>
+            </div>
+            
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-100 dark:border-red-800 text-center">
+              <span className="text-sm font-black text-google-red">
+                {themePresets.find(p => p.id === deletingPresetId)?.name}
+              </span>
+            </div>
+
+            <div className="flex gap-2">
+              <button 
+                onClick={() => setDeletingPresetId(null)}
+                className="flex-1 h-12 rounded-xl border-2 border-gray-100 dark:border-gray-800 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  deleteThemePreset(deletingPresetId);
+                  setDeletingPresetId(null);
+                }}
+                className="flex-1 h-12 rounded-xl bg-google-red text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all"
+              >
+                Confirm Delete
               </button>
             </div>
           </div>
