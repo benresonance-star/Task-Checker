@@ -146,6 +146,8 @@ interface TasklistState {
   resetThemeSettings: (modeOverride?: 'light' | 'dark') => Promise<void>;
   saveThemePreset: (name: string, modeOverride?: 'light' | 'dark') => Promise<void>;
   updateThemePreset: (presetId: string) => Promise<void>;
+  renameThemePreset: (presetId: string, newName: string) => Promise<void>;
+  duplicateThemePreset: (presetId: string, newName: string) => Promise<void>;
   deleteThemePreset: (presetId: string) => Promise<void>;
   applyThemePreset: (presetId: string) => Promise<void>;
 
@@ -3055,13 +3057,22 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
 
     saveThemePreset: async (name, modeOverride) => {
       const isDark = modeOverride ? (modeOverride === 'dark') : document.documentElement.classList.contains('dark');
+      const modeStr = isDark ? 'dark' : 'light';
+      
+      // Name uniqueness check
+      const existing = get().themePresets.find(p => p.mode === modeStr && p.name.toLowerCase() === name.trim().toLowerCase());
+      if (existing) {
+        get().notify(`A style named "${name}" already exists.`, 'error');
+        return;
+      }
+
       const settings = isDark ? get().themeSettingsDark : get().themeSettingsLight;
       const { currentUser } = get();
       if (!currentUser) return;
 
       const preset: Omit<ThemePreset, 'id'> = {
-        name,
-        mode: isDark ? 'dark' : 'light',
+        name: name.trim(),
+        mode: modeStr,
         settings,
         createdAt: Date.now(),
         createdBy: currentUser.name
@@ -3120,6 +3131,77 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       } catch (error) {
         console.error('Update preset failed:', error);
         get().notify('Failed to update theme preset.', 'error');
+      }
+    },
+
+    renameThemePreset: async (presetId, newName) => {
+      const preset = get().themePresets.find(p => p.id === presetId);
+      if (!preset) return;
+
+      // Name uniqueness check
+      const existing = get().themePresets.find(p => p.mode === preset.mode && p.id !== presetId && p.name.toLowerCase() === newName.trim().toLowerCase());
+      if (existing) {
+        get().notify(`A style named "${newName}" already exists.`, 'error');
+        return;
+      }
+
+      try {
+        await updateDoc(doc(db, 'themePresets', presetId), { 
+          name: newName.trim(),
+          updatedAt: Date.now() 
+        });
+        get().notify(`Renamed to "${newName}"!`, 'success');
+      } catch (error) {
+        console.error('Rename preset failed:', error);
+        get().notify('Failed to rename theme preset.', 'error');
+      }
+    },
+
+    duplicateThemePreset: async (presetId, newName) => {
+      const source = get().themePresets.find(p => p.id === presetId);
+      if (!source) return;
+
+      // Name uniqueness check
+      const existing = get().themePresets.find(p => p.mode === source.mode && p.name.toLowerCase() === newName.trim().toLowerCase());
+      if (existing) {
+        get().notify(`A style named "${newName}" already exists.`, 'error');
+        return;
+      }
+
+      const { currentUser } = get();
+      if (!currentUser) return;
+
+      const preset: Omit<ThemePreset, 'id'> = {
+        name: newName.trim(),
+        mode: source.mode,
+        settings: source.settings,
+        createdAt: Date.now(),
+        createdBy: currentUser.name
+      };
+
+      try {
+        const docRef = await addDoc(collection(db, 'themePresets'), sanitize(preset));
+        
+        // Auto-apply the duplicate
+        if (source.mode === 'dark') {
+          set({ activePresetIdDark: docRef.id });
+        } else {
+          set({ activePresetIdLight: docRef.id });
+        }
+        
+        // Sync settings doc with active preset ID
+        const { themeSettingsLight, themeSettingsDark, activePresetIdLight, activePresetIdDark } = get();
+        await setDoc(doc(db, 'settings', 'theme'), sanitize({
+          light: themeSettingsLight,
+          dark: themeSettingsDark,
+          activePresetIdLight,
+          activePresetIdDark
+        }));
+
+        get().notify(`Duplicated as "${newName}"!`, 'success');
+      } catch (error) {
+        console.error('Duplicate preset failed:', error);
+        get().notify('Failed to duplicate theme preset.', 'error');
       }
     },
 

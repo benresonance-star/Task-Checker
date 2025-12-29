@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, GripHorizontal, RotateCcw, Palette, Maximize2, Minimize2, Camera, Trash2, Check, Save, ChevronDown, ChevronRight, LayoutGrid, ClipboardList, Settings, Briefcase, Info, Music } from 'lucide-react';
+import { X, GripHorizontal, RotateCcw, Palette, Maximize2, Minimize2, Camera, Trash2, Check, Save, ChevronDown, ChevronRight, LayoutGrid, ClipboardList, Settings, Briefcase, Info, Music, Copy, Edit2 } from 'lucide-react';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { clsx } from 'clsx';
 import { ThemeSettings } from '../../types';
@@ -23,7 +23,9 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
     saveThemePreset,
     updateThemePreset,
     deleteThemePreset,
-    applyThemePreset
+    applyThemePreset,
+    renameThemePreset,
+    duplicateThemePreset
   } = useTasklistStore();
   
   const themeSettings = isDarkMode ? themeSettingsDark : themeSettingsLight;
@@ -38,6 +40,12 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [newPresetName, setNewPresetName] = useState('');
+  
+  // Duplication/Rename State
+  const [editingPresetId, setEditingPresetId] = useState<string | null>(null);
+  const [editingPresetName, setEditingPresetName] = useState('');
+  const [duplicatingPresetId, setDuplicatingPresetId] = useState<string | null>(null);
+  const [duplicateName, setDuplicateName] = useState('');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     presets: true,
     atmosphere: false,
@@ -268,25 +276,88 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 <div className="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
                   {themePresets.filter(p => p.mode === (isDarkMode ? 'dark' : 'light')).map(preset => {
                     const isActive = activePresetId === preset.id;
+                    const isEditing = editingPresetId === preset.id;
+
                     return (
                       <div key={preset.id} className={clsx(
-                        "flex items-center justify-between p-2 rounded-lg border transition-all group",
-                        isActive ? "bg-google-blue/10 border-google-blue shadow-sm" : "bg-gray-50 dark:bg-black/20 border-gray-100 dark:border-gray-800 hover:border-google-blue/30"
+                        "flex flex-col p-2 rounded-lg border transition-all group",
+                        isActive ? "bg-google-blue/10 border-google-blue shadow-sm" : "bg-gray-50 dark:bg-black/40 border-gray-100 dark:border-gray-800 hover:border-google-blue/30"
                       )}>
-                        <div className="flex flex-col min-w-0 flex-1 cursor-pointer" onClick={() => applyThemePreset(preset.id)}>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-black truncate">{preset.name}</span>
-                            {isActive && <div className="w-1 h-1 rounded-full bg-google-blue animate-pulse" />}
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex flex-col min-w-0 flex-1 cursor-pointer" onClick={() => !isEditing && applyThemePreset(preset.id)}>
+                            <div className="flex items-center gap-2">
+                              {isEditing ? (
+                                <input
+                                  autoFocus
+                                  type="text"
+                                  value={editingPresetName}
+                                  onChange={(e) => setEditingPresetName(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && editingPresetName.trim()) {
+                                      renameThemePreset(preset.id, editingPresetName);
+                                      setEditingPresetId(null);
+                                    }
+                                    if (e.key === 'Escape') setEditingPresetId(null);
+                                  }}
+                                  onBlur={() => setEditingPresetId(null)}
+                                  className="w-full bg-white dark:bg-black/40 border border-google-blue rounded px-1 py-0.5 text-sm font-bold"
+                                />
+                              ) : (
+                                <>
+                                  <span className="text-sm font-black truncate">{preset.name}</span>
+                                  {isActive && <div className="w-1 h-1 rounded-full bg-google-blue animate-pulse" />}
+                                </>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                        <div className={clsx("flex items-center gap-1", isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100")}>
-                          {isActive && (
-                            <button onClick={() => updateThemePreset(preset.id)} className="p-1.5 hover:bg-google-green/10 text-google-green rounded-md"><Save className="w-3.5 h-3.5" /></button>
-                          )}
-                          {!isActive && (
-                            <button onClick={() => applyThemePreset(preset.id)} className="p-1.5 hover:bg-google-blue/10 text-google-blue rounded-md"><Check className="w-3.5 h-3.5" /></button>
-                          )}
-                          <button onClick={() => deleteThemePreset(preset.id)} className="p-1.5 hover:bg-google-red/10 text-google-red rounded-md"><Trash2 className="w-3.5 h-3.5" /></button>
+                          <div className={clsx("flex items-center gap-1", (isActive || isEditing) ? "opacity-100" : "opacity-0 group-hover:opacity-100")}>
+                            {isEditing ? (
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (editingPresetName.trim()) {
+                                    renameThemePreset(preset.id, editingPresetName);
+                                    setEditingPresetId(null);
+                                  }
+                                }} 
+                                className="p-1.5 hover:bg-google-green/10 text-google-green rounded-md"
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                              </button>
+                            ) : (
+                              <>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingPresetId(preset.id);
+                                    setEditingPresetName(preset.name);
+                                  }} 
+                                  className="p-1.5 hover:bg-google-blue/10 text-google-blue rounded-md"
+                                  title="Rename"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                </button>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDuplicatingPresetId(preset.id);
+                                    setDuplicateName(`${preset.name} Copy`);
+                                  }} 
+                                  className="p-1.5 hover:bg-google-blue/10 text-google-blue rounded-md"
+                                  title="Duplicate"
+                                >
+                                  <Copy className="w-3.5 h-3.5" />
+                                </button>
+                                {isActive && (
+                                  <button onClick={() => updateThemePreset(preset.id)} className="p-1.5 hover:bg-google-green/10 text-google-green rounded-md" title="Overwrite Snapshot"><Save className="w-3.5 h-3.5" /></button>
+                                )}
+                                {!isActive && (
+                                  <button onClick={() => applyThemePreset(preset.id)} className="p-1.5 hover:bg-google-blue/10 text-google-blue rounded-md" title="Apply Snapshot"><Check className="w-3.5 h-3.5" /></button>
+                                )}
+                                <button onClick={() => deleteThemePreset(preset.id)} className="p-1.5 hover:bg-google-red/10 text-google-red rounded-md" title="Delete Snapshot"><Trash2 className="w-3.5 h-3.5" /></button>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );
@@ -667,6 +738,52 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
           className="absolute bottom-1 right-1 cursor-nwse-resize text-gray-300 dark:text-gray-700 hover:text-google-blue transition-colors"
         >
           <GripHorizontal className="w-4 h-4 rotate-45" />
+        </div>
+      )}
+
+      {/* Duplication Modal */}
+      {duplicatingPresetId && (
+        <div className="fixed inset-0 z-[4000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-[2rem] border-2 border-google-blue shadow-2xl p-6 space-y-4 animate-in zoom-in-95 duration-300">
+            <div className="space-y-1 text-center">
+              <h3 className="text-lg font-black uppercase text-gray-900 dark:text-white tracking-tight">Duplicate Style</h3>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Name your duplicate snapshot</p>
+            </div>
+            
+            <input 
+              autoFocus
+              type="text"
+              value={duplicateName}
+              onChange={(e) => setDuplicateName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && duplicateName.trim()) {
+                  duplicateThemePreset(duplicatingPresetId, duplicateName);
+                  setDuplicatingPresetId(null);
+                }
+                if (e.key === 'Escape') setDuplicatingPresetId(null);
+              }}
+              className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-google-blue outline-none"
+            />
+
+            <div className="flex gap-2">
+              <button 
+                onClick={() => setDuplicatingPresetId(null)}
+                className="flex-1 h-12 rounded-xl border-2 border-gray-100 dark:border-gray-800 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                disabled={!duplicateName.trim()}
+                onClick={() => {
+                  duplicateThemePreset(duplicatingPresetId, duplicateName);
+                  setDuplicatingPresetId(null);
+                }}
+                className="flex-1 h-12 rounded-xl bg-google-blue text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all disabled:opacity-50"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
