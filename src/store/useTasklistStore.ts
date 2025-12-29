@@ -335,6 +335,19 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     root.style.setProperty('--planner-alert-category', settings.colorPlannerAlertCategory);
     root.style.setProperty('--planner-alert-time-bg', settings.colorPlannerAlertTimeBg);
     root.style.setProperty('--planner-alert-time-text', settings.colorPlannerAlertTimeText);
+
+    // My Session Sidebar
+    root.style.setProperty('--session-sidebar-header-bg', settings.colorSessionSidebarHeaderBg);
+    root.style.setProperty('--session-sidebar-header-title', settings.colorSessionSidebarHeaderTitle);
+    root.style.setProperty('--session-task-active-bg', settings.colorSessionTaskActiveBg);
+    root.style.setProperty('--session-task-active-border', settings.colorSessionTaskActiveBorder);
+    root.style.setProperty('--session-task-selected-bg', settings.colorSessionTaskSelectedBg);
+    root.style.setProperty('--session-task-selected-border', settings.colorSessionTaskSelectedBorder);
+    root.style.setProperty('--session-task-inactive-bg', settings.colorSessionTaskInactiveBg);
+    root.style.setProperty('--session-task-inactive-border', settings.colorSessionTaskInactiveBorder);
+    root.style.setProperty('--session-queue-title', settings.colorSessionQueueTitle);
+    root.style.setProperty('--session-ledger-bg', settings.colorSessionLedgerBg);
+    root.style.setProperty('--session-ledger-text', settings.colorSessionLedgerText);
   };
 
   /**
@@ -484,6 +497,19 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
       colorPlannerAlertCategory: oldSettings.colorPlannerAlertCategory || 'rgba(239, 68, 68, 0.7)',
       colorPlannerAlertTimeBg: oldSettings.colorPlannerAlertTimeBg || 'rgba(239, 68, 68, 0.1)',
       colorPlannerAlertTimeText: oldSettings.colorPlannerAlertTimeText || '#EF4444',
+
+      // My Session Sidebar
+      colorSessionSidebarHeaderBg: oldSettings.colorSessionSidebarHeaderBg || (oldSettings.mode === 'dark' ? '#4285F4' : '#4285F4'),
+      colorSessionSidebarHeaderTitle: oldSettings.colorSessionSidebarHeaderTitle || (oldSettings.mode === 'dark' ? '#FFFFFF' : '#FFFFFF'),
+      colorSessionTaskActiveBg: oldSettings.colorSessionTaskActiveBg || (oldSettings.mode === 'dark' ? '#34A853' : '#34A853'),
+      colorSessionTaskActiveBorder: oldSettings.colorSessionTaskActiveBorder || (oldSettings.mode === 'dark' ? '#34A853' : '#34A853'),
+      colorSessionTaskSelectedBg: oldSettings.colorSessionTaskSelectedBg || (oldSettings.mode === 'dark' ? '#4285F4' : '#4285F4'),
+      colorSessionTaskSelectedBorder: oldSettings.colorSessionTaskSelectedBorder || (oldSettings.mode === 'dark' ? '#FFFFFF' : '#FFFFFF'),
+      colorSessionTaskInactiveBg: oldSettings.colorSessionTaskInactiveBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.4)' : '#FFFFFF'),
+      colorSessionTaskInactiveBorder: oldSettings.colorSessionTaskInactiveBorder || (oldSettings.mode === 'dark' ? '#1e293b' : '#E5E7EB'),
+      colorSessionQueueTitle: oldSettings.colorSessionQueueTitle || (oldSettings.mode === 'dark' ? '#9CA3AF' : '#6B7280'),
+      colorSessionLedgerBg: oldSettings.colorSessionLedgerBg || (oldSettings.mode === 'dark' ? 'rgba(0, 0, 0, 0.4)' : 'rgba(251, 188, 5, 0.05)'),
+      colorSessionLedgerText: oldSettings.colorSessionLedgerText || (oldSettings.mode === 'dark' ? '#FBBC05' : '#FBBC05'),
     };
   };
 
@@ -612,6 +638,19 @@ export const useTasklistStore = create<TasklistState>()((set, get) => {
     colorPlannerAlertCategory: 'rgba(239, 68, 68, 0.7)',
     colorPlannerAlertTimeBg: 'rgba(239, 68, 68, 0.1)',
     colorPlannerAlertTimeText: '#EF4444',
+
+    // My Session Sidebar Defaults
+    colorSessionSidebarHeaderBg: '#4285F4',
+    colorSessionSidebarHeaderTitle: '#FFFFFF',
+    colorSessionTaskActiveBg: '#34A853',
+    colorSessionTaskActiveBorder: '#34A853',
+    colorSessionTaskSelectedBg: '#4285F4',
+    colorSessionTaskSelectedBorder: '#FFFFFF',
+    colorSessionTaskInactiveBg: isDark ? 'rgba(0, 0, 0, 0.4)' : '#FFFFFF',
+    colorSessionTaskInactiveBorder: isDark ? '#1e293b' : '#E5E7EB',
+    colorSessionQueueTitle: isDark ? '#9CA3AF' : '#6B7280',
+    colorSessionLedgerBg: isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(251, 188, 5, 0.05)',
+    colorSessionLedgerText: '#FBBC05',
   });
 
   /**

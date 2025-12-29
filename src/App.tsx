@@ -93,19 +93,29 @@ const SidebarNoteItem = ({
   return (
     <div 
       ref={setNodeRef}
-      style={style}
       className={clsx(
         "group flex flex-col rounded-container border-2 transition-all relative overflow-hidden",
         isActuallyCompleted
           ? theme.components.sidebar.ledgerItem
-          : isSelected
-            ? "bg-indigo-600 border-white/40 shadow-lg shadow-indigo-500/20"
-            : isActiveFocus 
-              ? "bg-indigo-600 border-indigo-500 shadow-lg shadow-indigo-500/20" 
-              : (note.priority 
-                  ? "border-red-200 dark:border-red-900/30 shadow-md" 
-                  : "bg-white dark:bg-black/40 border-gray-200 dark:border-gray-800 hover:border-indigo-400 shadow-sm")
+          : "transition-all duration-300"
       )}
+      style={{
+        ...style,
+        backgroundColor: isActuallyCompleted
+          ? 'var(--session-ledger-bg)'
+          : isSelected
+            ? 'var(--session-task-selected-bg)'
+            : isActiveFocus
+              ? 'var(--session-task-active-bg)'
+              : 'var(--session-task-inactive-bg)',
+        borderColor: isActuallyCompleted
+          ? 'transparent'
+          : isSelected
+            ? 'var(--session-task-selected-border)'
+            : isActiveFocus
+              ? 'var(--session-task-active-border)'
+              : 'var(--session-task-inactive-border)',
+      }}
       onClick={onSelect}
     >
       <div className="flex items-start gap-3 p-4">
@@ -293,13 +303,12 @@ const SidebarTaskItem = ({
   return (
     <div 
       ref={setNodeRef}
-      style={style}
       className={clsx(
         theme.components.sidebar.activeTask,
         isActuallyCompleted
           ? theme.components.sidebar.ledgerItem
           : isSelected
-            ? "bg-google-blue border-white/40 shadow-lg shadow-google-blue/20"
+            ? "transition-all duration-300"
             : isMultiUserActive 
               ? theme.components.sidebar.activeTaskMulti
               : isActiveFocus 
@@ -311,8 +320,25 @@ const SidebarTaskItem = ({
                       ))
                 : isDeactivatedCompleted
                   ? theme.components.sidebar.deactivatedCompleted
-                  : theme.components.sidebar.inactiveTask
+                  : "transition-all duration-300"
       )}
+      style={{
+        ...style,
+        backgroundColor: isActuallyCompleted
+          ? 'var(--session-ledger-bg)'
+          : isSelected
+            ? 'var(--session-task-selected-bg)'
+            : isActiveFocus
+              ? 'var(--session-task-active-bg)'
+              : 'var(--session-task-inactive-bg)',
+        borderColor: isActuallyCompleted
+          ? 'transparent'
+          : isSelected
+            ? 'var(--session-task-selected-border)'
+            : isActiveFocus
+              ? 'var(--session-task-active-border)'
+              : 'var(--session-task-inactive-border)',
+      }}
       onClick={onSelect}
     >
       {/* Top Zone: Identification & Drag Handle */}
@@ -394,12 +420,53 @@ const SidebarTaskItem = ({
               }}
               className={clsx(
                 "flex items-center gap-2 px-3 py-2 rounded-xl transition-all",
-                isActiveFocus || isMultiUserActive ? "bg-white/10 text-white hover:bg-white/20" : "bg-gray-100 dark:bg-white/5 text-gray-600 hover:bg-gray-200"
+                isActiveFocus || isSelected || isMultiUserActive ? "bg-white/10 text-white hover:bg-white/20" : "bg-gray-100 dark:bg-white/5 text-gray-600 hover:bg-gray-200"
               )}
             >
               <FileText className={clsx("w-3.5 h-3.5", shouldHighlightNotes && "text-google-yellow fill-current")} />
               <span className="text-[10px] font-black uppercase tracking-widest">Notes</span>
             </button>
+
+            {/* Preparatory / Compact Pomodoro Timer (Visible when Selected or Active) */}
+            <div className={clsx(
+              "flex items-center gap-1.5 p-1 rounded-xl border-2 transition-all",
+              isActiveFocus || isSelected ? "bg-black/10 border-white/10" : "bg-gray-100/50 border-gray-200"
+            )}>
+              <div className="flex items-center px-2 py-1 bg-black/20 rounded-lg">
+                <Clock className={clsx("w-3 h-3 mr-1.5", (isActiveFocus || isSelected) ? "text-white/60" : "text-gray-400")} />
+                <span className={clsx(
+                  "text-[10px] font-black tabular-nums tracking-tight",
+                  (isActiveFocus || isSelected) ? "text-white" : "text-gray-600"
+                )}>
+                  {formatTime(task.timerRemaining || 0)}
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-1">
+                <button 
+                  onClick={handlePlayPause}
+                  className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-white/80 hover:text-white"
+                >
+                  {task.timerIsRunning ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+                </button>
+
+                <button 
+                  onClick={handleAdd5Min}
+                  className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-white/80 hover:text-white"
+                  title="Add 5 Minutes"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+
+                <button 
+                  onClick={handleResetTimer}
+                  className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-white/80 hover:text-white"
+                  title="Reset Timer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
 
             {!isTopTask && (
               <button 
@@ -409,7 +476,7 @@ const SidebarTaskItem = ({
                 }}
                 className={clsx(
                   "w-10 h-10 rounded-xl ml-auto flex items-center justify-center transition-all",
-                  isActiveFocus || isMultiUserActive ? "bg-white/10 text-white hover:bg-white/20 hover:text-google-red" : "bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-google-red"
+                  isActiveFocus || isSelected || isMultiUserActive ? "bg-white/10 text-white hover:bg-white/20 hover:text-google-red" : "bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-google-red"
                 )}
                 title="Remove from Session"
               >
@@ -420,57 +487,6 @@ const SidebarTaskItem = ({
 
           {isTopTask && (
             <>
-              {/* Pomodoro Timer Slot */}
-              <div className={clsx(
-                "flex items-center gap-2 p-1 rounded-2xl border-2",
-                isYellowState ? "bg-black/10 border-black/10" : "bg-white/10 border-white/10"
-              )}>
-                <div className={clsx(
-                  theme.components.pomodoro.container,
-                  isYellowState && "bg-black/5"
-                )}>
-                  <Clock className={clsx("w-3.5 h-3.5 mr-2", isYellowState ? "text-gray-900" : "text-white/60")} />
-                  <span className={clsx(
-                    "text-sm font-black tabular-nums tracking-tight",
-                    isYellowState ? "text-gray-900" : "text-white"
-                  )}>
-                    {formatTime(task.timerRemaining || 0)}
-                  </span>
-                </div>
-                
-                <button 
-                  onClick={handlePlayPause}
-                  className={clsx(
-                    theme.components.pomodoro.button,
-                    isYellowState && theme.components.pomodoro.buttonYellow
-                  )}
-                >
-                  {task.timerIsRunning ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
-                </button>
-
-                <button 
-                  onClick={handleAdd5Min}
-                  className={clsx(
-                    theme.components.pomodoro.button,
-                    isYellowState && theme.components.pomodoro.buttonYellow
-                  )}
-                  title="Add 5 Minutes"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-
-                <button 
-                  onClick={handleResetTimer}
-                  className={clsx(
-                    theme.components.pomodoro.button,
-                    isYellowState && theme.components.pomodoro.buttonYellow
-                  )}
-                  title="Reset Timer"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                </button>
-              </div>
-
               {/* Multi-User Presence Alert */}
               {isMultiUserActive && (
                 <div className="bg-white/10 rounded-2xl p-3 border border-white/20 animate-pulse">
@@ -2296,15 +2312,24 @@ function App() {
         )}>
         <div className="w-80 flex flex-col h-full flex-shrink-0">
           <div 
+            style={{ backgroundColor: 'var(--session-sidebar-header-bg)' }}
             className={theme.components.sidebar.header}
             onClick={() => setShowPlaylistSidebar(false)}
             title="Collapse Sidebar"
           >
             <div className="flex items-center gap-2">
-              <Music className="w-5 h-5 text-white" />
+              <Music className="w-5 h-5" style={{ color: 'var(--session-sidebar-header-title)' }} />
               <div className="flex items-center gap-1">
-                <h3 className="text-sm font-black uppercase tracking-[0.2em]">My Session</h3>
-                <ChevronRight className="w-4 h-4 text-white/50 group-hover/sidebar-header:text-white transition-all group-hover/sidebar-header:translate-x-0.5" />
+                <h3 
+                  className="text-sm font-black uppercase tracking-[0.2em]"
+                  style={{ color: 'var(--session-sidebar-header-title)' }}
+                >
+                  My Session
+                </h3>
+                <ChevronRight 
+                  className="w-4 h-4 transition-all group-hover/sidebar-header:translate-x-0.5" 
+                  style={{ color: 'var(--session-sidebar-header-title)', opacity: 0.5 }}
+                />
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -2434,8 +2459,13 @@ function App() {
                               {nextUpItems.length > 0 && (
                                 <div className="space-y-2">
                                   <div className="flex items-center gap-2 px-2">
-                                    <TrendingUp className="w-3.5 h-3.5 text-google-blue" />
-                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-google-blue/70">Next Up</span>
+                                    <TrendingUp className="w-3.5 h-3.5" style={{ color: 'var(--session-queue-title)' }} />
+                                    <span 
+                                      className="text-[10px] font-black uppercase tracking-[0.2em]"
+                                      style={{ color: 'var(--session-queue-title)', opacity: 0.7 }}
+                                    >
+                                      Next Up
+                                    </span>
                                   </div>
                                   <div className="space-y-3">
                                     {nextUpItems.map((item, idx) => {
@@ -2455,10 +2485,18 @@ function App() {
                                 <div className="space-y-3">
                                   <div className="flex items-center justify-between px-2">
                                     <div className="flex items-center gap-2">
-                                      <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400/70">Later Queue</span>
+                                      <Clock className="w-3.5 h-3.5" style={{ color: 'var(--session-queue-title)' }} />
+                                      <span 
+                                        className="text-[10px] font-black uppercase tracking-[0.2em]"
+                                        style={{ color: 'var(--session-queue-title)', opacity: 0.7 }}
+                                      >
+                                        Later Queue
+                                      </span>
                                     </div>
-                                    <span className="text-[10px] font-black text-gray-400 bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded-full">
+                                    <span 
+                                      className="text-[10px] font-black px-2 py-0.5 rounded-full"
+                                      style={{ backgroundColor: 'var(--app-bg)', color: 'var(--session-queue-title)', opacity: 0.5 }}
+                                    >
                                       {laterItems.length} tasks
                                     </span>
                                   </div>
@@ -2490,10 +2528,24 @@ function App() {
                               {/* WINNING LEDGER */}
                               {currentUser?.showCompletedInSession && winningLedger.length > 0 && (
                                 <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                  <div className={clsx(theme.components.sidebar.ledgerHeader, "select-none")}>
-                                    <Trophy className={clsx("w-3.5 h-3.5 text-google-yellow transition-transform duration-500", currentUser?.showCompletedInSession && "scale-110 animate-pulse")} />
-                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-google-yellow">Winning Ledger</span>
-                                    <span className="ml-auto text-[10px] font-black text-google-yellow bg-google-yellow/10 px-2 py-0.5 rounded-full">
+                                  <div 
+                                    className={clsx(theme.components.sidebar.ledgerHeader, "select-none")}
+                                    style={{ backgroundColor: 'var(--session-ledger-bg)' }}
+                                  >
+                                    <Trophy 
+                                      className={clsx("w-3.5 h-3.5 transition-transform duration-500", currentUser?.showCompletedInSession && "scale-110 animate-pulse")} 
+                                      style={{ color: 'var(--session-ledger-text)' }}
+                                    />
+                                    <span 
+                                      className="text-[10px] font-black uppercase tracking-[0.2em]"
+                                      style={{ color: 'var(--session-ledger-text)' }}
+                                    >
+                                      Winning Ledger
+                                    </span>
+                                    <span 
+                                      className="ml-auto text-[10px] font-black px-2 py-0.5 rounded-full"
+                                      style={{ backgroundColor: 'var(--app-bg)', color: 'var(--session-ledger-text)', opacity: 0.7 }}
+                                    >
                                       {winningLedger.length} Wins
                                     </span>
                                   </div>

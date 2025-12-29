@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, GripHorizontal, RotateCcw, Palette, Maximize2, Minimize2, Camera, Trash2, Check, Save, ChevronDown, ChevronRight, LayoutGrid, ClipboardList, Settings, Briefcase, Info } from 'lucide-react';
+import { X, GripHorizontal, RotateCcw, Palette, Maximize2, Minimize2, Camera, Trash2, Check, Save, ChevronDown, ChevronRight, LayoutGrid, ClipboardList, Settings, Briefcase, Info, Music } from 'lucide-react';
 import { useTasklistStore } from '../../store/useTasklistStore';
 import { clsx } from 'clsx';
 import { ThemeSettings } from '../../types';
@@ -581,7 +581,41 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
             )}
           </section>
 
-          {/* 6. Master Radii (System Corners) */}
+          {/* 6. My Session Sidebar */}
+          <section className="space-y-3">
+            <SectionHeader id="session" label="My Session Sidebar" icon={Music} />
+            {expandedSections.session && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-top-1 duration-200 px-1">
+                <div className="grid grid-cols-2 gap-3">
+                  <ColorControl label="Header Bg" value={themeSettings.colorSessionSidebarHeaderBg} onChange={(v) => handleChange('colorSessionSidebarHeaderBg', v)} />
+                  <ColorControl label="Header Title" value={themeSettings.colorSessionSidebarHeaderTitle} onChange={(v) => handleChange('colorSessionSidebarHeaderTitle', v)} />
+                </div>
+
+                <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest\">Task States</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Active Bg" value={themeSettings.colorSessionTaskActiveBg} onChange={(v) => handleChange('colorSessionTaskActiveBg', v)} />
+                    <ColorControl label="Active Border" value={themeSettings.colorSessionTaskActiveBorder} onChange={(v) => handleChange('colorSessionTaskActiveBorder', v)} />
+                    <ColorControl label="Selected Bg" value={themeSettings.colorSessionTaskSelectedBg} onChange={(v) => handleChange('colorSessionTaskSelectedBg', v)} />
+                    <ColorControl label="Selected Border" value={themeSettings.colorSessionTaskSelectedBorder} onChange={(v) => handleChange('colorSessionTaskSelectedBorder', v)} />
+                    <ColorControl label="Inactive Bg" value={themeSettings.colorSessionTaskInactiveBg} onChange={(v) => handleChange('colorSessionTaskInactiveBg', v)} />
+                    <ColorControl label="Inactive Border" value={themeSettings.colorSessionTaskInactiveBorder} onChange={(v) => handleChange('colorSessionTaskInactiveBorder', v)} />
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest\">Queue & Ledger</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ColorControl label="Queue Title" value={themeSettings.colorSessionQueueTitle} onChange={(v) => handleChange('colorSessionQueueTitle', v)} />
+                    <ColorControl label="Ledger Bg" value={themeSettings.colorSessionLedgerBg} onChange={(v) => handleChange('colorSessionLedgerBg', v)} />
+                    <ColorControl label="Ledger Text" value={themeSettings.colorSessionLedgerText} onChange={(v) => handleChange('colorSessionLedgerText', v)} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* 7. Master Radii (System Corners) */}
           <section className="space-y-3">
             <SectionHeader id="radii" label="System Corner Radii" icon={Settings} />
             {expandedSections.radii && (
