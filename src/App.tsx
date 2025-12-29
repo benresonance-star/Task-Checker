@@ -60,16 +60,16 @@ const SidebarNoteItem = ({
   item, 
   note, 
   isActiveFocus,
-  isTopTask
+  isSelected,
+  onSelect
 }: { 
   item: any, 
   note: ScratchpadItem, 
   isActiveFocus: boolean,
-  isTopTask: boolean
+  isSelected: boolean,
+  onSelect: () => void
 }) => {
   const { toggleNoteInActionSet, toggleScratchpadTask } = useTasklistStore();
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const {
     attributes,
@@ -87,7 +87,8 @@ const SidebarNoteItem = ({
     opacity: isDragging ? 0.8 : undefined,
   } as React.CSSProperties;
 
-  const isActuallyCompleted = note.completed;
+    const isActuallyCompleted = note.completed;
+    const isExpanded = isActiveFocus || isSelected;
 
   return (
     <div 
@@ -97,24 +98,15 @@ const SidebarNoteItem = ({
         "group flex flex-col rounded-container border-2 transition-all relative overflow-hidden",
         isActuallyCompleted
           ? theme.components.sidebar.ledgerItem
-          : isActiveFocus 
-            ? "bg-indigo-600 border-indigo-500 shadow-lg shadow-indigo-500/20" 
-            : (note.priority 
-                ? "border-red-200 dark:border-red-900/30 shadow-md" 
-                : "bg-white dark:bg-black/40 border-gray-200 dark:border-gray-800 hover:border-indigo-400 shadow-sm")
+          : isSelected
+            ? "bg-indigo-600 border-white/40 shadow-lg shadow-indigo-500/20"
+            : isActiveFocus 
+              ? "bg-indigo-600 border-indigo-500 shadow-lg shadow-indigo-500/20" 
+              : (note.priority 
+                  ? "border-red-200 dark:border-red-900/30 shadow-md" 
+                  : "bg-white dark:bg-black/40 border-gray-200 dark:border-gray-800 hover:border-indigo-400 shadow-sm")
       )}
-      onClick={() => {
-        const isPlanner = location.pathname === '/' || location.pathname === '/home';
-        const isSession = location.pathname === '/session';
-        
-        if (isPlanner || isSession) {
-          // Just navigate if not in session, but don't change focus manually
-          if (!isSession) navigate('/session');
-        } else {
-          // Default: jump to session context
-          navigate('/session');
-        }
-      }}
+      onClick={onSelect}
     >
       <div className="flex items-start gap-3 p-4">
         <div 
@@ -191,10 +183,9 @@ const SidebarNoteItem = ({
         </div>
       </div>
       
-      {isActiveFocus && !isActuallyCompleted && (
+      {isExpanded && !isActuallyCompleted && (
         <div className="px-4 pb-4 animate-in slide-in-from-top-2 duration-300">
-          {isTopTask && (
-            <div className="flex items-center gap-2 mt-3">
+          <div className="flex items-center gap-2 mt-3">
               <button 
                 onClick={(e) => { e.stopPropagation(); toggleScratchpadTask(note.id); }}
                 className={clsx(
@@ -216,7 +207,6 @@ const SidebarNoteItem = ({
                 <Trash2 className="w-5 h-5" />
               </button>
             </div>
-          )}
         </div>
       )}
     </div>
@@ -228,6 +218,8 @@ const SidebarTaskItem = ({
   instance, 
   isActiveFocus, 
   isTopTask,
+  isSelected,
+  onSelect,
   onOpenNotes
 }: { 
   item: any, 
@@ -235,11 +227,11 @@ const SidebarTaskItem = ({
   instance: any, 
   isActiveFocus: boolean, 
   isTopTask: boolean,
+  isSelected: boolean,
+  onSelect: () => void,
   onOpenNotes: (taskId: string, containerId: string, focusFeedback?: boolean) => void
 }) => {
   const { projects, toggleTask, toggleTaskInActionSet, toggleTaskTimer, updateTaskTimer, currentUser, users } = useTasklistStore();
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const {
     attributes,
@@ -279,6 +271,7 @@ const SidebarTaskItem = ({
     const isYellowState = isActiveFocus && otherClaimants.length > 0;
     const isDeactivatedCompleted = !isActiveFocus && !isMultiUserActive && task.completed;
     const isActuallyCompleted = task.completed;
+    const isExpanded = isActiveFocus || isSelected;
 
   const handlePlayPause = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -305,44 +298,22 @@ const SidebarTaskItem = ({
         theme.components.sidebar.activeTask,
         isActuallyCompleted
           ? theme.components.sidebar.ledgerItem
-          : isMultiUserActive 
-            ? theme.components.sidebar.activeTaskMulti
-            : isActiveFocus 
-              ? (isYellowState 
-                  ? theme.components.sidebar.activeTaskYellow
-                  : clsx(
-                      theme.components.sidebar.activeTaskFocus,
-                      task.completed && "animate-pulse"
-                    ))
-              : isDeactivatedCompleted
-                ? theme.components.sidebar.deactivatedCompleted
-                : theme.components.sidebar.inactiveTask
+          : isSelected
+            ? "bg-google-blue border-white/40 shadow-lg shadow-google-blue/20"
+            : isMultiUserActive 
+              ? theme.components.sidebar.activeTaskMulti
+              : isActiveFocus 
+                ? (isYellowState 
+                    ? theme.components.sidebar.activeTaskYellow
+                    : clsx(
+                        theme.components.sidebar.activeTaskFocus,
+                        task.completed && "animate-pulse"
+                      ))
+                : isDeactivatedCompleted
+                  ? theme.components.sidebar.deactivatedCompleted
+                  : theme.components.sidebar.inactiveTask
       )}
-      onClick={() => {
-        if (instance && project) {
-          const isPlanner = location.pathname === '/' || location.pathname === '/home';
-          const isSession = location.pathname === '/session';
-          const isProjectView = location.pathname.startsWith('/project/');
-          
-          if (isPlanner || isSession) {
-            // Stay in Planning/Session view, but allow jump to project context if clicked
-            if (!isSession) navigate(`/project/${project.id}/instance/${instance.id}`);
-          } else if (isProjectView) {
-            // Check if we are already in THIS project context
-            const pathParts = location.pathname.split('/');
-            const currentProjectId = pathParts[2];
-            const currentInstanceId = pathParts[4];
-            
-            if (currentProjectId !== project.id || currentInstanceId !== instance.id) {
-              // Different project, jump to it
-              navigate(`/project/${project.id}/instance/${instance.id}`, { replace: true });
-            }
-          } else {
-            // Default (e.g. Master Mode): jump to project context
-            navigate(`/project/${project.id}/instance/${instance.id}`, { replace: true });
-          }
-        }
-      }}
+      onClick={onSelect}
     >
       {/* Top Zone: Identification & Drag Handle */}
       <div className={clsx("flex items-start gap-3 p-4", !isActiveFocus && !isMultiUserActive && !isActuallyCompleted && "pb-3")}>
@@ -413,7 +384,7 @@ const SidebarTaskItem = ({
       </div>
 
       {/* Expanded Controls for Active Task */}
-      {isActiveFocus && !isActuallyCompleted && (
+      {isExpanded && !isActuallyCompleted && (
         <div className="px-4 pb-4 space-y-4 animate-in slide-in-from-top-2 duration-300">
           <div className="flex items-center gap-2">
             <button
@@ -728,6 +699,7 @@ function App() {
   const [showDiscoveryGrid, setShowDiscoveryGrid] = useState(false);
   const [showChecklistShelf, setShowChecklistShelf] = useState(false);
   const [isQueueExpanded, setIsQueueExpanded] = useState(false);
+  const [sidebarSelectedId, setSidebarSelectedId] = useState<string | null>(null);
   const [isEditingContextTitle, setIsEditingContextTitle] = useState(false);
   const [isEditingChecklistTitle, setIsEditingChecklistTitle] = useState(false);
   const [contextSearchQuery, setContextSearchQuery] = useState('');
@@ -2394,6 +2366,7 @@ function App() {
                                  currentUser?.activeFocus?.taskId === item.taskId));
                             
                             const isTopTask = !isLedger && globalIdx === 0;
+                            const isSelected = sidebarSelectedId === compositeKey;
 
                             if (item.type === 'note') {
                               const note = currentUser?.scratchpad?.find(n => n.id === item.taskId);
@@ -2404,7 +2377,8 @@ function App() {
                                   item={item}
                                   note={note}
                                   isActiveFocus={isActiveFocus}
-                                  isTopTask={isTopTask}
+                                  isSelected={isSelected}
+                                  onSelect={() => setSidebarSelectedId(isSelected ? null : compositeKey)}
                                 />
                               );
                             }
@@ -2422,6 +2396,8 @@ function App() {
                                 instance={instance}
                                 isActiveFocus={isActiveFocus}
                                 isTopTask={isTopTask}
+                                isSelected={isSelected}
+                                onSelect={() => setSidebarSelectedId(isSelected ? null : compositeKey)}
                                 onOpenNotes={(taskId, containerId, focusFeedback) => setEditingTaskInfo({ taskId, containerId, focusFeedback })}
                               />
                             );
@@ -2462,7 +2438,14 @@ function App() {
                                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-google-blue/70">Next Up</span>
                                   </div>
                                   <div className="space-y-3">
-                                    {nextUpItems.map((item, idx) => renderItem(item, idx))}
+                                    {nextUpItems.map((item, idx) => {
+                                      const compositeKey = item.type === 'note' ? `note-${item.taskId}` : `${item.projectId}-${item.instanceId}-${item.taskId}`;
+                                      return (
+                                        <div key={compositeKey}>
+                                          {renderItem(item, idx)}
+                                        </div>
+                                      );
+                                    })}
                                   </div>
                                 </div>
                               )}
