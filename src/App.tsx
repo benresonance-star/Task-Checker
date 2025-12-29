@@ -470,7 +470,7 @@ const SidebarTaskItem = ({
             >
               <FileText className={clsx(
                 "w-3.5 h-3.5",
-                shouldHighlightNotes ? "text-google-yellow fill-white stroke-[3]" : "fill-current"
+                shouldHighlightNotes ? "text-white fill-google-yellow stroke-[1.5]" : "fill-current"
               )} />
               <span className="text-[10px] font-black uppercase tracking-widest">Notes</span>
             </button>
@@ -518,11 +518,14 @@ const SidebarTaskItem = ({
               </div>
             ) : (
               <div 
-                className="flex items-center gap-2 px-3 py-2"
+                className={clsx(
+                  "flex items-center gap-2 px-3 py-2 rounded-xl transition-all",
+                  isActiveFocus || isSelected ? "bg-white/10" : "bg-gray-100 dark:bg-white/5"
+                )}
                 onClick={(e) => e.stopPropagation()}
                 onMouseDown={(e) => e.stopPropagation()}
               >
-                <Clock className="w-3.5 h-3.5 text-white/40" />
+                <Clock className="w-3.5 h-3.5 text-white/40 select-none" />
                 <div className="flex items-center gap-1">
                   <input
                     type="text"
@@ -532,7 +535,7 @@ const SidebarTaskItem = ({
                     onKeyDown={(e) => e.key === 'Enter' && handleDurationSubmit()}
                     className="w-8 bg-transparent border-none text-center p-0 text-[10px] font-black focus:ring-0 text-white placeholder:text-white/20"
                   />
-                  <span className="text-[10px] font-black text-white/40 uppercase tracking-tighter">min</span>
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-tighter select-none">min</span>
                 </div>
               </div>
             )}
