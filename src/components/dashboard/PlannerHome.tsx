@@ -541,7 +541,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
             ) : (
               <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
                 {/* The Switchboard Ribbon */}
-                <div className="flex items-center gap-3 overflow-x-auto pb-2 px-1 custom-scrollbar no-scrollbar">
+                <div className="flex items-center gap-3 overflow-x-auto pt-2 pb-2 px-1 custom-scrollbar no-scrollbar">
                   {activeCommitments.map(({ project }) => {
                     const isActive = activeSpotlightId === project.id;
 
@@ -550,7 +550,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                         key={project.id}
                         onClick={() => setActiveSpotlightId(project.id)}
                         className={clsx(
-                          "flex-shrink-0 flex items-center gap-3 px-5 py-3 rounded-2xl border-2 transition-all relative group",
+                          "flex-shrink-0 flex items-center gap-3 px-3.5 py-2 rounded-xl border-2 transition-all relative group",
                           isActive 
                             ? "bg-[var(--planner-token-active-bg)] border-[var(--planner-token-active-bg)] text-[var(--planner-token-active-text)] shadow-lg scale-105 z-10" 
                             : "bg-[var(--planner-token-inactive-bg)] border-[var(--planner-token-inactive-border)] text-[var(--planner-token-inactive-text)] hover:border-google-green/50"
