@@ -138,12 +138,12 @@ The system features a robust sync engine:
 
 ### Progressive Focus Queue (v1.13.44+)
 To reduce visual cognitive load and maintain workflow continuity, the "My Session" sidebar uses a tiered visibility and local interaction strategy:
-1.  **Top-Driven Focus**: Exactly one active task or note is "In Focus" at the top of the queue. The active focus automatically advances to the next uncompleted task as items are finished. This item is always expanded with full **Executive Controls** (Pomodoro Timer, Task Done button).
+1.  **Top-Driven Focus**: Exactly one active task or note is "In Focus" at the top of the queue. The active focus automatically advances to the next uncompleted task as items are finished. This item is always expanded with full **Executive Controls** (Functional Pomodoro Timer, Task Done button) and visually locked in its **Ready Green** state.
 2.  **Zero-Jump Selection**: Selecting a task further down the playlist does NOT trigger a page jump. Instead, it highlights the item locally within the sidebar, allowing for preparation without losing the current work context.
 3.  **Management Mode (Selected State)**: Manually selected items expand to reveal **Management Controls**:
-    - **Notes**: Instant access to task guidance.
-    - **Delete**: Remove the item from the session.
-    - **Compact Pomodoro**: A scaled-down version of the timer (`h-9`) allowing users to set expected durations for upcoming work.
+    - **Notes**: Instant access to task guidance. **The icon features high-contrast yellow filling with a sharp white outline to ensure clarity on dark backgrounds.**
+    - **Delete**: Standardized `w-10 h-10` button positioned to the far right, matching the project task layout.
+    - **Preparatory Duration**: A clean, standalone text entry field for estimated minutes (e.g. "30"). Changes are saved locally and synced to the cloud on blur or enter. Play/Pause and Reset buttons are hidden to maintain focus on the top task.
 4.  **Focus Queue**: The next items in the playlist. 
     - **Standard Mode**: Displays the next 2 uncompleted items.
     - **Planning Mirror Mode**: Automatically expands to show the top **3 items** if NO task is currently active. This mirrors the **Session Sprint Staging** area in the Home Planner.
@@ -155,7 +155,7 @@ To reduce visual cognitive load and maintain workflow continuity, the "My Sessio
 
 ### 7. Branding & Live Style System
 - **Branding Console**: A floating, draggable, and resizable HUD available to admins. It features a **"Draft Mode" workflow** where stylistic changes (colors, radii) are applied locally for real-time exploration but are only persisted to Firestore when explicitly saved via "Save as Workspace Default" or by overwriting an existing snapshot.
-- **Interface-First Organization**: The console provides direct access to all **96 theme properties**, organized into collapsible sections:
+- **Interface-First Organization**: The console provides direct access to all **110 theme properties**, organized into collapsible sections:
   - **Style Snapshots**: High-level theme management and capturing current states.
   - **Atmosphere & Identity**: Core brand colors (including Danger/Warning alerts), app backgrounds, and a comprehensive typography engine.
   - **My Dashboard (Focus)**: Specific styling for the Active Focus card, **Knowledge Hub** (including inactive step borders and backgrounds), and **Notes/Workbench backgrounds** (Personal, Project, and Priority specific).
@@ -334,7 +334,7 @@ To reduce visual cognitive load and maintain workflow continuity, the "My Sessio
 - **Timer Protection**: 
   - **Grace Period**: 3-second local timestamp check in `onSnapshot` to ignore incoming cloud data immediately after a local toggle.
   - **Heartbeat**: 10-second background push to Firestore for any task where `timerIsRunning === true`.
-- **Rank-Aware Sidebar**: The top-most uncompleted task in the sidebar is the **Executive Task**, featuring full timer controls and a completion footer. Subsequent selected tasks enter **Review Mode**, a streamlined view that removes play/pause and the "TASK DONE?" footer, moving management icons (Trash) into the primary utility row for compactness.
+- **Rank-Aware Sidebar**: The top-most uncompleted task in the sidebar is the **Executive Task**, featuring full functional timer controls and a completion footer. Subsequent selected tasks enter **Management Mode**, a streamlined view that replaces active timer controls with a standalone **Duration Input** for planning, and moves management icons (Trash) into the primary utility row for compactness.
 - **Top-Driven Playlist Model**: The `activeFocus` state is automatically synchronized with the first uncompleted item in the `actionSet`. Drag-and-drop reordering is the primary method for changing focus.
 - **Persistent Session Ledger**: Completed tasks remain in the `actionSet` with a `completedAt` timestamp and `completed: true` status. They are displayed in the **Winning Ledger** section with victory-themed styling.
 - **Mirror Staging**: The Home Planner's Staging slots are a stationary 3-item window into the sidebar's top items, visually reflecting the current focus wherever it sits in that trio.
@@ -417,7 +417,7 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > 
 > **Visual Identity**:
 > - Implement a high-contrast UI (Light and Dark) with theme persistence.
-> - **Branding & Style System**: Implement a dynamic theme engine using CSS Variables linked to **semantic technical keys** (e.g. `colorAppIdentity`, `radiusTaskCard`). Add a floating, draggable, and resizable **Branding Console** for admins to live-adjust colors and corner radii across **96 properties**. Support **Style Snapshots** (Theme Library) with the ability to **highlight the active theme** and **overwrite/sync existing snapshots** with new iterative tweaks. Include consolidated styling sections for **My Notes**, **"Can I Proceed?"**, **Task Info Window**, and **My Session Sidebar** (comprehensive control over header, task states, and ledger colors). Ensure real-time global sync via Firestore `settings/theme` and `themePresets`. Use `translate3d` and `requestAnimationFrame` for smooth HUD movement.
+> - **Branding & Style System**: Implement a dynamic theme engine using CSS Variables linked to **semantic technical keys** (e.g. `colorAppIdentity`, `radiusTaskCard`). Add a floating, draggable, and resizable **Branding Console** for admins to live-adjust colors and corner radii across **110 properties**. Support **Style Snapshots** (Theme Library) with the ability to **highlight the active theme** and **overwrite/sync existing snapshots** with new iterative tweaks. Include consolidated styling sections for **My Notes**, **"Can I Proceed?"**, **Task Info Window**, and **My Session Sidebar** (comprehensive control over header, task states, and ledger colors). Ensure real-time global sync via Firestore `settings/theme` and `themePresets`. Use `translate3d` and `requestAnimationFrame` for smooth HUD movement.
 > - **Standardized Radii Scales**: Define and use dynamic classes (`rounded-button`, `rounded-card`, `rounded-container`, `rounded-widget`, `rounded-sidebar`, `rounded-project-info`, `rounded-metadata`, `rounded-focus-card`, `rounded-task-button`) linked to a central semantic theme engine.
 > - **Project Context (Light Mode)**: Use `bg-blue-100/70` for main sections and `bg-white/80` for inner metadata cards (Identification, Planning, Building) with outlines matching text color.
 > - **Brand Identity**: Logo is a simple white tick inside an orange circle (`#E67E33`). Brand name stylized as `checkMATE`.
@@ -450,7 +450,7 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 28, 2025 (v1.9.10 - Dynamic Header Alignment & UI Polish)*
+*Updated: December 29, 2025 (v1.13.44 - My Session Refinements)*
 
 ## UI Architecture & Layering Strategy
 To ensure a consistent and predictable user interface, the application follows a standardized vertical stacking order (z-index hierarchy). This "Global HUD" strategy ensures that critical tools like the Branding Console remain accessible regardless of the current workspace state.
