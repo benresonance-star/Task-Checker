@@ -136,24 +136,30 @@ The system features a robust sync engine:
 - **Time Recording**: Automatically records exact time taken if a timer was used.
 - **Active Focus Tracking**: Selected tasks feature a **high-saturation focus ring (4px)** and a pulsing outline when multiple users are present.
 
-### Progressive Focus Queue (v1.13.44)
-To reduce visual cognitive load, the "My Session" sidebar uses a tiered visibility strategy:
-1.  **Top-Driven Focus**: Exactly one active task or note is "In Focus" at the top of the queue. The active focus automatically advances to the next uncompleted task as items are finished.
-2.  **Focus Queue**: The next items in the playlist. 
+### Progressive Focus Queue (v1.13.44+)
+To reduce visual cognitive load and maintain workflow continuity, the "My Session" sidebar uses a tiered visibility and local interaction strategy:
+1.  **Top-Driven Focus**: Exactly one active task or note is "In Focus" at the top of the queue. The active focus automatically advances to the next uncompleted task as items are finished. This item is always expanded with full **Executive Controls** (Pomodoro Timer, Task Done button).
+2.  **Zero-Jump Selection**: Selecting a task further down the playlist does NOT trigger a page jump. Instead, it highlights the item locally within the sidebar, allowing for preparation without losing the current work context.
+3.  **Management Mode (Selected State)**: Manually selected items expand to reveal **Management Controls**:
+    - **Notes**: Instant access to task guidance.
+    - **Delete**: Remove the item from the session.
+    - **Compact Pomodoro**: A scaled-down version of the timer (`h-9`) allowing users to set expected durations for upcoming work.
+4.  **Focus Queue**: The next items in the playlist. 
     - **Standard Mode**: Displays the next 2 uncompleted items.
     - **Planning Mirror Mode**: Automatically expands to show the top **3 items** if NO task is currently active. This mirrors the **Session Sprint Staging** area in the Home Planner.
-3.  **Later Queue**: All remaining uncompleted items, hidden behind a "Reveal More" button.
-4.  **Winning Ledger (Victory Protocol)**: A dedicated, ghosted section for completed tasks. 
+5.  **Later Queue**: All remaining uncompleted items, hidden behind a "Reveal More" button.
+6.  **Winning Ledger (Victory Protocol)**: A dedicated, ghosted section for completed tasks. 
     - **Celebratory Styling**: Items feature a strikethrough, lowered opacity, and a **Trophy icon**.
     - **Persistent Record**: Tasks remain in the ledger with a `completedAt` timestamp, allowing for end-of-day review and reset.
     - **Management**: Admins/Users can "Revert" (un-complete) or "Clear" (remove from session) tasks directly from the ledger.
 
 ### 7. Branding & Live Style System
 - **Branding Console**: A floating, draggable, and resizable HUD available to admins. It features a **"Draft Mode" workflow** where stylistic changes (colors, radii) are applied locally for real-time exploration but are only persisted to Firestore when explicitly saved via "Save as Workspace Default" or by overwriting an existing snapshot.
-- **Interface-First Organization**: The console provides direct access to all **84 theme properties**, organized into collapsible sections:
+- **Interface-First Organization**: The console provides direct access to all **96 theme properties**, organized into collapsible sections:
   - **Style Snapshots**: High-level theme management and capturing current states.
   - **Atmosphere & Identity**: Core brand colors (including Danger/Warning alerts), app backgrounds, and a comprehensive typography engine.
   - **My Dashboard (Focus)**: Specific styling for the Active Focus card, **Knowledge Hub** (including inactive step borders and backgrounds), and **Notes/Workbench backgrounds** (Personal, Project, and Priority specific).
+  - **My Session Sidebar**: Comprehensive styling for the work playlist, including Header background/text, Task States (Active, Selected, Inactive), Queue Titles, and Ledger colors.
   - **Project Interface**: Dashboard metadata sections, card styling, and multi-color Section Header icons.
   - **Checklist & Templates**: Task list hierarchy, connector lines, and highly granular controls for **Section/Subsection backgrounds, borders, radii, and font colors**, as well as **Task and Checklist title colors**, **Task backgrounds (Idle/Active)**, and a specific **Inactive Text** color for receded tasks.
   - **Task Info Window**: Overlay, window backgrounds, section styling (including specialized **"Can I Proceed?" background/outline**), input/button themes, and custom radii.
@@ -183,12 +189,12 @@ To reduce visual cognitive load, the "My Session" sidebar uses a tiered visibili
   - **Intelligent Contacts**: Client and Consultant contact icons automatically switch between `Phone` and `Smartphone` based on number detection.
   - **OneDrive Integration**: Quick-links to project folders with support for personal user overrides. Relocated under the project name for immediate access.
   - **Logic Navigation**: Persistent "Project Checklists" shelf at the bottom for multi-checklist management. Active checklists feature individual collapse states persisted in `localStorage`. **Active checklist headers display the template title directly (removing "Active Checklist:" prefix) with font sizing matching checklist sections and support for multi-line wrapping.**
-    - **My Session Style**: The "My Session" sidebar features a **blue header** (`bg-google-blue`) with white text. 
+    - **My Session Style**: The "My Session" sidebar features dynamic branding with customizable header, task states, and queue headers. 
     - **Contextual Hierarchy**: Each task in the sidebar displays the **Project Name** in bold uppercase letters directly above the task title, providing immediate context for users managing tasks across multiple projects.
     - **Intuitive Dismissal**: The entire sidebar header is clickable to collapse the panel, featuring a **right-pointing chevron** next to the title as a visual affordance for movement.
     - **Dynamic Entry Points**: To maintain focus, the "My Session" launch button **fades out and shifts** when the sidebar is active (horizontally on desktop, vertically on mobile) and returns when the sidebar is dismissed.
-    - **Navigation Logic**: Sidebar task selection is used for focus switching and Drag & Drop reordering. To maintain workflow continuity, selecting a task from the sidebar while on the Dashboard updates the focus without navigating away. In Project Mode, the app only navigates if the selected task belongs to a different project context. The "Open in full checklist" button on the **Dashboard** explicitly triggers navigation and auto-scroll to center the task in the checklist view.
-    - **Visual States**: Inactive tasks in the list use a **light blue background** and **blue outline** to match the application's action-state language. Open/closed state is persisted in `localStorage`.
+    - **Navigation Logic**: Sidebar task selection is used for **local management and focus switching** without navigating away from the current page. Selecting a task from the sidebar while on the Dashboard or Session view updates the local sidebar state (expanding for management) but keeps the main window context. The "Open in full checklist" button on the **Dashboard** explicitly triggers navigation.
+    - **Visual States**: Inactive tasks in the list use customizable backgrounds and outlines to match the application's action-state language. Selected items feature a distinct highlight to indicate active management.
   - **Sidebar Prioritization**: Navigation elements (Projects, Templates) are positioned at the top of the sidebar for primary access, with Tools (Imports, Settings) below. **Admins benefit from Context-Aware Navigation, where the app remembers the last active project and template when switching between management modes. Sidebar task selection is context-aware: if the user is on the Dashboard, selection only updates focus without navigating; if in Project view, it only navigates if the task belongs to a different project.**
   - **UI Consistency**: The "Edit Details" interface background matches the general project information background for a seamless transition. **Mobile optimization includes a bordered Edit button and compressed, stacked Save/Cancel controls.**
   - **Online Documents Management**: Integrated file explorer for project documentation.
@@ -411,7 +417,7 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > 
 > **Visual Identity**:
 > - Implement a high-contrast UI (Light and Dark) with theme persistence.
-> - **Branding & Style System**: Implement a dynamic theme engine using CSS Variables linked to **semantic technical keys** (e.g. `colorAppIdentity`, `radiusTaskCard`). Add a floating, draggable, and resizable **Branding Console** for admins to live-adjust colors and corner radii across **88 properties**. Support **Style Snapshots** (Theme Library) with the ability to **highlight the active theme** and **overwrite/sync existing snapshots** with new iterative tweaks. Include consolidated styling sections for **My Notes** (widget containers, rich-text surfaces, note types) and **"Can I Proceed?"** (background, border, item background, font, and icon colors), and **Task Info Window** (overlay, window backgrounds, section styling, input/button themes, and custom radii). Ensure real-time global sync via Firestore `settings/theme` and `themePresets`. Use `translate3d` and `requestAnimationFrame` for smooth HUD movement.
+> - **Branding & Style System**: Implement a dynamic theme engine using CSS Variables linked to **semantic technical keys** (e.g. `colorAppIdentity`, `radiusTaskCard`). Add a floating, draggable, and resizable **Branding Console** for admins to live-adjust colors and corner radii across **96 properties**. Support **Style Snapshots** (Theme Library) with the ability to **highlight the active theme** and **overwrite/sync existing snapshots** with new iterative tweaks. Include consolidated styling sections for **My Notes**, **"Can I Proceed?"**, **Task Info Window**, and **My Session Sidebar** (comprehensive control over header, task states, and ledger colors). Ensure real-time global sync via Firestore `settings/theme` and `themePresets`. Use `translate3d` and `requestAnimationFrame` for smooth HUD movement.
 > - **Standardized Radii Scales**: Define and use dynamic classes (`rounded-button`, `rounded-card`, `rounded-container`, `rounded-widget`, `rounded-sidebar`, `rounded-project-info`, `rounded-metadata`, `rounded-focus-card`, `rounded-task-button`) linked to a central semantic theme engine.
 > - **Project Context (Light Mode)**: Use `bg-blue-100/70` for main sections and `bg-white/80` for inner metadata cards (Identification, Planning, Building) with outlines matching text color.
 > - **Brand Identity**: Logo is a simple white tick inside an orange circle (`#E67E33`). Brand name stylized as `checkMATE`.
