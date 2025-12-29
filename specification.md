@@ -21,14 +21,14 @@ To maintain the high-performance standard of checkMATE as it grows, developers M
 
 ## Overview
 checkMATE is a high-precision hierarchical checklist management application designed for professional consistency, real-time collaboration, and deep-focus work tracking. It features a dual-interface architectural model:
-1.  **Home: The Planner**: A high-fidelity, single-screen "Command Center" for orientation and planning.
+1.  **Home: MISSION CONTROL**: A high-fidelity, single-screen "Command Center" for orientation and mission preparation.
     - **Session Sprint Staging (Staging Zone)**: A three-column top panel containing a real-time Pulse (Clock/Date), a **Winning Ledger** for daily victories (replacing the old alerts list), and a **Session Sprint Staging** area for the "Daily Trio" of tasks. **Task titles support full multi-line wrapping without truncation to ensure absolute clarity.**
-    - **Project Spotlight Switchboard**: A tactile project switcher focusing the interface on a single project. Features an **Elastic Balanced Trio** model where the container height adapts dynamically to content, ensuring zero wasted space while maintaining a professional minimum footprint.
+    - **Strategic Spotlight Switchboard**: A tactile project switcher focusing the interface on a single project. Features an **Elastic Balanced Trio** model where the container height adapts dynamically to content, ensuring zero wasted space while maintaining a professional minimum footprint.
     - **MY NOTES AND TASKS**: A streamlined general area for rapid entry, personal organization, and viewing all active session tasks.
 2.  **Work: My Work Session**: A specialized deep-work environment for executing project tasks and recording progress.
     - **Top-Driven Focus**: The interface strictly displays the first uncompleted task from the user's session playlist.
     - **Zen Mode Integration**: Features the **Active Focus Card** and **Knowledge Hub**. Optimized for deep focus by removing non-essential widgets like MY NOTES.
-    - **Victory Protocol**: When the Focus Queue is cleared, the interface displays a celebratory **Empty Inbox** view with quick links back to the Planner or the Winning Ledger.
+    - **Victory Protocol**: When the Focus Queue is cleared, the interface displays a celebratory **Empty Inbox** view with quick links back to MISSION CONTROL or the Winning Ledger.
 
 ## UI Architecture & Layering Strategy (Global HUD)
 To ensure critical tools (Branding Console, Admin Panel) are always accessible, we use a strict z-index hierarchy:
@@ -50,10 +50,10 @@ The application uses a 3-level hierarchical navigation system in the header:
 3.  **Level 3 (Checklist Selection)**: In Project mode, displays the active Checklist title. Clicking opens the Checklist Discovery shelf for switching within the project.
 4.  **Greedy Layout**: The breadcrumb container is "greedy" (`flex-1`), consuming all available space. It supports multi-line wrapping (`flex-wrap`) to ensure long titles remain fully visible without distortion or "..." truncation.
 5.  **Explicit Editing**: Admins can use the `Pencil` icon next to any title to enter an explicit edit mode.
-6.  **Locked Context**: The header is sticky-pinned (`top-0`) using glassmorphism, ensuring global situational awareness during long scrolls. **The header is persistent across both Home Planner and Project/Template views, providing consistent access to the "My Session" action set.**
+6.  **Locked Context**: The header is sticky-pinned (`top-0`) using glassmorphism, ensuring global situational awareness during long scrolls. **The header is persistent across both MISSION CONTROL and Project/Template views, providing consistent access to the "My Session" action set.**
 
 **Core Views:**
-- **Home Planner** (`/home`): The landing screen for orientation. Features the **Project Spotlight Switchboard** model, providing a single-screen overview of active commitments.
+- **MISSION CONTROL** (`/home`): The landing screen for orientation. Features the **Strategic Spotlight Switchboard** model, providing a single-screen overview of active commitments.
 - **My Work Session** (`/session`): The execution engine. Displays the **Active Focus Card** (Task or Note) and the **Knowledge Hub**. Optimized for deep focus by removing non-essential widgets like MY NOTES.
 6. **Contextual Controls**: 
     - **Browse Layout**: Toggle between Grid and List views within the Discovery shelves to customize how Projects/Templates are searched.
@@ -70,7 +70,7 @@ The application includes a high-priority "Intervention HUD" system for managing 
     - **Dismiss**: Clears the reminder trigger.
 3.  **Explicit Confirmation**: Setting a reminder requires an explicit "OK" or "Set Alert" confirmation. The picker popover remains active, isolating temporary state until the user saves or cancels, preventing accidental UI closure during fine-tuning.
 4.  **Visual Consistency**: All time-critical indicators use the **Bell icon** (`lucide-react/Bell`) to distinguish them from the Pomodoro clock.
-5.  **Situational Awareness**: Pulsing Bell badges appear on project cards in the Planner Home and session items in the sidebar whenever an active reminder is pending.
+5.  **Situational Awareness**: Pulsing Bell badges appear on project cards in MISSION CONTROL and session items in the sidebar whenever an active reminder is pending.
 6.  **Auto-Cleanup**: If a task or note is marked as "Done" prior to its reminder triggering, the system automatically deletes the reminder to prevent background alerts for completed work.
 - **Project/Template Discovery**: A visual grid of all available projects or templates with search, creation, and management controls (Delete/Settings).
 - **Checklist Discovery**: A slide-down shelf within the header showing all checklists in the current project, including completion progress bars.
@@ -113,7 +113,7 @@ The system features a robust sync engine:
   - **Watch For**: A focused list of pitfalls (max 3) to prevent common errors (formerly Keep an Eye On). **Hidden from users if empty.**
   - **Additional Guidance**: Progressive disclosure rich-text area for deep technical instructions. **Hidden from users if empty** to maintain a clean interface.
     - **MY TASK FEEDBACK**: A dedicated section for users to suggest template refinements or record admin-facing logs.
-      - **Post-Action Debrief**: Upon clicking "TASK DONE?" in Zen Mode, users are prompted: *"Would you like to suggest a refinement for this checklist template before finishing?"*. 
+      - **Post-Action Debrief**: Upon clicking "TASK DONE?" in My Work Session, users are prompted: *"Would you like to suggest a refinement for this checklist template before finishing?"*. 
       - **Auto-Focus Refinement**: Selecting "Yes" opens the Task Info modal and automatically scrolls to the feedback section for immediate entry.
       - **Collapsible Workspace**: Users can collapse the entire Task Guide via a toggle to focus purely on MY TASK FEEDBACK. This state is persisted per task in `localStorage`.
 - **Persistent Active Focus**: Whichever task a user last made active remains focused and highlighted across sessions. 
@@ -132,7 +132,7 @@ The system features a robust sync engine:
 - **Precision Recording**: Upon task completion, the application calculates and records the exact time spent (Original Duration minus Remaining Time) into a persistent `timeTaken` field.
   - **State Protection**: Optimized for multi-user sync with a **3-second local grace period** that prevents incoming cloud data from reverting local timer states immediately after a user interaction.
   - **Cloud Heartbeat**: Running timers perform a **10-second heartbeat sync** to Firestore, ensuring progress is preserved across page refreshes and multi-device sessions.
-- **Session Integration**: An "Add to Session" icon is positioned to the left of the task checkbox for rapid session building. In mobile view, secondary action icons (Add to Session, Notes) are reinstated for all inactive tasks to ensure full functionality. **The "My Session" counter features Automated Filtering logic (`getValidActionSet`) to ensure the displayed count only reflects tasks that still exist in the current project workspace.**
+- **Session Integration**: An "Add to Session" icon is positioned to the left of the task checkbox for rapid session building. In mobile view, secondary action icons (Add to Sidebar, Notes) are reinstated for all inactive tasks to ensure full functionality. **The "My Session" counter features Automated Filtering logic (`getValidActionSet`) to ensure the displayed count only reflects tasks that still exist in the current project workspace.**
 - **Time Recording**: Automatically records exact time taken if a timer was used.
 - **Active Focus Tracking**: Selected tasks feature a **high-saturation focus ring (4px)** and a pulsing outline when multiple users are present.
 
@@ -146,7 +146,7 @@ To reduce visual cognitive load and maintain workflow continuity, the "My Sessio
     - **Preparatory Duration**: A clean, standalone text entry field for estimated minutes (e.g. "30"). Changes are saved locally and synced to the cloud on blur or enter. Play/Pause and Reset buttons are hidden to maintain focus on the top task.
 4.  **Focus Queue**: The next items in the playlist. 
     - **Standard Mode**: Displays the next 2 uncompleted items.
-    - **Planning Mirror Mode**: Automatically expands to show the top **3 items** if NO task is currently active. This mirrors the **Session Sprint Staging** area in the Home Planner.
+    - **Planning Mirror Mode**: Automatically expands to show the top **3 items** if NO task is currently active. This mirrors the **Session Sprint Staging** area in MISSION CONTROL.
 5.  **Later Queue**: All remaining uncompleted items, hidden behind a "Reveal More" button.
 6.  **Winning Ledger (Victory Protocol)**: A dedicated, ghosted section for completed tasks. 
     - **Celebratory Styling**: Items feature a strikethrough, lowered opacity, and a **Trophy icon**.
@@ -158,7 +158,7 @@ To reduce visual cognitive load and maintain workflow continuity, the "My Sessio
 - **Interface-First Organization**: The console provides direct access to all **110 theme properties**, organized into collapsible sections:
   - **Style Snapshots**: High-level theme management and capturing current states.
   - **Atmosphere & Identity**: Core brand colors (including Danger/Warning alerts), app backgrounds, and a comprehensive typography engine.
-  - **My Dashboard (Focus)**: Specific styling for the Active Focus card, **Knowledge Hub** (including inactive step borders and backgrounds), and **Notes/Workbench backgrounds** (Personal, Project, and Priority specific).
+  - **MISSION CONTROL (Pre-Flight)**: Specific styling for the Active Focus card, **Knowledge Hub** (including inactive step borders and backgrounds), and **Notes/Workbench backgrounds** (Personal, Project, and Priority specific).
   - **My Session Sidebar**: Comprehensive styling for the work playlist, including Header background/text, Task States (Active, Selected, Inactive), Queue Titles, and Ledger colors.
   - **Project Interface**: Dashboard metadata sections, card styling, and multi-color Section Header icons.
   - **Checklist & Templates**: Task list hierarchy, connector lines, and highly granular controls for **Section/Subsection backgrounds, borders, radii, and font colors**, as well as **Task and Checklist title colors**, **Task backgrounds (Idle/Active)**, and a specific **Inactive Text** color for receded tasks.
@@ -337,7 +337,7 @@ To reduce visual cognitive load and maintain workflow continuity, the "My Sessio
 - **Rank-Aware Sidebar**: The top-most uncompleted task in the sidebar is the **Executive Task**, featuring full functional timer controls and a completion footer. Subsequent selected tasks enter **Management Mode**, a streamlined view that replaces active timer controls with a standalone **Duration Input** for planning, and moves management icons (Trash) into the primary utility row for compactness.
 - **Top-Driven Playlist Model**: The `activeFocus` state is automatically synchronized with the first uncompleted item in the `actionSet`. Drag-and-drop reordering is the primary method for changing focus.
 - **Persistent Session Ledger**: Completed tasks remain in the `actionSet` with a `completedAt` timestamp and `completed: true` status. They are displayed in the **Winning Ledger** section with victory-themed styling.
-- **Mirror Staging**: The Home Planner's Staging slots are a stationary 3-item window into the sidebar's top items, visually reflecting the current focus wherever it sits in that trio.
+- **Mirror Staging**: MISSION CONTROL's Staging slots are a stationary 3-item window into the sidebar's top items, visually reflecting the current focus wherever it sits in that trio.
 - **Cloud Sanitization**: Every `updateDoc` call to Firestore MUST wrap the data object in the `sanitize()` helper to remove `undefined` values, preventing silent persistence failures.
 - **Atomic Presence**: Always use Firestore dot-notation (`updateDoc(docRef, { [`activeUsers.${userId}`]: data })`) to update presence without risk of overwriting other users.
 
@@ -450,7 +450,8 @@ If this system needs to be rebuilt in totality using a one-shot agentic method (
 > **Deployment**: Configure for Firebase Hosting with a single-page application rewrite rule."
 
 ---
-*Updated: December 29, 2025 (v1.13.44 - My Session Refinements)*
+
+*Updated: December 29, 2025 (v1.13.44 - MISSION CONTROL Rebranding)*
 
 ## UI Architecture & Layering Strategy
 To ensure a consistent and predictable user interface, the application follows a standardized vertical stacking order (z-index hierarchy). This "Global HUD" strategy ensures that critical tools like the Branding Console remain accessible regardless of the current workspace state.

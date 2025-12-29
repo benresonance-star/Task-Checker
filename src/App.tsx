@@ -711,7 +711,7 @@ function App() {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const isPlanner = location.pathname === '/' || location.pathname === '/home';
+  const isMissionControl = location.pathname === '/' || location.pathname === '/home';
   const isSession = location.pathname === '/session';
   const isExecuting = currentUser?.activeFocus?.stage === 'executing';
   const queryParams = new URLSearchParams(location.search);
@@ -1445,7 +1445,7 @@ function App() {
                   )}
                 >
                   <LayoutGrid className="w-5 h-5" />
-                  <span>Home Planner</span>
+                  <span>MISSION CONTROL</span>
                 </button>
 
                 <button
@@ -1494,7 +1494,7 @@ function App() {
                   }}
                   className={`flex items-center justify-between px-4 py-3 rounded-button transition-colors ${(location.pathname === '/' || location.pathname === '/home') ? "bg-blue-50 text-google-blue dark:bg-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
                 >
-                  <div className="flex items-center gap-3"><LayoutGrid className="w-5 h-5" /><span className="font-bold">Home Planner</span></div>
+                  <div className="flex items-center gap-3"><LayoutGrid className="w-5 h-5" /><span className="font-bold">MISSION CONTROL</span></div>
                   {(location.pathname === '/' || location.pathname === '/home') && <div className="w-1.5 h-1.5 rounded-full bg-google-blue" />}
                 </button>
 
@@ -1517,10 +1517,10 @@ function App() {
                 navigate(lastId ? `/project/${lastId}` : '/project'); 
                 setIsMobileMenuOpen(false); 
               }} 
-              className={`flex items-center justify-between px-4 py-3 rounded-button transition-colors ${mode === 'project' && !isPlanner && !isSession ? "bg-blue-50 text-google-blue dark:bg-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+              className={`flex items-center justify-between px-4 py-3 rounded-button transition-colors ${mode === 'project' && !isMissionControl && !isSession ? "bg-blue-50 text-google-blue dark:bg-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
             >
               <div className="flex items-center gap-3"><Target className="w-5 h-5" /><span className="font-bold">Projects</span></div>
-              {mode === 'project' && !isPlanner && !isSession && <div className="w-1.5 h-1.5 rounded-full bg-google-blue" />}
+              {mode === 'project' && !isMissionControl && !isSession && <div className="w-1.5 h-1.5 rounded-full bg-google-blue" />}
             </button>
             {isAdmin && (
               <button 
@@ -1641,7 +1641,7 @@ function App() {
                   (location.pathname === '/' || location.pathname === '/home') ? theme.components.nav.itemActive : theme.components.nav.itemInactive
                 )}
               >
-                <LayoutGrid className="w-5 h-5" /><span className="font-medium">Home Planner</span>
+                <LayoutGrid className="w-5 h-5" /><span className="font-medium">MISSION CONTROL</span>
               </button>
 
               <button 
@@ -1751,10 +1751,10 @@ function App() {
             <div className="flex flex-col w-full gap-4">
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-1.5 md:gap-3 min-w-0 flex-1 flex-wrap">
-                  {isPlanner ? (
+                  {isMissionControl ? (
                     <div className="flex items-center gap-2 px-2 py-1.5 rounded-xl bg-google-blue/5">
                       <LayoutGrid className="w-5 h-5 text-google-blue" />
-                      <span className="text-xs font-black uppercase tracking-[0.2em] text-google-blue">Home Planner</span>
+                      <span className="text-xs font-black uppercase tracking-[0.2em] text-google-blue">MISSION CONTROL</span>
                     </div>
                   ) : (
                     <>
@@ -1885,7 +1885,7 @@ function App() {
                   "flex items-center gap-2 transition-all duration-500 shrink-0",
                   showPlaylistSidebar && "md:justify-end"
                 )}>
-                  {(isPlanner || mode === 'project') && (
+                  {(isMissionControl || mode === 'project') && (
                     <div className="hidden md:block relative group/playlist">
                       <Button 
                         variant="ghost" 
@@ -2224,7 +2224,7 @@ function App() {
           </header>
         )}
 
-            {isPlanner ? (
+            {isMissionControl ? (
               <div className="p-4 md:p-8">
                     <PlannerHome 
                       onOpenFocus={() => navigate('/session')}

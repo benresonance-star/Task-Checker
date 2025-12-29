@@ -353,9 +353,9 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
             )}
           </section>
 
-          {/* 1b. Home Planner (Today & Spotlight) */}
+          {/* 1b. MISSION CONTROL (Pre-Flight) */}
           <section className="space-y-3">
-            <SectionHeader id="planner" label="Home Planner (Today)" icon={LayoutGrid} />
+            <SectionHeader id="planner" label="MISSION CONTROL (Pre-Flight)" icon={LayoutGrid} />
             {expandedSections.planner && (
               <div className="space-y-6 animate-in fade-in slide-in-from-top-1 duration-200 px-1">
                 <div className="space-y-4">
@@ -369,7 +369,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                 </div>
 
                 <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-                  <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest\">Project Spotlight</h4>
+                  <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest\">Strategic Spotlight</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <ColorControl label="Spotlight Bg" value={themeSettings.colorPlannerSpotlightBg} onChange={(v) => handleChange('colorPlannerSpotlightBg', v)} />
                     <ColorControl label="Spotlight Border" value={themeSettings.colorPlannerSpotlightBorder} onChange={(v) => handleChange('colorPlannerSpotlightBorder', v)} />

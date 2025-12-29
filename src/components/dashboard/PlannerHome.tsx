@@ -452,7 +452,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
               style={{ color: 'var(--planner-alert-text, #ef4444)' }}
             >
               <div className="w-2 h-2 rounded-full animate-ping" style={{ backgroundColor: 'var(--planner-alert-text, #ef4444)' }} />
-              Time-Critical Alerts: Today
+              Time-Critical Alerts: MISSION CONTROL
             </h2>
             <span 
               className="text-[10px] font-black px-2 py-0.5 rounded-full"
@@ -511,7 +511,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
         </div>
       )}
 
-      {/* Project Spotlight Switchboard */}
+      {/* Strategic Spotlight Switchboard */}
       <div className="space-y-6">
         <div 
           className="flex items-center justify-between px-2 cursor-pointer group/header"
@@ -519,7 +519,7 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
         >
           <h2 className="flex items-center gap-3 text-[10px] font-black uppercase text-[var(--planner-section-title)] tracking-[0.2em]">
             <Target className="w-5 h-5 text-google-green" />
-            Project Activity Spotlight
+            Strategic Spotlight
             <div className="ml-1 p-1 rounded-full bg-[var(--planner-pulse-bg)] border border-[var(--planner-pulse-border)] transition-colors group-hover/header:bg-google-green/10">
               {isSpotlightExpanded ? (
                 <ChevronUp className="w-3 h-3 text-gray-500" />
