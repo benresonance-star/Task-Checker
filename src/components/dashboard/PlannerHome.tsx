@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   ArrowRight,
   TrendingUp,
-  Briefcase,
   Zap,
   ClipboardList,
   ChevronUp,
@@ -550,18 +549,12 @@ export const PlannerHome: React.FC<PlannerHomeProps> = ({
                         key={project.id}
                         onClick={() => setActiveSpotlightId(project.id)}
                         className={clsx(
-                          "flex-shrink-0 flex items-center gap-3 px-3.5 py-2 rounded-xl border-2 transition-all relative group",
+                          "flex-shrink-0 flex items-center px-3 py-1.5 rounded-xl border-2 transition-all relative group",
                           isActive 
                             ? "bg-[var(--planner-token-active-bg)] border-[var(--planner-token-active-bg)] text-[var(--planner-token-active-text)] shadow-lg scale-105 z-10" 
                             : "bg-[var(--planner-token-inactive-bg)] border-[var(--planner-token-inactive-border)] text-[var(--planner-token-inactive-text)] hover:border-google-green/50"
                         )}
                       >
-                        <div className={clsx(
-                          "p-1.5 rounded-lg transition-colors",
-                          isActive ? "bg-white/20 text-white" : "text-[var(--planner-token-icon)] bg-[var(--planner-token-icon)]/10 group-hover:bg-[var(--planner-token-icon)]/20"
-                        )}>
-                          <Briefcase className="w-4 h-4" />
-                        </div>
                         <span className="text-sm font-black whitespace-nowrap tracking-tight">{project.name}</span>
                       </button>
                     );
