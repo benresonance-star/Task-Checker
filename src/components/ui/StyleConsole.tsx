@@ -303,7 +303,7 @@ export const StyleConsole: React.FC<StyleConsoleProps> = ({ onClose }) => {
                                     if (e.key === 'Escape') setEditingPresetId(null);
                                   }}
                                   onBlur={() => setEditingPresetId(null)}
-                                  className="w-full bg-white dark:bg-black/40 border border-google-blue rounded px-2 py-1 text-sm font-bold focus:ring-1 focus:ring-google-blue outline-none"
+                                  className="w-48 bg-white dark:bg-black/40 border border-google-blue rounded px-2 py-1 text-sm font-bold focus:ring-1 focus:ring-google-blue outline-none shrink-0"
                                 />
                               ) : (
                                 <div className="flex items-center gap-2 min-w-0 cursor-pointer">
