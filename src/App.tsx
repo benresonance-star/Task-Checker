@@ -224,7 +224,7 @@ const SidebarNoteItem = ({
               <button 
                 onClick={(e) => { e.stopPropagation(); toggleNoteInActionSet(note.id); }}
                 className={clsx(
-                  "w-12 h-12 rounded-2xl flex items-center justify-center text-white transition-all border-2",
+                  "w-10 h-10 rounded-xl ml-auto flex items-center justify-center text-white transition-all border-2",
                   isActiveFocus || isSelected ? "bg-white/10 border-white/10 hover:bg-white/20 hover:text-google-red" : "bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-gray-800 text-gray-400 hover:text-google-red"
                 )}
                 title="Remove from Session"
